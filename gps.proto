@@ -11,3 +11,7 @@ message Point {
   float speed = 4;
   google.protobuf.Timestamp time = 5;
 }
+
+message Lap {
+  repeated Point points = 1;
+}

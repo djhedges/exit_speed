@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gps',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1fgoogle/protobuf/timestamp.proto\"g\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x02\x12\x0b\n\x03lon\x18\x02 \x01(\x02\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x02\x12\r\n\x05speed\x18\x04 \x01(\x02\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestampb\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1fgoogle/protobuf/timestamp.proto\"g\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x02\x12\x0b\n\x03lon\x18\x02 \x01(\x02\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x02\x12\r\n\x05speed\x18\x04 \x01(\x02\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"!\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Pointb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -84,8 +84,41 @@ _POINT = _descriptor.Descriptor(
   serialized_end=154,
 )
 
+
+_LAP = _descriptor.Descriptor(
+  name='Lap',
+  full_name='gps.Lap',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='points', full_name='gps.Lap.points', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=156,
+  serialized_end=189,
+)
+
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_LAP.fields_by_name['points'].message_type = _POINT
 DESCRIPTOR.message_types_by_name['Point'] = _POINT
+DESCRIPTOR.message_types_by_name['Lap'] = _LAP
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), {
@@ -94,6 +127,13 @@ Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), {
   # @@protoc_insertion_point(class_scope:gps.Point)
   })
 _sym_db.RegisterMessage(Point)
+
+Lap = _reflection.GeneratedProtocolMessageType('Lap', (_message.Message,), {
+  'DESCRIPTOR' : _LAP,
+  '__module__' : 'gps_pb2'
+  # @@protoc_insertion_point(class_scope:gps.Lap)
+  })
+_sym_db.RegisterMessage(Lap)
 
 
 # @@protoc_insertion_point(module_scope)
