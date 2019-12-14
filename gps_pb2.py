@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gps',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1fgoogle/protobuf/timestamp.proto\"g\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x02\x12\x0b\n\x03lon\x18\x02 \x01(\x02\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x02\x12\r\n\x05speed\x18\x04 \x01(\x02\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"!\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Pointb\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1fgoogle/protobuf/timestamp.proto\"g\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x02\x12\x0b\n\x03lon\x18\x02 \x01(\x02\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x02\x12\r\n\x05speed\x18\x04 \x01(\x02\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"!\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\"!\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lapb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -115,10 +115,43 @@ _LAP = _descriptor.Descriptor(
   serialized_end=189,
 )
 
+
+_SESSION = _descriptor.Descriptor(
+  name='Session',
+  full_name='gps.Session',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='laps', full_name='gps.Session.laps', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=191,
+  serialized_end=224,
+)
+
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _LAP.fields_by_name['points'].message_type = _POINT
+_SESSION.fields_by_name['laps'].message_type = _LAP
 DESCRIPTOR.message_types_by_name['Point'] = _POINT
 DESCRIPTOR.message_types_by_name['Lap'] = _LAP
+DESCRIPTOR.message_types_by_name['Session'] = _SESSION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), {
@@ -134,6 +167,13 @@ Lap = _reflection.GeneratedProtocolMessageType('Lap', (_message.Message,), {
   # @@protoc_insertion_point(class_scope:gps.Lap)
   })
 _sym_db.RegisterMessage(Lap)
+
+Session = _reflection.GeneratedProtocolMessageType('Session', (_message.Message,), {
+  'DESCRIPTOR' : _SESSION,
+  '__module__' : 'gps_pb2'
+  # @@protoc_insertion_point(class_scope:gps.Session)
+  })
+_sym_db.RegisterMessage(Session)
 
 
 # @@protoc_insertion_point(module_scope)

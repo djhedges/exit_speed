@@ -15,3 +15,7 @@ message Point {
 message Lap {
   repeated Point points = 1;
 }
+
+message Session {
+  repeated Lap laps = 1;
+}
