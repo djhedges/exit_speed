@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package gps;
+
+message Point {
+  float lat = 1;
+  float lon = 2;
+  float alt = 3;
+  float speed = 4;
+  google.protobuf.Timestamp time = 5;
+}
