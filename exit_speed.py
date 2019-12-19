@@ -8,16 +8,6 @@ from gps import *
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
 
-def PopulatePoint(report):
-  point = gps_pb2.Point()
-  point.lat = report.lat
-  point.lon = report.lon
-  point.alt = report.alt
-  point.speed = report.speed
-  point.time.FromJsonString(report.time)
-  return point
-
-
 class ExitSpeed(object):
 
   def __init__(self,
@@ -29,6 +19,10 @@ class ExitSpeed(object):
 
     self.session = None
     self.current_lap = None
+    self.current_point = None
+
+  def GetPoint(self):
+    return self.current_point
 
   def GetLap(self):
     if not self.current_lap:
@@ -42,24 +36,35 @@ class ExitSpeed(object):
       self.session = gps_pb2.Session()
     return self.session
 
-  def ProcessLap(self, point):
+  def ProcessLap(self):
+    point = self.GetPoint()
     lap = self.GetLap()
     lap.points.append(point)
     # TODO Lap start/finish
 
-  def ProcessSession(self, point):
+  def ProcessSession(self):
+    point = self.GetPoint()
     session = self.GetSession()
     if point.speed > self.start_speed:
-      self.ProcessLap(point)
+      self.ProcessLap()
       self.recording = True
     if point.speed < self.start_speed and self.recording:
       log_files.SaveSessionToDisk(session)
 
+  def PopulatePoint(self, report):
+    point = gps_pb2.Point()
+    point.lat = report.lat
+    point.lon = report.lon
+    point.alt = report.alt
+    point.speed = report.speed
+    point.time.FromJsonString(report.time)
+    self.current_point = point
+
   def ProcessReport(self, report):
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
-      point = PopulatePoint(report)
-      self.ProcessSession(point)
+      point = self.PopulatePoint(report)
+      self.ProcessSession()
 
   def Run(self):
     while True:
