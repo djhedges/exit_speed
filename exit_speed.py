@@ -4,8 +4,14 @@ import os
 import log_files
 import gps_pb2
 from gps import *
+from gps import EarthDistance
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
+
+
+def PointDelta(point_a, point_b):
+  return EarthDistanceSmall((point_a.lat, point_a.lon),
+                            (point_b.lat, point_b.lon))
 
 
 class ExitSpeed(object):
