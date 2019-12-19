@@ -18,18 +18,18 @@ class ExitSpeed(object):
     self.recording = False
 
     self.session = None
-    self.current_lap = None
-    self.current_point = None
+    self.lap = None
+    self.point = None
 
   def GetPoint(self):
-    return self.current_point
+    return self.point
 
   def GetLap(self):
-    if not self.current_lap:
+    if not self.lap:
       session = self.GetSession()
       lap = session.laps.add()
-      self.current_lap = lap
-    return self.current_lap
+      self.lap = lap
+    return self.lap
 
   def GetSession(self):
     if not self.session:
@@ -58,7 +58,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
-    self.current_point = point
+    self.point = point
 
   def ProcessReport(self, report):
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
@@ -71,12 +71,13 @@ class ExitSpeed(object):
       report = gpsd.next()
       self.ProcessReport(report)
 
-try:
-  while True:
-    es = ExitSpeed()
-    es.Run()
+if __name__ == '__main__':
+  try:
+    while True:
+      es = ExitSpeed()
+      es.Run()
 
 
-except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
-  print "Done.\nExiting."
-  gpsd.close()
+  except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
+    print "Done.\nExiting."
+    gpsd.close()
