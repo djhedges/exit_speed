@@ -3,8 +3,10 @@
 import os
 import log_files
 import gps_pb2
-from gps import *
-from gps import EarthDistance
+from gps import gps
+from gps import WATCH_ENABLE
+from gps import WATCH_NEWSTYLE
+from gps import EarthDistanceSmall
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
