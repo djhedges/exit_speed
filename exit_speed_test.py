@@ -55,6 +55,21 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     self.assertEqual(session, es.GetSession())
 
+  def testProcessPoint(self):
+    prior_point = gps_pb2.Point()
+    prior_point.lat = 12.000000
+    prior_point.lon = 23.000000
+    point = gps_pb2.Point()
+    point.lat = 12.000001
+    point.lon = 23.000002
+    lap = gps_pb2.Lap()
+    lap.points.extend([prior_point, point])
+    es = exit_speed.ExitSpeed()
+    es.point = point
+    es.lap = lap
+    es.ProcessPoint()
+    self.assertEqual(0.2430443280901163, point.delta)
+
   def testProcessLap(self):
     point = gps_pb2.Point()
     lap = gps_pb2.Lap()

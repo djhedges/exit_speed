@@ -11,6 +11,7 @@ message Point {
   float alt = 3;
   float speed = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
+  float delta = 6;  // Distance to the prior point of the lap.
 }
 
 message Lap {

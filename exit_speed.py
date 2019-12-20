@@ -64,10 +64,19 @@ class ExitSpeed(object):
       self.session.track = FindClosestTrack(self.GetPoint())
     return self.session
 
+  def ProcessPoint(self):
+    point = self.GetPoint()
+    lap = self.GetLap()
+    # Skip the first point since we have nothing to compare it o.
+    if len(lap.points) > 1:
+      prior_point = lap.points[-2]
+      point.delta = PointDelta(point, prior_point)
+
   def ProcessLap(self):
     point = self.GetPoint()
     lap = self.GetLap()
     lap.points.append(point)
+    self.ProcessPoint()
     # TODO Lap start/finish
 
   def ProcessSession(self):
