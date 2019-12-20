@@ -10,10 +10,29 @@ from gps import EarthDistanceSmall
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
+TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
+          (45.363799, -120.744556): 'Oregon Raceway Park',
+          (45.595015, -122.694526): 'Portland International Raceway',
+          (47.254702, -123.192676): 'The Ridge Motorsport Park',
+          (47.321082, -122.149664): 'Pacific Raceway',
+          (47.661806, -117.572297): 'Spokane Raceway'}
+
 
 def PointDelta(point_a, point_b):
   return EarthDistanceSmall((point_a.lat, point_a.lon),
                             (point_b.lat, point_b.lon))
+
+
+def FindClosestTrack(point):
+  distance_track = []
+  for location, track in TRACKS.items():
+    lat, lon = location
+    track_point = gps_pb2.Point()
+    track_point.lat = lat
+    track_point.lon = lon
+    distance = PointDelta(point, track_point)
+    distance_track.append((distance, track))
+  return sorted(distance_track)[0][1]
 
 
 class ExitSpeed(object):
@@ -42,6 +61,7 @@ class ExitSpeed(object):
   def GetSession(self):
     if not self.session:
       self.session = gps_pb2.Session()
+      self.session.track = FindClosestTrack(self.GetPoint())
     return self.session
 
   def ProcessLap(self):

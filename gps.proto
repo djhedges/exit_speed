@@ -1,3 +1,4 @@
+// Compile with protoc -I ./ --python_out ./ gps.proto
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
@@ -18,4 +19,5 @@ message Lap {
 
 message Session {
   repeated Lap laps = 1;
+  string track = 2;
 }
