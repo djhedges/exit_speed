@@ -31,8 +31,8 @@ def FindClosestTrack(point):
     track_point.lat = lat
     track_point.lon = lon
     distance = PointDelta(point, track_point)
-    distance_track.append((distance, track))
-  return sorted(distance_track)[0][1]
+    distance_track.append((distance, track, track_point))
+  return sorted(distance_track)[0]
 
 
 class ExitSpeed(object):
@@ -61,23 +61,35 @@ class ExitSpeed(object):
   def GetSession(self):
     if not self.session:
       self.session = gps_pb2.Session()
-      self.session.track = FindClosestTrack(self.GetPoint())
+      _, track, start_finish = FindClosestTrack(self.GetPoint())
+      self.session.track = track
+      self.session.start_finish.lat = start_finish.lat
+      self.session.start_finish.lon = start_finish.lon
     return self.session
 
   def ProcessPoint(self):
     point = self.GetPoint()
+    session = self.GetSession()
+    point.start_finish_distance = PointDelta(point, session.start_finish)
+
+  def CrossStartFinish(self):
     lap = self.GetLap()
-    # Skip the first point since we have nothing to compare it o.
-    if len(lap.points) > 1:
-      prior_point = lap.points[-2]
-      point.delta = PointDelta(point, prior_point)
+    session = self.GetSession()
+    if len(lap.points) > 2:
+      point_a = lap.points[-3]
+      point_b = lap.points[-2]
+      point_c = lap.points[-1]
+      if (point_a.start_finish_distance > point_b.start_finish_distance and
+          point_c.start_finish_distance > point_b.start_finish_distance):
+        lap = session.laps.add()
+        self.lap = lap
 
   def ProcessLap(self):
     point = self.GetPoint()
     lap = self.GetLap()
     lap.points.append(point)
     self.ProcessPoint()
-    # TODO Lap start/finish
+    self.CrossStartFinish()
 
   def ProcessSession(self):
     point = self.GetPoint()

@@ -24,8 +24,11 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.lat = 45.595412
     point.lon = -122.693901
-    self.assertEqual('Portland International Raceway',
-                     exit_speed.FindClosestTrack(point))
+    distance, track, start_finish = exit_speed.FindClosestTrack(point)
+    self.assertEqual(65.64651548636733, distance)
+    self.assertEqual(track, 'Portland International Raceway')
+    self.assertEqual(point.lat, 45.595412)
+    self.assertEqual(point.lon, -122.693901)
 
   def testGetPoint(self):
     point = gps_pb2.Point()
@@ -68,7 +71,26 @@ class TestExitSpeed(unittest.TestCase):
     es.point = point
     es.lap = lap
     es.ProcessPoint()
-    self.assertEqual(0.2430443280901163, point.delta)
+    self.assertEqual(14083839.944018112, point.start_finish_distance)
+
+  def testCrossStartFinish(self):
+    point_a = gps_pb2.Point()
+    point_b = gps_pb2.Point()
+    point_c = gps_pb2.Point()
+    point_a.start_finish_distance = 2
+    point_b.start_finish_distance = 1
+    point_c.start_finish_distance = 3
+    session = gps_pb2.Session()
+    session.track = 'Portland International Raceway'
+    session.start_finish.lat = 45.595015
+    session.start_finish.lon = -122.694526
+    lap = session.laps.add()
+    lap.points.extend([point_a, point_b, point_c])
+    es = exit_speed.ExitSpeed()
+    es.lap = lap
+    es.session = session
+    es.CrossStartFinish()
+    self.assertEqual(2, len(es.session.laps))
 
   def testProcessLap(self):
     point = gps_pb2.Point()
@@ -77,8 +99,6 @@ class TestExitSpeed(unittest.TestCase):
     es.point = point
     es.lap = lap
     es.ProcessLap()
-    for lap_point in lap.points:
-      self.assertEqual(point, lap_point)
 
   def testProcessSession(self):
     point = gps_pb2.Point()

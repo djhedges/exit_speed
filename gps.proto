@@ -11,7 +11,7 @@ message Point {
   float alt = 3;
   float speed = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
-  float delta = 6;  // Distance to the prior point of the lap.
+  float start_finish_distance = 6;  // Distance to the start/finish.
 }
 
 message Lap {
@@ -21,4 +21,5 @@ message Lap {
 message Session {
   repeated Lap laps = 1;
   string track = 2;
+  Point start_finish = 3;  // Location of start/finish.
 }
