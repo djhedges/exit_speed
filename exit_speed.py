@@ -38,7 +38,7 @@ def FindClosestTrack(point):
 class ExitSpeed(object):
 
   def __init__(self,
-	       start_speed=1,  # 4.5 ms/ ~ 10 mph
+	       start_speed=4.5,  # 4.5 ms/ ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
 	       ):
     self.start_speed = start_speed
@@ -116,7 +116,7 @@ class ExitSpeed(object):
   def ProcessReport(self, report):
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
-      point = self.PopulatePoint(report)
+      self.PopulatePoint(report)
       self.ProcessSession()
 
   def Run(self):
