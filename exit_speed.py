@@ -38,9 +38,11 @@ def FindClosestTrack(point):
 class ExitSpeed(object):
 
   def __init__(self,
-	       start_speed=4.5,  # 4.5 ms/ ~ 10 mph
+	       start_speed=1,  # 4.5 ms/ ~ 10 mph
+         start_finish_range=10,  # Meters, ~2x the width of straightaways.
 	       ):
     self.start_speed = start_speed
+    self.start_finish_range = start_finish_range
 
     self.recording = False
 
@@ -78,8 +80,9 @@ class ExitSpeed(object):
     if len(lap.points) > 2:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
-      point_c = lap.points[-1]
-      if (point_a.start_finish_distance > point_b.start_finish_distance and
+      point_c = lap.points[-1]  # Latest point.
+      if (point_c.start_finish_distance < self.start_finish_range and
+          point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
         # Add a new lap and set it to self.lap.
         lap = session.laps.add()

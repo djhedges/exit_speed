@@ -74,23 +74,27 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(14083839.944018112, point.start_finish_distance)
 
   def testCrossStartFinish(self):
-    point_a = gps_pb2.Point()
-    point_b = gps_pb2.Point()
-    point_c = gps_pb2.Point()
-    point_a.start_finish_distance = 2
-    point_b.start_finish_distance = 1
-    point_c.start_finish_distance = 3
-    session = gps_pb2.Session()
-    session.track = 'Portland International Raceway'
-    session.start_finish.lat = 45.595015
-    session.start_finish.lon = -122.694526
-    lap = session.laps.add()
-    lap.points.extend([point_a, point_b, point_c])
-    es = exit_speed.ExitSpeed()
-    es.lap = lap
-    es.session = session
-    es.CrossStartFinish()
-    self.assertEqual(2, len(es.session.laps))
+    params = ((2, 1, 3, 2),  # Start finish cross.
+              (102, 101, 103, 1),  # Too far away.
+              )
+    for a_distance, b_distance, c_distance, expected_len_of_laps in params:
+      point_a = gps_pb2.Point()
+      point_b = gps_pb2.Point()
+      point_c = gps_pb2.Point()
+      point_a.start_finish_distance = a_distance
+      point_b.start_finish_distance = b_distance
+      point_c.start_finish_distance = c_distance
+      session = gps_pb2.Session()
+      session.track = 'Portland International Raceway'
+      session.start_finish.lat = 45.595015
+      session.start_finish.lon = -122.694526
+      lap = session.laps.add()
+      lap.points.extend([point_a, point_b, point_c])
+      es = exit_speed.ExitSpeed()
+      es.lap = lap
+      es.session = session
+      es.CrossStartFinish()
+      self.assertEqual(expected_len_of_laps, len(es.session.laps))
 
   def testProcessLap(self):
     point = gps_pb2.Point()
@@ -99,13 +103,14 @@ class TestExitSpeed(unittest.TestCase):
     es.point = point
     es.lap = lap
     es.ProcessLap()
+    self.assertTrue(lap.points)
 
   def testProcessSession(self):
     point = gps_pb2.Point()
     point.speed = 21
     lap = gps_pb2.Lap()
     session = gps_pb2.Session()
-    es = exit_speed.ExitSpeed()
+    es = exit_speed.ExitSpeed(start_speed=5)
     es.point = point
     es.session = session
     es.ProcessSession()
