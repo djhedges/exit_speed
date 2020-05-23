@@ -73,6 +73,19 @@ class TestExitSpeed(unittest.TestCase):
     es.ProcessPoint()
     self.assertEqual(14083839.944018112, point.start_finish_distance)
 
+  def testSetLapTime(self):
+    es = exit_speed.ExitSpeed()
+    first_point = gps_pb2.Point()
+    first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    last_point = gps_pb2.Point()
+    last_point.time.FromJsonString(u'2020-05-23T17:49:00.100Z')
+    lap = gps_pb2.Lap()
+    lap.points.append(first_point)
+    lap.points.append(last_point)
+    es.lap = lap
+    es.SetLapTime()
+    self.assertEqual(76, lap.duration.ToSeconds())
+
   def testCrossStartFinish(self):
     params = ((2, 1, 3, 2),  # Start finish cross.
               (102, 101, 103, 1),  # Too far away.

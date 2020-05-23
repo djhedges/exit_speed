@@ -1,6 +1,7 @@
 // Compile with protoc -I ./ --python_out ./ gps.proto
 syntax = "proto3";
 
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
 package gps;
@@ -16,6 +17,7 @@ message Point {
 
 message Lap {
   repeated Point points = 1;
+  google.protobuf.Duration duration =2;  // Time it took to finish the lap.
 }
 
 message Session {

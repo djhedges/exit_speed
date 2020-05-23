@@ -90,6 +90,14 @@ class ExitSpeed(object):
     session = self.GetSession()
     point.start_finish_distance = PointDelta(point, session.start_finish)
 
+  def SetLapTime(self):
+    """Sets the lap duration based on the first and last point time delta."""
+    lap = self.GetLap()
+    first_point = lap.points[0]
+    last_point = lap.points[-1]
+    delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
+    lap.duration.FromNanoseconds(delta)
+
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""
     lap = self.GetLap()
@@ -101,8 +109,8 @@ class ExitSpeed(object):
       if (point_c.start_finish_distance < self.start_finish_range and
           point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
-        # Add a new lap and set it to self.lap.
         logging.info('Start/Finish')
+        # Add a new lap and set it to self.lap.
         lap = session.laps.add()
         self.lap = lap
 
@@ -151,6 +159,7 @@ class ExitSpeed(object):
 if __name__ == '__main__':
   try:
     while True:
+      logging.info('Starting Run')
       es = ExitSpeed()
       es.Run()
 
