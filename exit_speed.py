@@ -110,6 +110,7 @@ class ExitSpeed(object):
           point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
         logging.info('Start/Finish')
+        self.SetLapTime()
         # Add a new lap and set it to self.lap.
         lap = session.laps.add()
         self.lap = lap
