@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import logging
 import os
 import log_files
 import gps_pb2
@@ -19,11 +20,13 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
 
 
 def PointDelta(point_a, point_b):
+  """Returns the distance between two points."""
   return EarthDistanceSmall((point_a.lat, point_a.lon),
                             (point_b.lat, point_b.lon))
 
 
 def FindClosestTrack(point):
+  """Returns the distance, track and start/finish of the closest track."""
   distance_track = []
   for location, track in TRACKS.items():
     lat, lon = location
@@ -36,11 +39,19 @@ def FindClosestTrack(point):
 
 
 class ExitSpeed(object):
+  """Main object which loops and logs data."""
 
   def __init__(self,
 	       start_speed=4.5,  # 4.5 ms/ ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
 	       ):
+    """Initializer.
+
+    Args:
+      start_speed: Minimum speed before logging starts.
+      start_finish_range: Maximum distance a point can be considered when
+                          determining if the car crosses the start/finish.
+    """
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
 
@@ -51,9 +62,11 @@ class ExitSpeed(object):
     self.point = None
 
   def GetPoint(self):
+    """Returns the latest GPS point."""
     return self.point
 
   def GetLap(self):
+    """Returns the current lap."""
     if not self.lap:
       session = self.GetSession()
       lap = session.laps.add()
@@ -61,20 +74,24 @@ class ExitSpeed(object):
     return self.lap
 
   def GetSession(self):
+    """Returns the current session."""
     if not self.session:
       self.session = gps_pb2.Session()
       _, track, start_finish = FindClosestTrack(self.GetPoint())
+      logging.info('Closest track: %s' % track)
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
     return self.session
 
   def ProcessPoint(self):
+    """Populates the session with the latest GPS point."""
     point = self.GetPoint()
     session = self.GetSession()
     point.start_finish_distance = PointDelta(point, session.start_finish)
 
   def CrossStartFinish(self):
+    """Checks and handles when the car corsses the start/finish."""
     lap = self.GetLap()
     session = self.GetSession()
     if len(lap.points) > 2:
@@ -85,10 +102,12 @@ class ExitSpeed(object):
           point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
         # Add a new lap and set it to self.lap.
+        logging.info('Start/Finish')
         lap = session.laps.add()
         self.lap = lap
 
   def ProcessLap(self):
+    """Adds the point to the lap and checks if we crossed start/finish."""
     point = self.GetPoint()
     lap = self.GetLap()
     lap.points.append(point)
@@ -96,6 +115,7 @@ class ExitSpeed(object):
     self.CrossStartFinish()
 
   def ProcessSession(self):
+    """Start/ends the logging of data to log files based on car speed."""
     point = self.GetPoint()
     session = self.GetSession()
     if point.speed > self.start_speed:
@@ -103,8 +123,10 @@ class ExitSpeed(object):
       self.recording = True
     if point.speed < self.start_speed and self.recording:
       log_files.SaveSessionToDisk(session)
+      self.recording = False
 
   def PopulatePoint(self, report):
+    """Populates the point protocol buffer."""
     point = gps_pb2.Point()
     point.lat = report.lat
     point.lon = report.lon
@@ -114,12 +136,14 @@ class ExitSpeed(object):
     self.point = point
 
   def ProcessReport(self, report):
+    """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
       self.PopulatePoint(report)
       self.ProcessSession()
 
   def Run(self):
+    """Runs exit speed in a loop."""
     while True:
       report = gpsd.next()
       self.ProcessReport(report)
@@ -132,5 +156,5 @@ if __name__ == '__main__':
 
 
   except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
-    print "Done.\nExiting."
+    logging.info('Done.\nExiting.')
     gpsd.close()
