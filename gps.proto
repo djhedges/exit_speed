@@ -17,7 +17,7 @@ message Point {
 
 message Lap {
   repeated Point points = 1;
-  google.protobuf.Duration duration =2;  // Time it took to finish the lap.
+  google.protobuf.Duration duration = 2;  // Time it took to finish the lap.
 }
 
 message Session {
