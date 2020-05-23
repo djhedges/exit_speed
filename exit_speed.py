@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import datetime
 import logging
 import os
 import log_files
@@ -158,6 +159,10 @@ class ExitSpeed(object):
       self.ProcessReport(report)
 
 if __name__ == '__main__':
+  today = datetime.datetime.today()
+  filename = 'exit_speed-%s' % today.isoformat()
+  logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
+                      level=logging.INFO)
   try:
     while True:
       logging.info('Starting Run')
