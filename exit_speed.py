@@ -56,7 +56,7 @@ class ExitSpeed(object):
                           determining if the car crosses the start/finish.
     """
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
-                                         brightness=0.2)
+                                         brightness=0.1)
     self.dots.fill((0, 0, 255))
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
