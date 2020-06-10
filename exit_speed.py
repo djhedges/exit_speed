@@ -3,6 +3,8 @@
 import datetime
 import logging
 import os
+import adafruit_dotstar
+import board
 import log_files
 import gps_pb2
 from gps import gps
@@ -53,6 +55,9 @@ class ExitSpeed(object):
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
     """
+    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
+                                         brightness=0.2)
+    self.dots.fill((0, 0, 255))
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
 

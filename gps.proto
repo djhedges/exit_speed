@@ -1,3 +1,4 @@
+// sudo apt install python3-protobuf
 // Compile with protoc -I ./ --python_out ./ gps.proto
 syntax = "proto3";
 
@@ -7,12 +8,12 @@ import "google/protobuf/timestamp.proto";
 package gps;
 
 message Point {
-  float lat = 1;
-  float lon = 2;
-  float alt = 3;
-  float speed = 4;  // meters/second
+  double lat = 1;
+  double lon = 2;
+  double alt = 3;
+  double speed = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
-  float start_finish_distance = 6;  // Distance to the start/finish.
+  double start_finish_distance = 6;  // Distance to the start/finish.
 }
 
 message Lap {
