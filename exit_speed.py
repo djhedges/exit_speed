@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import datetime
 import logging
@@ -61,6 +61,7 @@ class ExitSpeed(object):
     self.session = None
     self.lap = None
     self.point = None
+    self.best_lap = None
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -98,6 +99,10 @@ class ExitSpeed(object):
     last_point = lap.points[-1]
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
     lap.duration.FromNanoseconds(delta)
+
+    session = self.GetSession()
+    if not self.best_lap or self.best_lap.duration.ToNanoseconds() > delta:
+      self.best_lap = lap
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""

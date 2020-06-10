@@ -79,12 +79,15 @@ class TestExitSpeed(unittest.TestCase):
     first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     last_point = gps_pb2.Point()
     last_point.time.FromJsonString(u'2020-05-23T17:49:00.100Z')
-    lap = gps_pb2.Lap()
+    session = gps_pb2.Session()
+    lap = session.laps.add()
     lap.points.append(first_point)
     lap.points.append(last_point)
     es.lap = lap
+    es.session = session
     es.SetLapTime()
     self.assertEqual(76, lap.duration.ToSeconds())
+    self.assertEqual(es.best_lap, lap)
 
   def testCrossStartFinish(self):
     params = ((2, 1, 3, 2),  # Start finish cross.
