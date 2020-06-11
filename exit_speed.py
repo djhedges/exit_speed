@@ -138,9 +138,12 @@ class ExitSpeed(object):
       if not tenths:
         self.dots.fill((0, 0, 0))
       elif speed_delta < 10 and speed_delta < 1:
-        self.dots.fill((0, 0, 0))
-        for led_index in range(int(tenths)):
+        leds_to_light = range(int(tenths))
+        for led_index in leds_to_light:
           self.dots[led_index] = led_color
+        leds_to_off = set(range(len(self.dots))) - set(leds_to_light)
+        for led_index in leds_to_off:
+          self.dots[led_index] = (0, 0, 0)  # Off
       else:
         self.dots.fill(led_color)
 
