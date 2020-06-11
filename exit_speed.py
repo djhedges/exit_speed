@@ -47,6 +47,7 @@ class ExitSpeed(object):
   def __init__(self,
 	       start_speed=4.5,  # 4.5 ms/ ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
+         min_points_per_session=60 * 10,  # 1 min @ gps 10hz
 	       ):
     """Initializer.
 
@@ -60,6 +61,7 @@ class ExitSpeed(object):
     self.dots.fill((0, 0, 255))
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
+    self.min_points_per_session=min_points_per_session
 
     self.recording = False
 
@@ -113,7 +115,7 @@ class ExitSpeed(object):
     """Checks and handles when the car corsses the start/finish."""
     lap = self.GetLap()
     session = self.GetSession()
-    if len(lap.points) > 100:
+    if len(lap.points) > self.min_points_per_session:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
       point_c = lap.points[-1]  # Latest point.

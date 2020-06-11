@@ -106,7 +106,7 @@ class TestExitSpeed(unittest.TestCase):
       session.start_finish.lon = -122.694526
       lap = session.laps.add()
       lap.points.extend([point_a, point_b, point_c])
-      es = exit_speed.ExitSpeed()
+      es = exit_speed.ExitSpeed(min_points_per_session=1)
       es.lap = lap
       es.session = session
       es.CrossStartFinish()
