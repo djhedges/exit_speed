@@ -177,6 +177,7 @@ if __name__ == '__main__':
   today = datetime.datetime.today()
   filename = 'exit_speed-%s' % today.isoformat()
   logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
+                      stream=sys.stdout,
                       level=logging.INFO)
   print(f'Logging to {filename}')
   try:

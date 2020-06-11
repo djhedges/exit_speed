@@ -2,6 +2,8 @@
 
 import csv
 import datetime
+import logging
+import sys
 import exit_speed
 from gps import client
 
@@ -51,4 +53,5 @@ def ConvertTraqmateToProto(filepath):
 
 
 if __name__ == '__main__':
+  logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   ConvertTraqmateToProto('testdata/2019-08-18_Portland_CORRADO_DJ_R03.csv')
