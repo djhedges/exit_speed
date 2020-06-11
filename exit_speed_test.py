@@ -58,6 +58,47 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     self.assertEqual(session, es.GetSession())
 
+  def testGetLedColorGreen(self):
+    es = exit_speed.ExitSpeed()
+
+    best_lap = gps_pb2.Lap()
+    b_point = best_lap.points.add()
+    b_point.lat = 46
+    b_point.lon = -122
+    b_point.speed = 20
+    es.SetBestLap(best_lap)
+
+    point = gps_pb2.Point()
+    point.lat = 45.595412
+    point.lon = -122.693901
+    point.speed = 21
+    es.point = point
+    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
+
+  def testGetLedColorRed(self):
+    es = exit_speed.ExitSpeed()
+
+    best_lap = gps_pb2.Lap()
+    b_point = best_lap.points.add()
+    b_point.lat = 46
+    b_point.lon = -122
+    b_point.speed = 22
+    es.SetBestLap(best_lap)
+
+    point = gps_pb2.Point()
+    point.lat = 45.595412
+    point.lon = -122.693901
+    point.speed = 21
+    es.point = point
+    self.assertTupleEqual(es.GetLedColor(), (255, 0, 0))
+
+  def testSetLapTime(self):
+    es = exit_speed.ExitSpeed()
+    first_point = gps_pb2.Point()
+    first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    es = exit_speed.ExitSpeed()
+    es.point = point
+
   def testProcessPoint(self):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000

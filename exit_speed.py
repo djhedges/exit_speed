@@ -124,11 +124,19 @@ class ExitSpeed(object):
       return True
     return False
 
+  def GetLedColor(self):
+    point = self.GetPoint()
+    best_point = self.FindNearestBestLapPoint()
+    if point.speed > best_point.speed:
+      return (0, 255, 0)  # Green
+    return (255, 0, 0)  # Red
+
   def UpdateLeds(self):
     """Update LEDs based on speed difference to the best lap."""
     if self.tree and self.LedInterval():
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
+      led_color = self.GetLedColor()
       if point.speed > best_point.speed:
         led_color = (0, 255, 0)  # Green
       else:

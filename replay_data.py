@@ -19,7 +19,7 @@ def ConvertPointToReport(point):
 
 
 def ReplayLog(filepath):
-  es = exit_speed.ExitSpeed(led_brightness=0.1)
+  es = exit_speed.ExitSpeed(led_brightness=0.05)
   session = log_files.ReadLog(filepath)
 
   replay_start = time.time()
