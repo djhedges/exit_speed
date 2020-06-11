@@ -10,7 +10,7 @@ def SaveSessionToDisk(session):
     os.mkdir(LAP_LOGS)
   first_lap = session.laps[0].points[0]
   filename = 'data-%s' % first_lap.time.ToJsonString()
-  with open(os.path.join(LAP_LOGS, filename), 'w') as log_file:
+  with open(os.path.join(LAP_LOGS, filename), 'wb') as log_file:
     log_file.write(session.SerializeToString())
 
 

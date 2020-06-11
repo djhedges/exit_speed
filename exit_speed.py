@@ -113,7 +113,7 @@ class ExitSpeed(object):
     """Checks and handles when the car corsses the start/finish."""
     lap = self.GetLap()
     session = self.GetSession()
-    if len(lap.points) > 2:
+    if len(lap.points) > 100:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
       point_c = lap.points[-1]  # Latest point.
@@ -129,9 +129,9 @@ class ExitSpeed(object):
   def ProcessLap(self):
     """Adds the point to the lap and checks if we crossed start/finish."""
     point = self.GetPoint()
+    self.ProcessPoint()
     lap = self.GetLap()
     lap.points.append(point)
-    self.ProcessPoint()
     self.CrossStartFinish()
 
   def ProcessSession(self):
@@ -140,10 +140,13 @@ class ExitSpeed(object):
     session = self.GetSession()
     if point.speed > self.start_speed:
       self.ProcessLap()
-      self.recording = True
+      if not self.recording:
+        self.recording = True
+        logging.info('Starting recording')
     if point.speed < self.start_speed and self.recording:
       log_files.SaveSessionToDisk(session)
       self.recording = False
+      logging.info('Stopping recording, saving files')
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
@@ -173,6 +176,7 @@ if __name__ == '__main__':
   filename = 'exit_speed-%s' % today.isoformat()
   logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
                       level=logging.INFO)
+  print(f'Logging to {filename}')
   try:
     while True:
       logging.info('Starting Run')
