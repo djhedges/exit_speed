@@ -141,9 +141,9 @@ class ExitSpeed(object):
     buffer can be, IE the number of deltas to hold on to.  At a GPS singal of
     10hz a ring size of 10 will cover a second worth of time.
     """
-    ring_size = 10
     speed_delta = best_point.speed - point.speed
     self.speed_deltas.append(speed_delta)
+    print(self.speed_deltas)
     return statistics.median(self.speed_deltas)
 
   def UpdateLeds(self):
