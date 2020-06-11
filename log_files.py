@@ -18,6 +18,6 @@ def SaveSessionToDisk(session):
 
 def ReadLog(log_path):
   session = gps_pb2.Session()
-  with open(log_path) as log_file:
+  with open(log_path, 'rb') as log_file:
     session.ParseFromString(log_file.read())
   return session
