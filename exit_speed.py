@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import time
 import adafruit_dotstar
 import board
 import log_files
@@ -11,6 +12,8 @@ from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
 from gps import EarthDistanceSmall
+import numpy as np
+from scipy.spatial import cKDTree
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
@@ -48,6 +51,7 @@ class ExitSpeed(object):
 	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
+         led_update_interval=1,
 	       ):
     """Initializer.
 
@@ -55,13 +59,17 @@ class ExitSpeed(object):
       start_speed: Minimum speed before logging starts.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
+      min_points_per_session:  Used to prevent sessions from prematurely ending.
+      led_update_interval:  Controls how often the LEDs can change so as to not
+                            enduce epileptic siezures.
     """
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=0.1)
     self.dots.fill((0, 0, 255))
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
-    self.min_points_per_session=min_points_per_session
+    self.min_points_per_session = min_points_per_session
+    self.led_update_interval = led_update_interval
 
     self.recording = False
 
@@ -69,6 +77,8 @@ class ExitSpeed(object):
     self.lap = None
     self.point = None
     self.best_lap = None
+    self.tree = None
+    self.last_led_update = time.time()
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -93,11 +103,60 @@ class ExitSpeed(object):
       self.session.start_finish.lon = start_finish.lon
     return self.session
 
+  def FindNearestBestLapPoint(self):
+    """Returns the nearest point on the best lap to the given point."""
+    point = self.GetPoint()
+    _, neighbor = self.tree.query([point.lon, point.lat], 1)
+    x = self.tree.data[:, 0][neighbor]
+    y = self.tree.data[:, 1][neighbor]
+    for point_b in self.best_lap.points:
+      if point_b.lon == x and point_b.lat == y:
+        return point_b
+
+  def LedInterval(self):
+    """Returns True if it is safe to update the LEDs based on interval."""
+    now = time.time()
+    if now - self.last_led_update > self.led_update_interval:
+      self.last_led_update = now
+      return True
+    return False
+
+  def UpdateLeds(self):
+    """Update LEDs based on speed difference to the best lap."""
+    if self.tree and self.LedInterval():
+      point = self.GetPoint()
+      best_point = self.FindNearestBestLapPoint()
+      if point.speed > best_point.speed:
+        led_color = (0, 255, 0)  # Green
+      else:
+        led_color = (255, 0, 0)  # Red
+      speed_delta = abs(point.speed - best_point.speed)
+      tenths = speed_delta // 0.1
+      if not tenths:
+        self.dots.fill((0, 0, 0))
+      elif speed_delta < 10 and speed_delta < 1:
+        self.dots.fill((0, 0, 0))
+        for led_index in range(int(tenths)):
+          self.dots[led_index] = led_color
+      else:
+        self.dots.fill(led_color)
+
   def ProcessPoint(self):
     """Populates the session with the latest GPS point."""
     point = self.GetPoint()
     session = self.GetSession()
     point.start_finish_distance = PointDelta(point, session.start_finish)
+    self.UpdateLeds()
+
+  def SetBestLap(self, lap):
+    """Sets best lap and builds a KDTree for finding closest points."""
+    if (not self.best_lap or
+        lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
+      self.best_lap = lap
+      x_y_points = []
+      for point in lap.points:
+        x_y_points.append([point.lon, point.lat])
+      self.tree = cKDTree(np.array(x_y_points))
 
   def SetLapTime(self):
     """Sets the lap duration based on the first and last point time delta."""
@@ -108,8 +167,7 @@ class ExitSpeed(object):
     lap.duration.FromNanoseconds(delta)
 
     session = self.GetSession()
-    if not self.best_lap or self.best_lap.duration.ToNanoseconds() > delta:
-      self.best_lap = lap
+    self.SetBestLap(lap)
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""

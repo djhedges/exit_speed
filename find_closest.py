@@ -135,6 +135,7 @@ class KDTree(BaseFindClosest):
     for point_b in self.best_lap.points:
       if point_b.lon == x and point_b.lat == y:
         nearest_point = point_b
+        print(point_b.speed, point.speed)
 
 def _PrintTiming():
   print(min(KDTREE), max(KDTREE), statistics.median(KDTREE))
