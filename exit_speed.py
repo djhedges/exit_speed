@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import collections
 import datetime
 import logging
 import os
@@ -83,7 +84,7 @@ class ExitSpeed(object):
     self.best_lap = None
     self.tree = None
     self.last_led_update = time.time()
-    self.speed_deltas = []
+    self.speed_deltas = collections.deque(maxlen=10)
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -127,11 +128,10 @@ class ExitSpeed(object):
     return False
 
   def GetLedColor(self):
-    point = self.GetPoint()
-    best_point = self.FindNearestBestLapPoint()
-    if point.speed > best_point.speed:
-      return (0, 255, 0)  # Green
-    return (255, 0, 0)  # Red
+    median_delta = statistics.median(self.speed_deltas)
+    if median_delta > 0:
+      return (255, 0, 0)  # Red
+    return (0, 255, 0)  # Green
 
   def GetMovingSpeedDelta(self, point, best_point):
     """Returns the median speed delta over a time period based on the ring size.
@@ -142,10 +142,8 @@ class ExitSpeed(object):
     10hz a ring size of 10 will cover a second worth of time.
     """
     ring_size = 10
-    speed_delta = abs(point.speed - best_point.speed)
-    self.speed_deltas.insert(0, speed_delta)
-    if len(self.speed_deltas) > ring_size:
-      self.speed_deltas.pop()
+    speed_delta = best_point.speed - point.speed
+    self.speed_deltas.append(speed_delta)
     return statistics.median(self.speed_deltas)
 
   def UpdateLeds(self):
@@ -153,9 +151,9 @@ class ExitSpeed(object):
     if self.tree and self.LedInterval():
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
-      led_color = self.GetLedColor()
       speed_delta = self.GetMovingSpeedDelta(point, best_point)
       tenths = speed_delta // 0.1
+      led_color = self.GetLedColor()
       if not tenths:
         self.dots.fill((0, 0, 0))
       elif speed_delta < 10 and speed_delta < 1:

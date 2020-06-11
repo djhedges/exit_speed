@@ -39,7 +39,7 @@ def _ReadCsvFile(filepath):
         start_time = row[1]
 
 def ConvertTraqmateToProto(filepath):
-  es = exit_speed.ExitSpeed()
+  es = exit_speed.ExitSpeed(led_brightness=0.05)
   start = time.time()
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
     report = client.dictwrapper({
