@@ -4,6 +4,7 @@ import csv
 import datetime
 import logging
 import sys
+import time
 import exit_speed
 from gps import client
 
@@ -29,7 +30,7 @@ def _ReadCsvFile(filepath):
         lat = float(lat.strip())
         lon = float(lon.strip())
         alt = float(alt.strip())
-        yield json_time, lat, lon, alt, speed
+        yield elapsed_time, json_time, lat, lon, alt, speed
       if row[0].startswith('GPS Reading'):
         reading_header = False
       if row[0].startswith('Starting Date'):
@@ -39,17 +40,23 @@ def _ReadCsvFile(filepath):
 
 def ConvertTraqmateToProto(filepath):
   es = exit_speed.ExitSpeed()
-  for time, lat, lon, alt, speed in _ReadCsvFile(filepath):
+  start = time.time()
+  for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
     report = client.dictwrapper({
               u'lon': lon,
               u'lat': lat,
               u'mode': 3,
-              u'time': time,
+              u'time': json_time,
               u'alt': alt,
               u'speed': speed,
               u'class': u'TPV'})
     es.ProcessReport(report)
-
+    now = time.time()
+    elapsed_time = float(elapsed_time)
+    if start + elapsed_time > now:
+      sleep_duration = start + elapsed_time - now
+      print(json_time, speed)
+      time.sleep(sleep_duration)
 
 
 if __name__ == '__main__':

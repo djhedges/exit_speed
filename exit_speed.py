@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 import time
+import sys
 import adafruit_dotstar
 import board
 import log_files
@@ -48,10 +49,11 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
-	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
+	       start_speed=2.0,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
-         led_update_interval=1,
+         led_update_interval=0,
+         led_brightness=1.0,
 	       ):
     """Initializer.
 
@@ -62,10 +64,11 @@ class ExitSpeed(object):
       min_points_per_session:  Used to prevent sessions from prematurely ending.
       led_update_interval:  Controls how often the LEDs can change so as to not
                             enduce epileptic siezures.
+      led_brightness: A percentage of how bright the LEDs should be.
     """
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
-                                         brightness=0.1)
-    self.dots.fill((0, 0, 255))
+                                         brightness=led_brightness)
+    self.dots.fill((0, 0, 255))  # Blue
     self.start_speed = start_speed
     self.start_finish_range = start_finish_range
     self.min_points_per_session = min_points_per_session
@@ -152,6 +155,7 @@ class ExitSpeed(object):
     """Sets best lap and builds a KDTree for finding closest points."""
     if (not self.best_lap or
         lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
+      logging.info('New Best Lap')
       self.best_lap = lap
       x_y_points = []
       for point in lap.points:
@@ -203,10 +207,13 @@ class ExitSpeed(object):
       if not self.recording:
         self.recording = True
         logging.info('Starting recording')
+        self.dots[0] = (0, 0, 255)  # Blue
+        self.dots[-1] = (0, 0, 255)  # Blue
     if point.speed < self.start_speed and self.recording:
       log_files.SaveSessionToDisk(session)
       self.recording = False
       logging.info('Stopping recording, saving files')
+      self.dots.fill((0, 0, 255))  # Blue
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
@@ -228,13 +235,16 @@ class ExitSpeed(object):
   def Run(self):
     """Runs exit speed in a loop."""
     while True:
-      report = gpsd.next()
-      self.ProcessReport(report)
+      try:
+        report = gpsd.next()
+        self.ProcessReport(report)
+      finally:
+        self.dots.fill((0, 0, 0))  # Clear
 
 if __name__ == '__main__':
   today = datetime.datetime.today()
   filename = 'exit_speed-%s' % today.isoformat()
-  logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
+  logging.basicConfig(#filename=os.path.join(log_files.LAP_LOGS, filename),
                       stream=sys.stdout,
                       level=logging.INFO)
   print(f'Logging to {filename}')
