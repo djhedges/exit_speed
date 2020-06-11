@@ -3,8 +3,9 @@
 import datetime
 import logging
 import os
-import time
+import statistics
 import sys
+import time
 import adafruit_dotstar
 import board
 import log_files
@@ -82,6 +83,7 @@ class ExitSpeed(object):
     self.best_lap = None
     self.tree = None
     self.last_led_update = time.time()
+    self.speed_deltas = []
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -131,17 +133,28 @@ class ExitSpeed(object):
       return (0, 255, 0)  # Green
     return (255, 0, 0)  # Red
 
+  def GetMovingSpeedDelta(self, point, best_point):
+    """Returns the median speed delta over a time period based on the ring size.
+
+    This helps smooth out the LEDs a bit so they're not so flickery by looking
+    a moving median of the speed deltas.  Ring size controls how big the ring
+    buffer can be, IE the number of deltas to hold on to.  At a GPS singal of
+    10hz a ring size of 10 will cover a second worth of time.
+    """
+    ring_size = 10
+    speed_delta = abs(point.speed - best_point.speed)
+    self.speed_deltas.insert(0, speed_delta)
+    if len(self.speed_deltas) > ring_size:
+      self.speed_deltas.pop()
+    return statistics.median(self.speed_deltas)
+
   def UpdateLeds(self):
     """Update LEDs based on speed difference to the best lap."""
     if self.tree and self.LedInterval():
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
       led_color = self.GetLedColor()
-      if point.speed > best_point.speed:
-        led_color = (0, 255, 0)  # Green
-      else:
-        led_color = (255, 0, 0)  # Red
-      speed_delta = abs(point.speed - best_point.speed)
+      speed_delta = self.GetMovingSpeedDelta(point, best_point)
       tenths = speed_delta // 0.1
       if not tenths:
         self.dots.fill((0, 0, 0))
