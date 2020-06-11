@@ -45,7 +45,7 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
-	       start_speed=4.5,  # 4.5 ms/ ~ 10 mph
+	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
 	       ):
