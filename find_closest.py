@@ -24,7 +24,10 @@ def LoadSession():
 
 @attr.s
 class BruteForce(object):
-  """Suprisingly ~0.6 seconds run time per point despite O(n^2)."""
+  """Suprisingly not terriable despite O(n^2).
+
+  After a few laps the timing was min 0.03, max 0.06 and median 0.04 seconds.
+  """
   session = attr.ib()
   best_lap = attr.ib(init=False, default=None)
 
@@ -52,7 +55,7 @@ class BruteForce(object):
       # Ignore laps which didn't cross start/finish or unresonably long.
       if lap.duration.ToSeconds() > 0 or lap.duration.ToSeconds() < 120:
         if (not self.best_lap or
-            lap.duration.ToNanoSeconds() < self.best_lap.duration.ToNanoSeconds()):
+            lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
           self.best_lap = lap
         print(f'Lap: {lap_num}, num of points: %s' % len(lap.points))
         self.Process(lap)
