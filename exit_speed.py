@@ -154,26 +154,31 @@ class ExitSpeed(object):
     self.speed_deltas.append(speed_delta)
     return statistics.median(self.speed_deltas)
 
+  def LedPerTenth(self):
+    """Dead code but keeping it for at track testing."""
+    speed_delta = abs(self.GetMovingSpeedDelta())
+    tenths = speed_delta // 0.1
+    led_color = self.GetLedColor()
+    if not tenths:
+      self.dots.fill((0, 0, 0))
+    elif speed_delta < 10 and speed_delta < 1:
+      leds_to_light = range(int(tenths))
+      for led_index in leds_to_light:
+        self.dots[led_index] = led_color
+      leds_to_off = set(range(len(self.dots))) - set(leds_to_light)
+      for led_index in leds_to_off:
+        self.dots[led_index] = (0, 0, 0)  # Off
+    else:
+      self.dots.fill(led_color)
+
   def UpdateLeds(self):
     """Update LEDs based on speed difference to the best lap."""
     if self.tree and self.LedInterval():
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
       self.UpdateSpeedDeltas(point, best_point)
-      speed_delta = abs(self.GetMovingSpeedDelta())
-      tenths = speed_delta // 0.1
       led_color = self.GetLedColor()
-      if not tenths:
-        self.dots.fill((0, 0, 0))
-      elif speed_delta < 10 and speed_delta < 1:
-        leds_to_light = range(int(tenths))
-        for led_index in leds_to_light:
-          self.dots[led_index] = led_color
-        leds_to_off = set(range(len(self.dots))) - set(leds_to_light)
-        for led_index in leds_to_off:
-          self.dots[led_index] = (0, 0, 0)  # Off
-      else:
-        self.dots.fill(led_color)
+      self.dots.fill(led_color)
 
   def ProcessPoint(self):
     """Populates the session with the latest GPS point."""
