@@ -84,7 +84,7 @@ class ExitSpeed(object):
     self.best_lap = None
     self.tree = None
     self.last_led_update = time.time()
-    self.speed_deltas = collections.deque(maxlen=10)
+    self.speed_deltas = collections.deque(maxlen=20)
 
   def GetPoint(self):
     """Returns the latest GPS point."""
