@@ -74,84 +74,24 @@ def BruteFindNearestPoint(point, best_points):
   return nearest_point
 
 
-def _LoopIndex(desired_index, best_points):
-  if (desired_index < len(best_points) and
-      desired_index > -1 * len(best_points) - 1):
-    return desired_index
-  if desired_index > 0:
-    return desired_index % len(best_points)
-  else:
-    index = len(best_points) - desired_index % len(best_points)
-    if index != len(best_points):
-      return index
-    return 0
-
-
-def _GoLeftOrRight(point, best_points, start_index, delta):
-  left_index = _LoopIndex(start_index - 1, best_points)
-  right_index = _LoopIndex(start_index + 1, best_points)
-  left_delta = exit_speed.PointDelta(point, best_points[left_index])
-  right_delta = exit_speed.PointDelta(point, best_points[right_index])
-
-  if delta < left_delta and delta < right_delta:
-    return 0
-  if left_delta < right_delta:
-    return -1  # Left
-  return 1  # Right
-
 @Time(TIMING)
-def DoublingSearch(point, point_num, best_points):
-  start_index = _LoopIndex(point_num, best_points)
-  delta = exit_speed.PointDelta(point, best_points[start_index])
-  closet_point = best_points[start_index]
-  direction = _GoLeftOrRight(point, best_points, start_index, delta)
-  if not direction:
-    return closet_point  # Got Lucky
+def KDTreeSearch(point, best_points, tree):
+  neighbors = tree.query_ball_point([point.lon, point.lat], 0.0004, n_jobs=-1)
+  brute_points = []
+  print(len(neighbors))
+  for neighbor in neighbors:
+    x = tree.data[:, 0][neighbor]
+    y = tree.data[:, 1][neighbor]
+    for point_b in best_points:
+      if point_b.lon == x and point_b.lat == y:
+        brute_points.append(point_b)
+  return BruteFindNearestPoint(point, brute_points)
 
-  # Expand
-  expansion = 4
-  prior_delta = delta
-  while True:
-    expand_index = _LoopIndex(
-        start_index + (expansion * direction), best_points)
-    expand_delta = exit_speed.PointDelta(point, best_points[expand_index])
-    if expand_delta > prior_delta:
-      break
-    else:
-      prior_delta = expand_delta
-      expansion *= 2
-
-  delta = expand_delta
-  closest_point = best_points[expand_index]
-  if expand_index < start_index:
-    points = best_points[expand_index:] + best_points[start_index:]
-    return BruteFindNearestPoint(point, points)
-  else:
-    return BruteFindNearestPoint(point, best_points[start_index:expand_index])
-
-#  # Contract
-#  while True:
-#    print(list(possible))
-#    mid = len(possible) // 2
-#    mid_index = _LoopIndex(possible[mid], best_points)
-#    mid_delta = exit_speed.PointDelta(point, best_points[mid_index])
-#    if mid_delta < delta:
-#      delta = mid_delta
-#      closet_point = best_points[possible[mid_index]]
-#    direction = _GoLeftOrRight(point, best_points, mid_index, mid_delta)
-#    if not direction:
-#      return closet_point
-#    if len(possible) == 1:
-#      break
-#    if direction == 1:  # Right
-#      possible = possible[mid + 1:]
-#    else:
-#      possible = possible[:mid -1]
-#  return closet_point
 
 def Loop(session):
   lap_num = 0
   best_lap = None
+  tree = None
   for lap in session.laps:
     lap_num += 1
     # Ignore laps which didn't cross start/finish or unresonably long.
@@ -163,16 +103,20 @@ def Loop(session):
           point_num += 1
           print(point_num)
           brute_closest = BruteFindNearestPoint(point, best_lap.points)
-          doubling_closest = DoublingSearch(point, point_num, best_lap.points)
-          if brute_closest != doubling_closest:
+          kdtree_closest = KDTreeSearch(point, best_lap.points, tree)
+          if brute_closest != kdtree_closest:
             brute_distance = exit_speed.PointDelta(point, brute_closest)
-            doubling_distance = exit_speed.PointDelta(point, doubling_closest)
-            print(brute_distance, doubling_distance)
+            kdtree_distance = exit_speed.PointDelta(point, kdtree_closest)
+            print(brute_distance, kdtree_distance)
             import pdb; pdb.set_trace()
       if (not best_lap or
           lap.duration.ToNanoseconds() <
           best_lap.duration.ToNanoseconds()):
         best_lap = lap
+        x_y_points = []
+        for point in lap.points:
+          x_y_points.append([point.lon, point.lat])
+        tree = cKDTree(np.array(x_y_points), leafsize=10)
 
 
 def _PrintTiming():
