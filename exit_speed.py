@@ -129,7 +129,6 @@ class ExitSpeed(object):
 
   def GetLedColor(self):
     median_delta = self.GetMovingSpeedDelta()
-    print(median_delta)
     if median_delta > 0:
       return (255, 0, 0)  # Red
     return (0, 255, 0)  # Green
@@ -158,7 +157,6 @@ class ExitSpeed(object):
       speed_delta = abs(self.GetMovingSpeedDelta())
       tenths = speed_delta // 0.1
       led_color = self.GetLedColor()
-      print(led_color)
       if not tenths:
         self.dots.fill((0, 0, 0))
       elif speed_delta < 10 and speed_delta < 1:
