@@ -51,7 +51,7 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
-	       start_speed=2.0,  # 4.5 m/s ~ 10 mph
+	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
          led_update_interval=0,
@@ -155,9 +155,10 @@ class ExitSpeed(object):
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
       self.UpdateSpeedDeltas(point, best_point)
-      speed_delta = self.GetMovingSpeedDelta()
+      speed_delta = abs(self.GetMovingSpeedDelta())
       tenths = speed_delta // 0.1
       led_color = self.GetLedColor()
+      print(led_color)
       if not tenths:
         self.dots.fill((0, 0, 0))
       elif speed_delta < 10 and speed_delta < 1:
