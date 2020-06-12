@@ -128,12 +128,13 @@ class ExitSpeed(object):
     return False
 
   def GetLedColor(self):
-    median_delta = statistics.median(self.speed_deltas)
+    median_delta = self.GetMovingSpeedDelta()
+    print(median_delta)
     if median_delta > 0:
       return (255, 0, 0)  # Red
     return (0, 255, 0)  # Green
 
-  def GetMovingSpeedDelta(self, point, best_point):
+  def GetMovingSpeedDelta(self):
     """Returns the median speed delta over a time period based on the ring size.
 
     This helps smooth out the LEDs a bit so they're not so flickery by looking
@@ -141,9 +142,11 @@ class ExitSpeed(object):
     buffer can be, IE the number of deltas to hold on to.  At a GPS singal of
     10hz a ring size of 10 will cover a second worth of time.
     """
+    return statistics.median(self.speed_deltas)
+
+  def UpdateSpeedDeltas(self, point, best_point):
     speed_delta = best_point.speed - point.speed
     self.speed_deltas.append(speed_delta)
-    print(self.speed_deltas)
     return statistics.median(self.speed_deltas)
 
   def UpdateLeds(self):
@@ -151,7 +154,8 @@ class ExitSpeed(object):
     if self.tree and self.LedInterval():
       point = self.GetPoint()
       best_point = self.FindNearestBestLapPoint()
-      speed_delta = self.GetMovingSpeedDelta(point, best_point)
+      self.UpdateSpeedDeltas(point, best_point)
+      speed_delta = self.GetMovingSpeedDelta()
       tenths = speed_delta // 0.1
       led_color = self.GetLedColor()
       if not tenths:

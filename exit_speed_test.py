@@ -58,39 +58,14 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     self.assertEqual(session, es.GetSession())
 
-  def testGetLedColorGreen(self):
+  def testGetLedColor(self):
     es = exit_speed.ExitSpeed()
-
-    best_lap = gps_pb2.Lap()
-    b_point = best_lap.points.add()
-    b_point.lat = 46
-    b_point.lon = -122
-    b_point.speed = 20
-    es.SetBestLap(best_lap)
-
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    point.speed = 21
-    es.point = point
-    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
-
-  def testGetLedColorRed(self):
-    es = exit_speed.ExitSpeed()
-
-    best_lap = gps_pb2.Lap()
-    b_point = best_lap.points.add()
-    b_point.lat = 46
-    b_point.lon = -122
-    b_point.speed = 22
-    es.SetBestLap(best_lap)
-
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    point.speed = 21
-    es.point = point
+    es.speed_deltas.extend([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     self.assertTupleEqual(es.GetLedColor(), (255, 0, 0))
+    es.speed_deltas.extend([0, -1, -2, -3, -4, -5, -6, -7, -8, -9])
+    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
+    es.speed_deltas.extend([0, 1, 2, 3, 4, -5, -6, -7, -8, -9])
+    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
 
   def testSetLapTime(self):
     es = exit_speed.ExitSpeed()
