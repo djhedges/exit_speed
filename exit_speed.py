@@ -16,7 +16,7 @@ from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
 from gps import EarthDistanceSmall
 import numpy as np
-from scipy.spatial import cKDTree
+from sklearn.neighbors import BallTree
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
@@ -112,12 +112,13 @@ class ExitSpeed(object):
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
     point = self.GetPoint()
-    _, neighbor = self.tree.query([point.lon, point.lat], 1)
-    x = self.tree.data[:, 0][neighbor]
-    y = self.tree.data[:, 1][neighbor]
-    for point_b in self.best_lap.points:
-      if point_b.lon == x and point_b.lat == y:
-        return point_b
+    neighbors = tree.query([[point.lat, point.lon]], k=1, return_distance=False)
+    for neighbor in neighbors[0]:
+      x = self.tree.data[:, 0][neighbor]
+      y = self.tree.data[:, 1][neighbor]
+      for point_b in self.best_lap.points:
+        if point_b.lat == x and point_b.lon == y:
+          return point_b
 
   def LedInterval(self):
     """Returns True if it is safe to update the LEDs based on interval."""
@@ -184,8 +185,9 @@ class ExitSpeed(object):
       self.best_lap = lap
       x_y_points = []
       for point in lap.points:
-        x_y_points.append([point.lon, point.lat])
-      self.tree = cKDTree(np.array(x_y_points))
+        x_y_points.append([point.lat, point.lon])
+      self.tree = BallTree(np.array(x_y_points), leaf_size=40,
+                           metric='pyfunc', func=EarthDistanceSmall)
 
   def SetLapTime(self):
     """Sets the lap duration based on the first and last point time delta."""
