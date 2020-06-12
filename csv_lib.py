@@ -56,6 +56,10 @@ def ConvertTraqmateToProto(filepath):
     elapsed_time = float(elapsed_time)
     if not first_elapsed:
       first_elapsed = elapsed_time
+    # Traqmate CSV files have data points every 0.025s where as our GPS sensor
+    # will only record at 0.1s.
+    if elapsed_time * 10 % 1 != 0:
+      continue
     if start + elapsed_time > now:
       print(json_time, speed)
       sleep_duration = start + elapsed_time - first_elapsed - now

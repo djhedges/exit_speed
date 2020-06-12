@@ -54,8 +54,9 @@ class ExitSpeed(object):
 	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
-         led_update_interval=0,
+         led_update_interval=0.2,
          led_brightness=1.0,
+         speed_deltas=50,
 	       ):
     """Initializer.
 
@@ -67,6 +68,9 @@ class ExitSpeed(object):
       led_update_interval:  Controls how often the LEDs can change so as to not
                             enduce epileptic siezures.
       led_brightness: A percentage of how bright the LEDs should be.
+      speed_deltas:  Used to smooth out GPS data.  This controls how many recent
+                     speed deltas are stored.  50 at 10hz means a median of the
+                     last 5 seconds is used.
     """
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=led_brightness)
@@ -84,7 +88,7 @@ class ExitSpeed(object):
     self.best_lap = None
     self.tree = None
     self.last_led_update = time.time()
-    self.speed_deltas = collections.deque(maxlen=20)
+    self.speed_deltas = collections.deque(maxlen=speed_deltas)
 
   def GetPoint(self):
     """Returns the latest GPS point."""
