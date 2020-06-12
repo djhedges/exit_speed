@@ -275,8 +275,8 @@ class ExitSpeed(object):
       try:
         report = gpsd.next()
         self.ProcessReport(report)
-      finally:
-        self.dots.fill((0, 0, 0))  # Clear
+      except Exception as err:
+        logging.exception(err, exc_info=True)
 
 if __name__ == '__main__':
   today = datetime.datetime.today()
