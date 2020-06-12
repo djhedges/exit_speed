@@ -60,24 +60,8 @@ class BaseFindClosest(object):
   def FindNearestPoint(self, point):
     raise NotImplemented
 
-  def Process(self, lap):
-    for point in lap.points:
-      self.FindNearestPoint(point)
-
   def UpdateBestLap(self, lap):
     self.best_lap = lap
-
-  def Loop(self):
-    lap_num = 0
-    for lap in self.session.laps:
-      lap_num += 1
-      # Ignore laps which didn't cross start/finish or unresonably long.
-      if lap.duration.ToSeconds() > 0 or lap.duration.ToSeconds() < 120:
-        if (not self.best_lap or
-            lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
-          self.UpdateBestLap(lap)
-        print(f'Lap: {lap_num}, num of points: %s' % len(lap.points))
-        self.Process(lap)
 
 
 class BruteForce(BaseFindClosest):
@@ -100,7 +84,7 @@ class BruteForce(BaseFindClosest):
       if not nearest_delta or delta < nearest_delta:
         nearest_delta = delta
         nearest_point = b_point
-    speed_delta = point.speed - nearest_point.speed
+    return nearest_point
 
 
 class KDTree(BaseFindClosest):
@@ -119,7 +103,6 @@ class KDTree(BaseFindClosest):
   total run time - 10m53.250s
   """
 
-  @Time(KDTREE)
   def UpdateBestLap(self, lap):
     super(KDTree, self).UpdateBestLap(lap)
     x_y_points = []
@@ -127,15 +110,58 @@ class KDTree(BaseFindClosest):
       x_y_points.append([point.lon, point.lat])
     self.tree = cKDTree(np.array(x_y_points))
 
-  @Time(TIMING)
+  def BruteFindNearestPoint(self, point, best_points):
+    nearest_delta = None
+    nearest_point = None
+    all_deltas = []
+    for b_point in best_points:
+      delta = exit_speed.PointDelta(point, b_point)
+      all_deltas.append(delta)
+      if not nearest_delta or delta < nearest_delta:
+        nearest_delta = delta
+        nearest_point = b_point
+    return nearest_point
+
+  @Time(KDTREE)
   def FindNearestPoint(self, point):
-    _, neighbor = self.tree.query([point.lon, point.lat], 1)
-    x = self.tree.data[:, 0][neighbor]
-    y = self.tree.data[:, 1][neighbor]
-    for point_b in self.best_lap.points:
-      if point_b.lon == x and point_b.lat == y:
-        nearest_point = point_b
-        print(point_b.speed, point.speed)
+    _, neighbors = self.tree.query([point.lon, point.lat], 100)
+    best_points = []
+    for neighbor in neighbors:
+      x = self.tree.data[:, 0][neighbor]
+      y = self.tree.data[:, 1][neighbor]
+      for point_b in self.best_lap.points:
+        if point_b.lon == x and point_b.lat == y:
+          best_points.append(point_b)
+    return self.BruteFindNearestPoint(point, best_points)
+
+
+def Loop(session):
+  brute = BruteForce(session)
+  kdtree = KDTree(session)
+  lap_num = 0
+  for lap in kdtree.session.laps:
+    lap_num += 1
+    # Ignore laps which didn't cross start/finish or unresonably long.
+    if lap.duration.ToSeconds() > 0 or lap.duration.ToSeconds() < 120:
+      if kdtree.best_lap:
+        print(f'Lap: {lap_num}, num of points: %s' % len(lap.points))
+        point_num = 0
+        for point in lap.points:
+          point_num += 1
+          print(point_num)
+          brute_closest = brute.FindNearestPoint(point)
+          kdtree_closest = kdtree.FindNearestPoint(point)
+          if brute_closest != kdtree_closest:
+            brute_distance = exit_speed.PointDelta(point, brute_closest)
+            kdtree_distance = exit_speed.PointDelta(point, kdtree_closest)
+            print(brute_distance, kdtree_distance)
+            import pdb; pdb.set_trace()
+      if (not kdtree.best_lap or
+          lap.duration.ToNanoseconds() <
+          kdtree.best_lap.duration.ToNanoseconds()):
+        brute.UpdateBestLap(lap)
+        kdtree.UpdateBestLap(lap)
+
 
 def _PrintTiming():
   print(min(KDTREE), max(KDTREE), statistics.median(KDTREE))
@@ -147,8 +173,7 @@ def main():
     print('Loading data')
     session = LoadSession()
     print('Done loading')
-    kdtree = KDTree(session)
-    kdtree.Loop()
+    Loop(session)
   except (KeyboardInterrupt, SystemExit):
     _PrintTiming()
   _PrintTiming()
