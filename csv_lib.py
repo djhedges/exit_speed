@@ -41,6 +41,7 @@ def _ReadCsvFile(filepath):
 def ConvertTraqmateToProto(filepath):
   es = exit_speed.ExitSpeed(led_brightness=0.05)
   start = time.time()
+  first_elapsed = None
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
     report = client.dictwrapper({
               u'lon': lon,
@@ -53,12 +54,15 @@ def ConvertTraqmateToProto(filepath):
     es.ProcessReport(report)
     now = time.time()
     elapsed_time = float(elapsed_time)
+    if not first_elapsed:
+      first_elapsed = elapsed_time
     if start + elapsed_time > now:
-      sleep_duration = start + elapsed_time - now
       print(json_time, speed)
-      time.sleep(sleep_duration)
+      sleep_duration = start + elapsed_time - first_elapsed - now
+      if sleep_duration > 0:
+        time.sleep(sleep_duration)
 
 
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-  ConvertTraqmateToProto('testdata/2019-08-18_Portland_CORRADO_DJ_R03.csv')
+  ConvertTraqmateToProto('testdata/2019-08-18_Portland_CORRADO_DJ_R03_stripped.csv')

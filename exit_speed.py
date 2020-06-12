@@ -112,7 +112,8 @@ class ExitSpeed(object):
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
     point = self.GetPoint()
-    neighbors = tree.query([[point.lat, point.lon]], k=1, return_distance=False)
+    neighbors = self.tree.query([[point.lat, point.lon]], k=1,
+                                return_distance=False)
     for neighbor in neighbors[0]:
       x = self.tree.data[:, 0][neighbor]
       y = self.tree.data[:, 1][neighbor]
@@ -186,7 +187,7 @@ class ExitSpeed(object):
       x_y_points = []
       for point in lap.points:
         x_y_points.append([point.lat, point.lon])
-      self.tree = BallTree(np.array(x_y_points), leaf_size=40,
+      self.tree = BallTree(np.array(x_y_points), leaf_size=30,
                            metric='pyfunc', func=EarthDistanceSmall)
 
   def SetLapTime(self):
