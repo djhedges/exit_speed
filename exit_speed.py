@@ -281,17 +281,17 @@ class ExitSpeed(object):
 if __name__ == '__main__':
   today = datetime.datetime.today()
   filename = 'exit_speed-%s' % today.isoformat()
-  logging.basicConfig(#filename=os.path.join(log_files.LAP_LOGS, filename),
-                      stream=sys.stdout,
-                      level=logging.INFO)
+  logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
+                      level=logging.DEBUG)
+  logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
   print(f'Logging to {filename}')
   try:
     while True:
       logging.info('Starting Run')
       es = ExitSpeed()
       es.Run()
-
-
-  except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
+  except:  # Catch All!
+    logging.exception('Die due to exception', exc_info=True)
+  finally:
     logging.info('Done.\nExiting.')
     gpsd.close()
