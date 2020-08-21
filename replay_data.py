@@ -4,9 +4,11 @@ import logging
 import time
 import sys
 import exit_speed
-import plotter
+import gps_pb2
 import log_files
 from gps import client
+import tensorflow as tf
+
 
 def ConvertPointToReport(point):
   return client.dictwrapper({
@@ -20,27 +22,26 @@ def ConvertPointToReport(point):
 
 
 def ReplayLog(filepath):
+  replay_start = time.time()
+  session_start = None
   es = exit_speed.ExitSpeed(start_speed=2.0,
                             led_brightness=0.05)
-  session = log_files.ReadLog(filepath)
-  plot = plotter.Plotter()
+  data = tf.data.TFRecordDataset(filepath)
+  for record in data:
+    point = gps_pb2.Point()
+    point.ParseFromString(record.numpy())
+    if not session_start:
+      session_start = point.time.ToMilliseconds() / 1000
 
-  replay_start = time.time()
-  session_start = session.laps[0].points[0].time.ToMilliseconds() / 1000
-  replay_delta = replay_delta = replay_start - session_start
-
-  for lap in session.laps:
-    for point in lap.points:
-      report = ConvertPointToReport(point)
-      es.ProcessReport(report)
-      plot.AddPoint(point)
-
-      run_delta = time.time() - replay_start
-      point_delta = point.time.ToMilliseconds() / 1000 - session_start
-      if run_delta < point_delta:
-        time.sleep(point_delta - run_delta)
+    report = ConvertPointToReport(point)
+    es.ProcessReport(report)
+    run_delta = time.time() - replay_start
+    point_delta = point.time.ToMilliseconds() / 1000 - session_start
+    if run_delta < point_delta:
+      time.sleep(point_delta - run_delta)
 
 
 if __name__ == '__main__':
+  tf.enable_eager_execution()
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-  ReplayLog('testdata/data-2020-06-11T22:16:27.700Z')
+  ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr')
