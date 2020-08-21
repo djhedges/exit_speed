@@ -17,6 +17,7 @@ from gps import WATCH_NEWSTYLE
 from gps import EarthDistanceSmall
 import numpy as np
 from sklearn.neighbors import BallTree
+import tensorflow as tf
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
@@ -51,7 +52,6 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
-	       start_speed=4.5,  # 4.5 m/s ~ 10 mph
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
          led_update_interval=0.2,
@@ -61,7 +61,6 @@ class ExitSpeed(object):
     """Initializer.
 
     Args:
-      start_speed: Minimum speed before logging starts.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
@@ -75,12 +74,11 @@ class ExitSpeed(object):
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
-    self.start_speed = start_speed
     self.start_finish_range = start_finish_range
     self.min_points_per_session = min_points_per_session
     self.led_update_interval = led_update_interval
 
-    self.recording = False
+    self.tfwriter = None
 
     self.session = None
     self.lap = None
@@ -180,12 +178,22 @@ class ExitSpeed(object):
       led_color = self.GetLedColor()
       self.dots.fill(led_color)
 
+  def LogPoint(self):
+    point = self.GetPoint()
+    if not self.tfwriter:
+      data_filename = os.path.join(log_files.LAP_LOGS,
+                                   'data-%s' % point.time.ToJsonString())
+      logging.info(f'Logging data to {data_filename}')
+      self.tfwriter = tf.io.TFRecordWriter(data_filename)
+    self.tfwriter.write(point.SerializeToString())
+
   def ProcessPoint(self):
     """Populates the session with the latest GPS point."""
     point = self.GetPoint()
     session = self.GetSession()
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
+    self.LogPoint()
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
@@ -242,18 +250,7 @@ class ExitSpeed(object):
     """Start/ends the logging of data to log files based on car speed."""
     point = self.GetPoint()
     session = self.GetSession()
-    if point.speed > self.start_speed:
-      self.ProcessLap()
-      if not self.recording:
-        self.recording = True
-        logging.info('Starting recording')
-        self.dots[0] = (0, 0, 255)  # Blue
-        self.dots[-1] = (0, 0, 255)  # Blue
-    if point.speed < self.start_speed and self.recording:
-      log_files.SaveSessionToDisk(session)
-      self.recording = False
-      logging.info('Stopping recording, saving files')
-      self.dots.fill((0, 0, 255))  # Blue
+    self.ProcessLap()
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
