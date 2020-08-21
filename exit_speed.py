@@ -55,7 +55,7 @@ class ExitSpeed(object):
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
          led_update_interval=0.2,
-         led_brightness=1.0,
+         led_brightness=0.5,
          speed_deltas=50,
 	       ):
     """Initializer.

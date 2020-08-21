@@ -4,6 +4,7 @@ import logging
 import time
 import sys
 import exit_speed
+import plotter
 import log_files
 from gps import client
 
@@ -22,6 +23,7 @@ def ReplayLog(filepath):
   es = exit_speed.ExitSpeed(start_speed=2.0,
                             led_brightness=0.05)
   session = log_files.ReadLog(filepath)
+  plot = plotter.Plotter()
 
   replay_start = time.time()
   session_start = session.laps[0].points[0].time.ToMilliseconds() / 1000
@@ -31,6 +33,7 @@ def ReplayLog(filepath):
     for point in lap.points:
       report = ConvertPointToReport(point)
       es.ProcessReport(report)
+      plot.AddPoint(point)
 
       run_delta = time.time() - replay_start
       point_delta = point.time.ToMilliseconds() / 1000 - session_start
