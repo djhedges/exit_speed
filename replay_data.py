@@ -5,7 +5,6 @@ import time
 import sys
 import exit_speed
 import gps_pb2
-import log_files
 import data_reader
 from gps import client
 
