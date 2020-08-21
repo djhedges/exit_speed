@@ -6,8 +6,8 @@ import sys
 import exit_speed
 import gps_pb2
 import log_files
+import data_reader
 from gps import client
-import tensorflow as tf
 
 
 def ConvertPointToReport(point):
@@ -26,10 +26,8 @@ def ReplayLog(filepath):
   session_start = None
   es = exit_speed.ExitSpeed(start_speed=2.0,
                             led_brightness=0.05)
-  data = tf.data.TFRecordDataset(filepath)
-  for record in data:
-    point = gps_pb2.Point()
-    point.ParseFromString(record.numpy())
+  points = data_reader.ReadData(filepath)
+  for point in points:
     if not session_start:
       session_start = point.time.ToMilliseconds() / 1000
 
@@ -42,6 +40,5 @@ def ReplayLog(filepath):
 
 
 if __name__ == '__main__':
-  tf.enable_eager_execution()
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr')
