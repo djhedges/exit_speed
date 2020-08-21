@@ -9,7 +9,6 @@ import sys
 import time
 import adafruit_dotstar
 import board
-import log_files
 import gps_pb2
 from gps import gps
 from gps import WATCH_ENABLE
@@ -27,6 +26,8 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (47.254702, -123.192676): 'The Ridge Motorsport Park',
           (47.321082, -122.149664): 'Pacific Raceway',
           (47.661806, -117.572297): 'Spokane Raceway'}
+
+LAP_LOGS = '/home/pi/lap_logs'
 
 
 def PointDelta(point_a, point_b):
@@ -181,7 +182,7 @@ class ExitSpeed(object):
   def LogPoint(self):
     point = self.GetPoint()
     if not self.tfwriter:
-      data_filename = os.path.join(log_files.LAP_LOGS,
+      data_filename = os.path.join(LAP_LOGS,
                                    'data-%s' % point.time.ToJsonString())
       logging.info(f'Logging data to {data_filename}')
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
@@ -281,7 +282,7 @@ class ExitSpeed(object):
 if __name__ == '__main__':
   today = datetime.datetime.today()
   filename = 'exit_speed-%s' % today.isoformat()
-  logging.basicConfig(filename=os.path.join(log_files.LAP_LOGS, filename),
+  logging.basicConfig(filename=os.path.join(LAP_LOGS, filename),
                       level=logging.DEBUG)
   logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
   print(f'Logging to {filename}')
