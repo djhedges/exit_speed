@@ -3,9 +3,9 @@
 from gps import client
 import gps_pb2
 import exit_speed
-import log_files
 import mock
 import unittest
+import tensorflow as tf
 
 
 class TestExitSpeed(unittest.TestCase):
@@ -86,6 +86,8 @@ class TestExitSpeed(unittest.TestCase):
     es = exit_speed.ExitSpeed()
     es.point = point
     es.lap = lap
+    mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
+    es.writer = mock_writer
     es.ProcessPoint()
     self.assertEqual(14083839.944018112, point.start_finish_distance)
 
@@ -142,11 +144,10 @@ class TestExitSpeed(unittest.TestCase):
     point.speed = 21
     lap = gps_pb2.Lap()
     session = gps_pb2.Session()
-    es = exit_speed.ExitSpeed(start_speed=5)
+    es = exit_speed.ExitSpeed()
     es.point = point
     es.session = session
     es.ProcessSession()
-    self.assertTrue(es.recording)
 
     for session_lap in session.laps:
       for lap_point in lap.points:
@@ -155,9 +156,9 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.speed = 1
     es.point = point
-    with mock.patch.object(log_files, 'SaveSessionToDisk') as mock_save:
-      es.ProcessSession()
-      mock_save.assert_called_once_with(session)
+    mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
+    es.writer = mock_writer
+    es.ProcessSession()
 
   def testPopulatePoint(self):
     report = client.dictwrapper({
