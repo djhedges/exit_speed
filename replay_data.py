@@ -27,6 +27,9 @@ def ReplayLog(filepath, include_sleep=False):
     filepath: A string of the path of lap data.
     include_sleep: If True replays adds sleeps to simulate how data was
                    processed in real time.
+
+  Returns:
+    A exit_speed.ExitSpeed instance that has replayed the given data.
   """
   replay_start = time.time()
   session_start = None
@@ -42,6 +45,7 @@ def ReplayLog(filepath, include_sleep=False):
     point_delta = point.time.ToMilliseconds() / 1000 - session_start
   if include_sleep and run_delta < point_delta:
     time.sleep(point_delta - run_delta)
+  return es
 
 
 if __name__ == '__main__':

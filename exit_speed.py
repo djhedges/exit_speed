@@ -27,7 +27,7 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (47.321082, -122.149664): 'Pacific Raceway',
           (47.661806, -117.572297): 'Spokane Raceway'}
 
-LAP_LOGS = '/home/pi/lap_logs'
+DEFAULT_LOG_PATH = '/home/pi/lap_logs'
 
 
 def PointDelta(point_a, point_b):
@@ -53,6 +53,7 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
+         log_path=DEFAULT_LOG_PATH,
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
          led_update_interval=0.2,
@@ -72,13 +73,14 @@ class ExitSpeed(object):
                      speed deltas are stored.  50 at 10hz means a median of the
                      last 5 seconds is used.
     """
-    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
-                                         brightness=led_brightness)
-    self.dots.fill((0, 0, 255))  # Blue
+    self.log_path = log_path
     self.start_finish_range = start_finish_range
     self.min_points_per_session = min_points_per_session
     self.led_update_interval = led_update_interval
 
+    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
+                                         brightness=led_brightness)
+    self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
 
     self.session = None
@@ -183,7 +185,7 @@ class ExitSpeed(object):
     point = self.GetPoint()
     if not self.tfwriter:
       data_filename = os.path.join(
-          LAP_LOGS, 'data-%s.tfr' % point.time.ToJsonString())
+          self.log_path, 'data-%s.tfr' % point.time.ToJsonString())
       logging.info(f'Logging data to {data_filename}')
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
     self.tfwriter.write(point.SerializeToString())
@@ -282,7 +284,7 @@ class ExitSpeed(object):
 if __name__ == '__main__':
   today = datetime.datetime.today()
   filename = 'exit_speed-%s' % today.isoformat()
-  logging.basicConfig(filename=os.path.join(LAP_LOGS, filename),
+  logging.basicConfig(filename=os.path.join(DEFAULT_LOG_PATH, filename),
                       level=logging.DEBUG)
   logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
   print(f'Logging to {filename}')

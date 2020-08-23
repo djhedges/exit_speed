@@ -7,7 +7,7 @@ import sys
 import tempfile
 import time
 import exit_speed
-import log_files
+import replay_data
 from gps import client
 
 
@@ -104,5 +104,7 @@ if __name__ == '__main__':
   #ConvertTraqmateToProto('testdata/2019-08-18_Portland_CORRADO_DJ_R03_stripped.csv')
   _, temp_csv = tempfile.mkstemp(prefix='exit_speed_')
   print(temp_csv)
-  session = log_files.ReadLog('/home/pi/lap_logs/data-2020-07-10T18:20:00.700Z')
+  es = replay_data.ReplayLog(
+      '/home/pi/lap_logs/data-2020-07-10T18:20:00.700Z.tfr')
+  session = es.GetSession()
   ConvertProtoToTraqmate(session, temp_csv)
