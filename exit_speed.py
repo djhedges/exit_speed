@@ -183,7 +183,7 @@ class ExitSpeed(object):
     point = self.GetPoint()
     if not self.tfwriter:
       data_filename = os.path.join(
-          LAP_LOGS, 'data-%s.tfrecord' % point.time.ToJsonString())
+          LAP_LOGS, 'data-%s.tfr' % point.time.ToJsonString())
       logging.info(f'Logging data to {data_filename}')
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
     self.tfwriter.write(point.SerializeToString())
