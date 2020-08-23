@@ -20,7 +20,14 @@ def ConvertPointToReport(point):
               u'class': u'TPV'})
 
 
-def ReplayLog(filepath):
+def ReplayLog(filepath, include_sleep=False):
+  """Replays data, extermely useful to LED testing.
+
+  Args:
+    filepath: A string of the path of lap data.
+    include_sleep: If True replays adds sleeps to simulate how data was
+                   processed in real time.
+  """
   replay_start = time.time()
   session_start = None
   es = exit_speed.ExitSpeed(led_brightness=0.05)
@@ -33,7 +40,7 @@ def ReplayLog(filepath):
     es.ProcessReport(report)
     run_delta = time.time() - replay_start
     point_delta = point.time.ToMilliseconds() / 1000 - session_start
-  if run_delta < point_delta:
+  if include_sleep and run_delta < point_delta:
     time.sleep(point_delta - run_delta)
 
 
