@@ -45,11 +45,12 @@ def ReplayLog(filepath, include_sleep=False):
     es.ProcessReport(report)
     run_delta = time.time() - replay_start
     point_delta = point.time.ToMilliseconds() / 1000 - session_start
-  if include_sleep and run_delta < point_delta:
-    time.sleep(point_delta - run_delta)
+    if include_sleep and run_delta < point_delta:
+      time.sleep(point_delta - run_delta)
   return es
 
 
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-  ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr')
+  ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr',
+            include_sleep=True)

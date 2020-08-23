@@ -10,6 +10,7 @@ import time
 import adafruit_dotstar
 import board
 import gps_pb2
+import metric_exporter
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
@@ -82,6 +83,7 @@ class ExitSpeed(object):
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
+    self.queue, self.pusher = metric_exporter.GetMetricPusher()
 
     self.session = None
     self.lap = None
@@ -202,6 +204,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
+    self.queue.put(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
