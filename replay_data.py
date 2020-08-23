@@ -31,9 +31,11 @@ def ReplayLog(filepath, include_sleep=False):
   Returns:
     A exit_speed.ExitSpeed instance that has replayed the given data.
   """
+  logging.info(f'Replaying {filepath}')
   replay_start = time.time()
   session_start = None
-  es = exit_speed.ExitSpeed(led_brightness=0.05)
+  es = exit_speed.ExitSpeed(log_path='/tmp',  # Dont clobber data on replay.
+                            led_brightness=0.05)
   points = data_reader.ReadData(filepath)
   for point in points:
     if not session_start:
