@@ -53,7 +53,7 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
 
   def __init__(self,
-         log_path=DEFAULT_LOG_PATH,
+         data_log_path=DEFAULT_LOG_PATH,
          start_finish_range=10,  # Meters, ~2x the width of straightaways.
          min_points_per_session=60 * 10,  # 1 min @ gps 10hz
          led_update_interval=0.2,
@@ -73,7 +73,7 @@ class ExitSpeed(object):
                      speed deltas are stored.  50 at 10hz means a median of the
                      last 5 seconds is used.
     """
-    self.log_path = log_path
+    self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
     self.min_points_per_session = min_points_per_session
     self.led_update_interval = led_update_interval
@@ -184,8 +184,13 @@ class ExitSpeed(object):
   def LogPoint(self):
     point = self.GetPoint()
     if not self.tfwriter:
+      utc_dt = point.time.ToDatetime()
+      current_dt = utc_dt.replace(
+        tzinfo=datetime.timezone.utc).astimezone(tz=None)
+      current_seconds = current_dt.second + current_dt.microsecond / 1e6
       data_filename = os.path.join(
-          self.log_path, 'data-%s.tfr' % point.time.ToJsonString())
+          self.data_log_path, 'data-%s:%03f.tfr' % (
+              current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
       logging.info(f'Logging data to {data_filename}')
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
     self.tfwriter.write(point.SerializeToString())
