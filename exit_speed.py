@@ -204,7 +204,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
-    self.queue.put(point)
+    self.queue.put_nowait(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
