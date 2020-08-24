@@ -14,8 +14,9 @@ def _EmptyQueue(queue):
   in case this process gets backed up.
   """
   qsize = queue.qsize()
-  if qsize > 1:
-    skipped_points = qsize -1
+  if qsize > 9:  # Reduce load on influxdb by only updating every 10 points.
+                 # IE every 1s which is the fastest the graphs are refreshing.
+    skipped_points = qsize - 9
     logging.info('Metric exporter skipped %d points', skipped_points)
     for _ in range(qsize):
       point = queue.get()
@@ -25,19 +26,13 @@ def _EmptyQueue(queue):
 
 
 def PushMetrics(point, influx_client):
-  metrics = ('lat', 'lon', 'alt')
   values = []
-  for metric in metrics:
-    values.append({'measurement': metric,
-                   'fields': {'value': getattr(point, metric)}})
-  values.append({'measurement': 'speed',
-                 'fields': {'value': point.speed * 2.23694}}) # m/s to mph.
   geo_hash = geohash.encode(point.lat, point.lon)
-  values.append({'measurement': 'geohash',
-                 'fields': {'value': 1},
-                 'tags': {'geohash': geo_hash,
-                          'lat': point.lat,
-                          'lon': point.lon}})
+  values.append({'measurement': 'point',
+                 'fields': {'alt': point.alt,
+                            'speed': point.speed * 2.23694, # m/s to mph.
+                           },
+                 'tags': {'geohash': geo_hash}})
   influx_client.write_points(values)
 
 
