@@ -52,6 +52,6 @@ def ReplayLog(filepath, include_sleep=False):
 
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-  #ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr',
-  ReplayLog('testdata/data-2019-08-18T16:53:01.250Z.tfr',
+  #ReplayLog('testdata/data-2019-08-18T16:53:01.250Z.tfr',
+  ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr',
             include_sleep=True)

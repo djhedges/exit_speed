@@ -46,7 +46,8 @@ def PushMetrics(point):
   METRIC_ALT.set(point.alt)
   METRIC_SPEED.set(point.speed)
   geo_hash = geohash.encode(point.lat, point.lon)
-  METRIC_GEOHASH.labels(geohash=geo_hash, target='exit_speed').set(1)
+  METRIC_GEOHASH.labels(geohash=geo_hash,
+                        target='exit_speed').set_to_current_time()
   push_to_gateway('server:9091', job='exit_speed', registry=REGISTRY)
   METRIC_POINTS_EXPORTED.inc()
 
