@@ -28,10 +28,16 @@ def PushMetrics(point, influx_client):
   metrics = ('lat', 'lon', 'alt')
   values = []
   for metric in metrics:
-    values.append({"measurement": metric,
-                   "fields": {"value": getattr(point, metric)}})
-  values.append({"measurement": 'speed',
-                 "fields": {"value": point.speed * 2.23694}}) # m/s to mph.
+    values.append({'measurement': metric,
+                   'fields': {'value': getattr(point, metric)}})
+  values.append({'measurement': 'speed',
+                 'fields': {'value': point.speed * 2.23694}}) # m/s to mph.
+  geo_hash = geohash.encode(point.lat, point.lon)
+  values.append({'measurement': 'geohash',
+                 'fields': {'value': 1},
+                 'tags': {'geohash': geo_hash,
+                          'lat': point.lat,
+                          'lon': point.lon}})
   influx_client.write_points(values)
 
 
