@@ -4,22 +4,7 @@ import logging
 import geohash
 from multiprocessing import Process
 from multiprocessing import Queue
-from prometheus_client import CollectorRegistry
-from prometheus_client import Counter
-from prometheus_client import Gauge
-from prometheus_client import push_to_gateway
-
-REGISTRY = CollectorRegistry()
-METRIC_LAT = Gauge('lat', 'latitude position', registry=REGISTRY)
-METRIC_LON = Gauge('lon', 'longitude position', registry=REGISTRY)
-METRIC_ALT = Gauge('alt', 'altitude', registry=REGISTRY)
-METRIC_SPEED = Gauge('speed', 'GPS reported speed in m/s', registry=REGISTRY)
-METRIC_GEOHASH = Gauge('geohash', 'Geohash of the latest GPS point',
-                       ['geohash', 'target'], registry=REGISTRY)
-METRIC_POINTS_EXPORTED = Counter(
-  'points_exported', 'Number of points exported', registry=REGISTRY)
-METRIC_POINTS_SKIPPED = Counter(
-  'points_skipped', 'Number of points skipped', registry=REGISTRY)
+from influxdb import InfluxDBClient
 
 
 def _EmptyQueue(queue):
@@ -31,7 +16,6 @@ def _EmptyQueue(queue):
   qsize = queue.qsize()
   if qsize > 1:
     skipped_points = qsize -1
-    METRIC_POINTS_SKIPPED.inc(skipped_points)
     logging.info('Metric exporter skipped %d points', skipped_points)
     for _ in range(qsize):
       point = queue.get()
@@ -40,26 +24,27 @@ def _EmptyQueue(queue):
   return point
 
 
-def PushMetrics(point):
-  METRIC_LAT.set(point.lat)
-  METRIC_LON.set(point.lon)
-  METRIC_ALT.set(point.alt)
-  METRIC_SPEED.set(point.speed)
-  geo_hash = geohash.encode(point.lat, point.lon)
-  METRIC_GEOHASH.labels(geohash=geo_hash,
-                        target='exit_speed').set_to_current_time()
-  push_to_gateway('server:9091', job='exit_speed', registry=REGISTRY)
-  METRIC_POINTS_EXPORTED.inc()
+def PushMetrics(point, influx_client):
+  metrics = ('lat', 'lon', 'alt')
+  values = []
+  for metric in metrics:
+    values.append({"measurement": metric,
+                   "fields": {"value": getattr(point, metric)}})
+  values.append({"measurement": 'speed',
+                 "fields": {"value": point.speed * 2.23694}}) # m/s to mph.
+  influx_client.write_points(values)
 
 
-def Loop(queue):
+def Loop(queue, influx_client):
   while True:
     point = _EmptyQueue(queue)
-    PushMetrics(point)
+    PushMetrics(point, influx_client)
 
 
 def GetMetricPusher():
   queue = Queue()
-  pusher = Process(target=Loop, args=(queue,), daemon=True)
+  influx_client = InfluxDBClient('server', 8086, 'root', 'root',
+                                 'exit_speed')
+  pusher = Process(target=Loop, args=(queue, influx_client), daemon=True)
   pusher.start()
-  return queue, pusher
+  return queue, pusher, influx_client

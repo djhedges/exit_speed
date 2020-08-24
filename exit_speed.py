@@ -83,7 +83,8 @@ class ExitSpeed(object):
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
-    self.queue, self.pusher = metric_exporter.GetMetricPusher()
+    self.queue, self.pusher, self.influx_client = (
+        metric_exporter.GetMetricPusher())
 
     self.session = None
     self.lap = None
