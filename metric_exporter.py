@@ -7,6 +7,9 @@ from multiprocessing import Queue
 from influxdb import InfluxDBClient
 
 
+
+
+
 def _EmptyQueue(queue):
   """A bid odd isn't?
 
@@ -25,27 +28,38 @@ def _EmptyQueue(queue):
   return point
 
 
-def PushMetrics(point, influx_client):
-  values = []
-  geo_hash = geohash.encode(point.lat, point.lon)
-  values.append({'measurement': 'point',
-                 'fields': {'alt': point.alt,
-                            'speed': point.speed * 2.23694, # m/s to mph.
-                           },
-                 'tags': {'geohash': geo_hash}})
-  influx_client.write_points(values)
+class Pusher(object):
 
+  def __init__(self):
+    super(Pusher, self).__init__()
+    self.queue = Queue()
+    self.process = Process(target=self.Loop, daemon=True)
+    self.point_number = 0  # Incrementing counter of points exported.
 
-def Loop(queue, influx_client):
-  while True:
-    point = _EmptyQueue(queue)
-    PushMetrics(point, influx_client)
+  def PushMetrics(self, point):
+    self.point_number += 1
+    values = []
+    geo_hash = geohash.encode(point.lat, point.lon)
+    values.append({'measurement': 'point',
+                   'fields': {'alt': point.alt,
+                              'speed': point.speed * 2.23694, # m/s to mph.
+                              'geohash': geo_hash,
+                             },
+                  })
+    self.influx_client.write_points(values)
+
+  def Loop(self):
+    while True:
+      point = _EmptyQueue(self.queue)
+      self.PushMetrics(point)
+
+  def Start(self):
+    self.influx_client = InfluxDBClient(
+        'server', 8086, 'root', 'root', 'exit_speed')
+    self.process.start()
 
 
 def GetMetricPusher():
-  queue = Queue()
-  influx_client = InfluxDBClient('server', 8086, 'root', 'root',
-                                 'exit_speed')
-  pusher = Process(target=Loop, args=(queue, influx_client), daemon=True)
-  pusher.start()
-  return queue, pusher, influx_client
+  pusher = Pusher()
+  pusher.Start()
+  return pusher

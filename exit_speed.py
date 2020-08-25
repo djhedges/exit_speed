@@ -83,8 +83,7 @@ class ExitSpeed(object):
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
-    self.queue, self.pusher, self.influx_client = (
-        metric_exporter.GetMetricPusher())
+    self.pusher = metric_exporter.GetMetricPusher()
 
     self.session = None
     self.lap = None
@@ -205,7 +204,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
-    self.queue.put_nowait(point)
+    self.pusher.queue.put_nowait(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
