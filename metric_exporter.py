@@ -34,27 +34,36 @@ class Pusher(object):
     self.process = Process(target=self.Loop, daemon=True)
     self.point_number = 0  # Incrementing counter of points exported.
 
-  def PushMetrics(self, point, lap):
+  def GetPointMetric(self, point):
     self.point_number += 1
-    values = []
     geo_hash = geohash.encode(point.lat, point.lon, precision=24)
-    values.append({'measurement': 'point',
-                   'fields': {'alt': point.alt,
-                              'speed': point.speed * 2.23694, # m/s to mph.
-                              'geohash': geo_hash,
-                             },
-                   'tags': {'lap_number': point.lap_number},
-                  })
+    return {'measurement': 'point',
+            'fields': {'alt': point.alt,
+                       'speed': point.speed * 2.23694, # m/s to mph.
+                       'geohash': geo_hash,
+                      },
+            'tags': {'lap_number': point.lap_number},
+           }
+
+  def GetLapMetric(self, lap):
     if lap:
+      lap_point = lap.points[0]
       milliseconds = lap.duration.ToMilliseconds()
       minutes = milliseconds // 60000
       seconds = milliseconds % 60000 / 1000
       duration = '%d:%.3f' % (minutes, seconds)
-      values.append({'measurement': 'lap',
-                     'fields': {'lap_number': lap.number,
-                                'duration': duration,
-                               },
-                    })
+      return {'measurement': 'lap',
+              'fields': {'lap_number': point.lap_number,
+                         'duration': duration,
+                        },
+             }
+
+  def PushMetrics(self, point, lap):
+    values = []
+    values.append(self.GetPointMetric(point))
+    lap_metric = self.GetLapMetric(lap)
+    if lap_metric:
+      values.append(lap_metric)
     self.influx_client.write_points(values)
 
   def Loop(self):
