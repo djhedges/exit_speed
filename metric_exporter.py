@@ -34,17 +34,21 @@ class Pusher(object):
     self.process = Process(target=self.Loop, daemon=True)
     self.point_number = 0  # Incrementing counter of points exported.
 
-  def PushMetrics(self, point, lap):
+  def GetPointMetric(self, point_queue_item):
     self.point_number += 1
-    values = []
+    point, lap = point_queue_item
     geo_hash = geohash.encode(point.lat, point.lon, precision=24)
-    values.append({'measurement': 'point',
-                   'fields': {'alt': point.alt,
-                              'speed': point.speed * 2.23694, # m/s to mph.
-                              'geohash': geo_hash,
-                             },
-                   'tags': {'lap_number': point.lap_number},
-                  })
+    return {'measurement': 'point',
+            'fields': {'alt': point.alt,
+                       'speed': point.speed * 2.23694, # m/s to mph.
+                       'geohash': geo_hash,
+                       },
+             'tags': {'lap_number': lap.number},
+            }
+
+  def PushMetrics(self, point_queue_item, lap):
+    values = []
+    values.append(self.GetPointMetric(point_queue_item))
     if lap:
       lap_point = lap.points[0]
       milliseconds = lap.duration.ToMilliseconds()
@@ -60,12 +64,12 @@ class Pusher(object):
 
   def Loop(self):
     while True:
-      point = _EmptyQueue(self.point_queue)
+      point_queue_item = _EmptyQueue(self.point_queue)
       if self.lap_queue.qsize() > 0:
         lap = self.lap_queue.get()
       else:
         lap = None
-      self.PushMetrics(point, lap)
+      self.PushMetrics(point_queue_item, lap)
 
   def Start(self):
     self.influx_client = InfluxDBClient(

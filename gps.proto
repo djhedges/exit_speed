@@ -14,12 +14,12 @@ message Point {
   double speed = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
   double start_finish_distance = 6;  // Distance to the start/finish.
-  int32 lap_number = 7;
 }
 
 message Lap {
   repeated Point points = 1;
   google.protobuf.Duration duration = 2;  // Time it took to finish the lap.
+  int32 number = 3;
 }
 
 message Session {
