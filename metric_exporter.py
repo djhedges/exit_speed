@@ -28,6 +28,7 @@ def _EmptyQueue(queue):
 class Pusher(object):
 
   def __init__(self):
+    """Initializer."""
     super(Pusher, self).__init__()
     self.point_queue = Queue()
     self.lap_queue = Queue()
@@ -41,13 +42,15 @@ class Pusher(object):
             'fields': {'alt': point.alt,
                        'speed': point.speed * 2.23694, # m/s to mph.
                        'geohash': geo_hash,
+                       'point_number': point.point_number,
                       },
+            'time': point.time.ToJsonString(),
             'tags': {'lap_number': point.lap_number},
            }
 
   def GetLapMetric(self, point, lap):
     if lap:
-      lap_point = lap.points[0]
+      lap_point = lap.points[-1]
       milliseconds = lap.duration.ToMilliseconds()
       minutes = milliseconds // 60000
       seconds = milliseconds % 60000 / 1000
@@ -56,6 +59,7 @@ class Pusher(object):
               'fields': {'lap_number': point.lap_number,
                          'duration': duration,
                         },
+              'time': lap_point.time.ToJsonString(),
              }
 
   def PushMetrics(self, point, lap):
