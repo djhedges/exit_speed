@@ -46,7 +46,6 @@ class Pusher(object):
             'fields': {'alt': point.alt,
                        'speed': point.speed * 2.23694, # m/s to mph.
                        'geohash': geo_hash,
-                       'point_number': point.point_number,
                       },
             'time': point.time.ToJsonString(),
             'tags': {'lap_number': point.lap_number},
