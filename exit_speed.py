@@ -92,7 +92,7 @@ class ExitSpeed(object):
     self.tree = None
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
-    self.lap_number = 1
+    self.lap_number = 0
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -102,9 +102,15 @@ class ExitSpeed(object):
     """Returns the current lap."""
     if not self.lap:
       session = self.GetSession()
-      lap = session.laps.add()
-      self.lap = lap
+      self.AddNewLap()
     return self.lap
+
+  def AddNewLap(self):
+    """Adds a new lap to the current session."""
+    session = self.GetSession()
+    lap = session.laps.add()
+    self.lap = lap
+    self.lap_number += 1
 
   def GetSession(self):
     """Returns the current session."""
@@ -246,11 +252,8 @@ class ExitSpeed(object):
         self.last_led_update = now + 1
         self.dots.fill((0, 0, 255))  # Blue
         self.SetLapTime()
-        # Add a new lap and set it to self.lap.
         self.pusher.lap_queue.put_nowait(lap)
-        lap = session.laps.add()
-        self.lap = lap
-        self.lap_number += 1
+        self.AddNewLap()
 
   def ProcessLap(self):
     """Adds the point to the lap and checks if we crossed start/finish."""
