@@ -27,8 +27,8 @@ class Pusher(object):
     returns the next point that is added.
     """
     qsize = self.point_queue.qsize()
-    self.points_skipped += 1
     for _ in range(qsize):
+      self.points_skipped += 1
       _ = self.point_queue.get()
     return self.point_queue.get()
 
