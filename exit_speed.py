@@ -92,7 +92,7 @@ class ExitSpeed(object):
     self.tree = None
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
-    self.lap_number = 0
+    self.lap_number = 1
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -101,7 +101,9 @@ class ExitSpeed(object):
   def GetLap(self):
     """Returns the current lap."""
     if not self.lap:
-      self.AddNewLap()
+      session = self.GetSession()
+      lap = session.laps.add()
+      self.lap = lap
     return self.lap
 
   def GetSession(self):
@@ -114,13 +116,6 @@ class ExitSpeed(object):
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
     return self.session
-
-  def AddNewLap(self):
-    session = self.GetSession()
-    lap = session.laps.add()
-    self.lap = lap
-    self.lap_number += 1
-    self.lap.number = self.lap_number
 
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
@@ -210,7 +205,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
-    self.pusher.point_queue.put_nowait((point, self.GetLap()))
+    self.pusher.point_queue.put_nowait(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
@@ -253,7 +248,9 @@ class ExitSpeed(object):
         self.SetLapTime()
         # Add a new lap and set it to self.lap.
         self.pusher.lap_queue.put_nowait(lap)
-        self.AddNewLap()
+        lap = session.laps.add()
+        self.lap = lap
+        self.lap_number += 1
 
   def ProcessLap(self):
     """Adds the point to the lap and checks if we crossed start/finish."""
@@ -277,6 +274,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
+    point.lap_number = self.lap_number
     self.point = point
 
   def ProcessReport(self, report):
