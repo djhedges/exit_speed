@@ -50,13 +50,12 @@ class Pusher(object):
     values = []
     values.append(self.GetPointMetric(point_queue_item))
     if lap:
-      lap_point = lap.points[0]
       milliseconds = lap.duration.ToMilliseconds()
       minutes = milliseconds // 60000
       seconds = milliseconds % 60000 / 1000
       duration = '%d:%.3f' % (minutes, seconds)
       values.append({'measurement': 'lap',
-                     'fields': {'lap_number': lap_point.lap_number,
+                     'fields': {'lap_number': lap.number,
                                 'duration': duration,
                                },
                     })
