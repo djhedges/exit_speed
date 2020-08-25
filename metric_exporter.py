@@ -45,7 +45,7 @@ class Pusher(object):
             'tags': {'lap_number': point.lap_number},
            }
 
-  def GetLapMetric(self, lap):
+  def GetLapMetric(self, point, lap):
     if lap:
       lap_point = lap.points[0]
       milliseconds = lap.duration.ToMilliseconds()
@@ -61,7 +61,7 @@ class Pusher(object):
   def PushMetrics(self, point, lap):
     values = []
     values.append(self.GetPointMetric(point))
-    lap_metric = self.GetLapMetric(lap)
+    lap_metric = self.GetLapMetric(point, lap)
     if lap_metric:
       values.append(lap_metric)
     self.influx_client.write_points(values)
