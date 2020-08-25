@@ -14,6 +14,7 @@ message Point {
   double speed = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
   double start_finish_distance = 6;  // Distance to the start/finish.
+  int32 lap_number = 7;
 }
 
 message Lap {

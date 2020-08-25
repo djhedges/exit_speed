@@ -7,9 +7,6 @@ from multiprocessing import Queue
 from influxdb import InfluxDBClient
 
 
-
-
-
 def _EmptyQueue(queue):
   """A bid odd isn't?
 
@@ -39,12 +36,13 @@ class Pusher(object):
   def PushMetrics(self, point):
     self.point_number += 1
     values = []
-    geo_hash = geohash.encode(point.lat, point.lon)
+    geo_hash = geohash.encode(point.lat, point.lon, precision=24)
     values.append({'measurement': 'point',
                    'fields': {'alt': point.alt,
                               'speed': point.speed * 2.23694, # m/s to mph.
                               'geohash': geo_hash,
                              },
+                   'tags': {'lap_number': point.lap_number},
                   })
     self.influx_client.write_points(values)
 
