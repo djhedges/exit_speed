@@ -1,28 +1,11 @@
 #!/usr/bin/python3
 
 import logging
+import queue
 import geohash
 from multiprocessing import Process
 from multiprocessing import Queue
 from influxdb import InfluxDBClient
-
-
-def _EmptyQueue(queue):
-  """A bid odd isn't?
-
-  My intent is to ensure we only report data on the latest point in the queue
-  in case this process gets backed up.
-  """
-  qsize = queue.qsize()
-  if qsize > 9:  # Reduce load on influxdb by only updating every 10 points.
-                 # IE every 1s which is the fastest the graphs are refreshing.
-    skipped_points = qsize - 9
-    logging.info('Metric exporter skipped %d points', skipped_points)
-    for _ in range(qsize):
-      point = queue.get()
-  else:
-    point = queue.get()
-  return point
 
 
 class Pusher(object):
@@ -31,12 +14,33 @@ class Pusher(object):
     """Initializer."""
     super(Pusher, self).__init__()
     self.point_queue = Queue()
+    self.backlog_point_queue = queue.LifoQueue()
     self.lap_queue = Queue()
     self.process = Process(target=self.Loop, daemon=True)
-    self.point_number = 0  # Incrementing counter of points exported.
+    self.point_exported = 0  # Incrementing counter of points exported.
+    self.points_skipped = 0
+
+  def GetPointFromQueue(self):
+    """Returns the latest point to export metrics for.
+
+    This methods clears the queue based on the current size and then blocks and
+    returns the next point that is added.
+    """
+    qsize = self.point_queue.qsize()
+    self.points_skipped += 1
+    for _ in range(qsize):
+      _ = self.point_queue.get()
+    return self.point_queue.get()
+
+  def GetExporterMetrcis(self):
+    return {'measurement': 'metric_exporter',
+            'fields': {'points_skipped': self.points_skipped,
+                       'points_exported': self.point_exported,
+                      },
+           }
 
   def GetPointMetric(self, point):
-    self.point_number += 1
+    self.point_exported += 1
     geo_hash = geohash.encode(point.lat, point.lon, precision=24)
     return {'measurement': 'point',
             'fields': {'alt': point.alt,
@@ -68,15 +72,16 @@ class Pusher(object):
     lap_metric = self.GetLapMetric(point, lap)
     if lap_metric:
       values.append(lap_metric)
+    values.append(self.GetExporterMetrcis())
     self.influx_client.write_points(values)
 
   def Loop(self):
     while True:
-      point = _EmptyQueue(self.point_queue)
       if self.lap_queue.qsize() > 0:
         lap = self.lap_queue.get()
       else:
         lap = None
+      point = self.GetPointFromQueue()
       self.PushMetrics(point, lap)
 
   def Start(self):
