@@ -35,6 +35,7 @@ CREATE TABLE points (
 SELECT create_hypertable('points', 'time');
 """
 
+from absl import logging
 import geohash
 import psycopg2
 from multiprocessing import Process
