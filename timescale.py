@@ -18,6 +18,7 @@ class Pusher(object):
     self.lap_queue = Queue()
     self.lap_duration_queue = Queue()
     self.point_queue = Queue()
+    self.lap_id_first_points = {}
 
   def ExportSession(self, cursor):
     if not self.session_id:
@@ -64,6 +65,12 @@ class Pusher(object):
       _ = self.point_queue.get()
     return self.point_queue.get()
 
+  def GetElapsedTime(self, point, lap_id):
+    if not self.lap_id_first_points.get(lap_id):
+      self.lap_id_first_points[lap_id] = point
+    first_point = self.lap_id_first_points[lap_id]
+    return point.time.ToMilliseconds() - first_point.time.ToMilliseconds()
+
   def ExportPoint(self, cursor):
     point = self.GetPointFromQueue()
     insert_statement = """
@@ -72,7 +79,7 @@ class Pusher(object):
     """
     lap_id = max(self.lap_number_ids.values())
     geo_hash = geohash.encode(point.lat, point.lon)
-    elapsed_duration_ms = 0
+    elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
     args = (point.time.ToJsonString(), self.session_id, lap_id,
             point.alt, point.speed, geo_hash, elapsed_duration_ms)
     cursor.execute(insert_statement, args)
