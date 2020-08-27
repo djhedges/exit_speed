@@ -92,7 +92,6 @@ class ExitSpeed(object):
     self.tree = None
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
-    self.lap_number = 0
 
   def GetPoint(self):
     """Returns the latest GPS point."""
@@ -110,7 +109,6 @@ class ExitSpeed(object):
     session = self.GetSession()
     lap = session.laps.add()
     self.lap = lap
-    self.lap_number += 1
 
   def GetSession(self):
     """Returns the current session."""
@@ -275,10 +273,11 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
-    point.lap_number = self.lap_number
     self.point = point
     lap = self.GetLap()
     lap.points.append(point)
+    session = self.GetSession()
+    point.lap_number = len(session.laps)
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
