@@ -30,34 +30,6 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.lat, 45.595412)
     self.assertEqual(point.lon, -122.693901)
 
-  def testGetPoint(self):
-    point = gps_pb2.Point()
-    es = exit_speed.ExitSpeed()
-    es.point = point
-    self.assertEqual(point, es.GetPoint())
-
-  def testGetLap(self):
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    lap = gps_pb2.Lap()
-    es = exit_speed.ExitSpeed()
-    es.point = point
-    self.assertTrue(es.GetLap())
-    es.lap = lap
-    self.assertEqual(lap, es.GetLap())
-
-  def testGetSession(self):
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    session = gps_pb2.Session()
-    es = exit_speed.ExitSpeed()
-    es.point = point
-    self.assertTrue(es.GetSession())
-    es.session = session
-    self.assertEqual(session, es.GetSession())
-
   def testGetLedColor(self):
     es = exit_speed.ExitSpeed()
     es.speed_deltas.extend([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -178,7 +150,7 @@ class TestExitSpeed(unittest.TestCase):
               u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
-    point = es.GetPoint()
+    point = es.self.point()
     self.assertEqual(point.lat, 14.2)
     self.assertEqual(point.lon, -2.1)
     self.assertEqual(point.alt, 6.9)
@@ -204,7 +176,7 @@ class TestExitSpeed(unittest.TestCase):
               u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
-    point = es.GetPoint()
+    point = es.self.point()
     self.assertEqual(point.lat, 14.2)
     self.assertEqual(point.lon, -2.1)
     self.assertEqual(point.alt, 6.9)

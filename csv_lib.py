@@ -67,7 +67,7 @@ def ConvertTraqmateToProto(filepath):
       sleep_duration = start + elapsed_time - first_elapsed - now
       if sleep_duration > 0:
         time.sleep(sleep_duration)
-  return es.GetSession()
+  return es.self.session()
 
 
 def ConvertProtoToTraqmate(session, filepath):
@@ -106,5 +106,5 @@ if __name__ == '__main__':
   print(temp_csv)
   es = replay_data.ReplayLog(
       '/home/pi/lap_logs/data-2020-07-10T18:20:00.700Z.tfr')
-  session = es.GetSession()
+  session = es.self.session()
   ConvertProtoToTraqmate(session, temp_csv)
