@@ -84,6 +84,7 @@ class ExitSpeed(object):
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
 
+    self.pusher = timescale.Pusher()
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
@@ -98,6 +99,7 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
+    self.pusher.lap_queue.put(lap)
 
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
@@ -258,8 +260,7 @@ class ExitSpeed(object):
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
-      self.pusher = timescale.Pusher(point.time, track)
-      self.pusher.Loop()
+      self.pusher.Start(point.time, track)
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
