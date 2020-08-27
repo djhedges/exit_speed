@@ -85,7 +85,7 @@ class ExitSpeed(object):
     self.tfwriter = None
     self.pusher = metric_exporter.GetMetricPusher()
 
-    self.session = None
+    self.session = gps_pb2.Session()
     self.lap = None
     self.point = None
     self.best_lap = None
@@ -115,7 +115,6 @@ class ExitSpeed(object):
   def GetSession(self):
     """Returns the current session."""
     if not self.session:
-      self.session = gps_pb2.Session()
       _, track, start_finish = FindClosestTrack(self.GetPoint())
       logging.info('Closest track: %s' % track)
       self.session.track = track
@@ -271,7 +270,8 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
-    point = gps_pb2.Point()
+    lap = self.GetLap()
+    point = lap.points.add()
     point.lat = report.lat
     point.lon = report.lon
     point.alt = report.alt
