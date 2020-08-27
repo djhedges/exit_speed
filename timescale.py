@@ -110,12 +110,12 @@ class Pusher(object):
     return point.time.ToMilliseconds() - first_point.time.ToMilliseconds()
 
   def ExportPoint(self, cursor):
-    point = self.GetPointFromQueue()
+    point, lap_number = self.GetPointFromQueue()
     insert_statement = """
     INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms)
     VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s)
     """
-    lap_id = max(self.lap_number_ids.values())
+    lap_id = self.lap_number_ids[lap_number]
     geo_hash = geohash.encode(point.lat, point.lon)
     elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
     args = (point.time.ToJsonString(), self.session_id, lap_id,
