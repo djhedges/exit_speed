@@ -86,7 +86,7 @@ class ExitSpeed(object):
     self.pusher = metric_exporter.GetMetricPusher()
 
     self.session = gps_pb2.Session()
-    self.lap = session.laps.add()
+    self.lap = self.session.laps.add()
     self.point = None
     self.best_lap = None
     self.tree = None

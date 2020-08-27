@@ -22,7 +22,7 @@ class Pusher(object):
     self.first_point_time = None
     self.current_lap = 1
 
-  def self.pointFromQueue(self):
+  def GetPointFromQueue(self):
     """Returns the latest point to export metrics for.
 
     This methods clears the queue based on the current size and then blocks and
@@ -90,7 +90,7 @@ class Pusher(object):
         lap = self.lap_queue.get()
       else:
         lap = None
-      point = self.self.pointFromQueue()
+      point = self.GetPointFromQueue()
       self.PushMetrics(point, lap)
 
   def Start(self):
