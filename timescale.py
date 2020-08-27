@@ -116,7 +116,8 @@ class Pusher(object):
     geo_hash = geohash.encode(point.lat, point.lon)
     elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
     args = (point.time.ToJsonString(), self.session_id, lap_id,
-            point.alt, point.speed, geo_hash, elapsed_duration_ms)
+            point.alt, point.speed * 2.23694, # m/s to mph,
+            geo_hash, elapsed_duration_ms)
     cursor.execute(insert_statement, args)
 
   def ConnectToDB(self):
