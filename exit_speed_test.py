@@ -53,11 +53,10 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.lat = 12.000001
     point.lon = 23.000002
-    lap = gps_pb2.Lap()
-    lap.points.extend([prior_point, point])
     es = exit_speed.ExitSpeed()
+    es.lap = gps_pb2.Lap()
+    es.lap.points.extend([prior_point, point])
     es.point = point
-    es.lap = lap
     mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
     es.writer = mock_writer
     es.ProcessPoint()
@@ -103,11 +102,7 @@ class TestExitSpeed(unittest.TestCase):
       self.assertEqual(expected_len_of_laps, len(es.session.laps))
 
   def testProcessLap(self):
-    point = gps_pb2.Point()
-    lap = gps_pb2.Lap()
     es = exit_speed.ExitSpeed()
-    es.point = point
-    es.lap = lap
     es.ProcessLap()
     self.assertTrue(lap.points)
 
@@ -150,7 +145,7 @@ class TestExitSpeed(unittest.TestCase):
               u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
-    point = es.self.point()
+    point = es.point
     self.assertEqual(point.lat, 14.2)
     self.assertEqual(point.lon, -2.1)
     self.assertEqual(point.alt, 6.9)
@@ -176,7 +171,7 @@ class TestExitSpeed(unittest.TestCase):
               u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
-    point = es.self.point()
+    point = es.point
     self.assertEqual(point.lat, 14.2)
     self.assertEqual(point.lon, -2.1)
     self.assertEqual(point.alt, 6.9)

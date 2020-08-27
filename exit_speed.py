@@ -95,13 +95,13 @@ class ExitSpeed(object):
 
   def AddNewLap(self):
     """Adds a new lap to the current session."""
-    session = self.self.session()
+    session = self.session
     lap = session.laps.add()
     self.lap = lap
 
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
-    point = self.self.point()
+    point = self.point
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
                                 return_distance=False)
     for neighbor in neighbors[0]:
@@ -160,14 +160,14 @@ class ExitSpeed(object):
   def UpdateLeds(self):
     """Update LEDs based on speed difference to the best lap."""
     if self.tree and self.LedInterval():
-      point = self.self.point()
+      point = self.point
       best_point = self.FindNearestBestLapPoint()
       self.UpdateSpeedDeltas(point, best_point)
       led_color = self.GetLedColor()
       self.dots.fill(led_color)
 
   def LogPoint(self):
-    point = self.self.point()
+    point = self.point
     if not self.tfwriter:
       utc_dt = point.time.ToDatetime()
       current_dt = utc_dt.replace(
@@ -182,8 +182,8 @@ class ExitSpeed(object):
 
   def ProcessPoint(self):
     """Populates the session with the latest GPS point."""
-    point = self.self.point()
-    session = self.self.session()
+    point = self.point
+    session = self.session
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
@@ -203,25 +203,19 @@ class ExitSpeed(object):
 
   def SetLapTime(self):
     """Sets the lap duration based on the first and last point time delta."""
-    lap = self.self.lap()
+    lap = self.lap
     first_point = lap.points[0]
     last_point = lap.points[-1]
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
     lap.duration.FromNanoseconds(delta)
 
-    session = self.self.session()
+    session = self.session
     self.SetBestLap(lap)
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""
-    if not self.session.track:
-      _, track, start_finish = FindClosestTrack(self.self.point())
-      logging.info('Closest track: %s' % track)
-      self.session.track = track
-      self.session.start_finish.lat = start_finish.lat
-      self.session.start_finish.lon = start_finish.lon
-    lap = self.self.lap()
-    session = self.self.session()
+    lap = self.lap
+    session = self.session
     if len(lap.points) > self.min_points_per_session:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
@@ -240,19 +234,19 @@ class ExitSpeed(object):
   def ProcessLap(self):
     """Adds the point to the lap and checks if we crossed start/finish."""
     self.ProcessPoint()
-    lap = self.self.lap()
+    lap = self.lap
     self.CrossStartFinish()
 
   def ProcessSession(self):
     """Start/ends the logging of data to log files based on car speed."""
-    point = self.self.point()
-    session = self.self.session()
+    point = self.point
+    session = self.session
     self.ProcessLap()
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
-    session = self.self.session()
-    lap = self.self.lap()
+    session = self.session
+    lap = self.lap
     point = lap.points.add()
     point.lat = report.lat
     point.lon = report.lon
@@ -261,6 +255,12 @@ class ExitSpeed(object):
     point.time.FromJsonString(report.time)
     point.lap_number = len(session.laps)
     self.point = point
+    if not self.session.track:
+      _, track, start_finish = FindClosestTrack(self.point)
+      logging.info('Closest track: %s' % track)
+      self.session.track = track
+      self.session.start_finish.lat = start_finish.lat
+      self.session.start_finish.lon = start_finish.lon
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
