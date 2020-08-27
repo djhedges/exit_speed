@@ -10,6 +10,7 @@ import time
 import adafruit_dotstar
 import board
 import gps_pb2
+import timescale
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
@@ -257,6 +258,8 @@ class ExitSpeed(object):
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
+      self.pusher = timescale.Pusher(point.time, track)
+      self.pusher.Loop()
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
