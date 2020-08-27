@@ -257,10 +257,8 @@ class ExitSpeed(object):
 
   def ProcessLap(self):
     """Adds the point to the lap and checks if we crossed start/finish."""
-    point = self.GetPoint()
     self.ProcessPoint()
     lap = self.GetLap()
-    lap.points.append(point)
     self.CrossStartFinish()
 
   def ProcessSession(self):
@@ -271,8 +269,7 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
-    lap = self.GetLap()
-    point = lap.points.add()
+    point = gps_pb2.Point()
     point.lat = report.lat
     point.lon = report.lon
     point.alt = report.alt
@@ -280,6 +277,8 @@ class ExitSpeed(object):
     point.time.FromJsonString(report.time)
     point.lap_number = self.lap_number
     self.point = point
+    lap = self.GetLap()
+    lap.points.append(point)
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
