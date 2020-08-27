@@ -10,7 +10,6 @@ import time
 import adafruit_dotstar
 import board
 import gps_pb2
-import metric_exporter
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
@@ -97,6 +96,7 @@ class ExitSpeed(object):
     session = self.session
     lap = session.laps.add()
     self.lap = lap
+    self.lap.number = len(session.laps)
 
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
@@ -186,7 +186,6 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
-    self.pusher.point_queue.put_nowait(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
@@ -227,7 +226,6 @@ class ExitSpeed(object):
         self.last_led_update = now + 1
         self.dots.fill((0, 0, 255))  # Blue
         self.SetLapTime()
-        self.pusher.lap_queue.put_nowait(lap)
         self.AddNewLap()
 
   def ProcessLap(self):
@@ -252,7 +250,6 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
-    point.lap_number = len(session.laps)
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)
@@ -260,7 +257,6 @@ class ExitSpeed(object):
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
-      self.pusher = metric_exporter.GetMetricPusher(track)
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
