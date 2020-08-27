@@ -212,6 +212,7 @@ class ExitSpeed(object):
 
     session = self.session
     self.SetBestLap(lap)
+    self.pusher.lap_duration_queue.put((lap.number, lap.duration))
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""
