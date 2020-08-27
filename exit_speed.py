@@ -83,7 +83,6 @@ class ExitSpeed(object):
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
-    self.pusher = metric_exporter.GetMetricPusher()
 
     self.session = gps_pb2.Session()
     self.lap = self.session.laps.add()
@@ -261,6 +260,7 @@ class ExitSpeed(object):
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
+      self.pusher = metric_exporter.GetMetricPusher(track)
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""

@@ -10,9 +10,10 @@ from multiprocessing import Queue
 
 class Pusher(object):
 
-  def __init__(self):
+  def __init__(self, track):
     """Initializer."""
     super(Pusher, self).__init__()
+    self.track = track
     self.point_queue = Queue()
     self.backlog_point_queue = queue.LifoQueue()
     self.lap_queue = Queue()
@@ -70,12 +71,13 @@ class Pusher(object):
       lap_point = lap.points[0]
       with self.timescale_conn.cursor() as cursor:
         insert_statement = """
-        INSERT INTO laps (time, lap_number, duration_ms)
-        VALUES (%s, %s, %s)
+        INSERT INTO laps (time, lap_number, duration_ms, track)
+        VALUES (%s, %s, %s, %s)
         """
         args = (lap_point.time.ToJsonString(),
                 lap_point.lap_number,
-                lap.duration.ToMilliseconds())
+                lap.duration.ToMilliseconds(),
+                self.track)
         cursor.execute(insert_statement, args)
 
   def PushMetrics(self, point, lap):
@@ -99,7 +101,7 @@ class Pusher(object):
     self.process.start()
 
 
-def GetMetricPusher():
-  pusher = Pusher()
+def GetMetricPusher(track):
+  pusher = Pusher(track)
   pusher.Start()
   return pusher
