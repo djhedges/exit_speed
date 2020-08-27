@@ -85,7 +85,7 @@ class ExitSpeed(object):
     self.tfwriter = None
 
     self.session = gps_pb2.Session()
-    self.lap = self.session.laps.add()
+    self.AddNewLap()
     self.point = None
     self.best_lap = None
     self.tree = None

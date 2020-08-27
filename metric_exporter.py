@@ -15,12 +15,12 @@ class Pusher(object):
     super(Pusher, self).__init__()
     self.track = track
     self.point_queue = Queue()
-    self.backlog_point_queue = queue.LifoQueue()
     self.lap_queue = Queue()
+    self.sesion_queue = Queue()
     self.process = Process(target=self.Loop, daemon=True)
     self.points_exported = 0  # Incrementing counter of points exported.
     self.points_skipped = 0
-    self.first_point = None
+    self.session_time = None
     self.first_point_time = None
     self.current_lap = 1
 
@@ -50,26 +50,18 @@ class Pusher(object):
     geo_hash = geohash.encode(point.lat, point.lon, precision=24)
     with self.timescale_conn.cursor() as cursor:
       if point.lap_number != self.current_lap or not self.first_point_time:
-        self.first_point = point
         self.first_point_time = point.time.ToMilliseconds()
         self.current_lap = point.lap_number
-        insert_statement = """
-        INSERT INTO laps (time, lap_number, track)
-        VALUES (%s, %s, %s)
-        """
-        args = (self.first_point.time.ToJsonString(),
-                point.lap_number,
-                self.track)
-        cursor.execute(insert_statement, args)
-
+        if not self.session_time:
+          self.session_time = point.time.ToJsonString()
       elapsed_duration = point.time.ToMilliseconds() - self.first_point_time
-      # timescale
       insert_statement = """
-      INSERT INTO points (time, lap_time, alt, speed, geohash, elapsed_duration)
-      VALUES (%s, %s, %s, %s, %s, %s)
+      INSERT INTO points (time, session_time, lap_number, alt, speed, geohash, elapsed_duration)
+      VALUES (%s, %s, %s, %s, %s, %s, %s)
       """
       args = (point.time.ToJsonString(),
-              self.first_point.time.ToJsonString(),
+              self.session_time,
+              point.lap_number,
               point.alt,
               point.speed * 2.23694, # m/s to mph.
               geo_hash,
@@ -83,9 +75,10 @@ class Pusher(object):
         insert_statement = """
         UPDATE laps
         SET duration_ms = %s
-        WHERE time = %s
+        WHERE session_time = %s AND lap_number = %s
         """
         args = (lap.duration.ToMilliseconds(),
+                lap_point.lap_number,
                 lap_point.time.ToJsonString())
         cursor.execute(insert_statement, args)
 
