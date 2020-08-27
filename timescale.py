@@ -19,7 +19,7 @@ CREATE TABLE sessions(
 CREATE TABLE laps(
   id               SERIAL            PRIMARY KEY,
   session_id       INT               REFERENCES sessions (id),
-  lap_number       INT               NOT NULL,
+  number       INT               NOT NULL,
   duration_ms      INT
 );
 
@@ -70,7 +70,7 @@ class Pusher(object):
     if self.lap_queue.qsize() > 0:
       lap = self.lap_queue.get()
       insert_statement = """
-      INSERT INTO laps (session_id, lap_number)
+      INSERT INTO laps (session_id, number)
       VALUES (%s, %s)
       RETURNING id
       """
