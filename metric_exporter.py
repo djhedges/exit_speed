@@ -20,6 +20,7 @@ class Pusher(object):
     self.process = Process(target=self.Loop, daemon=True)
     self.points_exported = 0  # Incrementing counter of points exported.
     self.points_skipped = 0
+    self.first_point = None
     self.first_point_time = None
     self.current_lap = 1
 
@@ -49,21 +50,30 @@ class Pusher(object):
     geo_hash = geohash.encode(point.lat, point.lon, precision=24)
     with self.timescale_conn.cursor() as cursor:
       if point.lap_number != self.current_lap or not self.first_point_time:
+        self.first_point = point
         self.first_point_time = point.time.ToMilliseconds()
         self.current_lap = point.lap_number
+        insert_statement = """
+        INSERT INTO laps (time, lap_number, track)
+        VALUES (%s, %s, %s)
+        """
+        args = (self.first_point.time.ToJsonString(),
+                point.lap_number,
+                self.track)
+        cursor.execute(insert_statement, args)
 
       elapsed_duration = point.time.ToMilliseconds() - self.first_point_time
       # timescale
       insert_statement = """
-      INSERT INTO points (time, alt, speed, geohash, elapsed_duration, lap_number)
+      INSERT INTO points (time, lap_time, alt, speed, geohash, elapsed_duration)
       VALUES (%s, %s, %s, %s, %s, %s)
       """
       args = (point.time.ToJsonString(),
+              self.first_point.time.ToJsonString(),
               point.alt,
               point.speed * 2.23694, # m/s to mph.
               geo_hash,
-              elapsed_duration,
-              point.lap_number)
+              elapsed_duration)
       cursor.execute(insert_statement, args)
 
   def ExportLapMetric(self, point, lap):
@@ -71,13 +81,12 @@ class Pusher(object):
       lap_point = lap.points[0]
       with self.timescale_conn.cursor() as cursor:
         insert_statement = """
-        INSERT INTO laps (time, lap_number, duration_ms, track)
-        VALUES (%s, %s, %s, %s)
+        UPDATE laps
+        SET duration_ms = %s
+        WHERE time = %s
         """
-        args = (lap_point.time.ToJsonString(),
-                lap_point.lap_number,
-                lap.duration.ToMilliseconds(),
-                self.track)
+        args = (lap.duration.ToMilliseconds(),
+                lap_point.time.ToJsonString())
         cursor.execute(insert_statement, args)
 
   def PushMetrics(self, point, lap):
