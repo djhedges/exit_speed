@@ -7,6 +7,14 @@ import exit_speed
 import gps_pb2
 import data_reader
 from gps import client
+from absl import app
+from absl import flags
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string('filepath', None, 'Path to the data file to replay')
+flags.mark_flag_as_required('filepath')
+flags.DEFINE_boolean('include_sleep', True,
+                     'Adds delays to mimic real time replay of data.')
 
 
 def ConvertPointToReport(point):
@@ -33,31 +41,43 @@ def ReplayLog(filepath, include_sleep=False):
   """
   logging.info(f'Replaying {filepath}')
   points = data_reader.ReadData(filepath)
-  replay_start = time.time()
-  time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
-  session_start = None
+  logging.info('Number of points %d', len(points))
+  if include_sleep:
+    replay_start = time.time()
+    time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
+    session_start = None
   es = exit_speed.ExitSpeed(data_log_path='/tmp',  # Dont clobber on replay.
-                            led_brightness=0.05)
+                            led_brightness=0.05,
+                            live_data=include_sleep)
   for point in points:
-    point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
-    if not session_start:
-      session_start = point.time.ToMilliseconds() / 1000
+    if include_sleep:
+      point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
+      if not session_start:
+        session_start = point.time.ToMilliseconds() / 1000
 
     report = ConvertPointToReport(point)
     es.ProcessReport(report)
-    run_delta = time.time() - replay_start
-    point_delta = point.time.ToMilliseconds() / 1000 - session_start
-    if include_sleep and run_delta < point_delta:
-      time.sleep(point_delta - run_delta)
+    if include_sleep:
+      run_delta = time.time() - replay_start
+      point_delta = point.time.ToMilliseconds() / 1000 - session_start
+      if run_delta < point_delta:
+        time.sleep(point_delta - run_delta)
+
+  if not include_sleep:
+    while es.pusher.point_queue.qsize() >0:
+      time.sleep(1)  # Wait until queue is emptied by the metric pusher.
   return es
+
+
+def main(unused_argv):
+  ReplayLog(FLAGS.filepath, include_sleep=FLAGS.include_sleep)
 
 
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+  app.run(main)
   # data-2019-08-18T16:53:01.250Z.tfr - Traqmate but higher refersh rate and
   # speed is in mph instead of m/s.
   #ReplayLog('testdata/data-2019-08-18T16:53:01.250Z.tfr',
   # data-2020-06-11T22:16:27.700Z.tfr - Parking lot
   #ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr',
-  ReplayLog('/home/pi/lap_logs/data-2020-07-10T19:51:51.600Z.tfr',
-            include_sleep=True)

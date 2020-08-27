@@ -43,7 +43,8 @@ from multiprocessing import Queue
 
 class Pusher(object):
 
-  def __init__(self):
+  def __init__(self, live_data=True):
+    self.live_data = False
     self.process = Process(target=self.Loop, daemon=True)
     self.timescale_conn = None
     self.session_time = None
@@ -95,9 +96,10 @@ class Pusher(object):
     This methods clears the queue based on the current size and then blocks and
     returns the next point that is added.
     """
-    qsize = self.point_queue.qsize()
-    for _ in range(qsize):
-      _ = self.point_queue.get()
+    if self.live_data:
+      qsize = self.point_queue.qsize()
+      for _ in range(qsize):
+        _ = self.point_queue.get()
     return self.point_queue.get()
 
   def GetElapsedTime(self, point, lap_id):

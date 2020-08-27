@@ -60,6 +60,7 @@ class ExitSpeed(object):
          led_update_interval=0.2,
          led_brightness=0.5,
          speed_deltas=50,
+         live_data=True,
 	       ):
     """Initializer.
 
@@ -84,7 +85,7 @@ class ExitSpeed(object):
     self.dots.fill((0, 0, 255))  # Blue
     self.tfwriter = None
 
-    self.pusher = timescale.Pusher()
+    self.pusher = timescale.Pusher(live_data=live_data)
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
