@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import geohash
 import psycopg2
 from multiprocessing import Process
 from multiprocessing import Queue
@@ -16,6 +17,7 @@ class Pusher(object):
     self.lap_number_ids = {}
     self.lap_queue = Queue()
     self.lap_duration_queue = Queue()
+    self.point_queue = Queue()
 
   def ExportSession(self, cursor):
     if not self.session_id:
@@ -51,6 +53,30 @@ class Pusher(object):
       args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
       cursor.execute(update_statement, args)
 
+  def GetPointFromQueue(self):
+    """Returns the latest point to export metrics for.
+
+    This methods clears the queue based on the current size and then blocks and
+    returns the next point that is added.
+    """
+    qsize = self.point_queue.qsize()
+    for _ in range(qsize):
+      _ = self.point_queue.get()
+    return self.point_queue.get()
+
+  def ExportPoint(self, cursor):
+    point = self.GetPointFromQueue()
+    insert_statement = """
+    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms)
+    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s)
+    """
+    lap_id = max(self.lap_number_ids.values())
+    geo_hash = geohash.encode(point.lat, point.lon)
+    elapsed_duration_ms = 0
+    args = (point.time.ToJsonString(), self.session_id, lap_id,
+            point.alt, point.speed, geo_hash, elapsed_duration_ms)
+    cursor.execute(insert_statement, args)
+
   def ConnectToDB(self):
     self.timescale_conn = psycopg2.connect(
         'postgres://postgres:postgres@server:/exit_speed')
@@ -62,6 +88,7 @@ class Pusher(object):
         self.ExportSession(cursor)
         self.ExportLap(cursor)
         self.UpdateLapDuration(cursor)
+        self.ExportPoint(cursor)
         self.timescale_conn.commit()
 
   def Start(self, session_time, track):

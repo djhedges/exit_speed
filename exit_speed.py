@@ -99,7 +99,7 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
-    self.pusher.lap_queue.put(lap)
+    self.pusher.lap_queue.put_nowait(lap)
 
   def FindNearestBestLapPoint(self):
     """Returns the nearest point on the best lap to the given point."""
@@ -189,6 +189,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.UpdateLeds()
     self.LogPoint()
+    self.pusher.point_queue.put_nowait(point)
 
   def SetBestLap(self, lap):
     """Sets best lap and builds a KDTree for finding closest points."""
@@ -212,7 +213,7 @@ class ExitSpeed(object):
 
     session = self.session
     self.SetBestLap(lap)
-    self.pusher.lap_duration_queue.put((lap.number, lap.duration))
+    self.pusher.lap_duration_queue.put_nowait((lap.number, lap.duration))
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""
