@@ -1,4 +1,39 @@
 #!/usr/bin/python3
+"""
+Database schema.
+
+CREATE TYPE track AS ENUM('Test Parking Lot',
+                          'Oregon Raceway Park',
+                          'Portland International Raceway',
+                          'The Ridge Motorsport Park',
+                          'Pacific Raceway',
+                          'Spokane Raceway');
+DROP TABLE points;
+DROP TABLE laps;
+DROP TABLE sessions;
+CREATE TABLE sessions(
+  id               SERIAL            PRIMARY KEY,
+  time             TIMESTAMPTZ       NOT NULL,
+  track            track             NOT NULL
+);
+CREATE TABLE laps(
+  id               SERIAL            PRIMARY KEY,
+  session_id       INT               REFERENCES sessions (id),
+  lap_number       INT               NOT NULL,
+  duration_ms      INT
+);
+
+CREATE TABLE points (
+  time                TIMESTAMPTZ       NOT NULL,
+  session_id          INT               REFERENCES sessions (id),
+  lap_id              INT               REFERENCES laps (id),
+  alt                 TEXT              NOT NULL,
+  speed               FLOAT             NOT NULL,
+  geohash             TEXT              NOT NULL,
+  elapsed_duration_ms INT               NOT NULL
+);
+SELECT create_hypertable('points', 'time');
+"""
 
 import geohash
 import psycopg2
