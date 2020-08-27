@@ -114,11 +114,6 @@ class ExitSpeed(object):
     """Returns the current session."""
     if not self.session:
       self.session = gps_pb2.Session()
-      _, track, start_finish = FindClosestTrack(self.GetPoint())
-      logging.info('Closest track: %s' % track)
-      self.session.track = track
-      self.session.start_finish.lat = start_finish.lat
-      self.session.start_finish.lon = start_finish.lon
     return self.session
 
   def FindNearestBestLapPoint(self):
@@ -236,6 +231,12 @@ class ExitSpeed(object):
 
   def CrossStartFinish(self):
     """Checks and handles when the car corsses the start/finish."""
+    if not self.session.track:
+      _, track, start_finish = FindClosestTrack(self.GetPoint())
+      logging.info('Closest track: %s' % track)
+      self.session.track = track
+      self.session.start_finish.lat = start_finish.lat
+      self.session.start_finish.lon = start_finish.lon
     lap = self.GetLap()
     session = self.GetSession()
     if len(lap.points) > self.min_points_per_session:
@@ -267,17 +268,16 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
-    point = gps_pb2.Point()
+    session = self.GetSession()
+    lap = self.GetLap()
+    point = lap.points.add()
     point.lat = report.lat
     point.lon = report.lon
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
-    self.point = point
-    lap = self.GetLap()
-    lap.points.append(point)
-    session = self.GetSession()
     point.lap_number = len(session.laps)
+    self.point = point
 
   def ProcessReport(self, report):
     """Processes a GPS report form the sensor.."""
