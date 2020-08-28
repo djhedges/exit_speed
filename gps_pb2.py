@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gps',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x01\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.Pointb\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\x01\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.Pointb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -76,6 +76,13 @@ _POINT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tps_voltage', full_name='gps.Point.tps_voltage', index=6,
+      number=7, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -89,7 +96,7 @@ _POINT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=218,
+  serialized_end=239,
 )
 
 
@@ -133,8 +140,8 @@ _LAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=220,
-  serialized_end=314,
+  serialized_start=241,
+  serialized_end=335,
 )
 
 
@@ -178,8 +185,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=316,
-  serialized_end=398,
+  serialized_start=337,
+  serialized_end=419,
 )
 
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP

@@ -9,6 +9,7 @@ import sys
 import time
 import adafruit_dotstar
 import board
+import u3
 import gps_pb2
 import timescale
 from gps import gps
@@ -83,6 +84,7 @@ class ExitSpeed(object):
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
+    self.labjack = self.InitializeLabJack()
     self.tfwriter = None
 
     self.pusher = timescale.Pusher(live_data=live_data)
@@ -93,6 +95,12 @@ class ExitSpeed(object):
     self.tree = None
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
+
+  def InitializeLabJack(self):
+    try:
+      return u3.U3()
+    except u3.LabJackException:
+      logging.exception('Unable to intialize labjack')
 
   def AddNewLap(self):
     """Adds a new lap to the current session."""
@@ -246,6 +254,14 @@ class ExitSpeed(object):
     session = self.session
     self.ProcessLap()
 
+  def SetTPSVoltage(self, point):
+    """Populate TPS voltage if labjack initialzed successfully."""
+    if self.labjack:
+      try:
+        point.voltage = self.labjack.getAIN(0)
+      except u3.LabJackException:
+        logging.exception('Error reading TPS voltage')
+
   def PopulatePoint(self, report):
     """Populates the point protocol buffer."""
     session = self.session
@@ -256,6 +272,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
+    self.SetTPSVoltage(point)
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)
