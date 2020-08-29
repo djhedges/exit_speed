@@ -258,7 +258,7 @@ class ExitSpeed(object):
     """Populate TPS voltage if labjack initialzed successfully."""
     if self.labjack:
       try:
-        point.voltage = self.labjack.getAIN(0)
+        point.tps_voltage = self.labjack.getAIN(0)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
 
