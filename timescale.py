@@ -113,7 +113,7 @@ class Pusher(object):
     point, lap_number = self.GetPointFromQueue()
     insert_statement = """
     INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage)
-    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s)
+    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s, %s)
     """
     lap_id = self.lap_number_ids[lap_number]
     geo_hash = geohash.encode(point.lat, point.lon)
