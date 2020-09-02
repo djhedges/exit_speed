@@ -112,7 +112,7 @@ class Pusher(object):
   def ExportPoint(self, cursor):
     point, lap_number = self.GetPointFromQueue()
     insert_statement = """
-    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms)
+    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage)
     VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s)
     """
     lap_id = self.lap_number_ids[lap_number]
@@ -120,7 +120,7 @@ class Pusher(object):
     elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
     args = (point.time.ToJsonString(), self.session_id, lap_id,
             point.alt, point.speed * 2.23694, # m/s to mph,
-            geo_hash, elapsed_duration_ms)
+            geo_hash, elapsed_duration_ms, point.tps_voltage)
     cursor.execute(insert_statement, args)
 
   def ConnectToDB(self):
