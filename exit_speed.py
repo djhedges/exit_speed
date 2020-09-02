@@ -2,7 +2,6 @@
 
 import collections
 import datetime
-import logging
 import os
 import statistics
 import sys
@@ -12,6 +11,9 @@ import board
 import u3
 import gps_pb2
 import timescale
+from absl import app
+from absl import flags
+from absl import logging
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
@@ -19,6 +21,8 @@ from gps import EarthDistanceSmall
 import numpy as np
 from sklearn.neighbors import BallTree
 import tensorflow as tf
+
+FLAGS = flags.FLAGS
 
 gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
 
@@ -259,6 +263,7 @@ class ExitSpeed(object):
     if self.labjack:
       try:
         point.tps_voltage = self.labjack.getAIN(0)
+        logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
 
@@ -298,20 +303,20 @@ class ExitSpeed(object):
       except Exception as err:
         logging.exception(err, exc_info=True)
 
-if __name__ == '__main__':
-  today = datetime.datetime.today()
-  filename = 'exit_speed-%s' % today.isoformat()
-  logging.basicConfig(filename=os.path.join(DEFAULT_LOG_PATH, filename),
-                      level=logging.DEBUG)
-  logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-  print(f'Logging to {filename}')
+def main(unused_argv):
+  logging.get_absl_handler().use_absl_log_file()
   try:
     while True:
       logging.info('Starting Run')
       es = ExitSpeed()
       es.Run()
+  except KeyboardInterrupt:
+    logging.info('Keyboard interrupt')
   except:  # Catch All!
-    logging.exception('Die due to exception', exc_info=True)
+    logging.exception('Die due to exception')
   finally:
     logging.info('Done.\nExiting.')
     gpsd.close()
+
+if __name__ == '__main__':
+  app.run(main)
