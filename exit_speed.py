@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+from typing import List
+from typing import Text
+from typing import Tuple
 import collections
 import datetime
 import os
@@ -14,6 +17,7 @@ import timescale
 from absl import app
 from absl import flags
 from absl import logging
+from gps import client
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
@@ -36,13 +40,14 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
 DEFAULT_LOG_PATH = '/home/pi/lap_logs'
 
 
-def PointDelta(point_a, point_b):
+def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
   """Returns the distance between two points."""
   return EarthDistanceSmall((point_a.lat, point_a.lon),
                             (point_b.lat, point_b.lon))
 
 
-def FindClosestTrack(point):
+def FindClosestTrack(
+    point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
   """Returns the distance, track and start/finish of the closest track."""
   distance_track = []
   for location, track in TRACKS.items():
@@ -100,13 +105,13 @@ class ExitSpeed(object):
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
 
-  def InitializeLabJack(self):
+  def InitializeLabJack(self) -> u3.U3:
     try:
       return u3.U3()
     except u3.LabJackException:
       logging.exception('Unable to intialize labjack')
 
-  def AddNewLap(self):
+  def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
     session = self.session
     lap = session.laps.add()
@@ -114,7 +119,7 @@ class ExitSpeed(object):
     self.lap.number = len(session.laps)
     self.pusher.lap_queue.put_nowait(lap)
 
-  def FindNearestBestLapPoint(self):
+  def FindNearestBestLapPoint(self) -> gps_pb2.Point:
     """Returns the nearest point on the best lap to the given point."""
     point = self.point
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
@@ -126,7 +131,7 @@ class ExitSpeed(object):
         if point_b.lat == x and point_b.lon == y:
           return point_b
 
-  def LedInterval(self):
+  def LedInterval(self) -> bool:
     """Returns True if it is safe to update the LEDs based on interval."""
     now = time.time()
     if now - self.last_led_update > self.led_update_interval:
@@ -134,13 +139,13 @@ class ExitSpeed(object):
       return True
     return False
 
-  def GetLedColor(self):
+  def GetLedColor(self) -> Tuple[int, int, int]:
     median_delta = self.GetMovingSpeedDelta()
     if median_delta > 0:
       return (255, 0, 0)  # Red
     return (0, 255, 0)  # Green
 
-  def GetMovingSpeedDelta(self):
+  def GetMovingSpeedDelta(self) -> float:
     """Returns the median speed delta over a time period based on the ring size.
 
     This helps smooth out the LEDs a bit so they're not so flickery by looking
@@ -150,29 +155,14 @@ class ExitSpeed(object):
     """
     return statistics.median(self.speed_deltas)
 
-  def UpdateSpeedDeltas(self, point, best_point):
+  def UpdateSpeedDeltas(self,
+                        point: gps_pb2.Point,
+                        best_point: gps_pb2.Point) -> float:
     speed_delta = best_point.speed - point.speed
     self.speed_deltas.append(speed_delta)
     return statistics.median(self.speed_deltas)
 
-  def LedPerTenth(self):
-    """Dead code but keeping it for at track testing."""
-    speed_delta = abs(self.GetMovingSpeedDelta())
-    tenths = speed_delta // 0.1
-    led_color = self.GetLedColor()
-    if not tenths:
-      self.dots.fill((0, 0, 0))
-    elif speed_delta < 10 and speed_delta < 1:
-      leds_to_light = range(int(tenths))
-      for led_index in leds_to_light:
-        self.dots[led_index] = led_color
-      leds_to_off = set(range(len(self.dots))) - set(leds_to_light)
-      for led_index in leds_to_off:
-        self.dots[led_index] = (0, 0, 0)  # Off
-    else:
-      self.dots.fill(led_color)
-
-  def UpdateLeds(self):
+  def UpdateLeds(self) -> None:
     """Update LEDs based on speed difference to the best lap."""
     if self.tree and self.LedInterval():
       point = self.point
@@ -181,7 +171,7 @@ class ExitSpeed(object):
       led_color = self.GetLedColor()
       self.dots.fill(led_color)
 
-  def LogPoint(self):
+  def LogPoint(self) -> None:
     point = self.point
     if not self.tfwriter:
       utc_dt = point.time.ToDatetime()
@@ -195,7 +185,7 @@ class ExitSpeed(object):
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
     self.tfwriter.write(point.SerializeToString())
 
-  def ProcessPoint(self):
+  def ProcessPoint(self) -> None:
     """Populates the session with the latest GPS point."""
     point = self.point
     session = self.session
@@ -204,7 +194,7 @@ class ExitSpeed(object):
     self.LogPoint()
     self.pusher.point_queue.put_nowait((point, self.lap.number))
 
-  def SetBestLap(self, lap):
+  def SetBestLap(self, lap: gps_pb2.Lap) -> None:
     """Sets best lap and builds a KDTree for finding closest points."""
     if (not self.best_lap or
         lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
@@ -216,7 +206,7 @@ class ExitSpeed(object):
       self.tree = BallTree(np.array(x_y_points), leaf_size=30,
                            metric='pyfunc', func=EarthDistanceSmall)
 
-  def SetLapTime(self):
+  def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
     lap = self.lap
     first_point = lap.points[0]
@@ -228,7 +218,7 @@ class ExitSpeed(object):
     self.SetBestLap(lap)
     self.pusher.lap_duration_queue.put_nowait((lap.number, lap.duration))
 
-  def CrossStartFinish(self):
+  def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     lap = self.lap
     session = self.session
@@ -246,19 +236,19 @@ class ExitSpeed(object):
         self.SetLapTime()
         self.AddNewLap()
 
-  def ProcessLap(self):
+  def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
     self.ProcessPoint()
     lap = self.lap
     self.CrossStartFinish()
 
-  def ProcessSession(self):
+  def ProcessSession(self) -> None:
     """Start/ends the logging of data to log files based on car speed."""
     point = self.point
     session = self.session
     self.ProcessLap()
 
-  def SetTPSVoltage(self, point):
+  def SetTPSVoltage(self, point: gps_pb2.Point) -> None:
     """Populate TPS voltage if labjack initialzed successfully."""
     if self.labjack:
       try:
@@ -267,7 +257,7 @@ class ExitSpeed(object):
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
 
-  def PopulatePoint(self, report):
+  def PopulatePoint(self, report: client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
     session = self.session
     lap = self.lap
@@ -287,14 +277,14 @@ class ExitSpeed(object):
       self.session.start_finish.lon = start_finish.lon
       self.pusher.Start(point.time, track)
 
-  def ProcessReport(self, report):
+  def ProcessReport(self, report: client.dictwrapper) -> None:
     """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
       self.PopulatePoint(report)
       self.ProcessSession()
 
-  def Run(self):
+  def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
       try:
@@ -303,7 +293,7 @@ class ExitSpeed(object):
       except Exception as err:
         logging.exception(err, exc_info=True)
 
-def main(unused_argv):
+def main(unused_argv) -> None:
   logging.get_absl_handler().use_absl_log_file()
   try:
     while True:
