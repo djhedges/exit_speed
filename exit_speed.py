@@ -252,9 +252,15 @@ class ExitSpeed(object):
     """Populate voltage readings if labjack initialzed successfully."""
     if self.labjack:
       try:
-        point.tps_voltage = self.labjack.getAIN(0)
-        point.water_temp_voltage = self.labjack.getAIN(1)
-        point.oil_pressure_voltage = self.labjack.getAIN(2)
+        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2))
+        ain0, ain1, ain2 = self.labjack.getFeedback(*commands)
+        point.tps_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
+            ain0, isLowVoltage=False, channelNumber=0)
+        point.water_temp_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
+            ain1, isLowVoltage=False, channelNumber=1)
+        point.oil_pressure_voltage = (
+            self.labjack.binaryToCalibratedAnalogVoltage(
+            ain2, isLowVoltage=False, channelNumber=2))
         logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
@@ -293,7 +299,7 @@ class ExitSpeed(object):
         report = gpsd.next()
         self.ProcessReport(report)
       except Exception as err:
-        logging.exception(err, exc_info=True)
+        logging.exception('Catch all, restarting')
 
 def main(unused_argv) -> None:
   logging.get_absl_handler().use_absl_log_file()
