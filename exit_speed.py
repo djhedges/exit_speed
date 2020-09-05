@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from typing import List
+from typing import Optional
 from typing import Text
 from typing import Tuple
 import collections
@@ -110,7 +111,8 @@ class ExitSpeed(object):
   def InitializeLabJack(self) -> u3.U3:
     try:
       labjack = u3.U3()
-      labjack.configIO(NumberOfTimersEnabled=1)
+      labjack.configIO(NumberOfTimersEnabled=1,  # FIO4
+                       EnableCounter0=True)      # FIO5
       self.labjack_timer_0 = labjack.getFeedback(self.LABJACK_TIMER_CMD)[0]
       return labjack
     except u3.LabJackException:
@@ -253,20 +255,23 @@ class ExitSpeed(object):
     session = self.session
     self.ProcessLap()
 
-  def GetRpm(self, ticks: float):
-    """I think this calculates the time between timer reads."""
+  def GetRpm(self, ticks: float, counter: float) -> Optional[int]:
+    """Returns hopefully the engine RPM."""
     ticks_hz = ticks / (4 * 10 ** 6)  # 4mhz
     if self.labjack_timer_0:
       delta = ticks_hz - self.labjack_timer_0
       logging.debug('Timer 0 Delta %s', delta)
+      return counter / 60 / delta
     self.labjack_timer_0 = ticks_hz
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
     if self.labjack:
       try:
-        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2), self.LABJACK_TIMER_CMD)
-        ain0, ain1, ain2, timer0 = self.labjack.getFeedback(*commands)
+        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2),
+                    self.LABJACK_TIMER_CMD,
+                    u3.Counter0(Reset=True))
+        ain0, ain1, ain2, timer0, counter0 = self.labjack.getFeedback(*commands)
         point.tps_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
             ain0, isLowVoltage=False, channelNumber=0)
         point.water_temp_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
@@ -274,7 +279,9 @@ class ExitSpeed(object):
         point.oil_pressure_voltage = (
             self.labjack.binaryToCalibratedAnalogVoltage(
             ain2, isLowVoltage=False, channelNumber=2))
-        self.GetRpm(timer0)
+        rpm = self.GetRpm(timer0, counter0)
+        if rpm:
+          point.rpm = rpm
         logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
