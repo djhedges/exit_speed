@@ -62,6 +62,7 @@ def FindClosestTrack(
 
 class ExitSpeed(object):
   """Main object which loops and logs data."""
+  LABJACK_TIMER_CMD = u3.Timer0(UpdateReset=True, Value=0, Mode=None)
 
   def __init__(self,
          data_log_path=DEFAULT_LOG_PATH,
@@ -94,6 +95,7 @@ class ExitSpeed(object):
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
     self.labjack = self.InitializeLabJack()
+    self.labjack_timer_0 = None  # Seconds since last timer read.
     self.tfwriter = None
 
     self.pusher = timescale.Pusher(live_data=live_data)
@@ -107,7 +109,10 @@ class ExitSpeed(object):
 
   def InitializeLabJack(self) -> u3.U3:
     try:
-      return u3.U3()
+      labjack = u3.U3()
+      labjack.configIO(NumberOfTimersEnabled=1)
+      self.labjack_timer_0 = labjack.getFeedback(self.LABJACK_TIMER_CMD)[0]
+      return labjack
     except u3.LabJackException:
       logging.exception('Unable to intialize labjack')
 
@@ -248,12 +253,20 @@ class ExitSpeed(object):
     session = self.session
     self.ProcessLap()
 
+  def GetRpm(self, ticks: float):
+    """I think this calculates the time between timer reads."""
+    ticks_hz = ticks / (4 * 10 ** 6)  # 4mhz
+    if self.labjack_timer_0:
+      delta = ticks_hz - self.labjack_timer_0
+      logging.debug('Timer 0 Delta %s', delta)
+    self.labjack_timer_0 = ticks_hz
+
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
     if self.labjack:
       try:
-        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2))
-        ain0, ain1, ain2 = self.labjack.getFeedback(*commands)
+        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2), self.LABJACK_TIMER_CMD)
+        ain0, ain1, ain2, timer0 = self.labjack.getFeedback(*commands)
         point.tps_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
             ain0, isLowVoltage=False, channelNumber=0)
         point.water_temp_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
@@ -261,6 +274,7 @@ class ExitSpeed(object):
         point.oil_pressure_voltage = (
             self.labjack.binaryToCalibratedAnalogVoltage(
             ain2, isLowVoltage=False, channelNumber=2))
+        self.GetRpm(timer0)
         logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
