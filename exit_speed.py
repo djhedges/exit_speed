@@ -254,6 +254,7 @@ class ExitSpeed(object):
       try:
         point.tps_voltage = self.labjack.getAIN(0)
         point.water_temp_voltage = self.labjack.getAIN(1)
+        point.oil_pressure_voltage = self.labjack.getAIN(2)
         logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
