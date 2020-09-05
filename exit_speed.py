@@ -248,11 +248,12 @@ class ExitSpeed(object):
     session = self.session
     self.ProcessLap()
 
-  def SetTPSVoltage(self, point: gps_pb2.Point) -> None:
-    """Populate TPS voltage if labjack initialzed successfully."""
+  def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
+    """Populate voltage readings if labjack initialzed successfully."""
     if self.labjack:
       try:
         point.tps_voltage = self.labjack.getAIN(0)
+        point.water_temp_voltage = self.labjack.getAIN(1)
         logging.debug('TPS Voltage %f', point.tps_voltage)
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
@@ -267,7 +268,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
-    self.SetTPSVoltage(point)
+    self.ReadLabjackValues(point)
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)

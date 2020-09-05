@@ -15,6 +15,7 @@ message Point {
   google.protobuf.Timestamp time = 5;
   double start_finish_distance = 6;  // Distance to the start/finish.
   double tps_voltage = 7;  // Throttle position sensor voltage.
+  double water_temp_voltage = 8;
 }
 
 message Lap {

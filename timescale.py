@@ -30,7 +30,9 @@ CREATE TABLE points (
   alt                 TEXT              NOT NULL,
   speed               FLOAT             NOT NULL,
   geohash             TEXT              NOT NULL,
-  elapsed_duration_ms INT               NOT NULL
+  elapsed_duration_ms INT               NOT NULL,
+  tps_voltage         FLOAT,
+  water_temp_voltage  FLOAT
 );
 SELECT create_hypertable('points', 'time');
 """
@@ -112,16 +114,22 @@ class Pusher(object):
   def ExportPoint(self, cursor):
     point, lap_number = self.GetPointFromQueue()
     insert_statement = """
-    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage)
-    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s, %s)
+    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage)
+    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s, %s)
     """
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
       geo_hash = geohash.encode(point.lat, point.lon)
       elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-      args = (point.time.ToJsonString(), self.session_id, lap_id,
-              point.alt, point.speed * 2.23694, # m/s to mph,
-              geo_hash, elapsed_duration_ms, point.tps_voltage)
+      args = (point.time.ToJsonString(),
+              self.session_id,
+              lap_id,
+              point.alt,
+              point.speed * 2.23694, # m/s to mph,
+              geo_hash,
+              elapsed_duration_ms,
+              point.tps_voltage,
+              point.water_temp_voltage)
       cursor.execute(insert_statement, args)
 
   def ConnectToDB(self):
