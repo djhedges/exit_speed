@@ -12,10 +12,23 @@ from multiprocessing import Value
 
 
 FRAME_SIZE = 28
+# {'frame_type': (slice_left, slice_right)}
 FRAME_FORMAT = {
-  'lambda_16': (5, 7),  # Bytes 6 & 7
-  'user_3': (13, 15),   # Bytes 13 & 14
-  'rpm_count': (23,25),       # Bytes 24 & 25
+  'header':         (0, 2),   # Bytes 1 & 2
+  'sequence':       (2, 3),   # Byte 3
+  'tick':           (3, 5),   # Bytes 4 & 5
+  'lambda_16':      (5, 7),   # Bytes 6 & 7
+  'ipx':            (7, 9),   # Bytes 8 & 9
+  'user_1':         (9, 11),  # Bytes 10 & 11
+  'user_2':         (11, 13), # Bytes 11 & 13
+  'user_3':         (13, 15), # Bytes 13 & 14
+  'thermocouple_1': (15, 17), # Bytes 16 & 17
+  'thermocouple_2': (17, 19), # Bytes 18 & 19
+  'thermocouple_3': (19, 21), # Bytes 20 & 21
+  'thermistor':     (21, 23), # Bytes 22 & 23
+  'rpm_count':      (23, 25), # Bytes 24 & 25
+  'status':         (25, 27), # Bytes 26 & 27
+  'crc':            (27, 28), # Byte 28
 }
 
 
