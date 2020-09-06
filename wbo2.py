@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """Parser for wbo2.
 https://www.wbo2.com/sw/logger.htm Frame and byte info.
-https://www.wbo2.com/sw/lambda-16.htm
 """
 
 import serial
@@ -73,8 +72,9 @@ def GetBytes(frame, frame_key):
 
 def Lambda16ToAFR(lambda_16):
   # http://techedge.com.au/vehicle/wbo2/wblambda.htm
-  # 1 = Petrol stoichiometric point.
-  return ((lambda_16 / 8192) + 0.5) * 1
+  # https://www.wbo2.com/sw/lambda-16.htm
+  # 14.7 = Unleaded stoichiometric point.
+  return ((lambda_16 / 8192) + 0.5) * 14.7
 
 
 def RPMCountToRPM(rpm_count):
