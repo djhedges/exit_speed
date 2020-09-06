@@ -66,6 +66,8 @@ def GetBytes(frame, frame_key):
   frame_bytes = frame[low:high]
   if 'user' in frame_key:
     return int.from_bytes(frame_bytes, 'big') / 8184 * 5
+  elif 'thermocouple' in frame_key:
+    return int.from_bytes(frame_bytes, 'big') / 1023 * 5 / 101
   return int.from_bytes(frame_bytes, 'big')
 
 
