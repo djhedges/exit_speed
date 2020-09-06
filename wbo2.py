@@ -65,7 +65,7 @@ def GetBytes(frame, frame_key):
   low, high = FRAME_FORMAT[frame_key]
   frame_bytes = frame[low:high]
   if 'user' in frame_key:
-    return int.from_bytes(frame_bytes, 'big') / 8192 * 5
+    return int.from_bytes(frame_bytes, 'big') / 8184 * 5
   return int.from_bytes(frame_bytes, 'big')
 
 
