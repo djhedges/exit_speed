@@ -18,6 +18,7 @@ message Point {
   double water_temp_voltage = 8;
   double oil_pressure_voltage = 9;
   double rpm = 10;
+  double afr = 11;  // Air fuel ratio.
 }
 
 message Lap {

@@ -7,6 +7,9 @@ https://www.wbo2.com/sw/lambda-16.htm
 import serial
 import struct
 from absl import app
+from multiprocessing import Process
+from multiprocessing import Value
+
 
 FRAME_SIZE = 28
 FRAME_FORMAT = {
@@ -50,6 +53,22 @@ def Lambda16ToAFR(lambda_16):
   # http://techedge.com.au/vehicle/wbo2/wblambda.htm
   # 1 = Petrol stoichiometric point.
   return ((lambda_16 / 8192) + 0.5) * 1
+
+
+class WBO2(object):
+
+  def __init__(self):
+    self.afr = Value('d', 0.0)
+    self.tps_voltage = Value('d', 0.0)
+    self.process = Process(target=self.Loop, daemon=True)
+    self.process.start()
+
+  def Loop(self):
+    with serial.Serial('/dev/ttyUSB0', 19200) as ser:
+      for frame in ReadSerial(ser):
+        lambda_16 = GetBytes(frame, 'lambda_16')
+        self.afr.value = Lambda16ToAFR(lambda_16)
+        self.tps_voltage.value = GetBytes(frame, 'user_3')
 
 
 def main(unused_argv):

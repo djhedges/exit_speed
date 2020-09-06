@@ -14,6 +14,7 @@ import adafruit_dotstar
 import board
 import u3
 import gps_pb2
+import wbo2
 import timescale
 from absl import app
 from absl import flags
@@ -97,6 +98,7 @@ class ExitSpeed(object):
     self.dots.fill((0, 0, 255))  # Blue
     self.labjack = self.InitializeLabJack()
     self.labjack_timer_0 = None  # Seconds since last timer read.
+    self.wide_band = wbo2.WBO2()
     self.tfwriter = None
 
     self.pusher = timescale.Pusher(live_data=live_data)
@@ -272,8 +274,6 @@ class ExitSpeed(object):
                     self.LABJACK_TIMER_CMD,
                     u3.Counter0(Reset=True))
         ain0, ain1, ain2, timer0, counter0 = self.labjack.getFeedback(*commands)
-        point.tps_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
-            ain0, isLowVoltage=False, channelNumber=0)
         point.water_temp_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
             ain1, isLowVoltage=False, channelNumber=1)
         point.oil_pressure_voltage = (
@@ -286,6 +286,11 @@ class ExitSpeed(object):
       except u3.LabJackException:
         logging.exception('Error reading TPS voltage')
 
+  def ReadWideBandValues(self, point) -> None:
+    """Populate wide band readings."""
+    point.tps_voltage = self.wide_band.tps_voltage.value
+    point.afr = self.wide_band.afr.value
+
   def PopulatePoint(self, report: client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
     session = self.session
@@ -297,6 +302,7 @@ class ExitSpeed(object):
     point.speed = report.speed
     point.time.FromJsonString(report.time)
     self.ReadLabjackValues(point)
+    self.ReadWideBandValues(point)
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)
@@ -316,11 +322,8 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      try:
-        report = gpsd.next()
-        self.ProcessReport(report)
-      except Exception as err:
-        logging.exception('Catch all, restarting')
+      report = gpsd.next()
+      self.ProcessReport(report)
 
 def main(unused_argv) -> None:
   logging.get_absl_handler().use_absl_log_file()
