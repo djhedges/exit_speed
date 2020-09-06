@@ -38,13 +38,14 @@ def main(unused_argv):
   ser = serial.Serial('/dev/ttyUSB0', 19200)
   for frame in ReadSerial(ser):
     print(frame[0], frame[1], frame[2])
-    lambda_16_bytes = frame[11:13]
+    lambda_16_bytes = frame[5:7]
     lambda_16 = struct.unpack(">h", lambda_16_bytes)[0]
     # http://techedge.com.au/vehicle/wbo2/wblambda.htm
     # 1 = Petrol stoichiometric point.
     afr = ((lambda_16 / 8192) + 0.5) * 1
     # TODO: Verify this with the car running.
     print('Lambda 16 %s, AFR %s' % (lambda_16, afr))
+    import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':
