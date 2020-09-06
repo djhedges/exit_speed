@@ -36,10 +36,16 @@ def FindFrameStart(ser):
       return header_byte_1 + header_byte_2 + ser.read(FRAME_SIZE - 2)
 
 
+def CheckFrame(frame):
+  return sum(frame) & 0b11111111 == 0xFF
+
+
 def ReadSerial(ser):
   yield FindFrameStart(ser)
   while True:
-    yield ser.read(FRAME_SIZE)
+    frame = ser.read(FRAME_SIZE)
+    if CheckFrame(frame):
+      yield frame
 
 
 def GetBytes(frame, frame_key):
