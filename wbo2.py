@@ -9,6 +9,10 @@ import struct
 from absl import app
 
 FRAME_SIZE = 28
+FRAME_FORMAT = {
+  'lambda_16': (5, 7),  # Bytes 6 & 7
+  'user_3': (13, 15),   # Bytes 13 & 14
+}
 
 
 def FindFrameStart(ser):
@@ -34,20 +38,27 @@ def ReadSerial(ser):
     yield ser.read(FRAME_SIZE)
 
 
+def GetBytes(frame, frame_key):
+  low, high = FRAME_FORMAT[frame_key]
+  frame_bytes = frame[low:high]
+  if 'user' in frame_key:
+    return int.from_bytes(frame_bytes, 'big') / 8192 * 5
+  return int.from_bytes(frame_bytes, 'big')
+
+
+def Lambda16ToAFR(lambda_16):
+  # http://techedge.com.au/vehicle/wbo2/wblambda.htm
+  # 1 = Petrol stoichiometric point.
+  return ((lambda_16 / 8192) + 0.5) * 1
+
+
 def main(unused_argv):
   ser = serial.Serial('/dev/ttyUSB0', 19200)
   for frame in ReadSerial(ser):
-    print(frame[0], frame[1], frame[2], frame[3], frame[4])
-    tick_bytes = frame[3:5]
-    tick = struct.unpack(">h", tick_bytes)[0]
-    print('Tick %s' % tick)
-    lambda_16_bytes = frame[5:7]
-    lambda_16 = struct.unpack(">h", lambda_16_bytes)[0]
-    # http://techedge.com.au/vehicle/wbo2/wblambda.htm
-    # 1 = Petrol stoichiometric point.
-    afr = ((lambda_16 / 8192) + 0.5) * 1
-    # TODO: Verify this with the car running.
-    print('Lambda 16 %s, AFR %s' % (lambda_16, afr))
+    lambda_16 = GetBytes(frame, 'lambda_16')
+    afr = Lambda16ToAFR(lambda_16)
+    tps_voltage = GetBytes(frame, 'user_3')
+    print(lambda_16, afr, tps_voltage)
 
 
 if __name__ == '__main__':
