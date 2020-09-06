@@ -14,6 +14,7 @@ import adafruit_dotstar
 import board
 import u3
 import gps_pb2
+import labjack
 import wbo2
 import timescale
 from absl import app
@@ -96,8 +97,7 @@ class ExitSpeed(object):
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=led_brightness)
     self.dots.fill((0, 0, 255))  # Blue
-    self.labjack = self.InitializeLabJack()
-    self.labjack_timer_0 = None  # Seconds since last timer read.
+    self.labjack = labjack.Labjack()
     self.wide_band = wbo2.WBO2()
     self.tfwriter = None
 
@@ -109,16 +109,6 @@ class ExitSpeed(object):
     self.tree = None
     self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
-
-  def InitializeLabJack(self) -> u3.U3:
-    try:
-      labjack = u3.U3()
-      labjack.configIO(NumberOfTimersEnabled=1,  # FIO4
-                       EnableCounter0=True)      # FIO5
-      self.labjack_timer_0 = labjack.getFeedback(self.LABJACK_TIMER_CMD)[0]
-      return labjack
-    except u3.LabJackException:
-      logging.exception('Unable to intialize labjack')
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -257,34 +247,10 @@ class ExitSpeed(object):
     session = self.session
     self.ProcessLap()
 
-  def GetRpm(self, ticks: float, counter: float) -> Optional[int]:
-    """Returns hopefully the engine RPM."""
-    ticks_hz = ticks / (4 * 10 ** 6)  # 4mhz
-    if self.labjack_timer_0:
-      delta = ticks_hz - self.labjack_timer_0
-      logging.debug('Timer 0 Delta %s', delta)
-      return counter / 60 / delta
-    self.labjack_timer_0 = ticks_hz
-
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
-    if self.labjack:
-      try:
-        commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2),
-                    self.LABJACK_TIMER_CMD,
-                    u3.Counter0(Reset=True))
-        ain0, ain1, ain2, timer0, counter0 = self.labjack.getFeedback(*commands)
-        point.water_temp_voltage = self.labjack.binaryToCalibratedAnalogVoltage(
-            ain1, isLowVoltage=False, channelNumber=1)
-        point.oil_pressure_voltage = (
-            self.labjack.binaryToCalibratedAnalogVoltage(
-            ain2, isLowVoltage=False, channelNumber=2))
-        rpm = self.GetRpm(timer0, counter0)
-        if rpm:
-          point.rpm = rpm
-        logging.debug('TPS Voltage %f', point.tps_voltage)
-      except u3.LabJackException:
-        logging.exception('Error reading TPS voltage')
+    point.water_temp_voltage = self.labjack.water_temp_voltage.value
+    point.oil_pressure_voltage = self.labjack.oil_pressure_voltage.value
 
   def ReadWideBandValues(self, point) -> None:
     """Populate wide band readings."""
