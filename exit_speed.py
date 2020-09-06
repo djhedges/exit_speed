@@ -256,6 +256,7 @@ class ExitSpeed(object):
     """Populate wide band readings."""
     point.tps_voltage = self.wide_band.tps_voltage.value
     point.afr = self.wide_band.afr.value
+    point.rpm = self.wide_band.rpm.value
 
   def PopulatePoint(self, report: client.dictwrapper) -> None:
     """Populates the point protocol buffer."""

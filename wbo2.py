@@ -15,6 +15,7 @@ FRAME_SIZE = 28
 FRAME_FORMAT = {
   'lambda_16': (5, 7),  # Bytes 6 & 7
   'user_3': (13, 15),   # Bytes 13 & 14
+  'rpm_count': (23,25),       # Bytes 24 & 25
 }
 
 
@@ -55,11 +56,20 @@ def Lambda16ToAFR(lambda_16):
   return ((lambda_16 / 8192) + 0.5) * 1
 
 
+def RPMCountToRPM(rpm_count):
+  if rpm_count:
+    us_between_pulse = rpm_count * 5
+    minute = 60 * 10 ** 6  # 60 seconds > microseconds
+    return minute / us_between_pulse / 3  # VR6 3 sparks per revolution.
+  return 0
+
+
 class WBO2(object):
 
   def __init__(self):
     self.afr = Value('d', 0.0)
     self.tps_voltage = Value('d', 0.0)
+    self.rpm = Value('i', 0)
     self.process = Process(target=self.Loop, daemon=True)
     self.process.start()
 
@@ -69,6 +79,8 @@ class WBO2(object):
         lambda_16 = GetBytes(frame, 'lambda_16')
         self.afr.value = Lambda16ToAFR(lambda_16)
         self.tps_voltage.value = GetBytes(frame, 'user_3')
+        rpm_count = GetBytes(frame, 'rpm_count')
+        self.rpm = RPMCountToRPM(rpm_count)
 
 
 def main(unused_argv):
@@ -77,7 +89,8 @@ def main(unused_argv):
     lambda_16 = GetBytes(frame, 'lambda_16')
     afr = Lambda16ToAFR(lambda_16)
     tps_voltage = GetBytes(frame, 'user_3')
-    print(lambda_16, afr, tps_voltage)
+    rpm_count = GetBytes(frame, 'rpm_count')
+    print(RPMCountToRPM(rpm_count))
 
 
 if __name__ == '__main__':
