@@ -1,17 +1,15 @@
 #!/usr/bin/python3
+"""CSV library for converting data from Traqmate to exit speed or vice versa."""
 
 import csv
 import datetime
-import logging
-import sys
-import tempfile
 import time
 import exit_speed
-import replay_data
 from gps import client
 
 
 def _ReadCsvFile(filepath):
+  """Reads the given CSV file."""
   reading_header = True
   start_date = None
   start_time = None
@@ -40,19 +38,28 @@ def _ReadCsvFile(filepath):
       if row[0].startswith('Starting Time'):
         start_time = row[1]
 
+
 def ConvertTraqmateToProto(filepath):
+  """Converts a Traqmate CSV file into a exit speed proto.
+
+  Args:
+    filepath: The file name and path of the Traqmate CSV file.
+
+  Returns:
+    A exit speed session proto.
+  """
   es = exit_speed.ExitSpeed(led_brightness=0.05)
   start = time.time()
   first_elapsed = None
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
     report = client.dictwrapper({
-              u'lon': lon,
-              u'lat': lat,
-              u'mode': 3,
-              u'time': json_time,
-              u'alt': alt,
-              u'speed': speed,
-              u'class': u'TPV'})
+        u'lon': lon,
+        u'lat': lat,
+        u'mode': 3,
+        u'time': json_time,
+        u'alt': alt,
+        u'speed': speed,
+        u'class': u'TPV'})
     es.ProcessReport(report)
     now = time.time()
     elapsed_time = float(elapsed_time)
@@ -71,6 +78,12 @@ def ConvertTraqmateToProto(filepath):
 
 
 def ConvertProtoToTraqmate(session, filepath):
+  """Converts a exit speed session to the Traqmate CSV format.
+
+  Args:
+    session: A exit speed session proto.
+    filepath: The file path and name of the new CSV file.
+  """
   first_point = session.laps[0].points[0]
   first_point_date = first_point.time.ToDatetime()
   last_point = session.laps[-1].points[-1]
@@ -97,14 +110,9 @@ def ConvertProtoToTraqmate(session, filepath):
                         first_point.time.ToNanoseconds())
         speed = point.speed / 0.44704
         csv_writer.writerow([
-            elapsed_time / 1000000000.0, point.lat, point.lon, point.alt, speed, lap_num])
-
-if __name__ == '__main__':
-  logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-  #ConvertTraqmateToProto('testdata/2019-08-18_Portland_CORRADO_DJ_R03_stripped.csv')
-  _, temp_csv = tempfile.mkstemp(prefix='exit_speed_')
-  print(temp_csv)
-  es = replay_data.ReplayLog(
-      '/home/pi/lap_logs/data-2020-07-10T18:20:00.700Z.tfr')
-  session = es.self.session()
-  ConvertProtoToTraqmate(session, temp_csv)
+            elapsed_time / 1000000000.0,
+            point.lat,
+            point.lon,
+            point.alt,
+            speed,
+            lap_num])
