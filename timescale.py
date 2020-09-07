@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-"""
-Database schema.
+"""Database schema.
 
 CREATE TYPE track AS ENUM('Test Parking Lot',
                           'Oregon Raceway Park',
@@ -40,26 +39,25 @@ CREATE TABLE points (
 SELECT create_hypertable('points', 'time');
 """
 
-from absl import logging
+import multiprocessing
 import geohash
 import psycopg2
-from multiprocessing import Process
-from multiprocessing import Queue
 
 
 class Pusher(object):
+  """Interface for publishing data to timescale."""
 
   def __init__(self, live_data=True):
-    self.live_data = False
-    self.process = Process(target=self.Loop, daemon=True)
+    self.live_data = live_data
+    self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.timescale_conn = None
     self.session_time = None
     self.track = None
     self.session_id = None
     self.lap_number_ids = {}
-    self.lap_queue = Queue()
-    self.lap_duration_queue = Queue()
-    self.point_queue = Queue()
+    self.lap_queue = multiprocessing.Queue()
+    self.lap_duration_queue = multiprocessing.Queue()
+    self.point_queue = multiprocessing.Queue()
     self.lap_id_first_points = {}
 
   def ExportSession(self, cursor):
@@ -74,6 +72,7 @@ class Pusher(object):
       self.session_id = cursor.fetchone()[0]
 
   def ExportLap(self, cursor):
+    """Export the lap data to timescale."""
     if self.lap_queue.qsize() > 0:
       lap = self.lap_queue.get()
       insert_statement = """
@@ -115,6 +114,7 @@ class Pusher(object):
     return point.time.ToMilliseconds() - first_point.time.ToMilliseconds()
 
   def ExportPoint(self, cursor):
+    """Exports point data to timescale."""
     point, lap_number = self.GetPointFromQueue()
     insert_statement = """
     INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr)
@@ -128,7 +128,7 @@ class Pusher(object):
               self.session_id,
               lap_id,
               point.alt,
-              point.speed * 2.23694, # m/s to mph,
+              point.speed * 2.23694,  # m/s to mph,
               geo_hash,
               elapsed_duration_ms,
               point.tps_voltage,
@@ -156,8 +156,3 @@ class Pusher(object):
     self.session_time = session_time
     self.track = track
     self.process.start()
-
-
-def GetMetricPusher(track):
-  pusher = Pusher(session_time, track)
-  return pusher
