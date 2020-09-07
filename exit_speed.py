@@ -1,33 +1,31 @@
 #!/usr/bin/python3
+"""The main script for starting exit speed."""
 
-from typing import List
-from typing import Optional
-from typing import Text
-from typing import Tuple
 import collections
 import datetime
 import os
 import statistics
-import sys
 import time
-import adafruit_dotstar
-import board
-import u3
-import gps_pb2
-import labjack
-import wbo2
-import timescale
+from typing import Text
+from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import adafruit_dotstar
+import board
 from gps import client
+from gps import EarthDistanceSmall
 from gps import gps
 from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
-from gps import EarthDistanceSmall
+import gps_pb2
+import labjack
 import numpy as np
 from sklearn.neighbors import BallTree
 import tensorflow as tf
+import timescale
+import u3
+import wbo2
 
 FLAGS = flags.FLAGS
 
@@ -67,18 +65,19 @@ class ExitSpeed(object):
   """Main object which loops and logs data."""
   LABJACK_TIMER_CMD = u3.Timer0(UpdateReset=True, Value=0, Mode=None)
 
-  def __init__(self,
-         data_log_path=DEFAULT_LOG_PATH,
-         start_finish_range=10,  # Meters, ~2x the width of straightaways.
-         min_points_per_session=60 * 10,  # 1 min @ gps 10hz
-         led_update_interval=0.2,
-         led_brightness=0.5,
-         speed_deltas=50,
-         live_data=True,
-	       ):
+  def __init__(
+      self,
+      data_log_path=DEFAULT_LOG_PATH,
+      start_finish_range=10,  # Meters, ~2x the width of straightaways.
+      min_points_per_session=60 * 10,  # 1 min @ gps 10hz
+      led_update_interval=0.2,
+      led_brightness=0.5,
+      speed_deltas=50,
+      live_data=True):
     """Initializer.
 
     Args:
+      data_log_path: Path to log the point data.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
@@ -88,6 +87,8 @@ class ExitSpeed(object):
       speed_deltas:  Used to smooth out GPS data.  This controls how many recent
                      speed deltas are stored.  50 at 10hz means a median of the
                      last 5 seconds is used.
+      live_data: A boolean, if True indicates that this session's data should be
+                 tagged as live.
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
@@ -171,16 +172,17 @@ class ExitSpeed(object):
       self.dots.fill(led_color)
 
   def LogPoint(self) -> None:
+    """Writes the current point to the data log."""
     point = self.point
     if not self.tfwriter:
       utc_dt = point.time.ToDatetime()
       current_dt = utc_dt.replace(
-        tzinfo=datetime.timezone.utc).astimezone(tz=None)
+          tzinfo=datetime.timezone.utc).astimezone(tz=None)
       current_seconds = current_dt.second + current_dt.microsecond / 1e6
       data_filename = os.path.join(
           self.data_log_path, 'data-%s:%03f.tfr' % (
               current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
-      logging.info(f'Logging data to {data_filename}')
+      logging.info('Logging data to %s', data_filename)
       self.tfwriter = tf.io.TFRecordWriter(data_filename)
     self.tfwriter.write(point.SerializeToString())
 
@@ -212,15 +214,12 @@ class ExitSpeed(object):
     last_point = lap.points[-1]
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
     lap.duration.FromNanoseconds(delta)
-
-    session = self.session
     self.SetBestLap(lap)
     self.pusher.lap_duration_queue.put_nowait((lap.number, lap.duration))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     lap = self.lap
-    session = self.session
     if len(lap.points) > self.min_points_per_session:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
@@ -238,13 +237,10 @@ class ExitSpeed(object):
   def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
     self.ProcessPoint()
-    lap = self.lap
     self.CrossStartFinish()
 
   def ProcessSession(self) -> None:
     """Start/ends the logging of data to log files based on car speed."""
-    point = self.point
-    session = self.session
     self.ProcessLap()
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
@@ -260,7 +256,6 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report: client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
-    session = self.session
     lap = self.lap
     point = lap.points.add()
     point.lat = report.lat
@@ -273,7 +268,7 @@ class ExitSpeed(object):
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)
-      logging.info('Closest track: %s' % track)
+      logging.info('Closest track: %s', track)
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
@@ -292,6 +287,7 @@ class ExitSpeed(object):
       report = gpsd.next()
       self.ProcessReport(report)
 
+
 def main(unused_argv) -> None:
   logging.get_absl_handler().use_absl_log_file()
   try:
@@ -301,11 +297,10 @@ def main(unused_argv) -> None:
       es.Run()
   except KeyboardInterrupt:
     logging.info('Keyboard interrupt')
-  except:  # Catch All!
-    logging.exception('Die due to exception')
   finally:
     logging.info('Done.\nExiting.')
     gpsd.close()
+
 
 if __name__ == '__main__':
   app.run(main)
