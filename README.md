@@ -71,6 +71,12 @@ http://wbo2.com/2a0/default.htm
 Python has suprisingly been able to keep up with the GPS 10hz output.  Ideally
 this should be rewritten in Go or C++.
 
+I've always wanted to play with the multriprocessing module and it has proved
+useful.  For example the metrics which are uploaded to Timescale are done in a
+seperate process.  This isolates the main process from unexpected errors and
+delays on I/O operations.  The Labjack and WBO2 readings also take place in
+seperate processes as well.
+
 ### Crossing Start/Finish
 
 Exit Spee has a map of tracks in the NW with GPS locations of
