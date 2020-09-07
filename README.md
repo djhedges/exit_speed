@@ -1,5 +1,7 @@
 # Exit Speed
 
+This is not an officially supported Google product.
+
 Race car telemetry with a Raspberry Pi.
 
 This project started with a set of LEDs and a USB GPS dongle.  The goal was to
