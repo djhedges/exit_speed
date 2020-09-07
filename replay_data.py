@@ -1,14 +1,15 @@
 #!/usr/bin/python3
+"""Script for replaying a data log.  Super handy for development."""
 
 import logging
-import time
 import sys
-import exit_speed
-import gps_pb2
-import data_reader
-from gps import client
+import time
+
 from absl import app
 from absl import flags
+import data_reader
+import exit_speed
+from gps import client
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('filepath', None, 'Path to the data file to replay')
@@ -19,13 +20,13 @@ flags.DEFINE_boolean('include_sleep', True,
 
 def ConvertPointToReport(point):
   return client.dictwrapper({
-              u'lon': point.lon,
-              u'lat': point.lat,
-              u'mode': 3,
-              u'time': point.time.ToJsonString(),
-              u'alt': point.alt,
-              u'speed': point.speed,
-              u'class': u'TPV'})
+      u'lon': point.lon,
+      u'lat': point.lat,
+      u'mode': 3,
+      u'time': point.time.ToJsonString(),
+      u'alt': point.alt,
+      u'speed': point.speed,
+      u'class': u'TPV'})
 
 
 def ReplayLog(filepath, include_sleep=False):
@@ -39,7 +40,7 @@ def ReplayLog(filepath, include_sleep=False):
   Returns:
     A exit_speed.ExitSpeed instance that has replayed the given data.
   """
-  logging.info(f'Replaying {filepath}')
+  logging.info('Replaying %s', filepath)
   points = data_reader.ReadData(filepath)
   logging.info('Number of points %d', len(points))
   if include_sleep:
@@ -80,8 +81,3 @@ def main(unused_argv):
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
   app.run(main)
-  # data-2019-08-18T16:53:01.250Z.tfr - Traqmate but higher refersh rate and
-  # speed is in mph instead of m/s.
-  #ReplayLog('testdata/data-2019-08-18T16:53:01.250Z.tfr',
-  # data-2020-06-11T22:16:27.700Z.tfr - Parking lot
-  #ReplayLog('testdata/data-2020-06-11T22:16:27.700Z.tfr',
