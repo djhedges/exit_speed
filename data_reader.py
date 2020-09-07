@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Library for reading a exit speed data file."""
 
 import gps_pb2
 import tensorflow as tf
