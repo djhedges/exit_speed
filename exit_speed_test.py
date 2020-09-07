@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
+import unittest
+import exit_speed
 from gps import client
 import gps_pb2
-import exit_speed
 import mock
-import unittest
 import tensorflow as tf
 
 
@@ -24,7 +24,7 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.lat = 45.595412
     point.lon = -122.693901
-    distance, track, start_finish = exit_speed.FindClosestTrack(point)
+    distance, track, _ = exit_speed.FindClosestTrack(point)
     self.assertEqual(65.64651548636733, distance)
     self.assertEqual(track, 'Portland International Raceway')
     self.assertEqual(point.lat, 45.595412)
@@ -38,13 +38,6 @@ class TestExitSpeed(unittest.TestCase):
     self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
     es.speed_deltas.extend([0, 1, 2, 3, 4, -5, -6, -7, -8, -9])
     self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
-
-  def testSetLapTime(self):
-    es = exit_speed.ExitSpeed()
-    first_point = gps_pb2.Point()
-    first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    es = exit_speed.ExitSpeed()
-    es.point = point
 
   def testProcessPoint(self):
     prior_point = gps_pb2.Point()
@@ -104,7 +97,7 @@ class TestExitSpeed(unittest.TestCase):
   def testProcessLap(self):
     es = exit_speed.ExitSpeed()
     es.ProcessLap()
-    self.assertTrue(lap.points)
+    self.assertTrue(es.lap.points)
 
   def testProcessSession(self):
     point = gps_pb2.Point()
@@ -116,7 +109,7 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     es.ProcessSession()
 
-    for session_lap in session.laps:
+    for _ in session.laps:
       for lap_point in lap.points:
         self.assertEqual(point, lap_point)
 
@@ -129,20 +122,20 @@ class TestExitSpeed(unittest.TestCase):
 
   def testPopulatePoint(self):
     report = client.dictwrapper({
-              u'epx': 7.409,
-              u'epy': 8.266,
-              u'epv': 20.01,
-              u'ept': 0.005,
-              u'lon': -2.1,
-              u'eps': 165.32,
-              u'lat': 14.2,
-              u'track': 0.0,
-              u'mode': 3,
-              u'time': u'2019-12-19T05:24:24.100Z',
-              u'device': u'/dev/ttyACM0',
-              u'alt': 6.9,
-              u'speed': 0.088,
-              u'class': u'TPV'})
+        u'epx': 7.409,
+        u'epy': 8.266,
+        u'epv': 20.01,
+        u'ept': 0.005,
+        u'lon': -2.1,
+        u'eps': 165.32,
+        u'lat': 14.2,
+        u'track': 0.0,
+        u'mode': 3,
+        u'time': u'2019-12-19T05:24:24.100Z',
+        u'device': u'/dev/ttyACM0',
+        u'alt': 6.9,
+        u'speed': 0.088,
+        u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
     point = es.point
@@ -155,20 +148,20 @@ class TestExitSpeed(unittest.TestCase):
 
   def testProcessReport(self):
     report = client.dictwrapper({
-              u'epx': 7.409,
-              u'epy': 8.266,
-              u'epv': 20.01,
-              u'ept': 0.005,
-              u'lon': -2.1,
-              u'eps': 165.32,
-              u'lat': 14.2,
-              u'track': 0.0,
-              u'mode': 3,
-              u'time': u'2019-12-19T05:24:24.100Z',
-              u'device': u'/dev/ttyACM0',
-              u'alt': 6.9,
-              u'speed': 0.088,
-              u'class': u'TPV'})
+        u'epx': 7.409,
+        u'epy': 8.266,
+        u'epv': 20.01,
+        u'ept': 0.005,
+        u'lon': -2.1,
+        u'eps': 165.32,
+        u'lat': 14.2,
+        u'track': 0.0,
+        u'mode': 3,
+        u'time': u'2019-12-19T05:24:24.100Z',
+        u'device': u'/dev/ttyACM0',
+        u'alt': 6.9,
+        u'speed': 0.088,
+        u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     es.PopulatePoint(report)
     point = es.point
