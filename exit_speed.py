@@ -14,10 +14,8 @@
 # limitations under the License.
 """The main script for starting exit speed."""
 
-import collections
 import datetime
 import os
-import statistics
 from typing import Text
 from typing import Tuple
 from absl import app
@@ -31,8 +29,6 @@ from gps import WATCH_NEWSTYLE
 import gps_pb2
 import labjack
 import leds
-import numpy as np
-from sklearn.neighbors import BallTree
 import tensorflow as tf
 import timescale
 import u3
@@ -80,7 +76,6 @@ class ExitSpeed(object):
       self,
       data_log_path=DEFAULT_LOG_PATH,
       start_finish_range=10,  # Meters, ~2x the width of straightaways.
-      speed_deltas=50,
       live_data=True):
     """Initializer.
 
@@ -88,9 +83,6 @@ class ExitSpeed(object):
       data_log_path: Path to log the point data.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
-      speed_deltas:  Used to smooth out GPS data.  This controls how many recent
-                     speed deltas are stored.  50 at 10hz means a median of the
-                     last 5 seconds is used.
       live_data: A boolean, if True indicates that this session's data should be
                  tagged as live.
     """
@@ -107,8 +99,6 @@ class ExitSpeed(object):
     self.AddNewLap()
     self.point = None
     self.best_lap = None
-    self.tree = None
-    self.speed_deltas = collections.deque(maxlen=speed_deltas)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -117,50 +107,6 @@ class ExitSpeed(object):
     self.lap = lap
     self.lap.number = len(session.laps)
     self.pusher.lap_queue.put_nowait(lap)
-
-  def FindNearestBestLapPoint(self) -> gps_pb2.Point:
-    """Returns the nearest point on the best lap to the given point."""
-    point = self.point
-    neighbors = self.tree.query([[point.lat, point.lon]], k=1,
-                                return_distance=False)
-    for neighbor in neighbors[0]:
-      x = self.tree.data[:, 0][neighbor]
-      y = self.tree.data[:, 1][neighbor]
-      for point_b in self.best_lap.points:
-        if point_b.lat == x and point_b.lon == y:
-          return point_b
-
-  def GetLedColor(self) -> Tuple[int, int, int]:
-    median_delta = self.GetMovingSpeedDelta()
-    if median_delta > 0:
-      return (255, 0, 0)  # Red
-    return (0, 255, 0)  # Green
-
-  def GetMovingSpeedDelta(self) -> float:
-    """Returns the median speed delta over a time period based on the ring size.
-
-    This helps smooth out the LEDs a bit so they're not so flickery by looking
-    a moving median of the speed deltas.  Ring size controls how big the ring
-    buffer can be, IE the number of deltas to hold on to.  At a GPS singal of
-    10hz a ring size of 10 will cover a second worth of time.
-    """
-    return statistics.median(self.speed_deltas)
-
-  def UpdateSpeedDeltas(self,
-                        point: gps_pb2.Point,
-                        best_point: gps_pb2.Point) -> float:
-    speed_delta = best_point.speed - point.speed
-    self.speed_deltas.append(speed_delta)
-    return statistics.median(self.speed_deltas)
-
-  def UpdateLeds(self) -> None:
-    """Update LEDs based on speed difference to the best lap."""
-    if self.tree and self.LedInterval():
-      point = self.point
-      best_point = self.FindNearestBestLapPoint()
-      self.UpdateSpeedDeltas(point, best_point)
-      led_color = self.GetLedColor()
-      self.leds.Fill(led_color)
 
   def LogPoint(self) -> None:
     """Writes the current point to the data log."""
@@ -182,21 +128,9 @@ class ExitSpeed(object):
     point = self.point
     session = self.session
     point.start_finish_distance = PointDelta(point, session.start_finish)
-    self.UpdateLeds()
+    self.UpdateLeds(point)
     self.LogPoint()
     self.pusher.point_queue.put_nowait((point, self.lap.number))
-
-  def SetBestLap(self, lap: gps_pb2.Lap) -> None:
-    """Sets best lap and builds a KDTree for finding closest points."""
-    if (not self.best_lap or
-        lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
-      logging.info('New Best Lap')
-      self.best_lap = lap
-      x_y_points = []
-      for point in lap.points:
-        x_y_points.append([point.lat, point.lon])
-      self.tree = BallTree(np.array(x_y_points), leaf_size=30,
-                           metric='pyfunc', func=EarthDistanceSmall)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
@@ -218,10 +152,7 @@ class ExitSpeed(object):
         point_a.start_finish_distance > point_b.start_finish_distance and
         point_c.start_finish_distance > point_b.start_finish_distance):
       logging.info('Start/Finish')
-      self.leds.Fill((0, 0, 255),  # Blue
-                     additional_delay=1,
-                     ignore_update_interval=True)
-      self.SetLapTime()
+      self.leds.CrossStartFinish(lap)
       self.AddNewLap()
 
   def ProcessLap(self) -> None:
