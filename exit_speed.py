@@ -80,7 +80,6 @@ class ExitSpeed(object):
       self,
       data_log_path=DEFAULT_LOG_PATH,
       start_finish_range=10,  # Meters, ~2x the width of straightaways.
-      min_points_per_session=60 * 10,  # 1 min @ gps 10hz
       speed_deltas=50,
       live_data=True):
     """Initializer.
@@ -89,7 +88,6 @@ class ExitSpeed(object):
       data_log_path: Path to log the point data.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
-      min_points_per_session:  Used to prevent sessions from prematurely ending.
       speed_deltas:  Used to smooth out GPS data.  This controls how many recent
                      speed deltas are stored.  50 at 10hz means a median of the
                      last 5 seconds is used.
@@ -98,7 +96,6 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
-    self.min_points_per_session = min_points_per_session
     self.leds = leds.LEDs()
 
     self.labjack = labjack.Labjack()
@@ -214,19 +211,18 @@ class ExitSpeed(object):
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     lap = self.lap
-    if len(lap.points) > self.min_points_per_session:
-      point_a = lap.points[-3]
-      point_b = lap.points[-2]
-      point_c = lap.points[-1]  # Latest point.
-      if (point_c.start_finish_distance < self.start_finish_range and
-          point_a.start_finish_distance > point_b.start_finish_distance and
-          point_c.start_finish_distance > point_b.start_finish_distance):
-        logging.info('Start/Finish')
-        self.leds.Fill((0, 0, 255),  # Blue
-                       additional_delay=1,
-                       ignore_update_interval=True)
-        self.SetLapTime()
-        self.AddNewLap()
+    point_a = lap.points[-3]
+    point_b = lap.points[-2]
+    point_c = lap.points[-1]  # Latest point.
+    if (point_c.start_finish_distance < self.start_finish_range and
+        point_a.start_finish_distance > point_b.start_finish_distance and
+        point_c.start_finish_distance > point_b.start_finish_distance):
+      logging.info('Start/Finish')
+      self.leds.Fill((0, 0, 255),  # Blue
+                     additional_delay=1,
+                     ignore_update_interval=True)
+      self.SetLapTime()
+      self.AddNewLap()
 
   def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
