@@ -18,14 +18,11 @@ import collections
 import datetime
 import os
 import statistics
-import time
 from typing import Text
 from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
-import adafruit_dotstar
-import board
 from gps import client
 from gps import EarthDistanceSmall
 from gps import gps
@@ -33,6 +30,7 @@ from gps import WATCH_ENABLE
 from gps import WATCH_NEWSTYLE
 import gps_pb2
 import labjack
+import leds
 import numpy as np
 from sklearn.neighbors import BallTree
 import tensorflow as tf
@@ -83,8 +81,6 @@ class ExitSpeed(object):
       data_log_path=DEFAULT_LOG_PATH,
       start_finish_range=10,  # Meters, ~2x the width of straightaways.
       min_points_per_session=60 * 10,  # 1 min @ gps 10hz
-      led_update_interval=0.2,
-      led_brightness=0.5,
       speed_deltas=50,
       live_data=True):
     """Initializer.
@@ -94,9 +90,6 @@ class ExitSpeed(object):
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
-      led_update_interval:  Controls how often the LEDs can change so as to not
-                            enduce epileptic siezures.
-      led_brightness: A percentage of how bright the LEDs should be.
       speed_deltas:  Used to smooth out GPS data.  This controls how many recent
                      speed deltas are stored.  50 at 10hz means a median of the
                      last 5 seconds is used.
@@ -106,11 +99,8 @@ class ExitSpeed(object):
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
     self.min_points_per_session = min_points_per_session
-    self.led_update_interval = led_update_interval
+    self.leds = leds.LEDs()
 
-    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
-                                         brightness=led_brightness)
-    self.dots.fill((0, 0, 255))  # Blue
     self.labjack = labjack.Labjack()
     self.wide_band = wbo2.WBO2()
     self.tfwriter = None
@@ -121,7 +111,6 @@ class ExitSpeed(object):
     self.point = None
     self.best_lap = None
     self.tree = None
-    self.last_led_update = time.time()
     self.speed_deltas = collections.deque(maxlen=speed_deltas)
 
   def AddNewLap(self) -> None:
@@ -143,14 +132,6 @@ class ExitSpeed(object):
       for point_b in self.best_lap.points:
         if point_b.lat == x and point_b.lon == y:
           return point_b
-
-  def LedInterval(self) -> bool:
-    """Returns True if it is safe to update the LEDs based on interval."""
-    now = time.time()
-    if now - self.last_led_update > self.led_update_interval:
-      self.last_led_update = now
-      return True
-    return False
 
   def GetLedColor(self) -> Tuple[int, int, int]:
     median_delta = self.GetMovingSpeedDelta()
@@ -182,7 +163,7 @@ class ExitSpeed(object):
       best_point = self.FindNearestBestLapPoint()
       self.UpdateSpeedDeltas(point, best_point)
       led_color = self.GetLedColor()
-      self.dots.fill(led_color)
+      self.leds.Fill(led_color)
 
   def LogPoint(self) -> None:
     """Writes the current point to the data log."""
@@ -241,9 +222,9 @@ class ExitSpeed(object):
           point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
         logging.info('Start/Finish')
-        now = time.time()
-        self.last_led_update = now + 1
-        self.dots.fill((0, 0, 255))  # Blue
+        self.leds.Fill((0, 0, 255),  # Blue
+                       additional_delay=1,
+                       ignore_update_interval=True)
         self.SetLapTime()
         self.AddNewLap()
 
