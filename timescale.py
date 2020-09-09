@@ -64,6 +64,7 @@ class Pusher(object):
   def __init__(self, live_data=True):
     self.live_data = live_data
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+    self.manager = multiprocessing.Manager()
     self.timescale_conn = None
     self.session_time = None
     self.track = None
@@ -71,7 +72,7 @@ class Pusher(object):
     self.lap_number_ids = {}
     self.lap_queue = multiprocessing.Queue()
     self.lap_duration_queue = multiprocessing.Queue()
-    self.point_queue = multiprocessing.Queue()
+    self.point_queue = self.manager.list()  # Used as LifoQueue.
     self.lap_id_first_points = {}
 
   def ExportSession(self, cursor):
@@ -110,16 +111,10 @@ class Pusher(object):
       cursor.execute(update_statement, args)
 
   def GetPointFromQueue(self):
-    """Returns the latest point to export metrics for.
-
-    This methods clears the queue based on the current size and then blocks and
-    returns the next point that is added.
-    """
-    if self.live_data:
-      qsize = self.point_queue.qsize()
-      for _ in range(qsize):
-        _ = self.point_queue.get()
-    return self.point_queue.get()
+    """Returns the latest point to export metrics for."""
+    while len(self.point_queue) == 0:
+       pass
+    return self.point_queue.pop()
 
   def GetElapsedTime(self, point, lap_id):
     if not self.lap_id_first_points.get(lap_id):
