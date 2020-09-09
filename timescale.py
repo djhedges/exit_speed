@@ -149,18 +149,23 @@ class Pusher(object):
       cursor.execute(insert_statement, args)
 
   def ConnectToDB(self):
-    self.timescale_conn = psycopg2.connect(
-        'postgres://postgres:postgres@server:/exit_speed')
+    if not self.timescale_conn:
+      self.timescale_conn = psycopg2.connect(
+          'postgres://postgres:postgres@server:/exit_speed')
 
   def Loop(self):
-    self.ConnectToDB()
     while True:
-      with self.timescale_conn.cursor() as cursor:
-        self.ExportSession(cursor)
-        self.ExportLap(cursor)
-        self.UpdateLapDuration(cursor)
-        self.ExportPoint(cursor)
-        self.timescale_conn.commit()
+      try:
+        self.ConnectToDB()
+        with self.timescale_conn.cursor() as cursor:
+          self.ExportSession(cursor)
+          self.ExportLap(cursor)
+          self.UpdateLapDuration(cursor)
+          self.ExportPoint(cursor)
+          self.timescale_conn.commit()
+      except psycopg2.Error:
+        logging.exception('Error writing to timescale database')
+        self.timescale_conn = None
 
   def Start(self, session_time, track):
     self.session_time = session_time
