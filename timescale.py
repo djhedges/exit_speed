@@ -163,7 +163,7 @@ class Pusher(object):
         # and we'll try again.
         self.point_queue.put((point, lap_number))
     except psycopg2.Error:
-      self.point_queue.put((point, lap_number))  # Place back on queue
+      self.point_queue.append((point, lap_number))  # Place back on queue
       raise
 
   def ConnectToDB(self):
