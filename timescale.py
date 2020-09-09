@@ -54,6 +54,7 @@ SELECT create_hypertable('points', 'time');
 """
 
 import multiprocessing
+from absl import logging
 import geohash
 import psycopg2
 
@@ -154,6 +155,7 @@ class Pusher(object):
           'postgres://postgres:postgres@server:/exit_speed')
 
   def Loop(self):
+    """Tries to export point data to the timescale backend."""
     while True:
       try:
         self.ConnectToDB()
