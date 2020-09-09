@@ -36,9 +36,9 @@ class Labjack(object):
     try:
       commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2))
       ain0, ain1, ain2 = self.labjack.getFeedback(*commands)
-      self.fuel_level_voltage = (
+      self.fuel_level_voltage.value = (
           self.labjack.binaryToCalibratedAnalogVoltage(
-              ain1, isLowVoltage=False, channelNumber=0))
+              ain0, isLowVoltage=False, channelNumber=0))
       self.water_temp_voltage.value = (
           self.labjack.binaryToCalibratedAnalogVoltage(
               ain1, isLowVoltage=False, channelNumber=1))

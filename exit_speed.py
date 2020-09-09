@@ -128,7 +128,7 @@ class ExitSpeed(object):
     point = self.point
     session = self.session
     point.start_finish_distance = PointDelta(point, session.start_finish)
-    self.UpdateLeds(point)
+    self.leds.UpdateLeds(point)
     self.LogPoint()
     self.pusher.point_queue.put_nowait((point, self.lap.number))
 
@@ -145,15 +145,16 @@ class ExitSpeed(object):
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     lap = self.lap
-    point_a = lap.points[-3]
-    point_b = lap.points[-2]
-    point_c = lap.points[-1]  # Latest point.
-    if (point_c.start_finish_distance < self.start_finish_range and
-        point_a.start_finish_distance > point_b.start_finish_distance and
-        point_c.start_finish_distance > point_b.start_finish_distance):
-      logging.info('Start/Finish')
-      self.leds.CrossStartFinish(lap)
-      self.AddNewLap()
+    if len(lap.points) > 3:
+      point_a = lap.points[-3]
+      point_b = lap.points[-2]
+      point_c = lap.points[-1]  # Latest point.
+      if (point_c.start_finish_distance < self.start_finish_range and
+          point_a.start_finish_distance > point_b.start_finish_distance and
+          point_c.start_finish_distance > point_b.start_finish_distance):
+        logging.info('Start/Finish')
+        self.leds.CrossStartFinish(lap)
+        self.AddNewLap()
 
   def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
