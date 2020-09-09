@@ -36,8 +36,6 @@ import wbo2
 
 FLAGS = flags.FLAGS
 
-gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
-
 TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (45.363799, -120.744556): 'Oregon Raceway Park',
           (45.595015, -122.694526): 'Portland International Raceway',
@@ -88,12 +86,11 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
+    self.gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
-
     self.labjack = labjack.Labjack()
     self.wide_band = wbo2.WBO2()
     self.tfwriter = None
-
     self.pusher = timescale.Pusher(live_data=live_data)
     self.session = gps_pb2.Session()
     self.AddNewLap()
@@ -207,7 +204,7 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      report = gpsd.next()
+      report = self.gpsd.next()
       self.ProcessReport(report)
 
 
@@ -222,7 +219,7 @@ def main(unused_argv) -> None:
     logging.info('Keyboard interrupt')
   finally:
     logging.info('Done.\nExiting.')
-    gpsd.close()
+    es.gpsd.close()
 
 
 if __name__ == '__main__':
