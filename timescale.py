@@ -112,8 +112,8 @@ class Pusher(object):
 
   def GetPointFromQueue(self):
     """Returns the latest point to export metrics for."""
-    while len(self.point_queue) == 0:
-       pass
+    while not self.point_queue:  # Queue is empty.
+      pass
     return self.point_queue.pop()
 
   def GetElapsedTime(self, point, lap_id):

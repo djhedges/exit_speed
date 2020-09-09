@@ -14,8 +14,8 @@
 # limitations under the License.
 """Library for reading values from labjack."""
 
-import time
 import multiprocessing
+import time
 from absl import logging
 import u3
 
