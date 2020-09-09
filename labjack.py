@@ -27,14 +27,18 @@ class Labjack(object):
     self.labjack_timer_0 = None  # Seconds since last timer read.
     self.water_temp_voltage = multiprocessing.Value('d', 0.0)
     self.oil_pressure_voltage = multiprocessing.Value('d', 0.0)
+    self.fuel_level_voltage = multiprocessing.Value('d', 0.0)
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.process.start()
 
   def ReadValues(self):
     """Reads the labjack voltages."""
     try:
-      commands = (u3.AIN(1), u3.AIN(2))
-      ain1, ain2 = self.labjack.getFeedback(*commands)
+      commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2))
+      ain0, ain1, ain2 = self.labjack.getFeedback(*commands)
+      self.fuel_level_voltage = (
+          self.labjack.binaryToCalibratedAnalogVoltage(
+              ain1, isLowVoltage=False, channelNumber=0))
       self.water_temp_voltage.value = (
           self.labjack.binaryToCalibratedAnalogVoltage(
               ain1, isLowVoltage=False, channelNumber=1))

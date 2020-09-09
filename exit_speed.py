@@ -168,6 +168,7 @@ class ExitSpeed(object):
     """Populate voltage readings if labjack initialzed successfully."""
     point.water_temp_voltage = self.labjack.water_temp_voltage.value
     point.oil_pressure_voltage = self.labjack.oil_pressure_voltage.value
+    point.fuel_level_voltage = self.labjack.fuel_level_voltage.value
 
   def ReadWideBandValues(self, point) -> None:
     """Populate wide band readings."""
