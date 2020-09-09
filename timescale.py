@@ -89,27 +89,36 @@ class Pusher(object):
 
   def ExportLap(self, cursor):
     """Export the lap data to timescale."""
-    if self.lap_queue.qsize() > 0:
-      lap = self.lap_queue.get()
-      insert_statement = """
-      INSERT INTO laps (session_id, number)
-      VALUES (%s, %s)
-      RETURNING id
-      """
-      args = (self.session_id, lap.number)
-      cursor.execute(insert_statement, args)
-      self.lap_number_ids[lap.number] = cursor.fetchone()[0]
+    try:
+      if self.lap_queue.qsize() > 0:
+        lap = self.lap_queue.get()
+        insert_statement = """
+        INSERT INTO laps (session_id, number)
+        VALUES (%s, %s)
+        RETURNING id
+        """
+        args = (self.session_id, lap.number)
+        cursor.execute(insert_statement, args)
+        self.lap_number_ids[lap.number] = cursor.fetchone()[0]
+    except psycopg2.Error:
+      self.lap_queue.put(lap)  # Place lap back on queue.
+      raise
 
   def UpdateLapDuration(self, cursor):
-    if self.lap_duration_queue.qsize() > 0:
-      lap_number, duration = self.lap_duration_queue.get()
-      update_statement = """
-      UPDATE laps
-      SET duration_ms = %s
-      WHERE id = %s
-      """
-      args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
-      cursor.execute(update_statement, args)
+    """Exports lap duration to the Timescale backend."""
+    try:
+      if self.lap_duration_queue.qsize() > 0:
+        lap_number, duration = self.lap_duration_queue.get()
+        update_statement = """
+        UPDATE laps
+        SET duration_ms = %s
+        WHERE id = %s
+        """
+        args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
+        cursor.execute(update_statement, args)
+    except psycopg2.Error:
+      self.lap_duration_queue.put((lap_number, duration))  # Place back on queue
+      raise
 
   def GetPointFromQueue(self):
     """Returns the latest point to export metrics for."""
@@ -125,29 +134,33 @@ class Pusher(object):
 
   def ExportPoint(self, cursor):
     """Exports point data to timescale."""
-    point, lap_number = self.GetPointFromQueue()
-    insert_statement = """
-    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
-    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
-    """
-    lap_id = self.lap_number_ids.get(lap_number)
-    if lap_id:
-      geo_hash = geohash.encode(point.lat, point.lon)
-      elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-      args = (point.time.ToJsonString(),
-              self.session_id,
-              lap_id,
-              point.alt,
-              point.speed * 2.23694,  # m/s to mph,
-              geo_hash,
-              elapsed_duration_ms,
-              point.tps_voltage,
-              point.water_temp_voltage,
-              point.oil_pressure_voltage,
-              point.rpm,
-              point.afr,
-              point.fuel_level_voltage)
-      cursor.execute(insert_statement, args)
+    try:
+      point, lap_number = self.GetPointFromQueue()
+      insert_statement = """
+      INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
+      VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
+      """
+      lap_id = self.lap_number_ids.get(lap_number)
+      if lap_id:
+        geo_hash = geohash.encode(point.lat, point.lon)
+        elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
+        args = (point.time.ToJsonString(),
+                self.session_id,
+                lap_id,
+                point.alt,
+                point.speed * 2.23694,  # m/s to mph,
+                geo_hash,
+                elapsed_duration_ms,
+                point.tps_voltage,
+                point.water_temp_voltage,
+                point.oil_pressure_voltage,
+                point.rpm,
+                point.afr,
+                point.fuel_level_voltage)
+        cursor.execute(insert_statement, args)
+    except psycopg2.Error:
+      self.point_queue.put((point, lap_number))  # Place back on queue
+      raise
 
   def ConnectToDB(self):
     if not self.timescale_conn:
