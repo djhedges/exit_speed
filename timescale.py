@@ -158,6 +158,10 @@ class Pusher(object):
                 point.afr,
                 point.fuel_level_voltage)
         cursor.execute(insert_statement, args)
+      else:
+        # Point arrived on the queue before the lap.  Place it back in the queue
+        # and we'll try again.
+        self.point_queue.put((point, lap_number))
     except psycopg2.Error:
       self.point_queue.put((point, lap_number))  # Place back on queue
       raise
