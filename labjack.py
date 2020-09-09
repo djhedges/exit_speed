@@ -14,6 +14,7 @@
 # limitations under the License.
 """Library for reading values from labjack."""
 
+import time
 import multiprocessing
 from absl import logging
 import u3
@@ -52,3 +53,4 @@ class Labjack(object):
     self.labjack = u3.U3()
     while True:
       self.ReadValues()
+      time.sleep(0.02)

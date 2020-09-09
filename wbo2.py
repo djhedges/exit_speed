@@ -119,7 +119,7 @@ class WBO2(object):
         self.afr.value = Lambda16ToAFR(lambda_16)
         self.tps_voltage.value = GetBytes(frame, 'user_3')
         rpm_count = GetBytes(frame, 'rpm_count')
-        self.rpm = RPMCountToRPM(rpm_count)
+        self.rpm.value = RPMCountToRPM(rpm_count)
 
 
 def main(unused_argv):
