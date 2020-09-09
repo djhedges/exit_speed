@@ -53,26 +53,25 @@ CREATE TABLE points (
 SELECT create_hypertable('points', 'time');
 """
 
+import multiprocessing
 import geohash
 import psycopg2
-from multiprocessing import Process
-from multiprocessing import Queue
 
 
 class Pusher(object):
   """Interface for publishing data to timescale."""
 
   def __init__(self, live_data=True):
-    self.live_data = False
-    self.process = Process(target=self.Loop, daemon=True)
+    self.live_data = live_data
+    self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.timescale_conn = None
     self.session_time = None
     self.track = None
     self.session_id = None
     self.lap_number_ids = {}
-    self.lap_queue = Queue()
-    self.lap_duration_queue = Queue()
-    self.point_queue = Queue()
+    self.lap_queue = multiprocessing.Queue()
+    self.lap_duration_queue = multiprocessing.Queue()
+    self.point_queue = multiprocessing.Queue()
     self.lap_id_first_points = {}
 
   def ExportSession(self, cursor):
