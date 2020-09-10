@@ -18,7 +18,6 @@ import collections
 import statistics
 import time
 from typing import Tuple
-from absl import app
 from absl import flags
 from absl import logging
 import adafruit_dotstar
@@ -75,7 +74,9 @@ class LEDs(object):
                         to blue for a full second.
       ignore_update_interval: If True skips the update interval check.
     """
-    if ignore_update_interval or self.LedInterval(additional_delay):
+    update = self.LedInterval(additional_delay)
+    logging.info('Update FFS %s', update)
+    if ignore_update_interval or update:
       self.dots.fill(color)
 
   def FindNearestBestLapPoint(self, point: gps_pb2.Point) -> gps_pb2.Point:
@@ -137,9 +138,3 @@ class LEDs(object):
               additional_delay=1,
               ignore_update_interval=True)
     self.SetBestLap(lap)
-
-def main(_):
-  import pdb; pdb.set_trace()
-
-if __name__ == '__main__':
-  app.run(main)
