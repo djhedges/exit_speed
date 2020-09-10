@@ -82,7 +82,7 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
-    self.gpsd = gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
+    self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
     self.labjack = labjack.Labjack()
     self.wide_band = wbo2.WBO2()
