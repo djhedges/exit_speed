@@ -68,8 +68,8 @@ http://wbo2.com/2a0/default.htm
 
 ## Software Design Choices
 
-Python has suprisingly been able to keep up with the GPS 10hz output.  Ideally
-this should be rewritten in Go or C++.
+Python has suprisingly been able to keep up with the GPS 10hz output and export
+data at 20hz.  Ideally this should be rewritten in Go or C++.
 
 I've always wanted to play with the multriprocessing module and it has proved
 useful.  For example the metrics which are uploaded to Timescale are done in a

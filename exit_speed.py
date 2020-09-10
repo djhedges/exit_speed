@@ -21,11 +21,7 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
-from gps import client
-from gps import EarthDistanceSmall
-from gps import gps
-from gps import WATCH_ENABLE
-from gps import WATCH_NEWSTYLE
+import gps
 import gps_pb2
 import labjack
 import leds
@@ -48,8 +44,8 @@ DEFAULT_LOG_PATH = '/home/pi/lap_logs'
 
 def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
   """Returns the distance between two points."""
-  return EarthDistanceSmall((point_a.lat, point_a.lon),
-                            (point_b.lat, point_b.lon))
+  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
+                                (point_b.lat, point_b.lon))
 
 
 def FindClosestTrack(
@@ -86,7 +82,7 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
-    self.gpsd = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
+    self.gpsd = gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
     self.labjack = labjack.Labjack()
     self.wide_band = wbo2.WBO2()
@@ -174,7 +170,7 @@ class ExitSpeed(object):
     point.afr = self.wide_band.afr.value
     point.rpm = self.wide_band.rpm.value
 
-  def PopulatePoint(self, report: client.dictwrapper) -> None:
+  def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
     lap = self.lap
     point = lap.points.add()
@@ -194,7 +190,7 @@ class ExitSpeed(object):
       self.session.start_finish.lon = start_finish.lon
       self.pusher.Start(point.time, track)
 
-  def ProcessReport(self, report: client.dictwrapper) -> None:
+  def ProcessReport(self, report: gps.client.dictwrapper) -> None:
     """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
