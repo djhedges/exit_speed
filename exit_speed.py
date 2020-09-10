@@ -82,6 +82,7 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
+    self.last_gps_report = None
     self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
     self.labjack = labjack.Labjack()
@@ -194,8 +195,11 @@ class ExitSpeed(object):
     """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if report['class'] == 'TPV' and report.mode == 3:
-      self.PopulatePoint(report)
-      self.ProcessSession()
+      if (not self.last_gps_report or
+          self.last_gps_report != report.time):
+        self.PopulatePoint(report)
+        self.ProcessSession()
+        self.last_gps_report = report.time
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""
