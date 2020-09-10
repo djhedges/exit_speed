@@ -48,7 +48,7 @@ class LEDs(object):
     self.last_led_update = time.time()
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=FLAGS.led_brightness)
-    self.Fill((0, 0, 255))  # Blue
+    self.Fill((0, 0, 255), ignore_update_interval=True)  # Blue
     self.tree = None
     self.speed_deltas = collections.deque(maxlen=FLAGS.speed_deltas)
     self.best_lap = None
