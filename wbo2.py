@@ -105,21 +105,28 @@ def RPMCountToRPM(rpm_count):
 class WBO2(object):
   """Interface for the WBO2 wideband lambda/AFR controller."""
 
-  def __init__(self):
-    self.afr = multiprocessing.Value('d', 0.0)
+  def __init__(self, config):
+    self.config = {}
+    self.values = {'afr': multiprocessing.Value('d', 0.0),
+                   'rpm': multiprocessing.Value('d', 0.0)}
     self.tps_voltage = multiprocessing.Value('d', 0.0)
-    self.rpm = multiprocessing.Value('i', 0)
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.process.start()
+
+  def _AddConfigValues(self):
+    if self.config.get('wbo2'):
+      for point_value in self.config.values():
+        self.values[point_value] = multiprocessing.Value('d', 0.0)
 
   def Loop(self):
     with serial.Serial('/dev/ttyUSB0', 19200) as ser:
       for frame in ReadSerial(ser):
         lambda_16 = GetBytes(frame, 'lambda_16')
-        self.afr.value = Lambda16ToAFR(lambda_16)
-        self.tps_voltage.value = GetBytes(frame, 'user_3')
+        self.values['afr'].value = Lambda16ToAFR(lambda_16)
         rpm_count = GetBytes(frame, 'rpm_count')
-        self.rpm.value = RPMCountToRPM(rpm_count)
+        self.values['rpm'].value = RPMCountToRPM(rpm_count)
+        for frame_key, point_value in self.config['wbo2'].items():
+          self.values['tps_voltage'].value = GetBytes(frame, frame_key)
 
 
 def main(unused_argv):

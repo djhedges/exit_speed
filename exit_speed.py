@@ -88,7 +88,7 @@ class ExitSpeed(object):
     self.leds = leds.LEDs()
     config = config_lib.LoadConfig()
     self.labjack = labjack.Labjack(config)
-    self.wide_band = wbo2.WBO2()
+    self.wbo2 = wbo2.WBO2(config)
     self.tfwriter = None
     self.pusher = timescale.Pusher(live_data=live_data)
     self.session = gps_pb2.Session()
@@ -166,11 +166,10 @@ class ExitSpeed(object):
     for point_value, voltage in self.labjack.voltage_values.items():
       setattr(point, point_value, voltage.value)
 
-  def ReadWideBandValues(self, point) -> None:
+  def ReadWBO2Values(self, point) -> None:
     """Populate wide band readings."""
-    point.tps_voltage = self.wide_band.tps_voltage.value
-    point.afr = self.wide_band.afr.value
-    point.rpm = self.wide_band.rpm.value
+    for point_value, value in self.wbo2.values.items():
+      setattr(point, point_value, value.value)
 
   def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
@@ -182,7 +181,7 @@ class ExitSpeed(object):
     point.speed = report.speed
     point.time.FromJsonString(report.time)
     self.ReadLabjackValues(point)
-    self.ReadWideBandValues(point)
+    self.ReadWBO2Values(point)
     self.point = point
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)

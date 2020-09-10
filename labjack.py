@@ -63,7 +63,6 @@ class Labjack(object):
               channelNumber=command.positiveChannel)
         point_value = self.command_point_value[command]
         self.voltage_values[point_value].value = voltage
-        print(result, voltage, point_value, command)
     except u3.LabJackException:
       logging.exception('Error reading labjack values')
 
