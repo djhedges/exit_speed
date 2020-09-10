@@ -1,0 +1,6 @@
+labjack:
+  ain0: fuel_level_voltage
+  ain1: water_temp_voltage
+  ain2: oil_pressure_voltage
+wbo2:
+  user_3: tps_voltage
