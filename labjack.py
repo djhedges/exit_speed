@@ -15,7 +15,6 @@
 """Library for reading values from labjack."""
 
 import multiprocessing
-import time
 from absl import logging
 import u3
 
@@ -25,7 +24,6 @@ class Labjack(object):
 
   def __init__(self):
     self.labjack = None
-    self.labjack_timer_0 = None  # Seconds since last timer read.
     self.water_temp_voltage = multiprocessing.Value('d', 0.0)
     self.oil_pressure_voltage = multiprocessing.Value('d', 0.0)
     self.fuel_level_voltage = multiprocessing.Value('d', 0.0)
@@ -53,4 +51,3 @@ class Labjack(object):
     self.labjack = u3.U3()
     while True:
       self.ReadValues()
-      time.sleep(0.02)
