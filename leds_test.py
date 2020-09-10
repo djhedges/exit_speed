@@ -13,55 +13,134 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import time
 import unittest
 import mock
 import adafruit_dotstar
+from absl import flags
 from absl.testing import absltest
 import leds
+import gps_pb2
+
+FLAGS = flags.FLAGS
 
 
 class TestLEDs(unittest.TestCase):
 
   def setUp(self):
-    self.led = leds.LEDs()
-    self.led.last_led_update = time.time() - self.led.led_update_interval
+    self.leds = leds.LEDs()
+    self.leds.last_led_update = time.time() - self.leds.led_update_interval
     self.mock_dots = mock.create_autospec(adafruit_dotstar.DotStar,
                                           spec_set=True)
-    self.led.dots = self.mock_dots
+    self.leds.dots = self.mock_dots
 
   def testLedInterval(self):
-    self.assertTrue(self.led.LedInterval())
-    self.assertFalse(self.led.LedInterval())
-    time.sleep(self.led.led_update_interval)
-    self.led.LedInterval(additional_delay=10)
-    self.assertGreater(time.time() + 5, self.led.led_update_interval)
+    self.assertTrue(self.leds.LedInterval())
+    self.assertFalse(self.leds.LedInterval())
+    time.sleep(self.leds.led_update_interval)
+    self.leds.LedInterval(additional_delay=10)
+    self.assertGreater(time.time() + 5, self.leds.led_update_interval)
 
   def testFill(self):
     color = (255, 255, 255)
-    self.led.Fill(color)
+    self.leds.Fill(color)
     self.mock_dots.fill.assert_called_once_with(color)
     self.mock_dots.fill.reset_mock()
 
-    self.led.Fill(color, ignore_update_interval=True)
+    self.leds.Fill(color, ignore_update_interval=True)
     self.mock_dots.fill.assert_called_once_with(color)
     self.mock_dots.fill.reset_mock()
 
-    self.led.Fill(color, additional_delay=10, ignore_update_interval=True)
-    self.assertGreater(time.time() + 5, self.led.led_update_interval)
+    self.leds.Fill(color, additional_delay=10, ignore_update_interval=True)
+    self.assertGreater(time.time() + 5, self.leds.led_update_interval)
     self.mock_dots.fill.assert_called_once_with(color)
+
+  def testFindNearestBestLapPoint(self):
+    lap = gps_pb2.Lap()
+    point = lap.points.add()
+    point.lat = 1
+    point.lon = 1
+    point = lap.points.add()
+    point.lat = 5
+    point.lon = 5
+    point = lap.points.add()
+    point.lat = 20
+    point.lon = 20
+
+    self.leds.SetBestLap(lap)  # Build the tree.
+    point = gps_pb2.Point()
+    point.lat = 4
+    point.lon = 4
+    nearest = self.leds.FindNearestBestLapPoint(point)
+    self.assertEqual(nearest.lat, 5)
+    self.assertEqual(nearest.lon, 5)
 
   def testGetLedColor(self):
     red = (255, 0, 0)
     green = (0, 255, 0)
-    self.led.speed_deltas = [1]
-    self.assertEqual(red, self.led.GetLedColor())
-    self.led.speed_deltas = [-1]
-    self.assertEqual(green, self.led.GetLedColor())
+    self.leds.speed_deltas = [1]
+    self.assertEqual(red, self.leds.GetLedColor())
+    self.leds.speed_deltas = [-1]
+    self.assertEqual(green, self.leds.GetLedColor())
 
   def testGetMovingSpeedDelta(self):
-    self.led.speed_deltas = [-100, 5, 100]
-    self.assertEqual(5, self.led.GetMovingSpeedDelta())
+    self.leds.speed_deltas = [-100, 5, 100]
+    self.assertEqual(5, self.leds.GetMovingSpeedDelta())
+
+  def testUpdateSpeedDeltas(self):
+    point = gps_pb2.Point()
+    point.speed = 88  # mph
+    best_point = gps_pb2.Point()
+    best_point.speed = 87
+    self.leds.UpdateSpeedDeltas(point, best_point)
+    deltas = collections.deque(maxlen=FLAGS.speed_deltas)
+    deltas.append(-1.0)
+    self.assertSequenceEqual(deltas, self.leds.speed_deltas)
+
+  @mock.patch.object(leds.LEDs, 'Fill')
+  def testUpdateLeds(self, mock_fill):
+    lap = gps_pb2.Lap()
+    point = lap.points.add()
+    point.speed = 88  # mph
+    self.leds.UpdateLeds(point)
+    self.assertFalse(mock_fill.mock_calls)  # No BallTree yet.
+
+    self.leds.SetBestLap(lap)  # Used to build the BallTree.
+    self.leds.UpdateLeds(point)
+    color = (0, 255, 0)  # Green
+    mock_fill.assert_called_once_with(color)
+    deltas = collections.deque(maxlen=FLAGS.speed_deltas)
+    deltas.append(0.0)
+    self.assertSequenceEqual(deltas, self.leds.speed_deltas)
+
+  def testSetBestLap(self):
+    lap = gps_pb2.Lap()
+    lap.duration.FromSeconds(100)
+    point = lap.points.add()
+    point.speed = 88  # mph
+
+    self.leds.SetBestLap(lap)
+    first_tree = self.leds.tree
+
+    lap = gps_pb2.Lap()
+    lap.duration.FromSeconds(99)
+    point = lap.points.add()
+    point.speed = 88  # mph
+    self.leds.SetBestLap(lap)
+    self.assertFalse(first_tree == self.leds.tree)
+
+  @mock.patch.object(leds.LEDs, 'Fill')
+  def testCrossStartFinish(self, mock_fill):
+    lap = gps_pb2.Lap()
+    lap.duration.FromSeconds(100)
+    point = lap.points.add()
+    point.speed = 88  # mph
+    self.leds.CrossStartFinish(lap)
+    blue = (0, 0, 255)
+    mock_fill.assert_called_once_with(blue,
+                                      additional_delay=1,
+                                      ignore_update_interval=True)
 
 
 if __name__ == '__main__':
