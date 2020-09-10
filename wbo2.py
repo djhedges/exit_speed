@@ -106,7 +106,7 @@ class WBO2(object):
   """Interface for the WBO2 wideband lambda/AFR controller."""
 
   def __init__(self, config):
-    self.config = {}
+    self.config = config
     self.values = {'afr': multiprocessing.Value('d', 0.0),
                    'rpm': multiprocessing.Value('d', 0.0)}
     self.tps_voltage = multiprocessing.Value('d', 0.0)
@@ -126,7 +126,7 @@ class WBO2(object):
         rpm_count = GetBytes(frame, 'rpm_count')
         self.values['rpm'].value = RPMCountToRPM(rpm_count)
         for frame_key, point_value in self.config['wbo2'].items():
-          self.values['tps_voltage'].value = GetBytes(frame, frame_key)
+          self.values[point_value].value = GetBytes(frame, frame_key)
 
 
 def main(unused_argv):

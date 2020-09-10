@@ -15,9 +15,7 @@
 """Library for reading values from labjack."""
 
 import multiprocessing
-from absl import app
 from absl import logging
-import gps_pb2
 import u3
 
 
@@ -33,6 +31,7 @@ class Labjack(object):
     self.process.start()
 
   def _BuildCommands(self):
+    """Builds the list of feedback commands to send to the labjack device."""
     commands = []
     command_point_value = {}
     if self.config.get('labjack'):
@@ -59,8 +58,9 @@ class Labjack(object):
       for command in self.commands:
         result = results[self.commands.index(command)]
         voltage = self.u3.binaryToCalibratedAnalogVoltage(
-              result, isLowVoltage=False,
-              channelNumber=command.positiveChannel)
+            result,
+            isLowVoltage=False,
+            channelNumber=command.positiveChannel)
         point_value = self.command_point_value[command]
         self.voltage_values[point_value].value = voltage
     except u3.LabJackException:
