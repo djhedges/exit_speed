@@ -109,13 +109,13 @@ class WBO2(object):
     self.config = config
     self.values = {'afr': multiprocessing.Value('d', 0.0),
                    'rpm': multiprocessing.Value('d', 0.0)}
-    self.tps_voltage = multiprocessing.Value('d', 0.0)
+    self._AddConfigValues()
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.process.start()
 
   def _AddConfigValues(self):
     if self.config.get('wbo2'):
-      for point_value in self.config.values():
+      for point_value in self.config['wbo2'].values():
         self.values[point_value] = multiprocessing.Value('d', 0.0)
 
   def Loop(self):
