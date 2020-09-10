@@ -50,6 +50,7 @@ class LEDs(object):
     self.Fill((0, 0, 255))  # Blue
     self.tree = None
     self.speed_deltas = collections.deque(maxlen=FLAGS.speed_deltas)
+    self.best_lap = None
 
   def LedInterval(self,
                   additional_delay: float = 0) -> bool:
@@ -116,7 +117,7 @@ class LEDs(object):
       best_point = self.FindNearestBestLapPoint(point)
       self.UpdateSpeedDeltas(point, best_point)
       led_color = self.GetLedColor()
-      self.leds.Fill(led_color)
+      self.Fill(led_color)
 
   def SetBestLap(self, lap: gps_pb2.Lap) -> None:
     """Sets best lap and builds a KDTree for finding closest points."""
@@ -131,7 +132,7 @@ class LEDs(object):
                            metric='pyfunc', func=EarthDistanceSmall)
 
   def CrossStartFinish(self, lap: gps_pb2.Lap) -> None:
-    self.leds.Fill((0, 0, 255),  # Blue
-                   additional_delay=1,
-                   ignore_update_interval=True)
+    self.Fill((0, 0, 255),  # Blue
+              additional_delay=1,
+              ignore_update_interval=True)
     self.SetBestLap(lap)

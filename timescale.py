@@ -135,33 +135,34 @@ class Pusher(object):
   def ExportPoint(self, cursor):
     """Exports point data to timescale."""
     try:
-      point, lap_number = self.GetPointFromQueue()
-      insert_statement = """
-      INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
-      VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
-      """
-      lap_id = self.lap_number_ids.get(lap_number)
-      if lap_id:
-        geo_hash = geohash.encode(point.lat, point.lon)
-        elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-        args = (point.time.ToJsonString(),
-                self.session_id,
-                lap_id,
-                point.alt,
-                point.speed * 2.23694,  # m/s to mph,
-                geo_hash,
-                elapsed_duration_ms,
-                point.tps_voltage,
-                point.water_temp_voltage,
-                point.oil_pressure_voltage,
-                point.rpm,
-                point.afr,
-                point.fuel_level_voltage)
-        cursor.execute(insert_statement, args)
-      else:
-        # Point arrived on the queue before the lap.  Place it back in the queue
-        # and we'll try again.
-        self.point_queue.put((point, lap_number))
+      if self.point_queue:  # Laps can be queue without points.
+        point, lap_number = self.GetPointFromQueue()
+        insert_statement = """
+        INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
+        VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
+        """
+        lap_id = self.lap_number_ids.get(lap_number)
+        if lap_id:
+          geo_hash = geohash.encode(point.lat, point.lon)
+          elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
+          args = (point.time.ToJsonString(),
+                  self.session_id,
+                  lap_id,
+                  point.alt,
+                  point.speed * 2.23694,  # m/s to mph,
+                  geo_hash,
+                  elapsed_duration_ms,
+                  point.tps_voltage,
+                  point.water_temp_voltage,
+                  point.oil_pressure_voltage,
+                  point.rpm,
+                  point.afr,
+                  point.fuel_level_voltage)
+          cursor.execute(insert_statement, args)
+        else:
+          # Point arrived on the queue before the lap.  Place it back in the
+          # queue and we'll try again.
+          self.point_queue.append((point, lap_number))
     except psycopg2.Error:
       self.point_queue.append((point, lap_number))  # Place back on queue
       raise

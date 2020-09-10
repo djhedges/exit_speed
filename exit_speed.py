@@ -94,7 +94,6 @@ class ExitSpeed(object):
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
-    self.best_lap = None
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -102,7 +101,7 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
-    self.pusher.lap_queue.put_nowait(lap)
+    self.pusher.lap_queue.put(lap)
 
   def LogPoint(self) -> None:
     """Writes the current point to the data log."""
@@ -136,7 +135,7 @@ class ExitSpeed(object):
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
     lap.duration.FromNanoseconds(delta)
     self.SetBestLap(lap)
-    self.pusher.lap_duration_queue.put_nowait((lap.number, lap.duration))
+    self.pusher.lap_duration_queue.put((lap.number, lap.duration))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
