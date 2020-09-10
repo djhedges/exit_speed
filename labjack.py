@@ -15,39 +15,59 @@
 """Library for reading values from labjack."""
 
 import multiprocessing
+from absl import app
 from absl import logging
+import gps_pb2
 import u3
 
 
 class Labjack(object):
   """Interface for the labjack DAQ."""
 
-  def __init__(self):
-    self.labjack = None
-    self.water_temp_voltage = multiprocessing.Value('d', 0.0)
-    self.oil_pressure_voltage = multiprocessing.Value('d', 0.0)
-    self.fuel_level_voltage = multiprocessing.Value('d', 0.0)
+  def __init__(self, config):
+    self.config = config
+    self.u3 = None
+    self.commands, self.command_point_value = self._BuildCommands()
+    self.voltage_values = self._BuildValues()
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.process.start()
+
+  def _BuildCommands(self):
+    commands = []
+    command_point_value = {}
+    if self.config.get('labjack'):
+      for input_name, point_value in self.config['labjack'].items():
+        input_type = input_name[0:3]
+        channel = int(input_name[-1])
+        feedback_command = getattr(u3, input_type.upper())
+        command = feedback_command(channel)
+        commands.append(command)
+        command_point_value[command] = point_value
+    return commands, command_point_value
+
+  def _BuildValues(self):
+    values = {}
+    if self.config.get('labjack'):
+      for point_value in self.config['labjack'].values():
+        values[point_value] = multiprocessing.Value('d', 0.0)
+    return values
 
   def ReadValues(self):
     """Reads the labjack voltages."""
     try:
-      commands = (u3.AIN(0), u3.AIN(1), u3.AIN(2))
-      ain0, ain1, ain2 = self.labjack.getFeedback(*commands)
-      self.fuel_level_voltage.value = (
-          self.labjack.binaryToCalibratedAnalogVoltage(
-              ain0, isLowVoltage=False, channelNumber=0))
-      self.water_temp_voltage.value = (
-          self.labjack.binaryToCalibratedAnalogVoltage(
-              ain1, isLowVoltage=False, channelNumber=1))
-      self.oil_pressure_voltage.value = (
-          self.labjack.binaryToCalibratedAnalogVoltage(
-              ain2, isLowVoltage=False, channelNumber=2))
+      results = self.u3.getFeedback(*self.commands)
+      for command in self.commands:
+        result = results[self.commands.index(command)]
+        voltage = self.u3.binaryToCalibratedAnalogVoltage(
+              result, isLowVoltage=False,
+              channelNumber=command.positiveChannel)
+        point_value = self.command_point_value[command]
+        self.voltage_values[point_value].value = voltage
+        print(result, voltage, point_value, command)
     except u3.LabJackException:
       logging.exception('Error reading labjack values')
 
   def Loop(self):
-    self.labjack = u3.U3()
+    self.u3 = u3.U3()
     while True:
       self.ReadValues()

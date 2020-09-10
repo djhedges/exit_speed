@@ -21,6 +21,7 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import config_lib
 import gps
 import gps_pb2
 import labjack
@@ -85,7 +86,8 @@ class ExitSpeed(object):
     self.last_gps_report = None
     self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
-    self.labjack = labjack.Labjack()
+    config = config_lib.LoadConfig()
+    self.labjack = labjack.Labjack(config)
     self.wide_band = wbo2.WBO2()
     self.tfwriter = None
     self.pusher = timescale.Pusher(live_data=live_data)
@@ -161,9 +163,8 @@ class ExitSpeed(object):
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
-    point.water_temp_voltage = self.labjack.water_temp_voltage.value
-    point.oil_pressure_voltage = self.labjack.oil_pressure_voltage.value
-    point.fuel_level_voltage = self.labjack.fuel_level_voltage.value
+    for point_value, voltage in self.labjack.voltage_values.items():
+      setattr(point, point_value, voltage.value)
 
   def ReadWideBandValues(self, point) -> None:
     """Populate wide band readings."""
