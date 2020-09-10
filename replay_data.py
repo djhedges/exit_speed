@@ -25,6 +25,7 @@ import exit_speed
 from gps import client
 
 FLAGS = flags.FLAGS
+FLAGS.set_default('led_brightness', 0.05)
 flags.DEFINE_string('filepath', None, 'Path to the data file to replay')
 flags.mark_flag_as_required('filepath')
 flags.DEFINE_boolean('include_sleep', True,
@@ -61,7 +62,6 @@ def ReplayLog(filepath, include_sleep=False):
     time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
     session_start = None
   es = exit_speed.ExitSpeed(data_log_path='/tmp',  # Dont clobber on replay.
-                            led_brightness=0.05,
                             live_data=include_sleep)
   for point in points:
     if include_sleep:
