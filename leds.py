@@ -75,7 +75,6 @@ class LEDs(object):
       ignore_update_interval: If True skips the update interval check.
     """
     update = self.LedInterval(additional_delay)
-    logging.info('Update FFS %s', update)
     if ignore_update_interval or update:
       self.dots.fill(color)
 
