@@ -15,6 +15,10 @@
 """Library for reading values from labjack."""
 
 import multiprocessing
+from typing import Dict
+from typing import List
+from typing import Text
+from typing import Tuple
 from absl import logging
 import u3
 
@@ -31,7 +35,8 @@ class Labjack(object):
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
 
-  def _BuildCommands(self):
+  def _BuildCommands(self) -> Tuple[List[u3.FeedbackCommand],
+                                    Dict[u3.FeedbackCommand, Text]]:
     """Builds the list of feedback commands to send to the labjack device."""
     commands = []
     command_proto_field = {}
@@ -45,7 +50,7 @@ class Labjack(object):
         command_proto_field[command] = proto_field
     return commands, command_proto_field
 
-  def _BuildValues(self):
+  def _BuildValues(self) -> Dict[Text, multiprocessing.Value]:
     values = {}
     if self.config.get('labjack'):
       for proto_field in self.config['labjack'].values():
