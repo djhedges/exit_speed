@@ -19,8 +19,15 @@ https://www.wbo2.com/sw/logger.htm Frame and byte info.
 
 import multiprocessing
 from absl import app
+from absl import flags
 import serial
 
+FLAGS = flags.FLAGS
+flags.DEFINE_float('stoichiometric', 14.7,
+                   'This is used to convert the Lambda_16 bytes into '
+                   'an A/F ratio. This should be changed based on fuel.'
+                   'Petrol 14.7, LGP 15.5, Methanol 6.4, Diesel 14.5')
+# http://techedge.com.au/vehicle/wbo2/wblambda.htm
 
 FRAME_SIZE = 28
 # {'frame_type': (slice_left, slice_right)}
@@ -96,7 +103,7 @@ def Lambda16ToAFR(lambda_16):
   # http://techedge.com.au/vehicle/wbo2/wblambda.htm
   # https://www.wbo2.com/sw/lambda-16.htm
   # 14.7 = Unleaded stoichiometric point.
-  return ((lambda_16 / 8192) + 0.5) * 14.7
+  return ((lambda_16 / 8192) + 0.5) * FLAGS.stoichiometric
 
 
 def RPMCountToRPM(rpm_count):
