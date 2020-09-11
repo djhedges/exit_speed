@@ -18,6 +18,8 @@ https://www.wbo2.com/sw/logger.htm Frame and byte info.
 """
 
 import multiprocessing
+from typing import Generator
+from typing import Text
 from absl import app
 from absl import flags
 import serial
@@ -54,7 +56,7 @@ FRAME_FORMAT = {
 # pylint: enable=bad-whitespace
 
 
-def FindFrameStart(ser):
+def FindFrameStart(ser) -> bytes:
   """Find the frame's header start bytes based on the terminal stream."""
   while True:
     header_byte_1 = None
@@ -72,11 +74,11 @@ def FindFrameStart(ser):
       return header_byte_1 + header_byte_2 + ser.read(FRAME_SIZE - 2)
 
 
-def CheckFrame(frame):
+def CheckFrame(frame) -> bool:
   return sum(frame) & 0b11111111 == 0xFF
 
 
-def ReadSerial(ser):
+def ReadSerial(ser) -> Generator[bytes, None, None]:
   yield FindFrameStart(ser)
   while True:
     frame = ser.read(FRAME_SIZE)
@@ -84,7 +86,7 @@ def ReadSerial(ser):
       yield frame
 
 
-def GetBytes(frame, frame_key):
+def GetBytes(frame: bytes, frame_key: Text) -> float:
   """Converts byte data into something usable."""
   low, high = FRAME_FORMAT[frame_key]
   frame_bytes = frame[low:high]
@@ -99,14 +101,14 @@ def GetBytes(frame, frame_key):
   return int.from_bytes(frame_bytes, 'big')
 
 
-def Lambda16ToAFR(lambda_16):
+def Lambda16ToAFR(lambda_16: float) -> float:
   # http://techedge.com.au/vehicle/wbo2/wblambda.htm
   # https://www.wbo2.com/sw/lambda-16.htm
   # 14.7 = Unleaded stoichiometric point.
   return ((lambda_16 / 8192) + 0.5) * FLAGS.stoichiometric
 
 
-def RPMCountToRPM(rpm_count):
+def RPMCountToRPM(rpm_count: float) -> float:
   if rpm_count:
     us_between_pulse = rpm_count * 5
     minute = 60 * 10 ** 6  # 60 seconds > microseconds
