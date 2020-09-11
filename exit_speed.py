@@ -158,6 +158,7 @@ class ExitSpeed(object):
           point_c.start_finish_distance > point_b.start_finish_distance):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish(lap)
+        self.SetLapTime()
         self.AddNewLap()
 
   def ProcessLap(self) -> None:
