@@ -52,13 +52,13 @@ def FindFrameStart(ser):
   while True:
     header_byte_1 = None
     header_byte_2 = None
-    b = ser.read()
-    if b[0] == 0x5a:
-      header_byte_1 = b
+    byte = ser.read()
+    if byte[0] == 0x5a:
+      header_byte_1 = byte
     if header_byte_1:
-      b = ser.read()
-      if b[0] == 0xa5:
-        header_byte_2 = b
+      byte = ser.read()
+      if byte[0] == 0xa5:
+        header_byte_2 = byte
       else:
         header_byte_1 = None  # Reset, perhaps another byte was set to 0x5a.
     if header_byte_1 and header_byte_2:
@@ -78,9 +78,15 @@ def ReadSerial(ser):
 
 
 def GetBytes(frame, frame_key):
+  """Converts byte data into something usable."""
   low, high = FRAME_FORMAT[frame_key]
   frame_bytes = frame[low:high]
-  if 'user' in frame_key:
+  if 'lambda_16' == frame_key:
+    return Lambda16ToAFR(int.from_bytes(frame_bytes, 'big'))
+  if 'rpm_count' == frame_key:
+    print(frame_bytes)
+    return RPMCountToRPM(int.from_bytes(frame_bytes, 'big'))
+  elif 'user' in frame_key:
     return int.from_bytes(frame_bytes, 'big') / 8184 * 5
   elif 'thermocouple' in frame_key:
     return int.from_bytes(frame_bytes, 'big') / 1023 * 5 / 101
@@ -105,13 +111,13 @@ def RPMCountToRPM(rpm_count):
 class WBO2(object):
   """Interface for the WBO2 wideband lambda/AFR controller."""
 
-  def __init__(self, config):
+  def __init__(self, config, start_process=True):
     self.config = config
-    self.values = {'afr': multiprocessing.Value('d', 0.0),
-                   'rpm': multiprocessing.Value('d', 0.0)}
+    self.values = {}
     self._AddConfigValues()
-    self.process = multiprocessing.Process(target=self.Loop, daemon=True)
-    self.process.start()
+    if start_process:
+      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self.process.start()
 
   def _AddConfigValues(self):
     if self.config.get('wbo2'):
@@ -121,10 +127,6 @@ class WBO2(object):
   def Loop(self):
     with serial.Serial('/dev/ttyUSB0', 19200) as ser:
       for frame in ReadSerial(ser):
-        lambda_16 = GetBytes(frame, 'lambda_16')
-        self.values['afr'].value = Lambda16ToAFR(lambda_16)
-        rpm_count = GetBytes(frame, 'rpm_count')
-        self.values['rpm'].value = RPMCountToRPM(rpm_count)
         for frame_key, point_value in self.config['wbo2'].items():
           self.values[point_value].value = GetBytes(frame, frame_key)
 
@@ -134,6 +136,7 @@ def main(unused_argv):
     for frame in ReadSerial(ser):
       rpm_count = GetBytes(frame, 'rpm_count')
       print(RPMCountToRPM(rpm_count))
+      import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':
