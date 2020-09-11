@@ -56,13 +56,14 @@ SELECT create_hypertable('points', 'time');
 import multiprocessing
 from absl import logging
 import geohash
+import gps_pb2
 import psycopg2
 
 
 class Pusher(object):
   """Interface for publishing data to timescale."""
 
-  def __init__(self, live_data=True):
+  def __init__(self, live_data: bool = True):
     self.live_data = live_data
     self.process = multiprocessing.Process(target=self.Loop, daemon=True)
     self.manager = multiprocessing.Manager()
@@ -76,7 +77,7 @@ class Pusher(object):
     self.point_queue = self.manager.list()  # Used as LifoQueue.
     self.lap_id_first_points = {}
 
-  def ExportSession(self, cursor):
+  def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
       insert_statement = """
       INSERT INTO sessions (time, track)
@@ -87,8 +88,9 @@ class Pusher(object):
       cursor.execute(insert_statement, args)
       self.session_id = cursor.fetchone()[0]
 
-  def ExportLap(self, cursor):
+  def ExportLap(self, cursor: psycopg2.extensions.cursor):
     """Export the lap data to timescale."""
+    lap = None
     try:
       if self.lap_queue.qsize() > 0:
         lap = self.lap_queue.get()
@@ -101,11 +103,13 @@ class Pusher(object):
         cursor.execute(insert_statement, args)
         self.lap_number_ids[lap.number] = cursor.fetchone()[0]
     except psycopg2.Error:
-      self.lap_queue.put(lap)  # Place lap back on queue.
+      if lap:
+        self.lap_queue.put(lap)  # Place lap back on queue.
       raise
 
-  def UpdateLapDuration(self, cursor):
+  def UpdateLapDuration(self, cursor: psycopg2.extensions.cursor):
     """Exports lap duration to the Timescale backend."""
+    lap_number, duration = None, None
     try:
       if self.lap_duration_queue.qsize() > 0:
         lap_number, duration = self.lap_duration_queue.get()
@@ -117,7 +121,9 @@ class Pusher(object):
         args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
         cursor.execute(update_statement, args)
     except psycopg2.Error:
-      self.lap_duration_queue.put((lap_number, duration))  # Place back on queue
+      if lap_number:
+        # Place back on queue
+        self.lap_duration_queue.put((lap_number, duration))
       raise
 
   def GetPointFromQueue(self):
@@ -126,16 +132,17 @@ class Pusher(object):
       pass
     return self.point_queue.pop()
 
-  def GetElapsedTime(self, point, lap_id):
+  def GetElapsedTime(self, point: gps_pb2.Point, lap_id: int):
     if not self.lap_id_first_points.get(lap_id):
       self.lap_id_first_points[lap_id] = point
     first_point = self.lap_id_first_points[lap_id]
     return point.time.ToMilliseconds() - first_point.time.ToMilliseconds()
 
-  def ExportPoint(self, cursor):
+  def ExportPoint(self, cursor: psycopg2.extensions.cursor):
     """Exports point data to timescale."""
+    point, lap_number = None, None
     try:
-      if self.point_queue:  # Laps can be queue without points.
+      if self.point_queue:  # Laps can be queued without points.
         point, lap_number = self.GetPointFromQueue()
         insert_statement = """
         INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
@@ -164,7 +171,8 @@ class Pusher(object):
           # queue and we'll try again.
           self.point_queue.append((point, lap_number))
     except psycopg2.Error:
-      self.point_queue.append((point, lap_number))  # Place back on queue
+      if point:
+        self.point_queue.append((point, lap_number))  # Place back on queue
       raise
 
   def ConnectToDB(self):
