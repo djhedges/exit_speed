@@ -16,12 +16,12 @@
 import collections
 import time
 import unittest
-import mock
-import adafruit_dotstar
 from absl import flags
 from absl.testing import absltest
-import leds
+import adafruit_dotstar
 import gps_pb2
+import leds
+import mock
 
 FLAGS = flags.FLAGS
 
@@ -29,6 +29,7 @@ FLAGS = flags.FLAGS
 class TestLEDs(unittest.TestCase):
 
   def setUp(self):
+    super(TestLEDs, self).setUp()
     self.leds = leds.LEDs()
     self.leds.last_led_update = time.time() - self.leds.led_update_interval
     self.mock_dots = mock.create_autospec(adafruit_dotstar.DotStar,
@@ -128,7 +129,7 @@ class TestLEDs(unittest.TestCase):
     point = lap.points.add()
     point.speed = 88  # mph
     self.leds.SetBestLap(lap)
-    self.assertFalse(first_tree == self.leds.tree)
+    self.assertNotEqual(first_tree, self.leds.tree)
 
   @mock.patch.object(leds.LEDs, 'Fill')
   def testCrossStartFinish(self, mock_fill):

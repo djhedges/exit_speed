@@ -13,17 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
 import unittest
 from absl.testing import absltest
 import config_lib
 import labjack
+import mock
 import u3
 
 
 class TestLabjack(unittest.TestCase):
 
   def setUp(self):
+    super(TestLabjack, self).setUp()
     config = config_lib.LoadConfig()
     self.labjack = labjack.Labjack(config, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
@@ -39,7 +40,7 @@ class TestLabjack(unittest.TestCase):
     expected_mapping = {0: 'fuel_level_voltage',
                         1: 'water_temp_voltage',
                         2: 'oil_pressure_voltage'}
-    for command, proto_field in command_proto_field.items():
+    for command in command_proto_field:
       self.assertEqual(expected_mapping[command.positiveChannel],
                        command_proto_field[command])
 
@@ -51,12 +52,16 @@ class TestLabjack(unittest.TestCase):
                              self.labjack._BuildValues().keys())
 
   def testReadValues(self):
+    # pylint: disable=invalid-name
+    # pylint: disable=unused-argument
     def _binaryToCalibratedAnalogVoltage(result, isLowVoltage, channelNumber):
       self.assertFalse(isLowVoltage)
       mapping = {32816: 1.5,
                  35696: 2.7,
                  32827: 3.9}
       return mapping[result]
+    # pylint: enable=invalid-name
+    # pylint: enable=unused-argument
     self.mock_u3.getFeedback.return_value = [32816, 35696, 32827]
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = _binaryToCalibratedAnalogVoltage
     self.labjack.ReadValues()

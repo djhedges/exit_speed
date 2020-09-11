@@ -14,12 +14,12 @@
 # limitations under the License.
 
 import unittest
+from absl import flags
+from absl.testing import absltest
 import exit_speed
 from gps import client
 import gps_pb2
 import mock
-from absl import flags
-from absl.testing import absltest
 import tensorflow as tf
 
 FLAGS = flags.FLAGS

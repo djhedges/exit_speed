@@ -13,20 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import serial
-import multiprocessing
-import mock
 import unittest
 from absl.testing import absltest
 import config_lib
+import mock
+import serial
 import wbo2
 
-TEST_FRAME = b'Z\xa5\x08\x0c\xf8\x0f\xff \x00\x020\x01`\x03\xd0\x00\x15\x00\x1a\x00 \x01\xa4\x00\x00\x03\x00i'
+TEST_FRAME = (b'Z\xa5\x08\x0c\xf8\x0f\xff \x00\x020\x01`\x03\xd0\x00\x15\x00'
+              b'\x1a\x00 \x01\xa4\x00\x00\x03\x00i')
 
 
 class TestWBO2(unittest.TestCase):
 
   def setUp(self):
+    super(TestWBO2, self).setUp()
     self.start = 0
 
   def MockRead(self, size=1):

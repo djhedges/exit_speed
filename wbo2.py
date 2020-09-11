@@ -135,7 +135,6 @@ def main(unused_argv):
     for frame in ReadSerial(ser):
       rpm_count = GetBytes(frame, 'rpm_count')
       print(RPMCountToRPM(rpm_count))
-      import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':

@@ -14,8 +14,8 @@
 # limitations under the License.
 """Libaries for parsing yaml configs for Exit Speed."""
 
-import yaml
 from absl import flags
+import yaml
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('config_path', './config.yaml',
