@@ -84,7 +84,6 @@ def GetBytes(frame, frame_key):
   if 'lambda_16' == frame_key:
     return Lambda16ToAFR(int.from_bytes(frame_bytes, 'big'))
   if 'rpm_count' == frame_key:
-    print(frame_bytes)
     return RPMCountToRPM(int.from_bytes(frame_bytes, 'big'))
   elif 'user' in frame_key:
     return int.from_bytes(frame_bytes, 'big') / 8184 * 5
