@@ -1,3 +1,5 @@
+leds: True
+timescale: True
 labjack:
   ain0: fuel_level_voltage
   ain1: water_temp_voltage

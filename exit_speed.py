@@ -83,17 +83,26 @@ class ExitSpeed(object):
     """
     self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
+    self.live_data = live_data
     self.last_gps_report = None
+
+    self.InitializeSubProcesses()
     self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
-    config = config_lib.LoadConfig()
-    self.labjack = labjack.Labjack(config)
-    self.wbo2 = wbo2.WBO2(config)
     self.tfwriter = None
-    self.pusher = timescale.Pusher(live_data=live_data)
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
+
+  def InitializeSubProcesses(self):
+    """Initialize subprocess modules based on config.yaml."""
+    self.config = config_lib.LoadConfig()
+    if self.config.get('labjack'):
+      self.labjack = labjack.Labjack(self.config)
+    if self.config.get('wbo2'):
+      self.wbo2 = wbo2.WBO2(self.config)
+    if self.config.get('timescale'):
+      self.pusher = timescale.Pusher(live_data=self.live_data)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -134,13 +143,13 @@ class ExitSpeed(object):
     last_point = lap.points[-1]
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
     lap.duration.FromNanoseconds(delta)
-    self.SetBestLap(lap)
+    self.leds.SetBestLap(lap)
     self.pusher.lap_duration_queue.put((lap.number, lap.duration))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     lap = self.lap
-    if len(lap.points) > 3:
+    if len(lap.points) >= 3:
       point_a = lap.points[-3]
       point_b = lap.points[-2]
       point_c = lap.points[-1]  # Latest point.
@@ -162,13 +171,15 @@ class ExitSpeed(object):
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
-    for point_value, voltage in self.labjack.voltage_values.items():
-      setattr(point, point_value, voltage.value)
+    if self.config.get('labjack'):
+      for point_value, voltage in self.labjack.voltage_values.items():
+        setattr(point, point_value, voltage.value)
 
   def ReadWBO2Values(self, point) -> None:
     """Populate wide band readings."""
-    for point_value, value in self.wbo2.values.items():
-      setattr(point, point_value, value.value)
+    if self.config.get('wbo2'):
+      for point_value, value in self.wbo2.values.items():
+        setattr(point, point_value, value.value)
 
   def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
@@ -209,6 +220,7 @@ class ExitSpeed(object):
 
 def main(unused_argv) -> None:
   logging.get_absl_handler().use_absl_log_file()
+  es = None
   try:
     while True:
       logging.info('Starting Run')
@@ -218,7 +230,8 @@ def main(unused_argv) -> None:
     logging.info('Keyboard interrupt')
   finally:
     logging.info('Done.\nExiting.')
-    es.gpsd.close()
+    if es:
+      es.gpsd.close()
 
 
 if __name__ == '__main__':

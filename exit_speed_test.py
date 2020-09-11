@@ -18,7 +18,12 @@ import exit_speed
 from gps import client
 import gps_pb2
 import mock
+from absl import flags
+from absl.testing import absltest
 import tensorflow as tf
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('config_path', 'testdata/test_config.yaml')
 
 
 class TestExitSpeed(unittest.TestCase):
@@ -43,15 +48,6 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.lat, 45.595412)
     self.assertEqual(point.lon, -122.693901)
 
-  def testGetLedColor(self):
-    es = exit_speed.ExitSpeed()
-    es.speed_deltas.extend([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    self.assertTupleEqual(es.GetLedColor(), (255, 0, 0))
-    es.speed_deltas.extend([0, -1, -2, -3, -4, -5, -6, -7, -8, -9])
-    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
-    es.speed_deltas.extend([0, 1, 2, 3, 4, -5, -6, -7, -8, -9])
-    self.assertTupleEqual(es.GetLedColor(), (0, 255, 0))
-
   def testProcessPoint(self):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000
@@ -66,7 +62,7 @@ class TestExitSpeed(unittest.TestCase):
     mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
     es.writer = mock_writer
     es.ProcessPoint()
-    self.assertEqual(14083839.944018112, point.start_finish_distance)
+    self.assertEqual(2856514.6203466402, point.start_finish_distance)
 
   def testSetLapTime(self):
     es = exit_speed.ExitSpeed()
@@ -82,7 +78,7 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     es.SetLapTime()
     self.assertEqual(76, lap.duration.ToSeconds())
-    self.assertEqual(es.best_lap, lap)
+    self.assertEqual(es.leds.best_lap, lap)
 
   def testCrossStartFinish(self):
     params = ((2, 1, 3, 2),  # Start finish cross.
@@ -101,7 +97,7 @@ class TestExitSpeed(unittest.TestCase):
       session.start_finish.lon = -122.694526
       lap = session.laps.add()
       lap.points.extend([point_a, point_b, point_c])
-      es = exit_speed.ExitSpeed(min_points_per_session=1)
+      es = exit_speed.ExitSpeed()
       es.lap = lap
       es.session = session
       es.CrossStartFinish()
@@ -109,6 +105,7 @@ class TestExitSpeed(unittest.TestCase):
 
   def testProcessLap(self):
     es = exit_speed.ExitSpeed()
+    es.point = es.lap.points.add()
     es.ProcessLap()
     self.assertTrue(es.lap.points)
 
@@ -185,5 +182,6 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.time.seconds, 1576733064)
     self.assertEqual(point.time.nanos, 100000000)
 
+
 if __name__ == '__main__':
-  unittest.main()
+  absltest.main()

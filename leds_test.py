@@ -77,12 +77,12 @@ class TestLEDs(unittest.TestCase):
     self.assertEqual(nearest.lon, 5)
 
   def testGetLedColor(self):
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    self.leds.speed_deltas = [1]
-    self.assertEqual(red, self.leds.GetLedColor())
-    self.leds.speed_deltas = [-1]
-    self.assertEqual(green, self.leds.GetLedColor())
+    self.leds.speed_deltas.extend([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    self.assertTupleEqual(self.leds.GetLedColor(), (255, 0, 0))
+    self.leds.speed_deltas.extend([0, -1, -2, -3, -4, -5, -6, -7, -8, -9])
+    self.assertTupleEqual(self.leds.GetLedColor(), (0, 255, 0))
+    self.leds.speed_deltas.extend([0, 1, 2, 3, 4, -5, -6, -7, -8, -9])
+    self.assertTupleEqual(self.leds.GetLedColor(), (0, 255, 0))
 
   def testGetMovingSpeedDelta(self):
     self.leds.speed_deltas = [-100, 5, 100]
