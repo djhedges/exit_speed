@@ -20,13 +20,10 @@ CREATE TYPE track AS ENUM('Test Parking Lot',
                           'The Ridge Motorsport Park',
                           'Pacific Raceway',
                           'Spokane Raceway');
-DROP TABLE points;
-DROP TABLE laps;
-DROP TABLE sessions;
 CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
   time             TIMESTAMPTZ       NOT NULL,
-  track            track             NOT NULL
+  track            track             NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
