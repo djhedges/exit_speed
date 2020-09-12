@@ -1,28 +1,13 @@
 # Notes for setting up Timescale
 
-## Local Timescale on the Pi
 
-### Install Timescale and Postgres
+## Remote Timescale Setup
 
-Install Timescale and Postgres
-```
-sudo apt-get install timescaledb-1.7.1-postgresql-11
-```
+This was done on Debian GNU/Linux 10 (buster) on a remote server.
 
-Add `shared_preload_libraries = 'timescaledb'` to `/etc/postgresql/11/main/postgresql.conf`.
+Install mostly consists of following the steps here.
+https://docs.timescale.com/latest/getting-started/installation/debian/installation-apt-debian
 
-```
-```
-
-Tune & Restart
-
-```
-sudo apt-get install golang git postgresql-server-dev-11
-sudo go get github.com/timescale/timescaledb-tune/cmd/timescaledb-tune
-git clone github.com/timescale/timescaledb-tune/cmd/timescaledb-tune
-sudo go run timescaledb-tune/cmd/timescaledb-tune/main.go --quiet --yes
-sudo service postgresql restart
-```
 
 ### Create database and tables
 
@@ -71,7 +56,7 @@ SELECT create_hypertable('points', 'time');
 EXIT;
 ```
 
-Add a database user.
+## Add a database user.
 
 ```
 sudo -u postgres psql postgres -d exit_speed
@@ -82,22 +67,18 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO exit_speed;
 EXIT;
 ```
 
-## Remote Timescale Setup
+## Allow connections from the Pi
 
-This was done on Debian GNU/Linux 10 (buster) on a remote server.
-
-Install mostly consists of following the steps here.
-https://docs.timescale.com/latest/getting-started/installation/debian/installation-apt-debian
+Add the following to the end of `/etc/postgresql/12/main/pg_hba.conf`
 
 ```
-sudo apt-get install wget
-echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -c -s)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt-get update
-sudo sh -c "echo 'deb https://packagecloud.io/timescale/timescaledb/debian/ `lsb_release -c -s` main' > /etc/apt/sources.list.d/timescaledb.list"
-wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install timescaledb-postgresql-12
-sudo timescaledb-tune --quiet --yes
-sudo service postgresql restart
+host    exit_speed      all             10.3.1.3/32             md5
 ```
+
+Modify the following in `/etc/postgresql/12/main/postgresql.conf`
+
+```
+listen_addresses = 'localhost,10.3.1.1'
+```
+
+Finally restart with `sudo service postgresql restart`
