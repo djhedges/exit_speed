@@ -12,44 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Database schema.
-
-CREATE TYPE track AS ENUM('Test Parking Lot',
-                          'Oregon Raceway Park',
-                          'Portland International Raceway',
-                          'The Ridge Motorsport Park',
-                          'Pacific Raceway',
-                          'Spokane Raceway');
-CREATE TABLE sessions(
-  id               SERIAL            PRIMARY KEY,
-  time             TIMESTAMPTZ       NOT NULL,
-  track            track             NOT NULL,
-  live_data        BOOLEAN           DEFAULT TRUE
-);
-CREATE TABLE laps(
-  id               SERIAL            PRIMARY KEY,
-  session_id       INT               REFERENCES sessions (id),
-  number           INT               NOT NULL,
-  duration_ms      INT
-);
-
-CREATE TABLE points (
-  time                  TIMESTAMPTZ       NOT NULL,
-  session_id            INT               REFERENCES sessions (id),
-  lap_id                INT               REFERENCES laps (id),
-  alt                   TEXT              NOT NULL,
-  speed                 FLOAT             NOT NULL,
-  geohash               TEXT              NOT NULL,
-  elapsed_duration_ms   INT               NOT NULL,
-  tps_voltage           FLOAT,
-  water_temp_voltage    FLOAT,
-  oil_pressure_voltage  FLOAT,
-  rpm                   FLOAT,
-  afr                   FLOAT,
-  fuel_level_voltage    FLOAT
-);
-SELECT create_hypertable('points', 'time');
-"""
+"""Timescale interface for exporting data."""
 
 import multiprocessing
 from absl import logging
