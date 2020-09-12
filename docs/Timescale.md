@@ -1,35 +1,38 @@
 # Notes for setting up Timescale
 
-This was done on Debian GNU/Linux 10 (buster).
+## Local Timescale on the Pi
 
-## Install Timescale and Postgres
+### Install Timescale and Postgres
 
-Install mostly consists of following the steps here.
-https://docs.timescale.com/latest/getting-started/installation/debian/installation-apt-debian
+Install Timescale and Postgres
+```
+sudo apt-get install timescaledb-1.7.1-postgresql-11
+```
+
+Add `shared_preload_libraries = 'timescaledb'` to `/etc/postgresql/11/main/postgresql.conf`.
 
 ```
-sudo apt-get install wget
-echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -c -s)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt-get update
-sudo sh -c "echo 'deb https://packagecloud.io/timescale/timescaledb/debian/ `lsb_release -c -s` main' > /etc/apt/sources.list.d/timescaledb.list"
-wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
-sudo apt-get update
+```
 
-# Now install appropriate package for PG version
-sudo apt-get install timescaledb-postgresql-12
-sudo timescaledb-tune --quiet --yes
+Tune & Restart
+
+```
+sudo apt-get install golang git postgresql-server-dev-11
+sudo go get github.com/timescale/timescaledb-tune/cmd/timescaledb-tune
+git clone github.com/timescale/timescaledb-tune/cmd/timescaledb-tune
+sudo go run timescaledb-tune/cmd/timescaledb-tune/main.go --quiet --yes
 sudo service postgresql restart
 ```
 
-## Create database and tables
+### Create database and tables
 
 Connect to the database with `sudo -u postgres psql postgres`
 
 Then run the following statements:
 
 ```
-CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+CREATE DATABASE exit_speed;
+\c exit_speed;
 CREATE TYPE track AS ENUM('Test Parking Lot',
                           'Oregon Raceway Park',
                           'Portland International Raceway',
@@ -63,5 +66,38 @@ CREATE TABLE points (
   afr                   FLOAT,
   fuel_level_voltage    FLOAT
 );
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 SELECT create_hypertable('points', 'time');
+EXIT;
+```
+
+Add a database user.
+
+```
+sudo -u postgres psql postgres -d exit_speed
+CREATE USER exit_speed WITH PASSWORD 'faster';
+GRANT ALL PRIVILEGES ON DATABASE exit_speed TO exit_speed;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO exit_speed;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO exit_speed;
+EXIT;
+```
+
+## Remote Timescale Setup
+
+This was done on Debian GNU/Linux 10 (buster) on a remote server.
+
+Install mostly consists of following the steps here.
+https://docs.timescale.com/latest/getting-started/installation/debian/installation-apt-debian
+
+```
+sudo apt-get install wget
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -c -s)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+sudo sh -c "echo 'deb https://packagecloud.io/timescale/timescaledb/debian/ `lsb_release -c -s` main' > /etc/apt/sources.list.d/timescaledb.list"
+wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install timescaledb-postgresql-12
+sudo timescaledb-tune --quiet --yes
+sudo service postgresql restart
 ```
