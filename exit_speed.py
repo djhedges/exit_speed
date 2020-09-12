@@ -231,6 +231,7 @@ def main(unused_argv) -> None:
     logging.info('Keyboard interrupt')
   finally:
     logging.info('Done.\nExiting.')
+    logging.exception('Ensure we log any exceptions')
     if es:
       es.gpsd.close()
 
