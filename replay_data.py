@@ -62,7 +62,7 @@ def ReplayLog(filepath, include_sleep=False):
     time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
     session_start = None
   es = exit_speed.ExitSpeed(data_log_path='/tmp',  # Dont clobber on replay.
-                            live_data=include_sleep)
+                            live_data=not include_sleep)
   for point in points:
     if include_sleep:
       point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)

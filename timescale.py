@@ -27,11 +27,12 @@ CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
   time             TIMESTAMPTZ       NOT NULL,
   track            track             NOT NULL
+  live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
   id               SERIAL            PRIMARY KEY,
   session_id       INT               REFERENCES sessions (id),
-  number       INT               NOT NULL,
+  number           INT               NOT NULL,
   duration_ms      INT
 );
 
@@ -80,11 +81,11 @@ class Pusher(object):
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
       insert_statement = """
-      INSERT INTO sessions (time, track)
-      VALUES (%s, %s)
+      INSERT INTO sessions (time, track, live_data)
+      VALUES (%s, %s, %s)
       RETURNING id
       """
-      args = (self.session_time.ToJsonString(), self.track)
+      args = (self.session_time.ToJsonString(), self.track, self.live_data)
       cursor.execute(insert_statement, args)
       self.session_id = cursor.fetchone()[0]
 
