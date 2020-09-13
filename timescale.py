@@ -24,15 +24,12 @@ from absl import logging
 import geohash
 import gps_pb2
 import psycopg2
+from psycopg2 import extras
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
                     'postgres://exit_speed:faster@cloud:/exit_speed',
                     'Postgres URI connection string.')
-
-def ConnectToDB() -> psycopg2.extensions.connection:
-  return psycopg2.connect(FLAGS.timescale_db_spec)
-
 
 SESSION_INSERT = textwrap.dedent("""
 INSERT INTO sessions (time, track, live_data)
@@ -49,10 +46,31 @@ UPDATE laps
 SET duration_ms = %s
 WHERE id = %s
 """)
-POINT_INSERT = textwrap.dedent("""
-INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
-VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
+POINT_PREPARE = textwrap.dedent("""
+PREPARE point_insert AS
+INSERT INTO points (time, session_id, lap_id, alt, speed, geohash,
+                    elapsed_duration_ms, tps_voltage, water_temp_voltage,
+                    oil_pressure_voltage, rpm, afr, fuel_level_voltage)
+VALUES ($1, $2, $3, $4, $5,
+        $6, $7, $8, $9, $10,
+        $11, $12, $13)
 """)
+POINT_INSERT = textwrap.dedent("""
+EXECUTE point_insert (%s, %s, %s, %s, %s,
+                      %s, %s, %s, %s, %s,
+                      %s, %s, %s)
+""")
+
+
+def ConnectToDB() -> psycopg2.extensions.connection:
+  return psycopg2.connect(FLAGS.timescale_db_spec)
+
+
+def _GetConnWithPointPrepare():
+  conn = ConnectToDB()
+  with conn.cursor() as cursor:
+    cursor.execute(POINT_PREPARE)
+  return conn
 
 
 class Pusher(object):
@@ -150,7 +168,7 @@ class Pusher(object):
     point = None
     try:
       if not self.timescale_conn:
-        self.timescale_conn = ConnectToDB()
+        self.timescale_conn = _GetConnWithPointPrepare()
       lap = self.GetLapFromQueue()
       lap_number_und_duration = self.GetLapDurationFromQueue()
       point_und_lap_number = self.GetPointFromQueue()
