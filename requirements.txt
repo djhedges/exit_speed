@@ -1,1 +1,3 @@
 absl-py
+adafruit-circuitpython-dotstar
+yaml
