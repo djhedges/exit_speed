@@ -7,7 +7,6 @@ python:
 install:
   - sudo apt-get install autoconf automake libtool curl make g++ wget unzip
   - pip3 install -r requirements.txt
-after install:
 script:
   - bash compile_protobuf.sh
   - pytest
