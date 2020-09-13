@@ -17,7 +17,6 @@
 from absl import app
 from absl import flags
 from absl import logging
-import psycopg2
 import timescale
 
 FLAGS = flags.FLAGS
@@ -27,8 +26,8 @@ flags.DEFINE_integer('max_lap_duration_ms', 60 * 1000 * 3,  # 3 mins.
                      'Nukes laps with duration short than this value.')
 
 
-
 def NukeNonLiveData(conn):
+  """Delete non live data which usually generated during testing."""
   with conn.cursor() as cursor:
     nuke_statement = """
     DELETE FROM points
@@ -43,6 +42,13 @@ def NukeNonLiveData(conn):
 
 
 def NukeLapsWithNoDuration(conn):
+  """Delete any laps without a duration.
+
+  These are usually points logged post session in the paddock.
+
+  Args:
+    conn: A connection to the timescale backend.
+  """
   with conn.cursor() as cursor:
     nuke_statement = """
     DELETE FROM points
@@ -55,6 +61,7 @@ def NukeLapsWithNoDuration(conn):
 
 
 def NukeLapsByDuration(conn):
+  """Delete laps based on time.  These are usually traffic or the out lap."""
   with conn.cursor() as cursor:
     nuke_statement = """
     DELETE FROM points
@@ -71,6 +78,7 @@ def NukeLapsByDuration(conn):
 
 
 def NukeHangingLaps(conn):
+  """Based on prior deletes these cleans up any laps without points."""
   with conn.cursor() as cursor:
     select_statement = """
     SELECT DISTINCT(lap_id) FROM points
@@ -94,6 +102,7 @@ def NukeHangingLaps(conn):
 
 
 def NukeHangingSessions(conn):
+  """Based on prior deletes these cleans up any sessions without laps."""
   with conn.cursor() as cursor:
     select_statement = """
     SELECT DISTINCT(session_id) FROM laps

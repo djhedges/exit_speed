@@ -23,7 +23,6 @@ from absl import logging
 import geohash
 import gps_pb2
 import psycopg2
-from psycopg2 import extras
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
