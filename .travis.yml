@@ -2,6 +2,7 @@ arch:
   - arm64
 dist: buster
 language: python
+cache: pip
 python:
   - "3.7"
 install:
