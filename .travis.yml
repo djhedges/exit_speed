@@ -10,7 +10,9 @@ install:
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
 before script:
-  - sudo /home/travis/exodriver/install.sh
+  - cd exodriver
+  - sudo ./install.sh
+  - cd -
 script:
   - pytest --ignore=/home/travis/djhedges/exit_speed/gps_pb2.py
   - pytype /home/travis/djhedges/exit_speed/*.py
