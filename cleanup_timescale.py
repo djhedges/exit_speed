@@ -18,6 +18,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import psycopg2
+import timescale
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer('min_lap_duration_ms', 60 * 1000,
@@ -25,8 +26,6 @@ flags.DEFINE_integer('min_lap_duration_ms', 60 * 1000,
 flags.DEFINE_integer('max_lap_duration_ms', 60 * 1000 * 3,  # 3 mins.
                      'Nukes laps with duration short than this value.')
 
-
-DB_SPEC = 'postgres://exit_speed:faster@cloud:/exit_speed'
 
 
 def NukeNonLiveData(conn):
@@ -118,7 +117,7 @@ def NukeHangingSessions(conn):
 
 
 def main(unused_argv):
-  with psycopg2.connect(DB_SPEC) as conn:
+  with timescale.ConnectToDB() as conn:
     NukeNonLiveData(conn)
     NukeLapsWithNoDuration(conn)
     NukeLapsByDuration(conn)
