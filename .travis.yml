@@ -7,7 +7,5 @@ python:
   - "3.7"
 install:
   - pip3 install -r requirements.txt
-before script:
-  - djhedges/exit_speed/bin/protoc-3.11.2 -I ./ --python_out ./ gps.proto
 script:
   - pytest
