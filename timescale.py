@@ -15,6 +15,8 @@
 """Timescale interface for exporting data."""
 
 import multiprocessing
+import time
+import textwrap
 from typing import Optional
 from typing import Tuple
 from absl import flags
@@ -30,6 +32,27 @@ flags.DEFINE_string('timescale_db_spec',
 
 def ConnectToDB() -> psycopg2.extensions.connection:
   return psycopg2.connect(FLAGS.timescale_db_spec)
+
+
+SESSION_INSERT = textwrap.dedent("""
+INSERT INTO sessions (time, track, live_data)
+VALUES (%s, %s, %s)
+RETURNING id
+""")
+LAP_INSERT = textwrap.dedent("""
+INSERT INTO laps (session_id, number)
+VALUES (%s, %s)
+RETURNING id
+""")
+LAP_DURATION_UPDATE = textwrap.dedent("""
+UPDATE laps
+SET duration_ms = %s
+WHERE id = %s
+""")
+POINT_INSERT = textwrap.dedent("""
+INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
+VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
+""")
 
 
 class Pusher(object):
@@ -54,24 +77,14 @@ class Pusher(object):
 
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
-      insert_statement = """
-      INSERT INTO sessions (time, track, live_data)
-      VALUES (%s, %s, %s)
-      RETURNING id
-      """
       args = (self.session_time.ToJsonString(), self.track, self.live_data)
-      cursor.execute(insert_statement, args)
+      cursor.execute(SESSION_INSERT, args)
       self.session_id = cursor.fetchone()[0]
 
   def ExportLap(self, lap: gps_pb2.Lap, cursor: psycopg2.extensions.cursor):
     """Export the lap data to timescale."""
-    insert_statement = """
-    INSERT INTO laps (session_id, number)
-    VALUES (%s, %s)
-    RETURNING id
-    """
     args = (self.session_id, lap.number)
-    cursor.execute(insert_statement, args)
+    cursor.execute(LAP_INSERT, args)
     self.lap_number_ids[lap.number] = cursor.fetchone()[0]
 
   def UpdateLapDuration(self,
@@ -79,13 +92,8 @@ class Pusher(object):
                         duration: gps_pb2.Lap.duration,
                         cursor: psycopg2.extensions.cursor):
     """Exports lap duration to the Timescale backend."""
-    update_statement = """
-    UPDATE laps
-    SET duration_ms = %s
-    WHERE id = %s
-    """
     args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
-    cursor.execute(update_statement, args)
+    cursor.execute(LAP_DURATION_UPDATE, args)
 
   def GetElapsedTime(self, point: gps_pb2.Point, lap_id: int) -> int:
     if not self.lap_id_first_points.get(lap_id):
@@ -98,10 +106,6 @@ class Pusher(object):
                   lap_number: int,
                   cursor: psycopg2.extensions.cursor):
     """Exports point data to timescale."""
-    insert_statement = """
-    INSERT INTO points (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms, tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr, fuel_level_voltage)
-    VALUES             (%s,   %s,         %s,     %s,  %s,    %s,      %s,                  %s,          %s,                 %s,                   %s,  %s,  %s)
-    """
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
       geo_hash = geohash.encode(point.lat, point.lon)
@@ -119,7 +123,7 @@ class Pusher(object):
               point.rpm,
               point.afr,
               point.fuel_level_voltage)
-      cursor.execute(insert_statement, args)
+      cursor.execute(POINT_INSERT, args)
     else:
       # Point arrived on the queue before the lap.  Place it back in the
       # queue and we'll try again.
@@ -176,7 +180,10 @@ class Pusher(object):
   def Loop(self):
     """Tries to export point data to the timescale backend."""
     while True:
+      start = time.time()
       self.Do()
+      delta = time.time() - start
+      logging.info(delta)
 
   def Start(self, session_time, track):
     self.session_time = session_time
