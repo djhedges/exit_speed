@@ -17,15 +17,19 @@
 import multiprocessing
 from typing import Optional
 from typing import Tuple
+from absl import flags
 from absl import logging
 import geohash
 import gps_pb2
 import psycopg2
 
+FLAGS = flags.FLAGS
+flags.DEFINE_string('timescale_db_spec',
+                    'postgres://exit_speed:faster@cloud:/exit_speed',
+                    'Postgres URI connection string.')
 
 def ConnectToDB() -> psycopg2.extensions.connection:
-  return psycopg2.connect(
-        'postgres://exit_speed:faster@cloud:/exit_speed')
+  return psycopg2.connect(FLAGS.timescale_db_spec)
 
 
 class Pusher(object):
