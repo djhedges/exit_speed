@@ -11,5 +11,6 @@ install:
   - git clone https://github.com/labjack/exodriver.git
   - cd exodriver
   - sudo ./install.sh
+  - cd -
 script:
   - pytest
