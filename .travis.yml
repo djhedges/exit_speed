@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.7"
+before install:
+  - sudo apt-get install protobuf-compiler
 install:
   - protoc -I ./ --python_out ./ gps.proto
   - pip3 install -r requirements.txt
