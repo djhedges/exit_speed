@@ -6,3 +6,4 @@ protobuf
 psycopg2
 python-geohash
 PyYAML
+testing.postgresql
