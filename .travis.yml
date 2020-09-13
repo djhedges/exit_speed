@@ -15,4 +15,4 @@ before script:
   - cd -
 script:
   - pytest
-  - pytype .*py
+  - pytype
