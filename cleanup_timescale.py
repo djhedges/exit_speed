@@ -26,7 +26,7 @@ flags.DEFINE_integer('max_lap_duration_ms', 60 * 1000 * 3,  # 3 mins.
                      'Nukes laps with duration short than this value.')
 
 
-DB_SPEC = 'postgres://postgres:postgres@server:/exit_speed'
+DB_SPEC = 'postgres://exit_speed:faster@cloud:/exit_speed'
 
 
 def NukeNonLiveData(conn):

@@ -139,7 +139,7 @@ class Pusher(object):
   def ConnectToDB(self):
     if not self.timescale_conn:
       self.timescale_conn = psycopg2.connect(
-          'postgres://postgres:postgres@server:/exit_speed')
+          'postgres://exit_speed:faster@cloud:/exit_speed')
 
   def Loop(self):
     """Tries to export point data to the timescale backend."""
