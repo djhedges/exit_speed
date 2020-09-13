@@ -18,6 +18,8 @@ import time
 import unittest
 from absl import flags
 from absl.testing import absltest
+import adafruit_blinka
+adafruit_blinka.agnostic.detector.chip.id = 'BCM2XXX'
 import adafruit_dotstar
 import gps_pb2
 import leds
