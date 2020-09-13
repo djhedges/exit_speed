@@ -20,7 +20,7 @@ from absl import flags
 from absl.testing import absltest
 # Fixes dotstar import on Travis.
 import adafruit_platformdetect
-with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector
+with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_dotstar
 import gps_pb2
