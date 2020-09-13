@@ -13,7 +13,6 @@ before script:
   - cd exodriver
   - sudo ./install.sh
   - cd -
-  - sed -i '1i# pytype: skip-file' gps_pb2.py
 script:
   - pytest
   - pytype .*py
