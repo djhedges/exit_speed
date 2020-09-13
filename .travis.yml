@@ -9,8 +9,11 @@ install:
   - sudo apt-get install libusb-1.0-0-dev
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
+before script:
   - cd exodriver
   - sudo ./install.sh
   - cd -
+  - sed -i '1i# pytype: skip-file' gps_pb2.py
 script:
   - pytest
+  - pytype .*py

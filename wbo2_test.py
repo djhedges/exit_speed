@@ -71,8 +71,7 @@ class TestWBO2(unittest.TestCase):
     config = config_lib.LoadConfig()
     interface = wbo2.WBO2(config, start_process=False)
     keys = {'afr': None, 'rpm': None, 'tps_voltage': None}.keys()
-    self.assertSequenceEqual(keys,
-                             interface.values.keys())
+    self.assertEqual(keys, interface.values.keys())
 
 
 if __name__ == '__main__':
