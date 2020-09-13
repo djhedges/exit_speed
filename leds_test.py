@@ -18,10 +18,11 @@ import time
 import unittest
 from absl import flags
 from absl.testing import absltest
-import adafruit_blinka
 # Fixes dotstar import on Travis.
-adafruit_blinka.agnostic.detector.chip.id = 'BCM2XXX'
-import adafruit_dotstar
+import adafruit_platformdetect
+with mock.patch.object(adafruit_platformdetect'Detector') as mock_detector
+  mock_detector.chip.id.return_value = 'BCM2XXX'
+  import adafruit_dotstar
 import gps_pb2
 import leds
 import mock
