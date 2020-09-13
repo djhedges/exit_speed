@@ -5,10 +5,8 @@ language: python
 python:
   - "3.7"
 install:
-  - sudo apt-get install autoconf automake libtool curl make g++ wget unzip
   - pip3 install -r requirements.txt
 before script:
-  - protoc -I ./ --python_out ./ gps.proto
+  - bin/protoc-3.11.2 -I ./ --python_out ./ gps.proto
 script:
-  - bash compile_protobuf.sh
   - pytest
