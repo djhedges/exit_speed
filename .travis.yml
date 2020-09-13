@@ -5,8 +5,7 @@ language: python
 python:
   - "3.7"
 install:
-  - sudo apt-get install autoconf automake libtool curl make g++ wget unzip
+  - sudo apt-get install protobuf-compiler
   - pip3 install -r requirements.txt
 script:
-  - bash compile_protobuf.sh
   - pytest

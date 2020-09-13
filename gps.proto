@@ -1,6 +1,6 @@
 // sudo apt install python3-protobuf
 // Compile with protoc -I ./ --python_out ./ gps.proto
-syntax = "proto3";
+syntax = "proto2";
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
@@ -8,28 +8,29 @@ import "google/protobuf/timestamp.proto";
 package gps;
 
 message Point {
-  double lat = 1;
-  double lon = 2;
-  double alt = 3;
-  double speed = 4;  // meters/second
-  google.protobuf.Timestamp time = 5;
-  double start_finish_distance = 6;  // Distance to the start/finish.
-  double tps_voltage = 7;  // Throttle position sensor voltage.
-  double water_temp_voltage = 8;
-  double oil_pressure_voltage = 9;
-  double rpm = 10;
-  double afr = 11;  // Air fuel ratio.
-  double fuel_level_voltage = 12;  // Air fuel ratio.
+  optional double lat = 1;
+  optional double lon = 2;
+  optional double alt = 3;
+  optional double speed = 4;  // meters/second
+  optional google.protobuf.Timestamp time = 5;
+  optional double start_finish_distance = 6;  // Distance to the start/finish.
+  optional double tps_voltage = 7;  // Throttle position sensor voltage.
+  optional double water_temp_voltage = 8;
+  optional double oil_pressure_voltage = 9;
+  optional double rpm = 10;
+  optional double afr = 11;  // Air fuel ratio.
+  optional double fuel_level_voltage = 12;  // Air fuel ratio.
 }
 
 message Lap {
   repeated Point points = 1;
-  google.protobuf.Duration duration = 2;  // Time it took to finish the lap.
-  int32 number = 3;
+  // Time it took to finish the lap.
+  optional google.protobuf.Duration duration = 2;
+  optional int32 number = 3;
 }
 
 message Session {
   repeated Lap laps = 1;
-  string track = 2;
-  Point start_finish = 3;  // Location of start/finish.
+  optional string track = 2;
+  optional Point start_finish = 3;  // Location of start/finish.
 }
