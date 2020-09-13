@@ -100,12 +100,14 @@ class Pusher(object):
       args = (self.session_time.ToJsonString(), self.track, self.live_data)
       cursor.execute(SESSION_INSERT, args)
       self.session_id = cursor.fetchone()[0]
+      self.timescale_conn.commit()
 
   def ExportLap(self, lap: gps_pb2.Lap, cursor: psycopg2.extensions.cursor):
     """Export the lap data to timescale."""
     args = (self.session_id, lap.number)
     cursor.execute(LAP_INSERT, args)
     self.lap_number_ids[lap.number] = cursor.fetchone()[0]
+    self.timescale_conn.commit()
 
   def UpdateLapDuration(self,
                         lap_number: int,
@@ -114,6 +116,7 @@ class Pusher(object):
     """Exports lap duration to the Timescale backend."""
     args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
     cursor.execute(LAP_DURATION_UPDATE, args)
+    self.timescale_conn.commit()
 
   def GetElapsedTime(self, point: gps_pb2.Point, lap_id: int) -> int:
     if not self.lap_id_first_points.get(lap_id):
