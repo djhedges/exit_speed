@@ -3,6 +3,7 @@ adafruit-circuitpython-dotstar
 fake_rpi
 gps
 LabJackPython
+numpy
 protobuf
 psycopg2
 python-geohash

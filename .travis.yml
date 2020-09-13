@@ -12,5 +12,5 @@ install:
 before script:
   - sudo exodriver/install.sh
 script:
-  - pytest --ignore=gps_pb2.py
+  - pytest --ignore=/home/travis/djhedges/exit_speed/gps_pb2.py
   - pytype /home/travis/djhedges/exit_speed/*.py
