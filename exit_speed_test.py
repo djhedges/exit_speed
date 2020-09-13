@@ -14,16 +14,18 @@
 # limitations under the License.
 
 import unittest
+import mock
 from absl import flags
 from absl.testing import absltest
 # Fixes dotstar import on Travis.
 import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
+import adafruit_dotstar
 import exit_speed
+import leds
 from gps import client
 import gps_pb2
-import mock
 import tensorflow as tf
 
 FLAGS = flags.FLAGS
@@ -31,6 +33,13 @@ FLAGS.set_default('config_path', 'testdata/test_config.yaml')
 
 
 class TestExitSpeed(unittest.TestCase):
+
+  def setUp(self):
+    super(TestExitSpeed, self).setUp()
+    mock_star = mock.create_autospec(adafruit_dotstar.DotStar)
+    patch = mock.patch.object(adafruit_dotstar, 'DotStar')
+    patch.return_value = mock_star
+    patch.start()
 
   def testPointDelta(self):
     point_a = gps_pb2.Point()
