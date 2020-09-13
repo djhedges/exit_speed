@@ -5,8 +5,10 @@ language: python
 cache: pip
 python:
   - "3.7"
+before install:
+  - pip3 install --upgrade pip
 install:
-  - sudo apt-get install libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev python3-sklearn
+  - sudo apt-get install libblas3 liblapack3 libusb-1.0-0-dev python3-sklearn
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
 before script:
