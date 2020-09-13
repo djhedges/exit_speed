@@ -5,5 +5,6 @@ LabJackPython
 protobuf
 psycopg2
 python-geohash
+pytype
 PyYAML
 testing.postgresql
