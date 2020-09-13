@@ -3,4 +3,5 @@ adafruit-circuitpython-dotstar
 gps
 LabJackPython
 protobuf
+psycopg2
 PyYAML
