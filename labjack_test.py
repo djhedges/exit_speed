@@ -48,8 +48,7 @@ class TestLabjack(unittest.TestCase):
     expected = {'fuel_level_voltage': None,
                 'water_temp_voltage': None,
                 'oil_pressure_voltage': None}
-    self.assertSequenceEqual(expected.keys(),
-                             self.labjack._BuildValues().keys())
+    self.assertEqual(expected.keys(), self.labjack._BuildValues().keys())
 
   def testReadValues(self):
     # pylint: disable=invalid-name
