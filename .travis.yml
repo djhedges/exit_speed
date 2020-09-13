@@ -7,5 +7,8 @@ python:
   - "3.7"
 install:
   - pip3 install -r requirements.txt
+  - git clone https://github.com/labjack/exodriver.git
+  - cd exodriver
+  - sudo ./install.sh
 script:
   - pytest
