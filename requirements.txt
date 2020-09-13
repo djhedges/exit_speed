@@ -1,5 +1,6 @@
 absl-py
 adafruit-circuitpython-dotstar
 gps
+LabJackPython
 protobuf
 PyYAML
