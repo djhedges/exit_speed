@@ -4,4 +4,5 @@ gps
 LabJackPython
 protobuf
 psycopg2
+python-geohash
 PyYAML
