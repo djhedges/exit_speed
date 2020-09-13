@@ -1,8 +1,10 @@
 absl-py
 adafruit-circuitpython-dotstar
+blas
 fake_rpi
 gps
 LabJackPython
+lapack
 numpy
 protobuf
 psycopg2
