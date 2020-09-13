@@ -6,6 +6,8 @@ cache: pip
 python:
   - "3.7"
 before install:
+  - sudo apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 9165938D90FDDD2E
+  - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
   - pip3 install --upgrade pip
 install:
   - sudo apt-get install libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev python3-sklearn
