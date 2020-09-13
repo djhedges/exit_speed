@@ -15,7 +15,6 @@
 """Timescale interface for exporting data."""
 
 import multiprocessing
-import time
 import textwrap
 from typing import Optional
 from typing import Tuple
@@ -30,6 +29,9 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
                     'postgres://exit_speed:faster@cloud:/exit_speed',
                     'Postgres URI connection string.')
+flags.DEFINE_integer('commit_cycle', 3,
+                     'Number of points to commit at a time.')
+
 
 SESSION_INSERT = textwrap.dedent("""
 INSERT INTO sessions (time, track, live_data)
@@ -92,6 +94,7 @@ class Pusher(object):
     self.lap_duration_queue = multiprocessing.Queue()
     self.point_queue = self.manager.list()  # Used as LifoQueue.
     self.lap_id_first_points = {}
+    self.commit_cycle = 0
 
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
@@ -161,6 +164,14 @@ class Pusher(object):
       pass
     return self.point_queue.pop()
 
+  def _Commit(self):
+    """Commits points to timescale based on FLAGS.commit_cycle."""
+    if self.commit_cycle >= FLAGS.commit_cycle:
+      self.timescale_conn.commit()
+      self.commit_cycle = 0
+    else:
+      self.commit_cycle += 1
+
   def Do(self):
     """One iteration of the infinite loop."""
     lap = None
@@ -183,7 +194,7 @@ class Pusher(object):
         self.ExportPoint(point_und_lap_number[0],
                          point_und_lap_number[1],
                          cursor)
-        self.timescale_conn.commit()
+        self._Commit()
     except psycopg2.Error:
       logging.exception('Error writing to timescale database')
       # Repopulate queues on errors.
@@ -198,10 +209,7 @@ class Pusher(object):
   def Loop(self):
     """Tries to export point data to the timescale backend."""
     while True:
-      start = time.time()
       self.Do()
-      delta = time.time() - start
-      logging.info(delta)
 
   def Start(self, session_time, track):
     self.session_time = session_time
