@@ -17,14 +17,15 @@ install:
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
   - sudo apt install g++ unzip zip
-  # Tensorflow
   - mkdir /tmp/bin
-  - wget https://github.com/bazelbuild/bazel/releases/download/3.5.0/bazel-3.5.0-linux-arm64 /tmp/bin/
-  - chmod +x /tmp/bin/bazel-3.5.0
-  - ln -s /tmp/bin/bazel-3.5.0-linux-arm64 bazel
+  # Bazel for Tensorflow compiling.
+  - cd /tmp/bin/
+  - wget https://github.com/bazelbuild/bazel/releases/download/3.5.0/bazel-3.5.0-linux-arm64
+  - mv bazel-3.5.0-linux-arm64 bazel
+  - chmod +x /tmp/bin/bazel
   - PATH=$PATH:/tmp/bin/
-  - echo $PATH
-  - pwd
+  - cd -
+  # Tensorflow
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
   - git checkout r1.14
