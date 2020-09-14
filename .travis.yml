@@ -19,12 +19,11 @@ install:
   - sudo apt install g++ unzip zip
   - mkdir /tmp/bin
   # Bazel for Tensorflow compiling.
-  - cd /tmp/bin/
-  - wget https://github.com/bazelbuild/bazel/releases/download/3.5.0/bazel-3.5.0-linux-arm64
-  - mv bazel-3.5.0-linux-arm64 bazel
-  - chmod +x /tmp/bin/bazel
-  - PATH=$PATH:/tmp/bin/
-  - cd -
+  - git clone git clone https://github.com/bazelbuild/bazel.git
+  - cd bazel
+  - git checkout 0.26.1
+  - ./compile.sh
+  - PATH=$PATH:$(pwd)/output/bazel
   # Tensorflow
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
