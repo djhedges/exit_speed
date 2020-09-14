@@ -9,7 +9,6 @@ install:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
   - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
   - sudo apt-get update
-  - pip3 install -r requirements.txt
   # Sktree Balltree
   - sudo apt-get install gfortran
   - sudo apt-get install libatlas3-base
@@ -18,12 +17,15 @@ install:
   - sudo apt-get install liblapack-dev
   - sudo apt install g++ unzip zip
   - mkdir /tmp/bin
+  - pip3 install -r requirements.txt
   # Bazel for Tensorflow compiling.
-  - git clone https://github.com/bazelbuild/bazel.git
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-dist.zip
+  - unzip bazel-0.26.1-dist.zip -d bazel
   - cd bazel
   - git checkout 0.26.1
   - ./compile.sh
   - PATH=$PATH:$(pwd)/output/bazel
+  - cd -
   # Tensorflow
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
