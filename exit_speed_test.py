@@ -39,6 +39,13 @@ FLAGS.set_default('config_path', 'testdata/test_config.yaml')
 
 class TestExitSpeed(unittest.TestCase):
 
+  def setUp(self):
+￼   super(TestExitSpeed, self).setUp()
+￼   mock_star = mock.create_autospec(adafruit_dotstar.DotStar)
+￼   patch = mock.patch.object(adafruit_dotstar, 'DotStar')
+￼   patch.return_value = mock_star
+￼   patch.start()
+
   def testPointDelta(self):
     point_a = gps_pb2.Point()
     point_b = gps_pb2.Point()

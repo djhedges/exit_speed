@@ -39,7 +39,10 @@ class TestLEDs(unittest.TestCase):
 
   def setUp(self):
     super(TestLEDs, self).setUp()
-    self.leds = leds.LEDs()
+    mock_star = mock.create_autospec(adafruit_dotstar.DotStar)
+￼   with mock.patch.object(adafruit_dotstar, 'DotStar') as mock_inst:
+￼     mock_inst.return_value = mock_star
+      self.leds = leds.LEDs()
     self.leds.last_led_update = time.time() - self.leds.led_update_interval
     self.mock_dots = mock.create_autospec(adafruit_dotstar.DotStar,
                                           spec_set=True)
