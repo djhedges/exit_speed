@@ -61,7 +61,7 @@ def ConvertTraqmateToProto(filepath):
   Returns:
     A exit speed session proto.
   """
-  es = exit_speed.ExitSpeed(led_brightness=0.05)
+  es = exit_speed.ExitSpeed()
   start = time.time()
   first_elapsed = None
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
