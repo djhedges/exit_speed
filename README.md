@@ -2,6 +2,14 @@
 
 This is not an officially supported Google product.
 
+## Status
+
+[![Build Status](https://travis-ci.org/djhedges/exit_speed/pymvg.png?branch=master)](https://travis-ci.org/djhedges/exit_speed/pymvg)
+
+[![Coverage Status](https://coveralls.io/repos/djhedges/exit_speed/pymvg/badge.png?branch=master)](https://coveralls.io/r/djhedges/exit_speed/pymvg?branch=master)
+
+## Intro
+
 Race car telemetry with a Raspberry Pi.
 
 This project started with a set of LEDs and a USB GPS dongle.  The goal was to
