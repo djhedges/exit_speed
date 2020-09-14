@@ -10,5 +10,5 @@ python-geohash
 pytype
 PyYAML
 RPi.GPIO
-scikit-learn==1.4.1
+scikit-learn
 testing.postgresql
