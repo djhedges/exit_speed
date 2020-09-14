@@ -10,4 +10,5 @@ python-geohash
 pytype
 PyYAML
 RPi.GPIO
+scikit-learn
 testing.postgresql
