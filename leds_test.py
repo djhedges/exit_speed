@@ -24,7 +24,7 @@ import fake_rpi
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
-# Fixes dotstar import on Travis.	import fake_rpi
+# Fixes dotstar import on Travis.
 import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
@@ -40,8 +40,8 @@ class TestLEDs(unittest.TestCase):
   def setUp(self):
     super(TestLEDs, self).setUp()
     mock_star = mock.create_autospec(adafruit_dotstar.DotStar)
-￼   with mock.patch.object(adafruit_dotstar, 'DotStar') as mock_inst:
-￼     mock_inst.return_value = mock_star
+    with mock.patch.object(adafruit_dotstar, 'DotStar') as mock_inst:
+      mock_inst.return_value = mock_star
       self.leds = leds.LEDs()
     self.leds.last_led_update = time.time() - self.leds.led_update_interval
     self.mock_dots = mock.create_autospec(adafruit_dotstar.DotStar,
