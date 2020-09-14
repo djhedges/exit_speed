@@ -4,9 +4,9 @@ This is not an officially supported Google product.
 
 ## Status
 
-[![Build Status](https://travis-ci.org/djhedges/exit_speed/pymvg.png?branch=master)](https://travis-ci.org/djhedges/exit_speed/pymvg)
+[![Build Status](https://travis-ci.org/exit_speed/djhedges.png?branch=master)](https://travis-ci.org/github/djhedges/exit_speed/pymvg)
 
-[![Coverage Status](https://coveralls.io/repos/djhedges/exit_speed/pymvg/badge.png?branch=master)](https://coveralls.io/r/djhedges/exit_speed/pymvg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/exit_speed/djhedges/badge.png?branch=master)](https://coveralls.io/github/djhedges/exit_speed)
 
 ## Intro
 
