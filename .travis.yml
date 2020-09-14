@@ -10,7 +10,7 @@ before install:
   - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
   - sudo apt-get update
 install:
-  - sudo apt-get install gcc-fortran libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev
+  - sudo apt-get install libgfortran5 libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev python3-sklearn python3-sklearn-lib
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
 before script:
