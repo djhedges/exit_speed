@@ -8,21 +8,18 @@ cache:
   - pip
 python:
   - "3.7.3"
-before install:
-#  - sudo apt-get install gfortran
-#  - sudo apt-get install libgfortran5
-#  - sudo apt-get install libblas3
-#  - sudo apt-get install liblapack3
-#  - sudo apt-get install liblapack-dev
-#  - sudo apt-get install libblas-dev
-#  - sudo apt-get install libatlas-base-dev
-  - sudo apt-get install libusb-1.0-0-dev
 install:
+  - sudo apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 9165938D90FDDD2E
+  - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
+  - sudo apt-get update
   - pip3 install -r requirements.txt --extra-index-url https://www.piwheels.org/simple
-  - git clone https://github.com/labjack/exodriver.git
+  # Sktree Balltree
+  - sudo apt install libatlas3-base libgfortran5
   - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple
   - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.org/simple
-before script:
+  # LabJack
+  - sudo apt-get install libusb-1.0-0-dev
+  - git clone https://github.com/labjack/exodriver.git
   - cd exodriver
   - sudo ./install.sh
   - cd -
