@@ -15,14 +15,14 @@ install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
-  #- sudo apt install g++ unzip zip
-  - mkdir /tmp/bin
+  # Python libaries
   - pip3 install -r requirements.txt
   # Bazel for Tensorflow compiling.
+  sudo apt-get install openjdk-11-jdk
   - wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-dist.zip
   - unzip bazel-0.26.1-dist.zip -d bazel
   - cd bazel
-  - ./compile.sh
+  - env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh
   - PATH=$PATH:$(pwd)/output/bazel
   - cd -
   # Tensorflow
