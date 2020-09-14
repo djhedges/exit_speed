@@ -5,9 +5,6 @@ language: python
 cache: pip
 python:
   - "3.7"
-# Used to get scikit working.
-virtualenv:
-  - system_site_packages: true
 install:
   - sudo apt-get install libgfortran5 libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev python3-sklearn python3-sklearn-lib python3-nose python3-pytest python3-matplotlib
   - pip3 install -r requirements.txt
