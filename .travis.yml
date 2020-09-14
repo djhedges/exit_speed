@@ -8,11 +8,13 @@ cache:
 python:
   - "3.7"
 before install:
-  - pip install wheel
+  - pip3 install wheel
 install:
   - sudo apt-get install libgfortran5 libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
+after install:
+  - pip3 install scikit-learn==0.20.2
 before script:
   - cd exodriver
   - sudo ./install.sh
