@@ -39,5 +39,5 @@ install:
   - sudo ./install.sh
   - cd -
 script:
-  - pytest --ignore=/home/travis/build/djhedges/exit_speed/gps_pb2.py
+  - pytest --disable-pytest-warnings
   - pytype /home/travis/build/djhedges/exit_speed/*.py -o /tmp/pytype
