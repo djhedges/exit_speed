@@ -5,6 +5,7 @@ language: python
 cache: pip
 python: "3.7.3"
 install:
+  # Needed for the libgfortran5 package.
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
   - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
   - sudo apt-get update
@@ -15,7 +16,14 @@ install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
+  - sudo apt install g++ unzip zip
   # Tensorflow
+  - mkdir bin
+  - wget https://github.com/bazelbuild/bazel/releases/download/3.5.0/bazel-3.5.0-linux-arm64 bin/bazel
+  - chmod +x bin/bazel
+  - PATH=$PATH:bin/
+  - echo $PATH
+  - pwd
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
   - git checkout r1.14
