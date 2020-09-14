@@ -11,8 +11,8 @@ install:
   - sudo apt-get install gfortran libgfortran5 libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
-  - pip3 install --use-wheel scipy==1.4.1
-  - pip3 install --use-wheel scikit-learn==0.20.2
+  - pip3 install --only-binary scipy==1.4.1
+  - pip3 install --only-binary scikit-learn==0.20.2
 before script:
   - cd exodriver
   - sudo ./install.sh
