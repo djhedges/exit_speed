@@ -13,8 +13,8 @@ install:
   - pip3 install -r requirements.txt --extra-index-url https://www.piwheels.org/simple
   # Sktree Balltree
   - sudo apt install libatlas3-base libgfortran5
-#  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple
-  - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.org/simple
+  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple --platform armv7
+  - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.org/simple --platform armv7
   # LabJack
   - sudo apt-get install libusb-1.0-0-dev
   - git clone https://github.com/labjack/exodriver.git
