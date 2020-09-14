@@ -1,13 +1,11 @@
 os: linux
-arch:
-  - arm64
+arch: arm64
 dist: buster
 language: python
 cache:
   - apt
   - pip
-python:
-  - "3.7.3"
+python: "3.7.3"
 install:
   - sudo apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 9165938D90FDDD2E
   - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
@@ -15,7 +13,7 @@ install:
   - pip3 install -r requirements.txt --extra-index-url https://www.piwheels.org/simple
   # Sktree Balltree
   - sudo apt install libatlas3-base libgfortran5
-  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple
+#  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple
   - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.org/simple
   # LabJack
   - sudo apt-get install libusb-1.0-0-dev
