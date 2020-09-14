@@ -1,3 +1,4 @@
+os: linux
 arch:
   - arm64
 dist: buster
@@ -7,13 +8,21 @@ cache:
   - pip
 python:
   - "3.7.3"
-install:
-  - sudo apt-get install gfortran libgfortran5 libblas3 liblapack3 liblapack-dev libblas-dev libatlas-base-dev libusb-1.0-0-dev
+before install:
+  - sudo apt-get install gfortran
+  - sudo apt-get install libgfortran5
+  - sudo apt-get install libblas3
+  - sudo apt-get install liblapack3
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install libblas-dev
+  - sudo apt-get install libatlas-base-dev
+  - sudo apt-get install libusb-1.0-0-dev
   - pip3 install --upgrade pip
+install:
   - pip3 install -r requirements.txt
+  - pip3 install --only-binary:all scipy==1.4.1
+  - pip3 install --only-binary:all scikit-learn==0.20.2
   - git clone https://github.com/labjack/exodriver.git
-  - pip3 install --only-binary scipy==1.4.1
-  - pip3 install --only-binary scikit-learn==0.20.2
 before script:
   - cd exodriver
   - sudo ./install.sh
