@@ -27,6 +27,7 @@ install:
   - env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh
   - PATH=$PATH:$(pwd)/output/bazel
   - cd -
+  - df -h &
   # Tensorflow
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
