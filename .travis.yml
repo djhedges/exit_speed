@@ -2,9 +2,7 @@ os: linux
 arch: arm64
 dist: buster
 language: python
-cache:
-  - apt
-  - pip
+cache: pip
 python: "3.7.3"
 install:
   - sudo apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 9165938D90FDDD2E
