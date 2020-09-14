@@ -20,8 +20,8 @@ before install:
 install:
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
-  - pip3 install scipy==1.4.1 --index-url https://pypi.python.org/simple
-  - pip3 install scikit-learn==0.20.2 --index-url https://pypi.python.org/simple
+  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.hostedpi.com/simple
+  - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.hostedpi.com/simple
 before script:
   - cd exodriver
   - sudo ./install.sh
