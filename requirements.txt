@@ -1,5 +1,6 @@
 absl-py
 adafruit-circuitpython-dotstar
+Cython
 fake_rpi
 gps
 LabJackPython
