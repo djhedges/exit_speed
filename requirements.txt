@@ -17,6 +17,5 @@ ipython==5.8.0
 pandas==0.23.3
 
 # sckkit-learn deps first.
-pip==18.1
 setuptools==47.1.1
 numpy==1.16.2
