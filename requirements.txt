@@ -14,7 +14,7 @@ testing.postgresql==1.3.0
 # scipy deps
 matplotlib==3.0.2
 ipython==5.8.0
-pandas==0.23.3+dfsg
+pandas==0.23.3
 
 # sckkit-learn deps first.
 pip==18.1
