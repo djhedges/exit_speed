@@ -12,6 +12,7 @@ install:
   - sudo apt-get update
   - pip3 install -r requirements.txt
   # Sktree Balltree
+  - sudo apt-get install gfortran
   - sudo apt-get install libatlas3-base
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
