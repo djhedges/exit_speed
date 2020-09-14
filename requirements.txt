@@ -12,3 +12,4 @@ PyYAML
 RPi.GPIO
 scikit-learn
 testing.postgresql
+wheel
