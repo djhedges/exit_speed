@@ -2,8 +2,6 @@ arch:
   - arm64
 dist: buster
 language: python
-virtualenv:
-  system_site_packages: true
 cache:
   - apt
   - pip
