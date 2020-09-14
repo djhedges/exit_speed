@@ -22,7 +22,6 @@ install:
   - wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-dist.zip
   - unzip bazel-0.26.1-dist.zip -d bazel
   - cd bazel
-  - git checkout 0.26.1
   - ./compile.sh
   - PATH=$PATH:$(pwd)/output/bazel
   - cd -
