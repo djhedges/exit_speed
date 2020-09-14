@@ -28,7 +28,7 @@ install:
   # Tensorflow
   - git clone https://github.com/tensorflow/tensorflow.git
   - cd tensorflow
-  - git checkout r1.14
+  - git checkout r1.15
   - ./configure
   - bazel build --config=v1 //tensorflow/tools/pip_package:build_pip_package
   - ls /tmp/tensorflow_pkg/
