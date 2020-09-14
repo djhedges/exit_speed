@@ -20,8 +20,8 @@ before install:
   - pip3 install --upgrade pip
 install:
   - pip3 install -r requirements.txt
-  - pip3 install --only-binary:all scipy==1.4.1
-  - pip3 install --only-binary:all scikit-learn==0.20.2
+  - pip3 install --prefer-binary scipy==1.4.1
+  - pip3 install --prefer-binary scikit-learn==0.20.2
   - git clone https://github.com/labjack/exodriver.git
 before script:
   - cd exodriver
