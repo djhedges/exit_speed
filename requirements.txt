@@ -11,6 +11,6 @@ python-geohash
 pytype
 PyYAML
 RPi.GPIO
-scikit-learn
+scikit-learn[alldeps]
 testing.postgresql
 wheel
