@@ -18,7 +18,7 @@ install:
   # Python libaries
   - pip3 install -r requirements.txt
   # Bazel for Tensorflow compiling.
-  sudo apt-get install openjdk-11-jdk
+  - sudo apt-get install openjdk-11-jdk
   - wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-dist.zip
   - unzip bazel-0.26.1-dist.zip -d bazel
   - cd bazel
