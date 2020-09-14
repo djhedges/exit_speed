@@ -19,8 +19,6 @@ before install:
   - sudo apt-get install libusb-1.0-0-dev
 install:
   - pip3 install -r requirements.txt
-  - pip3 install --use-wheel scipy==1.4.1
-  - pip3 install --use-wheel scikit-learn==0.20.2
   - git clone https://github.com/labjack/exodriver.git
 before script:
   - cd exodriver
