@@ -25,4 +25,4 @@ install:
   - cd -
 script:
   - pytest --ignore=/home/travis/build/djhedges/exit_speed/gps_pb2.py
-  - pytype /home/travis/build/djhedges/exit_speed/*.py
+  - pytype /home/travis/build/djhedges/exit_speed/*.py -o /tmp/pytype
