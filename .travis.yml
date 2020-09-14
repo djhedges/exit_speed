@@ -18,10 +18,10 @@ before install:
 #  - sudo apt-get install libatlas-base-dev
   - sudo apt-get install libusb-1.0-0-dev
 install:
-  - pip3 install -r requirements.txt --extra-index-url https://www.piwheels.hostedpi.com/simple
+  - pip3 install -r requirements.txt --extra-index-url https://www.piwheels.org/simple
   - git clone https://github.com/labjack/exodriver.git
-  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.hostedpi.com/simple
-  - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.hostedpi.com/simple
+  - pip3 install scipy==1.4.1 --index-url https://www.piwheels.org/simple
+  - pip3 install scikit-learn==0.20.2 --index-url https://www.piwheels.org/simple
 before script:
   - cd exodriver
   - sudo ./install.sh
