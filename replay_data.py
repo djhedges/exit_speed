@@ -79,9 +79,9 @@ def ReplayLog(filepath, include_sleep=False):
 
   if not include_sleep:
     time.sleep(1)
-    qsize = es.pusher.point_queue.qsize()
+    qsize = len(es.pusher.point_queue)
     while qsize > 0:
-      qsize = es.pusher.point_queue.qsize()
+      qsize = len(es.pusher.point_queue)
       logging.info('Queue size %s', qsize)
       time.sleep(1)  # Wait until queue is emptied by the metric pusher.
   return es
