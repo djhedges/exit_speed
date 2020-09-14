@@ -15,7 +15,7 @@ install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
-  - sudo apt install g++ unzip zip
+  #- sudo apt install g++ unzip zip
   - mkdir /tmp/bin
   - pip3 install -r requirements.txt
   # Bazel for Tensorflow compiling.
