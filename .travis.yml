@@ -6,7 +6,7 @@ cache:
   - apt
   - pip
 python:
-  - "3.7"
+  - "3.7.3"
 before install:
   - pip3 install wheel
 install:
