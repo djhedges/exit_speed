@@ -14,5 +14,5 @@ before script:
   - sudo ./install.sh
   - cd -
 script:
-  - pytest --ignore=/home/travis/djhedges/exit_speed/gps_pb2.py
-  - pytype /home/travis/djhedges/exit_speed/*.py
+  - pytest --ignore=/home/travis/build/djhedges/exit_speed/gps_pb2.py
+  - pytype /home/travis/build/djhedges/exit_speed/*.py
