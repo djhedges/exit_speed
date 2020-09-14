@@ -20,6 +20,8 @@ before install:
 install:
   - pip3 install -r requirements.txt
   - git clone https://github.com/labjack/exodriver.git
+  - easy_install scipy==1.4.1
+  - pip3 install scikit-learn==0.20.2
 before script:
   - cd exodriver
   - sudo ./install.sh
