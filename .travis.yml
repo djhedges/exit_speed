@@ -12,7 +12,10 @@ install:
   - sudo apt-get update
   - pip3 install -r requirements.txt
   # Sktree Balltree
-  - sudo apt install libatlas3-base libgfortran5
+  - sudo apt-get install libatlas3-base
+  - sudo apt-get install libblas-dev
+  - sudo apt-get install libgfortran5
+  - sudo apt-get install liblapack-dev
   - pip3 install scipy==1.4.1 #--index-url https://www.piwheels.org/simple --platform linux/arm/v7 --no-deps
   - pip3 install scikit-learn==0.20.2 #--index-url https://www.piwheels.org/simple --platform linux/arm/v7 --no-deps
   # LabJack
