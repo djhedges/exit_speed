@@ -15,8 +15,8 @@ install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
-  - pip3 install scipy==1.4.1 #--index-url https://www.piwheels.org/simple --platform linux/arm/v7 --no-deps
-  - pip3 install scikit-learn==0.20.2 #--index-url https://www.piwheels.org/simple --platform linux/arm/v7 --no-deps
+  - pip3 install scipy==1.4.1
+  #- pip3 install scikit-learn==0.20.2
   # LabJack
   - sudo apt-get install libusb-1.0-0-dev
   - git clone https://github.com/labjack/exodriver.git
