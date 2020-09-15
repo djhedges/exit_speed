@@ -38,11 +38,17 @@ class Logger(object):
       file_prefix: File prefix with out the .data extension.
                    Ex: testdata/PIR_race_10hz_gps_only_2020-06-21
     """
+    super().__init__()
     self.file_prefix = file_prefix
     self.file_path = None
     self.current_file = None
     self.current_proto_len = PROTO_LEN_BYTES
     self._SetFilePath()
+
+  def __del__(self):
+    super().__del__()
+    if self.current_file():
+      self.current_file.close()
 
   def _SetFilePath(self):
     self.file_path = '%s_%s.data' % (self.file_prefix, self.current_proto_len)
