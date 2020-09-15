@@ -29,6 +29,7 @@ BYTE_ORDER = 'big'
 
 
 class Logger(object):
+  """Interface for writing protos to disk."""
 
   def __init__(self, file_prefix: Text):
     """Initializer.
@@ -51,7 +52,7 @@ class Logger(object):
       self.current_file.flush()
     self.current_file = open(self.file_path, 'wb')
 
-  def GetFile(self, proto_len) -> file:
+  def GetFile(self, proto_len):
     if proto_len < int.from_bytes(b'\xff' * self.current_proto_len, 'big'):
       if not self.current_file:
         self._SetCurrentFile()

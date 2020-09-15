@@ -34,7 +34,7 @@ class TestLabjack(unittest.TestCase):
 
   def testBuildCommands(self):
     expected_cmds = [u3.AIN(0), u3.AIN(1), u3.AIN(2)]
-    commands, command_proto_field = self.labjack._BuildCommands()
+    commands, command_proto_field = self.labjack.BuildCommands()
     for command in commands:
       index = commands.index(command)
       self.assertEqual(command.positiveChannel,

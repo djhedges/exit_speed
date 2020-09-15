@@ -29,13 +29,13 @@ class Labjack(object):
   def __init__(self, config, start_process=True):
     self.config = config
     self.u3 = None
-    self.commands, self.command_proto_field = self._BuildCommands()
+    self.commands, self.command_proto_field = self.BuildCommands()
     self.voltage_values = self.BuildValues()
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
 
-  def _BuildCommands(self) -> Tuple[List[u3.FeedbackCommand],
+  def BuildCommands(self) -> Tuple[List[u3.FeedbackCommand],
                                     Dict[u3.FeedbackCommand, Text]]:
     """Builds the list of feedback commands to send to the labjack device."""
     commands = []
