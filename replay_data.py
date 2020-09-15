@@ -57,13 +57,11 @@ def ReplayLog(filepath, include_sleep=False):
   """
   logging.info('Replaying %s', filepath)
   logger = data_logger.Logger(filepath[:-5])  # Chop off the .data
-  points = logger.ReadProtos()
+  points = list(logger.ReadProtos())
   logging.info('Number of points %d', len(points))
   if include_sleep:
     replay_start = time.time()
-    # pylint: disable=unsubscriptable-object
     time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
-    # pylint: enable=unsubscriptable-object
     session_start = None
   es = exit_speed.ExitSpeed(live_data=not include_sleep)
   for point in points:
