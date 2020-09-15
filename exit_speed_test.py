@@ -31,25 +31,28 @@ import exit_speed
 import leds
 import gps
 import gps_pb2
+import psycopg2
+import timescale
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('config_path', 'testdata/test_config.yaml')
 FLAGS.set_default('data_log_path', '/tmp')
 
 
-def _AddMock(module, class_name):
-  mock_star = mock.create_autospec(getattr(module, class_name))
-  patch = mock.patch.object(module, class_name)
-  patch.return_value = mock_star
-  patch.start()
-
-
 class TestExitSpeed(unittest.TestCase):
 
   def setUp(self):
     super(TestExitSpeed, self).setUp()
-    _AddMock(adafruit_dotstar, 'DotStar')
-    _AddMock(gps, 'gps')
+    self._AddMock(adafruit_dotstar, 'DotStar')
+    self._AddMock(gps, 'gps')
+    mock_conn = mock.create_autospec(psycopg2.extensions.connection)
+    mock_connect = self._AddMock(timescale, 'ConnectToDB')
+    mock_connect.return_value = mock_conn
+
+  def _AddMock(self, module, name):
+    patch = mock.patch.object(module, name)
+    self.addCleanup(patch.stop)
+    return patch.start()
 
   def testPointDelta(self):
     point_a = gps_pb2.Point()
