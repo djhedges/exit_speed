@@ -20,7 +20,7 @@ import time
 
 from absl import app
 from absl import flags
-import data_reader
+import data_logger
 import exit_speed
 from gps import client
 
@@ -56,7 +56,8 @@ def ReplayLog(filepath, include_sleep=False):
     A exit_speed.ExitSpeed instance that has replayed the given data.
   """
   logging.info('Replaying %s', filepath)
-  points = data_reader.ReadData(filepath)
+  logger = data_logger.Logger(filepath[:-5])  # Chop off the .data
+  points = logger.ReadProtos(filepath)
   logging.info('Number of points %d', len(points))
   if include_sleep:
     replay_start = time.time()
