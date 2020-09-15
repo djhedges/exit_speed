@@ -91,14 +91,13 @@ class Pusher(object):
     self.lap_number_ids = {}
     self.lap_queue = multiprocessing.Queue()
     self.lap_duration_queue = multiprocessing.Queue()
-    self.point_queue_lock = multiprocessing.Lock()
-    self._point_queue = self.manager.list()  # Used as LifoQueue.
-    self._retry_point_queue = []
+    self.point_queue = self.manager.list()  # Used as LifoQueue.
+    self.retry_point_queue = []
     self.lap_id_first_points = {}
     self.commit_cycle = 0
 
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
-    self._point_queue.append((point, lap_number))
+    self.point_queue.append((point, lap_number))
 
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
@@ -153,7 +152,7 @@ class Pusher(object):
               point.fuel_level_voltage)
       cursor.execute(POINT_INSERT, args)
     else:
-      self._retry_point_queue.append((point, lap_number))
+      self.retry_point_queue.append((point, lap_number))
 
   def GetLapFromQueue(self) -> Optional[gps_pb2.Lap]:
     if self.lap_queue.qsize() > 0:
@@ -165,11 +164,11 @@ class Pusher(object):
 
   def GetPointFromQueue(self) -> Tuple[gps_pb2.Point, int]:
     """Blocks until a point is ready to export."""
-    if self._retry_point_queue and not self._point_queue:
-      self._retry_point_queue.pop()
-    while not self._point_queue:  # Queue is empty.
+    if self.retry_point_queue and not self.point_queue:
+      return self.retry_point_queue.pop()
+    while not self.point_queue:  # Queue is empty.
       pass
-    return self._point_queue.pop()
+    return self.point_queue.pop()
 
   def _Commit(self):
     """Commits points to timescale based on FLAGS.commit_cycle."""
@@ -210,7 +209,7 @@ class Pusher(object):
       if lap_number_und_duration:
         self.lap_duration_queue.put(lap_number_und_duration)
       if point:
-        self._retry_point_queue.append(point_und_lap_number)
+        self.retry_point_queue.append(point_und_lap_number)
       self.timescale_conn = None  # Reset connection
 
   def Loop(self):
