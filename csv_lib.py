@@ -87,7 +87,7 @@ def ConvertTraqmateToProto(filepath):
       sleep_duration = start + elapsed_time - first_elapsed - now
       if sleep_duration > 0:
         time.sleep(sleep_duration)
-  return es.session()
+  return es.session
 
 
 def ConvertProtoToTraqmate(session, filepath):

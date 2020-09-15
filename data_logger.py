@@ -18,7 +18,6 @@ Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
 
-import os
 from absl import logging
 from typing import Generator
 from typing import Text
@@ -52,7 +51,7 @@ class Logger(object):
       self.current_file.flush()
     self.current_file = open(self.file_path, 'wb')
 
-  def _GetFile(self, proto_len):
+  def GetFile(self, proto_len) -> file:
     if proto_len < int.from_bytes(b'\xff' * self.current_proto_len, 'big'):
       if not self.current_file:
         self._SetCurrentFile()
@@ -65,7 +64,7 @@ class Logger(object):
   def WriteProto(self, proto: gps_pb2.Point):
     proto_bytes = proto.SerializePartialToString()
     proto_len = len(proto_bytes)
-    data_file = self._GetFile(proto_len)
+    data_file = self.GetFile(proto_len)
     data_file.write(proto_len.to_bytes(
       PROTO_LEN_BYTES, BYTE_ORDER) + proto_bytes)
 
@@ -78,7 +77,7 @@ class Logger(object):
           try:
             point = gps_pb2.Point.FromString(proto_bytes)
             yield point
-          except:
+          except message.DecodeError:
             logging.info('Decode error.  Likely the file writes were '
                          'interrupted.  Treating as end of file.')
             break

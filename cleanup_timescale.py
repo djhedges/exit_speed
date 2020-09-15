@@ -84,12 +84,12 @@ def NukeHangingLaps(conn):
     SELECT DISTINCT(lap_id) FROM points
     """
     cursor.execute(select_statement)
-    laps_to_keep = set([result[0] for result in cursor.fetchall()])
+    laps_to_keep = set(cursor.fetchall())
     select_statement = """
     SELECT id FROM laps
     """
     cursor.execute(select_statement)
-    all_lap_ids = set([result[0] for result in cursor.fetchall()])
+    all_lap_ids = set(cursor.fetchall())
     hanging_lap_ids = all_lap_ids.difference(laps_to_keep)
     nuke_statement = """
     DELETE FROM laps
@@ -108,12 +108,12 @@ def NukeHangingSessions(conn):
     SELECT DISTINCT(session_id) FROM laps
     """
     cursor.execute(select_statement)
-    sessions_to_keep = set([result[0] for result in cursor.fetchall()])
+    sessions_to_keep = set(cursor.fetchall())
     select_statement = """
     SELECT id FROM sessions
     """
     cursor.execute(select_statement)
-    all_session_ids = set([result[0] for result in cursor.fetchall()])
+    all_session_ids = set(cursor.fetchall())
     hanging_session_ids = all_session_ids.difference(sessions_to_keep)
     nuke_statement = """
     DELETE FROM sessions

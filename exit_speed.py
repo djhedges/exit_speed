@@ -216,7 +216,7 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      report = self.gpsd.next()
+      report = self.gpsd.next()  # pylint: disable=not-callable
       self.ProcessReport(report)
 
 

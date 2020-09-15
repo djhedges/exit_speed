@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Unitests for Labjack."""
 
 import unittest
 from absl.testing import absltest
@@ -22,9 +23,10 @@ import u3
 
 
 class TestLabjack(unittest.TestCase):
+  """Unitests for Labjack."""
 
   def setUp(self):
-    super(TestLabjack, self).setUp()
+    super().setUp()
     config = config_lib.LoadConfig()
     self.labjack = labjack.Labjack(config, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
@@ -48,7 +50,7 @@ class TestLabjack(unittest.TestCase):
     expected = {'fuel_level_voltage': None,
                 'water_temp_voltage': None,
                 'oil_pressure_voltage': None}
-    self.assertEqual(expected.keys(), self.labjack._BuildValues().keys())
+    self.assertEqual(expected.keys(), self.labjack.BuildValues().keys())
 
   def testReadValues(self):
     # pylint: disable=invalid-name
@@ -62,7 +64,8 @@ class TestLabjack(unittest.TestCase):
     # pylint: enable=invalid-name
     # pylint: enable=unused-argument
     self.mock_u3.getFeedback.return_value = [32816, 35696, 32827]
-    self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = _binaryToCalibratedAnalogVoltage
+    self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
+        _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()
     self.assertEqual(1.5,
                      self.labjack.voltage_values['fuel_level_voltage'].value)

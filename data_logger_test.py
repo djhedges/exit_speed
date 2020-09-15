@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""DataLogger unittest."""
 
 import os
 import tempfile
@@ -22,15 +23,16 @@ import gps_pb2
 
 
 class TestDataLogger(unittest.TestCase):
+  """DataLogger unittest."""
 
   def setUp(self):
-    super(TestDataLogger, self).setUp()
+    super().setUp()
     _, self.file_prefix = tempfile.mkstemp()
     self.point = gps_pb2.Point()
     self.point.alt = 1
     self.point.speed = 1
     self.point.lat = 45.69545832462609
-    self.point.lon -121.52551179751754
+    self.point.lon = -121.52551179751754
     self.point.tps_voltage = 2
     self.point.water_temp_voltage = 3
     self.point.oil_pressure_voltage = 4
@@ -47,7 +49,7 @@ class TestDataLogger(unittest.TestCase):
     logger = data_logger.Logger(self.file_prefix)
     expected = os.path.join('%s_1.data' % self.file_prefix)
     self.assertEqual(expected , logger.file_path)
-    logger._GetFile(256)
+    logger.GetFile(256)
     expected = os.path.join('%s_2.data' % self.file_prefix)
     self.assertEqual(expected , logger.file_path)
 

@@ -30,7 +30,7 @@ class Labjack(object):
     self.config = config
     self.u3 = None
     self.commands, self.command_proto_field = self._BuildCommands()
-    self.voltage_values = self._BuildValues()
+    self.voltage_values = self.BuildValues()
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
@@ -50,7 +50,7 @@ class Labjack(object):
         command_proto_field[command] = proto_field
     return commands, command_proto_field
 
-  def _BuildValues(self) -> Dict[Text, multiprocessing.Value]:
+  def BuildValues(self) -> Dict[Text, multiprocessing.Value]:
     values = {}
     if self.config.get('labjack'):
       for proto_field in self.config['labjack'].values():
