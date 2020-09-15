@@ -125,11 +125,11 @@ class TestTimescale(unittest.TestCase):
   def testExportPointArrivesBeforeLap(self):
     point = gps_pb2.Point()
     self.pusher.ExportPoint(point, 99, self.cursor)
-    self.assertEqual(1, len(self.pusher.point_queue))
+    self.assertEqual(1, len(self.pusher._point_queue))
 
   def testGetPointFromQueue(self):
     point = gps_pb2.Point()
-    self.pusher.point_queue.append((point, 1))
+    self.pusher.AddPointToQueue(point, 1)
     returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
     self.assertEqual(point, returned_point)
     self.assertEqual(1, returned_lap_number)
@@ -152,7 +152,7 @@ class TestTimescale(unittest.TestCase):
     point.afr = 14.7
     point.fuel_level_voltage = 5
     self.pusher.lap_queue.put(lap)
-    self.pusher.point_queue.append((point, 1))
+    self.pusher.AddPointToQueue(point, 1)
     with self.subTest(name='Success'):
       self.pusher.Do()
       self.cursor.execute('SELECT count(*) FROM sessions')
@@ -163,9 +163,9 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(1, self.cursor.fetchone()[0])
       self.assertEqual(0, self.pusher.lap_queue.qsize())
       self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
-      self.assertEqual(0, len(self.pusher.point_queue))
+      self.assertEqual(0, len(self.pusher._point_queue))
     with self.subTest(name='Second Point'):
-      self.pusher.point_queue.append((point, 1))
+      self.pusher.AddPointToQueue(point, 1)
       self.pusher.Do()
       self.cursor.execute('SELECT count(*) FROM sessions')
       self.assertEqual(1, self.cursor.fetchone()[0])
@@ -175,16 +175,16 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(2, self.cursor.fetchone()[0])
       self.assertEqual(0, self.pusher.lap_queue.qsize())
       self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
-      self.assertEqual(0, len(self.pusher.point_queue))
+      self.assertEqual(0, len(self.pusher._point_queue))
     with self.subTest(name='Lap Duration'):
       self.pusher.lap_duration_queue.put((1, lap.duration))
-      self.pusher.point_queue.append((point, 1))
+      self.pusher.AddPointToQueue(point, 1)
       self.pusher.Do()
       self.assertEqual(0, self.pusher.lap_queue.qsize())
       self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
-      self.assertEqual(0, len(self.pusher.point_queue))
+      self.assertEqual(0, len(self.pusher._point_queue))
     with self.subTest(name='Point Too Early'):
-      self.pusher.point_queue.append((point, 2))
+      self.pusher._point_queue.append((point, 2))
       self.pusher.Do()
       self.cursor.execute('SELECT count(*) FROM sessions')
       self.assertEqual(1, self.cursor.fetchone()[0])
@@ -192,22 +192,22 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(1, self.cursor.fetchone()[0])
       self.cursor.execute('SELECT count(*) FROM points')
       self.assertEqual(3, self.cursor.fetchone()[0])
-      self.assertEqual(1, len(self.pusher.point_queue))
+      self.assertEqual(1, len(self.pusher._point_queue))
       self.assertEqual(0, self.pusher.lap_queue.qsize())
       self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
-      self.assertEqual(1, len(self.pusher.point_queue))
+      self.assertEqual(1, len(self.pusher._point_queue))
     with self.subTest(name='Exception'):
       lap.number = 2
       lap.duration.FromMilliseconds(90 * 1000)
       self.pusher.lap_queue.put(lap)
       self.pusher.lap_duration_queue.put((1, lap.duration))
-      self.pusher.point_queue.append((point, 1))
+      self.pusher.AddPointToQueue(point, 1)
       with mock.patch.object(self.pusher, 'ExportPoint') as mock_export:
         mock_export.side_effect = psycopg2.Error
         self.pusher.Do()
         self.assertEqual(1, self.pusher.lap_queue.qsize())
         self.assertEqual(1, self.pusher.lap_duration_queue.qsize())
-        self.assertEqual(1, len(self.pusher.point_queue))
+        self.assertEqual(1, len(self.pusher._point_queue))
 
   def testDoCommitCycle(self):
     """Ensures points aren't dropped if errrors arrive between commits."""
@@ -222,16 +222,16 @@ class TestTimescale(unittest.TestCase):
     point.rpm = 1000
     point.afr = 14.7
     point.fuel_level_voltage = 5
-    self.assertEqual(0, len(self.pusher.point_queue))
-    self.pusher.point_queue.append((point, 1))
+    self.assertEqual(0, len(self.pusher._point_queue))
+    self.pusher.AddPointToQueue(point, 1)
     self.pusher.Do()
-    self.pusher.point_queue.append((point, 1))
+    self.pusher.AddPointToQueue(point, 1)
     self.pusher.Do()
     with mock.patch.object(self.pusher, '_Commit') as mock_commit:
       mock_commit.side_effect = psycopg2.Error
-      self.pusher.point_queue.append((point, 1))
+      self.pusher.AddPointToQueue(point, 1)
       self.pusher.Do()
-    self.assertEqual(3, len(self.pusher.point_queue))
+    self.assertEqual(3, len(self.pusher._point_queue))
 
 
 if __name__ == '__main__':

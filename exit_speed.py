@@ -135,7 +135,7 @@ class ExitSpeed(object):
     point.start_finish_distance = PointDelta(point, session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
-    self.pusher.point_queue.append((point, self.lap.number))
+    self.pusher.AddPointToQueue(point, self.lap.number)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
