@@ -18,30 +18,42 @@ Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
 
+import os
 from absl import logging
 from typing import Generator
 from google.protobuf import message
 import gps_pb2
 
-PROTO_LEN_BYTES = 2
+PROTO_LEN_BYTES = 1
 BYTE_ORDER = 'big'
 
 
 class Logger(object):
 
-  def __init__(self, file_path):
-    self.file_path = file_path
+  def __init__(self, file_prefix):
+    self.file_prefix = file_prefix
+    self.file_path = None
     self.current_file = None
+    self.current_proto_len = PROTO_LEN_BYTES
+    self._SetFilePath()
 
-  def _GetFile(self):
-    if not self.current_file:
+  def _SetFilePath(self):
+    self.file_path = '%s_%s.data' % (self.file_prefix, self.current_proto_len)
+
+  def _GetFile(self, proto_len):
+    if proto_len < int.from_bytes(b'\xff' * self.current_proto_len, 'big'):
+      if not self.current_file:
+        self.current_file = open(self.file_path, 'wb')
+    else:
+      self.current_proto_len += 1
+      self._SetFilePath()
       self.current_file = open(self.file_path, 'wb')
     return self.current_file
 
   def WriteProto(self, proto: gps_pb2.Point):
     proto_bytes = proto.SerializePartialToString()
     proto_len = len(proto_bytes)
-    data_file = self._GetFile()
+    data_file = self._GetFile(proto_len)
     data_file.write(proto_len.to_bytes(
       PROTO_LEN_BYTES, BYTE_ORDER) + proto_bytes)
 

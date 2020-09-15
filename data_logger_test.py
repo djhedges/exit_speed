@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import tempfile
 import unittest
 from absl.testing import absltest
@@ -24,7 +25,7 @@ class TestDataLogger(unittest.TestCase):
 
   def setUp(self):
     super(TestDataLogger, self).setUp()
-    _, self.file_path = tempfile.mkstemp()
+    _, self.file_prefix = tempfile.mkstemp()
     self.point = gps_pb2.Point()
     self.point.alt = 1
     self.point.speed = 1
@@ -37,8 +38,21 @@ class TestDataLogger(unittest.TestCase):
     self.point.afr = 14.7
     self.point.fuel_level_voltage = 5
 
+  def testSetFilePath(self):
+    logger = data_logger.Logger(self.file_prefix)
+    expected = os.path.join('%s_1.data' % self.file_prefix)
+    self.assertEqual(expected , logger.file_path)
+
+  def testGetFile(self):
+    logger = data_logger.Logger(self.file_prefix)
+    expected = os.path.join('%s_1.data' % self.file_prefix)
+    self.assertEqual(expected , logger.file_path)
+    logger._GetFile(256)
+    expected = os.path.join('%s_2.data' % self.file_prefix)
+    self.assertEqual(expected , logger.file_path)
+
   def testWriteAndReadBack(self):
-    logger = data_logger.Logger(self.file_path)
+    logger = data_logger.Logger(self.file_prefix)
     logger.WriteProto(self.point)
     logger.WriteProto(self.point)
     logger.current_file.flush()
@@ -49,13 +63,13 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testShortWrite(self):
-    logger = data_logger.Logger(self.file_path)
+    logger = data_logger.Logger(self.file_prefix)
     logger.WriteProto(self.point)
     logger.WriteProto(self.point)
     logger.current_file.flush()
-    with open(self.file_path, 'rb') as temp_file:
+    with open(logger.file_path, 'rb') as temp_file:
       contents = temp_file.read()
-    with open(self.file_path, 'wb') as temp_file:
+    with open(logger.file_path, 'wb') as temp_file:
       temp_file.write(contents[:-1])
 
     file_points = []
@@ -65,10 +79,10 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testZeroProtoBytes(self):
-    logger = data_logger.Logger(self.file_path)
+    logger = data_logger.Logger(self.file_prefix)
     logger.WriteProto(self.point)
     logger.current_file.flush()
-    with open(self.file_path, 'ab') as temp_file:
+    with open(logger.file_path, 'ab') as temp_file:
       temp_file.write((data_logger.PROTO_LEN_BYTES).to_bytes(
           data_logger.PROTO_LEN_BYTES, data_logger.BYTE_ORDER))
 
@@ -79,10 +93,10 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testMidHeader(self):
-    logger = data_logger.Logger(self.file_path)
+    logger = data_logger.Logger(self.file_prefix)
     logger.WriteProto(self.point)
     logger.current_file.flush()
-    with open(self.file_path, 'ab') as temp_file:
+    with open(logger.file_path, 'ab') as temp_file:
       temp_file.write((1).to_bytes(
           data_logger.PROTO_LEN_BYTES, data_logger.BYTE_ORDER))
 
