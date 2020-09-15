@@ -16,8 +16,8 @@ set -e
 set -x
 CODE_PATH="$(dirname $0)"
 for test_file in $(ls "${CODE_PATH}"/*_test.py); do
-  if [ $test_file != "replay_data_test.py" ]; then
-    bash -c $test_file
+  if [ $test_file != "./replay_data_test.py" ]; then
+    echo bash -c $test_file
   fi
 done
 pytype *.py
