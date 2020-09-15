@@ -4,7 +4,7 @@ This is not an officially supported Google product.
 
 ## Status
 
-[![Build Status](https://travis-ci.com/djhedges/exit_speed.svg?branch=master)](https://travis-ci.org/github/djhedges/exit_speed)
+[![Build Status](https://travis-ci.com/djhedges/exit_speed.svg?branch=master)](https://travis-ci.com/github/djhedges/exit_speed)
 
 [![Coverage Status](https://coveralls.io/repos/exit_speed/djhedges/badge.png?branch=master)](https://coveralls.io/github/djhedges/exit_speed)
 
