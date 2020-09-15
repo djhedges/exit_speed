@@ -24,5 +24,5 @@ install:
   - sudo ./install.sh
   - cd -
 script:
-  - /home/travis/build/djhedges/exit_speed/run_tests.sh
-  - pytype /home/travis/build/djhedges/exit_speed/*.py -o /tmp/pytype
+  - /home/travis/build/djhedges/exit_speed/run_tests_on_travis.sh
+  #- pytype /home/travis/build/djhedges/exit_speed/*.py -o /tmp/pytype
