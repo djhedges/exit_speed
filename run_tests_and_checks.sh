@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-set +e
-set +x
+set -e
+set -x
 CODE_PATH="$(dirname $0)"
 for test_file in "$(ls $CODE_PATH/*_test.py)"; do
   bash -c ./$test_file
