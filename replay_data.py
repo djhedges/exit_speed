@@ -57,7 +57,7 @@ def ReplayLog(filepath, include_sleep=False):
   """
   logging.info('Replaying %s', filepath)
   logger = data_logger.Logger(filepath[:-5])  # Chop off the .data
-  points = logger.ReadProtos(filepath)
+  points = logger.ReadProtos()
   logging.info('Number of points %d', len(points))
   if include_sleep:
     replay_start = time.time()
