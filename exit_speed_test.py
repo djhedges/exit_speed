@@ -19,7 +19,6 @@ import unittest
 import mock
 from absl import flags
 from absl.testing import absltest
-import exit_speed
 import fake_rpi
 import gps
 import gps_pb2
@@ -34,6 +33,7 @@ import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_dotstar
+  import exit_speed
 # pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS
