@@ -21,6 +21,7 @@ https://developers.google.com/protocol-buffers/docs/techniques
 import os
 from absl import logging
 from typing import Generator
+from typing import Text
 from google.protobuf import message
 import gps_pb2
 
@@ -30,7 +31,13 @@ BYTE_ORDER = 'big'
 
 class Logger(object):
 
-  def __init__(self, file_prefix):
+  def __init__(self, file_prefix: Text):
+    """Initializer.
+
+    Args:
+      file_prefix: File prefix with out the .data extension.
+                   Ex: testdata/PIR_race_10hz_gps_only_2020-06-21
+    """
     self.file_prefix = file_prefix
     self.file_path = None
     self.current_file = None
@@ -41,7 +48,8 @@ class Logger(object):
     self.file_path = '%s_%s.data' % (self.file_prefix, self.current_proto_len)
 
   def _SetCurrentFile(self):
-    self.current_file.flush()
+    if self.current_file:
+      self.current_file.flush()
     self.current_file = open(self.file_path, 'wb')
 
   def _GetFile(self, proto_len):
