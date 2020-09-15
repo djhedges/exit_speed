@@ -56,7 +56,7 @@ def ReplayLog(filepath, include_sleep=False):
     A exit_speed.ExitSpeed instance that has replayed the given data.
   """
   logging.info('Replaying %s', filepath)
-  logger = data_logger.Logger(filepath[:-5])  # Chop off the .data
+  logger = data_logger.Logger(filepath[:-7])  # Chop off the _1.data
   points = list(logger.ReadProtos())
   logging.info('Number of points %d', len(points))
   if include_sleep:
