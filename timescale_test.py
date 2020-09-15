@@ -113,7 +113,7 @@ class TestTimescale(unittest.TestCase):
      fuel_level_voltage) = self.cursor.fetchone()
     self.assertEqual(alt, 1.0)
     self.assertEqual(speed, 2.23694)
-    self.assertEqual(geohash, 'u005bn8524b4')
+    self.assertEqual(geohash, 'c21efweg66fd')
     self.assertEqual(elapsed_duration_ms, 0.0)
     self.assertEqual(tps_voltage, 2.0)
     self.assertEqual(water_temp_voltage, 3.0)
