@@ -14,6 +14,8 @@
 # limitations under the License.
 """Library for reading values from labjack."""
 
+import sys
+import traceback
 import multiprocessing
 from typing import Dict
 from typing import List
@@ -70,7 +72,11 @@ class Labjack(object):
         proto_field = self.command_proto_field[command]
         self.voltage_values[proto_field].value = voltage
     except u3.LabJackException:
-      logging.exception('Error reading labjack values')
+      stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
+      logging.log_every_n_seconds(logging.ERROR,
+                                  'Error reading labjack values\n%s',
+                                  10,
+                                  stack_trace)
 
   def Loop(self):
     self.u3 = u3.U3()

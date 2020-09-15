@@ -15,7 +15,9 @@
 """Timescale interface for exporting data."""
 
 import multiprocessing
+import sys
 import textwrap
+import traceback
 from typing import Optional
 from typing import Tuple
 from absl import flags
@@ -202,7 +204,11 @@ class Pusher(object):
                          cursor)
         self._Commit()
     except psycopg2.Error:
-      logging.exception('Error writing to timescale database')
+      stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
+      logging.log_every_n_seconds(logging.ERROR,
+                                  'Error writing to timescale database\n%s',
+                                  10,
+                                  stack_trace)
       # Repopulate queues on errors.
       if lap:
         self.lap_queue.put(lap)
