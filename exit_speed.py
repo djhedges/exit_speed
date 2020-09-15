@@ -116,7 +116,7 @@ class ExitSpeed(object):
         tzinfo=datetime.timezone.utc).astimezone(tz=None)
     current_seconds = current_dt.second + current_dt.microsecond / 1e6
     file_prefix = os.path.join(
-        FLAGS.data_log_path, 'data-%s:%03f' % (
+        FLAGS.data_log_path, '%s:%03f' % (
             current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
     logging.info('Logging data to %s', file_prefix)
     self.data_logger = data_logger.Logger(file_prefix)
