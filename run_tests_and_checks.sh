@@ -16,7 +16,7 @@ set -e
 set -x
 CODE_PATH="$(dirname $0)"
 for test_file in $(ls "${CODE_PATH}"/*_test.py); do
-  bash -c ./$test_file
+  bash -c $test_file
 done
 pytype *.py
 pylint --ignore-patterns=gps_pb2.py *.py
