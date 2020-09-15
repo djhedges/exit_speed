@@ -16,9 +16,12 @@
 import os
 import tempfile
 import unittest
-from absl.testing import absltest
+from absl.testing import flags
 import data_logger
 import gps_pb2
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestDataLogger(unittest.TestCase):

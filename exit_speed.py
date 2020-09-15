@@ -22,16 +22,18 @@ from absl import app
 from absl import flags
 from absl import logging
 import config_lib
+import data_logger
 import gps
 import gps_pb2
 import labjack
 import leds
-import tensorflow as tf
 import timescale
 import u3
 import wbo2
 
 FLAGS = flags.FLAGS
+flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
+                    'The directory to save data and logs.')
 
 TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (45.363799, -120.744556): 'Oregon Raceway Park',
@@ -40,7 +42,6 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (47.321082, -122.149664): 'Pacific Raceway',
           (47.661806, -117.572297): 'Spokane Raceway'}
 
-DEFAULT_LOG_PATH = '/home/pi/lap_logs'
 
 
 def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
@@ -69,19 +70,16 @@ class ExitSpeed(object):
 
   def __init__(
       self,
-      data_log_path=DEFAULT_LOG_PATH,
       start_finish_range=10,  # Meters, ~2x the width of straightaways.
       live_data=True):
     """Initializer.
 
     Args:
-      data_log_path: Path to log the point data.
       start_finish_range: Maximum distance a point can be considered when
                           determining if the car crosses the start/finish.
       live_data: A boolean, if True indicates that this session's data should be
                  tagged as live.
     """
-    self.data_log_path = data_log_path
     self.start_finish_range = start_finish_range
     self.live_data = live_data
     self.last_gps_report = None
@@ -89,7 +87,7 @@ class ExitSpeed(object):
     self.InitializeSubProcesses()
     self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
-    self.tfwriter = None
+    self.data_logger = None
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
@@ -112,20 +110,23 @@ class ExitSpeed(object):
     self.lap.number = len(session.laps)
     self.pusher.lap_queue.put(lap)
 
+  def _InitializeDataLogger(self, point: gps_pb2.Point):
+    utc_dt = point.time.ToDatetime()
+    current_dt = utc_dt.replace(
+        tzinfo=datetime.timezone.utc).astimezone(tz=None)
+    current_seconds = current_dt.second + current_dt.microsecond / 1e6
+    file_prefix = os.path.join(
+        FLAGS.data_log_path, 'data-%s:%03f' % (
+            current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
+    logging.info('Logging data to %s', file_prefix)
+    self.data_logger = data_logger.Logger(file_prefix)
+
   def LogPoint(self) -> None:
     """Writes the current point to the data log."""
     point = self.point
-    if not self.tfwriter:
-      utc_dt = point.time.ToDatetime()
-      current_dt = utc_dt.replace(
-          tzinfo=datetime.timezone.utc).astimezone(tz=None)
-      current_seconds = current_dt.second + current_dt.microsecond / 1e6
-      data_filename = os.path.join(
-          self.data_log_path, 'data-%s:%03f.tfr' % (
-              current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
-      logging.info('Logging data to %s', data_filename)
-      self.tfwriter = tf.io.TFRecordWriter(data_filename)
-    self.tfwriter.write(point.SerializeToString())
+    if not self.data_logger:
+      self._InitializeDataLogger(point)
+    self.data_logger.WriteProto(point)
 
   def ProcessPoint(self) -> None:
     """Populates the session with the latest GPS point."""

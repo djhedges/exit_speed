@@ -31,10 +31,10 @@ import exit_speed
 import leds
 from gps import client
 import gps_pb2
-import tensorflow as tf
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('config_path', 'testdata/test_config.yaml')
+FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestExitSpeed(unittest.TestCase):
@@ -77,8 +77,6 @@ class TestExitSpeed(unittest.TestCase):
     es.lap = gps_pb2.Lap()
     es.lap.points.extend([prior_point, point])
     es.point = point
-    mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
-    es.writer = mock_writer
     es.ProcessPoint()
     self.assertEqual(2856514.6203466402, point.start_finish_distance)
 
@@ -144,8 +142,6 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.speed = 1
     es.point = point
-    mock_writer = mock.create_autospec(tf.io.TFRecordWriter)
-    es.writer = mock_writer
     es.ProcessSession()
 
   def testPopulatePoint(self):
