@@ -15,7 +15,7 @@
 set -e
 set -x
 CODE_PATH="$(dirname $0)"
-for test_file in "$(ls $CODE_PATH/*_test.py)"; do
+for test_file in $(ls "${CODE_PATH}"/*_test.py); do
   bash -c ./$test_file
 done
 pytype *.py
