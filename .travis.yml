@@ -24,5 +24,6 @@ install:
   - sudo ./install.sh
   - cd -
 script:
-  - /home/travis/build/djhedges/exit_speed/run_tests_on_travis.sh
+  - /home/travis/build/djhedges/exit_speed/wbo2_test.py
+  - pytest --disable-pytest-warnings
   #- pytype /home/travis/build/djhedges/exit_speed/*.py -o /tmp/pytype
