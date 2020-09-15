@@ -5,6 +5,7 @@ gps==3.19
 LabJackPython==2.0.0
 protobuf==3.12.2
 psycopg2==2.7.7
+pylint==2.6.0
 python-geohash==0.8.5
 pytype==2020.8.28
 PyYAML==5.3.1
