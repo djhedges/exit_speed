@@ -31,3 +31,5 @@ for file_name in os.listdir(LOG_DIR):
     logger = data_logger.Logger(prefix)
     for point in points:
       logger.WriteProto(point)
+    logger.current_file.flush()
+    logger.current_file.close()

@@ -41,7 +41,8 @@ class Logger(object):
     self.file_path = '%s_%s.data' % (self.file_prefix, self.current_proto_len)
 
   def _SetCurrentFile(self):
-    self.current_file = open(self.file_path, 'wb', buffering=0)
+    self.current_file.flush()
+    self.current_file = open(self.file_path, 'wb')
 
   def _GetFile(self, proto_len):
     if proto_len < int.from_bytes(b'\xff' * self.current_proto_len, 'big'):
