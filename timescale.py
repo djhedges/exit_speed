@@ -202,7 +202,10 @@ class Pusher(object):
                          cursor)
         self._Commit()
     except psycopg2.Error:
-      logging.exception('Error writing to timescale database')
+      logging.log_every_n_seconds(logging.ERROR,
+                                  'Error writing to timescale database',
+                                  10,
+                                  exc_info=True)
       # Repopulate queues on errors.
       if lap:
         self.lap_queue.put(lap)

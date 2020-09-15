@@ -70,7 +70,10 @@ class Labjack(object):
         proto_field = self.command_proto_field[command]
         self.voltage_values[proto_field].value = voltage
     except u3.LabJackException:
-      logging.exception('Error reading labjack values')
+      logging.log_every_n_seconds(logging.ERROR,
+                                  'Error reading labjack values',
+                                  10,
+                                  exc_info=True)
 
   def Loop(self):
     self.u3 = u3.U3()
