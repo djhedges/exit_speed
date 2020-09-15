@@ -29,7 +29,7 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   import adafruit_dotstar
 import exit_speed
 import leds
-from gps import client
+import gps
 import gps_pb2
 
 FLAGS = flags.FLAGS
@@ -37,14 +37,19 @@ FLAGS.set_default('config_path', 'testdata/test_config.yaml')
 FLAGS.set_default('data_log_path', '/tmp')
 
 
+def _AddMock(module, class_name):
+  mock_star = mock.create_autospec(getattr(module, class_name))
+  patch = mock.patch.object(module, class_name)
+  patch.return_value = mock_star
+  patch.start()
+
+
 class TestExitSpeed(unittest.TestCase):
 
   def setUp(self):
     super(TestExitSpeed, self).setUp()
-    mock_star = mock.create_autospec(adafruit_dotstar.DotStar)
-    patch = mock.patch.object(adafruit_dotstar, 'DotStar')
-    patch.return_value = mock_star
-    patch.start()
+    _AddMock(adafruit_dotstar, 'DotStar')
+    _AddMock(gps, 'gps')
 
   def testPointDelta(self):
     point_a = gps_pb2.Point()
@@ -145,7 +150,7 @@ class TestExitSpeed(unittest.TestCase):
     es.ProcessSession()
 
   def testPopulatePoint(self):
-    report = client.dictwrapper({
+    report = gps.client.dictwrapper({
         u'epx': 7.409,
         u'epy': 8.266,
         u'epv': 20.01,
@@ -171,7 +176,7 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.time.nanos, 100000000)
 
   def testProcessReport(self):
-    report = client.dictwrapper({
+    report = gps.client.dictwrapper({
         u'epx': 7.409,
         u'epy': 8.266,
         u'epv': 20.01,
