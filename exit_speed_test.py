@@ -12,13 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""ExitSpeed unittest."""
 
 import sys
 import unittest
 import mock
 from absl import flags
 from absl.testing import absltest
+import exit_speed
 import fake_rpi
+import gps
+import gps_pb2
+import psycopg2
+import timescale
+# pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
@@ -27,12 +34,7 @@ import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_dotstar
-import exit_speed
-import leds
-import gps
-import gps_pb2
-import psycopg2
-import timescale
+# pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('config_path', 'testdata/test_config.yaml')
@@ -40,9 +42,10 @@ FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestExitSpeed(unittest.TestCase):
+  """ExitSpeed unittest."""
 
   def setUp(self):
-    super(TestExitSpeed, self).setUp()
+    super().setUp()
     self._AddMock(adafruit_dotstar, 'DotStar')
     self._AddMock(gps, 'gps')
     mock_conn = mock.create_autospec(psycopg2.extensions.connection)
