@@ -67,7 +67,7 @@ def ConnectToDB() -> psycopg2.extensions.connection:
   return psycopg2.connect(FLAGS.timescale_db_spec)
 
 
-def _GetConnWithPointPrepare(conn: psycopg2.extensions.connection =  False):
+def GetConnWithPointPrepare(conn: psycopg2.extensions.connection =  False):
   conn = conn or ConnectToDB()
   with conn.cursor() as cursor:
     cursor.execute(POINT_PREPARE)
@@ -181,7 +181,7 @@ class Pusher(object):
     point = None
     try:
       if not self.timescale_conn:
-        self.timescale_conn = _GetConnWithPointPrepare()
+        self.timescale_conn = GetConnWithPointPrepare()
       lap = self.GetLapFromQueue()
       lap_number_und_duration = self.GetLapDurationFromQueue()
       point_und_lap_number = self.GetPointFromQueue()

@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Unitests for timescale.py"""
 
-import time
 import unittest
 from absl.testing import absltest
-import config_lib
 import gps_pb2
 import psycopg2
 import timescale
@@ -31,6 +30,7 @@ def tearDownModule():
 
 
 class TestTimescale(unittest.TestCase):
+  """Timescale unittest."""
 
   def setUp(self):
     self.postgresql = Postgresql()
@@ -40,7 +40,7 @@ class TestTimescale(unittest.TestCase):
     cursor = conn.cursor()
     cursor.execute(statements)
     conn.commit()
-    self.conn = timescale._GetConnWithPointPrepare(conn)
+    self.conn = timescale.GetConnWithPointPrepare(conn)
     self.cursor = self.conn.cursor()
     point = gps_pb2.Point()
     point.time.FromJsonString('2020-09-13T01:36:38.600Z')
@@ -99,7 +99,7 @@ class TestTimescale(unittest.TestCase):
     point.alt = 1
     point.speed = 1
     point.lat = 45.69545832462609
-    point.lon -121.52551179751754
+    point.lon = -121.52551179751754
     point.tps_voltage = 2
     point.water_temp_voltage = 3
     point.oil_pressure_voltage = 4
@@ -108,7 +108,7 @@ class TestTimescale(unittest.TestCase):
     point.fuel_level_voltage = 5
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
-    (time, session_id, lap_id, alt, speed, geohash, elapsed_duration_ms,
+    (time, _, _, alt, speed, geohash, elapsed_duration_ms,
      tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr,
      fuel_level_voltage) = self.cursor.fetchone()
     self.assertEqual(alt, 1.0)
@@ -144,7 +144,7 @@ class TestTimescale(unittest.TestCase):
     point.alt = 1
     point.speed = 1
     point.lat = 45.69545832462609
-    point.lon -121.52551179751754
+    point.lon = -121.52551179751754
     point.tps_voltage = 2
     point.water_temp_voltage = 3
     point.oil_pressure_voltage = 4

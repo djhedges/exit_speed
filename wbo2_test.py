@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Unitests for wbo2.py"""
 
 import unittest
 from absl.testing import absltest
@@ -25,9 +26,10 @@ TEST_FRAME = (b'Z\xa5\x08\x0c\xf8\x0f\xff \x00\x020\x01`\x03\xd0\x00\x15\x00'
 
 
 class TestWBO2(unittest.TestCase):
+  """WBO2 unittests."""
 
   def setUp(self):
-    super(TestWBO2, self).setUp()
+    super().setUp()
     self.start = 0
 
   def MockRead(self, size=1):
