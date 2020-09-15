@@ -40,14 +40,17 @@ class Logger(object):
   def _SetFilePath(self):
     self.file_path = '%s_%s.data' % (self.file_prefix, self.current_proto_len)
 
+  def _SetCurrentFile(self):
+    self.current_file = open(self.file_path, 'wb', buffering=0)
+
   def _GetFile(self, proto_len):
     if proto_len < int.from_bytes(b'\xff' * self.current_proto_len, 'big'):
       if not self.current_file:
-        self.current_file = open(self.file_path, 'wb')
+        self._SetCurrentFile()
     else:
       self.current_proto_len += 1
       self._SetFilePath()
-      self.current_file = open(self.file_path, 'wb')
+      self._SetCurrentFile()
     return self.current_file
 
   def WriteProto(self, proto: gps_pb2.Point):
