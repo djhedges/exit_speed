@@ -46,8 +46,7 @@ class Logger(object):
     self._SetFilePath()
 
   def __del__(self):
-    super().__del__()
-    if self.current_file():
+    if self.current_file:
       self.current_file.close()
 
   def _SetFilePath(self):

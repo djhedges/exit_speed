@@ -24,12 +24,4 @@ install:
   - sudo ./install.sh
   - cd -
 script:
-  # Pytest doesn't play well with absl.
-  - python3 /home/travis/build/djhedges/exit_speed/data_logger_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/exit_speed_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/labjack_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/leds_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/timescale_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
-  - pytype /home/travis/build/djhedges/exit_speed/*.py
-  - pylint --ignore-patterns=gps_pb2.py *.py
+  - /home/travis/build/djhedges/exit_speed/run_tests_and_checks.sh
