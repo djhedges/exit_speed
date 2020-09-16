@@ -43,7 +43,7 @@ class Logger(object):
     if file_prefix_or_name.endswith('.data'):
       self.file_prefix = file_prefix_or_name[:-7]  # Chop off the _1.data
     else:
-      self.file_prefix = file_prefix
+      self.file_prefix = file_prefix_or_name
     self.file_path = None
     self.current_file = None
     self.current_proto_len = PROTO_LEN_BYTES
