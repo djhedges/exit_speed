@@ -53,6 +53,10 @@ def NukeLapsWithNoDuration(conn):
     nuke_statement = """
     DELETE FROM points
     WHERE lap_id IN (SELECT id FROM laps WHERE duration_ms is NULL);
+    """
+    logging.info(nuke_statement)
+    cursor.execute(nuke_statement)
+    nuke_statement = """
     DELETE FROM laps
     WHERE id IN (SELECT id FROM laps WHERE duration_ms is NULL);
     """
