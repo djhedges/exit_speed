@@ -41,7 +41,7 @@ class Logger(object):
     """
     super().__init__()
     if file_prefix_or_name.endswith('.data'):
-      self.file_prefix = file_prefix_or_name[:-7])  # Chop off the _1.data
+      self.file_prefix = file_prefix_or_name[:-7]  # Chop off the _1.data
     else:
       self.file_prefix = file_prefix
     self.file_path = None

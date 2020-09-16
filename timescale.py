@@ -69,7 +69,7 @@ def ConnectToDB() -> psycopg2.extensions.connection:
   return psycopg2.connect(FLAGS.timescale_db_spec)
 
 
-def GetConnWithPointPrepare(conn: psycopg2.extensions.connection =  False):
+def GetConnWithPointPrepare(conn: psycopg2.extensions.connection =  None):
   conn = conn or ConnectToDB()
   with conn.cursor() as cursor:
     cursor.execute(POINT_PREPARE)
