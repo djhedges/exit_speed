@@ -31,15 +31,19 @@ BYTE_ORDER = 'big'
 class Logger(object):
   """Interface for writing protos to disk."""
 
-  def __init__(self, file_prefix: Text):
+  def __init__(self, file_prefix_or_name: Text):
     """Initializer.
 
     Args:
       file_prefix: File prefix with out the .data extension.
                    Ex: testdata/PIR_race_10hz_gps_only_2020-06-21
+                   Or the a file's complete name including the _#.data suffix.
     """
     super().__init__()
-    self.file_prefix = file_prefix
+    if file_prefix_or_name.endswith('.data'):
+      self.file_prefix = file_prefix_or_name[:-7])  # Chop off the _1.data
+    else:
+      self.file_prefix = file_prefix
     self.file_path = None
     self.current_file = None
     self.current_proto_len = PROTO_LEN_BYTES
