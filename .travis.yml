@@ -32,4 +32,4 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/timescale_test.py
   - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
   - pytype /home/travis/build/djhedges/exit_speed/*.py
-  - pylint --ignore-patterns=_pb2.py *.py
+  - pylint --ignore-patterns=.*pb2.py *.py
