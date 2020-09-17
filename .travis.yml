@@ -1,7 +1,9 @@
 os: linux
 arch: arm64
 dist: buster
-language: python
+language:
+  - go
+  - python
 cache: pip
 python: "3.7.3"
 install:
@@ -31,5 +33,5 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/leds_test.py
   - python3 /home/travis/build/djhedges/exit_speed/timescale_test.py
   - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
-  - pytype /home/travis/build/djhedges/exit_speed/*.py --keep-going --no-cache
+  - pytype /home/travis/build/djhedges/exit_speed/*.py --keep-going --no-cache -o /tmp
   - pylint --ignore-patterns=.*pb2.py *.py
