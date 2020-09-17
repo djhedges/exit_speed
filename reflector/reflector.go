@@ -14,6 +14,10 @@
 // limitations under the License.
 package reflector
 
+import {
+  "github.com/djhedges/exit_speed/reflector_go_proto"
+}
+
 func A() string {
   return "test"
 }
