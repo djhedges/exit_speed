@@ -19,5 +19,6 @@ import {
 }
 
 func A() string {
+
   return "test"
 }
