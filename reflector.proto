@@ -1,0 +1,38 @@
+//!/usr/bin/python3
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// sudo apt install python3-protobuf
+// Compile with protoc -I ./ --go_out=./ --go_opt=paths=source_relative --python_out ./ reflector.proto
+syntax = "proto3";
+
+option go_package = "github.com/djhedges/exit_speed/protos/reflector_go_proto";
+
+import "gps.proto";
+import "google/protobuf/duration.proto";
+
+package reflector;
+
+message PointUpdate {
+  gps.Point point = 1;
+  int32 lap_number = 2;
+}
+
+message NewLap {
+  int32 lap_number = 2;
+};
+
+message UpdateLapDuration {
+  google.protobuf.Duration duration = 1;  // Time it took to finish the lap.
+}
