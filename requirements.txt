@@ -1,4 +1,3 @@
-setuptools==47.1.1  # Needed by absl.
 absl-py==0.10.0
 adafruit-circuitpython-dotstar==2.0.0
 fake_rpi==0.7.1
@@ -22,6 +21,7 @@ pandas==0.23.3
 
 # sckkit-learn deps first.
 numpy==1.16.2
+setuptools==47.1.1  # Needed by absl.
 # Finally scipy & scikit.
 #scipy==1.4.1
 #scikit-learn==0.20.2
