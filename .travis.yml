@@ -1,5 +1,7 @@
 os: linux
-arch: arm64
+arch:
+  - amd64
+  - arm64
 dist: buster
 language:
   - go
