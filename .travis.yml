@@ -20,6 +20,7 @@ install:
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
   # Python libaries
+  - sudo apt-get install python3-pip
   - pip3 install -r requirements.txt
   # LabJack
   - sudo apt-get install libusb-1.0-0-dev
