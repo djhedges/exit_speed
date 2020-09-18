@@ -7,7 +7,7 @@ language:
   - go
   - python
 cache: pip
-python: "3.7.3"
+python: "3.7"
 install:
   # Needed for the libgfortran5 package.
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
@@ -21,7 +21,6 @@ install:
   - sudo apt-get install liblapack-dev
   # Python libaries
   - sudo apt-get install python3-pip
-  - sudo apt-get install python3-setuptools
   - pip3 install -r requirements.txt
   # LabJack
   - sudo apt-get install libusb-1.0-0-dev
