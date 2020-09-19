@@ -2,6 +2,8 @@ os: linux
 arch:
   - amd64
   - arm64
+    - install
+      - sudo apt-get install golang
 dist: buster
 language:
   - python
@@ -18,8 +20,6 @@ install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install libgfortran5
   - sudo apt-get install liblapack-dev
-  # Golang for testing
-  - sudo apt-get install golang
   # Python libaries
   - sudo apt-get install python3-pip
   - pip3 install -r requirements.txt
