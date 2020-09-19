@@ -1,13 +1,11 @@
 os: linux
 arch:
-  - amd64
   - arm64
 dist: buster
 language:
-  - go
   - python
 cache: pip
-python: "3.7"
+python: "3.7.3"
 install:
   # Needed for the libgfortran5 package.
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
@@ -35,7 +33,7 @@ script:
   #- python3 /home/travis/build/djhedges/exit_speed/labjack_test.py
   #- python3 /home/travis/build/djhedges/exit_speed/leds_test.py
   #- python3 /home/travis/build/djhedges/exit_speed/timescale_test.py
-  #- python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
+  - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
   #- pytype /home/travis/build/djhedges/exit_speed/*.py --keep-going --no-cache -o /tmp
   #- pylint --ignore-patterns=.*pb2.py *.py
   #- cd reflector; go test; cd -
