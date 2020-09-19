@@ -37,4 +37,4 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
   - pytype /home/travis/build/djhedges/exit_speed/*.py keep-going -o /tmp
   - pylint --ignore-patterns=.*pb2.py *.py
-  - cd reflector; go test; cd -
+  - go test ./...
