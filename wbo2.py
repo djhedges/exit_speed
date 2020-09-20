@@ -29,6 +29,8 @@ flags.DEFINE_float('stoichiometric', 14.7,
                    'This is used to convert the Lambda_16 bytes into '
                    'an A/F ratio. This should be changed based on fuel.'
                    'Petrol 14.7, LGP 15.5, Methanol 6.4, Diesel 14.5')
+flags.DEFINE_integer('cylinders', 6,
+                     'Number of cylinders in the engine.')
 # http://techedge.com.au/vehicle/wbo2/wblambda.htm
 
 FRAME_SIZE = 28
@@ -93,7 +95,8 @@ def GetBytes(frame: bytes, frame_key: Text) -> float:
   if 'lambda_16' == frame_key:
     return Lambda16ToAFR(int.from_bytes(frame_bytes, 'big'))
   if 'rpm_count' == frame_key:
-    return RPMCountToRPM(int.from_bytes(frame_bytes, 'big'))
+    return RPMCountToRPM(int.from_bytes(frame_bytes, 'big'),
+                         FLAGS.cylinders)
   elif 'user' in frame_key:
     return int.from_bytes(frame_bytes, 'big') / 8184 * 5
   elif 'thermocouple' in frame_key:
@@ -108,11 +111,11 @@ def Lambda16ToAFR(lambda_16: float) -> float:
   return ((lambda_16 / 8192) + 0.5) * FLAGS.stoichiometric
 
 
-def RPMCountToRPM(rpm_count: float) -> float:
+def RPMCountToRPM(rpm_count: float, cylinders: int) -> float:
   if rpm_count:
     us_between_pulse = rpm_count * 5
     minute = 60 * 10 ** 6  # 60 seconds > microseconds
-    return minute / us_between_pulse / 3  # VR6 3 sparks per revolution.
+    return minute / us_between_pulse / (cylinders / 2)
   return 0
 
 
@@ -142,8 +145,7 @@ class WBO2(object):
 def main(unused_argv):
   with serial.Serial('/dev/ttyUSB0', 19200) as ser:
     for frame in ReadSerial(ser):
-      rpm_count = GetBytes(frame, 'rpm_count')
-      print(RPMCountToRPM(rpm_count))
+      print(GetBytes(frame, 'user_3'))
 
 
 if __name__ == '__main__':
