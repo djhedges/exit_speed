@@ -22,6 +22,7 @@ from typing import Generator
 from typing import Text
 from absl import app
 from absl import flags
+from absl import logging
 import serial
 
 FLAGS = flags.FLAGS
@@ -81,9 +82,8 @@ def CheckFrame(frame) -> bool:
 
 
 def ReadSerial(ser) -> Generator[bytes, None, None]:
-  yield FindFrameStart(ser)
   while True:
-    frame = ser.read(FRAME_SIZE)
+    frame = FindFrameStart(ser)
     if CheckFrame(frame):
       yield frame
 
@@ -138,6 +138,8 @@ class WBO2(object):
   def Loop(self):
     with serial.Serial('/dev/ttyUSB0', 19200) as ser:
       for frame in ReadSerial(ser):
+        logging.log_every_n_seconds(logging.DEBUG, 'WBO2 Frame: %s',
+                                    10, frame)
         for frame_key, point_value in self.config['wbo2'].items():
           self.values[point_value].value = GetBytes(frame, frame_key)
 
