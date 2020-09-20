@@ -69,10 +69,10 @@ class TestWBO2(unittest.TestCase):
   def testRPMCountToRPM(self):
     self.assertEqual(6000, wbo2.RPMCountToRPM(1000, 4))
     self.assertEqual(4000, wbo2.RPMCountToRPM(1000, 6))
-    self.assertEqual(1816, wbo2.RPMCountToRPM(2202, 6))
 
   def testGetUser3(self):
-    self.assertEqual(0, wbo2.GetBytes(TEST_FRAME, 'user_3'))
+    self.assertEqual(0.5962854349951124,
+            wbo2.GetBytes(TEST_FRAME, 'user_3'))
 
   def testAddConfigValues(self):
     config = config_lib.LoadConfig()
