@@ -33,7 +33,7 @@ flags.DEFINE_float('led_brightness', 0.5,
 flags.DEFINE_float('led_update_interval', 0.2,
                    'Limits how often the LEDs are able to change to prevent '
                    'excessive flickering.')
-flags.DEFINE_integer('speed_deltas', 50,
+flags.DEFINE_integer('speed_deltas', 10,
                      'Used to smooth out GPS data.  This controls how many '
                      'recent speed deltas are stored.  50 at 10hz means a '
                      'median of the last 5 seconds is used.')
