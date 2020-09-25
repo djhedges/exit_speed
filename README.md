@@ -24,18 +24,17 @@ as the throttle position and water temperature.  In turn the data was exported
 to a Timescale database which allows for real time analysis of the data in
 Grafana.  Including lap comparison.
 
-![Image of Green LEDs]
-(https://github.com/djhedges/exit_speed/blob/master/docs/green_led.png)
+![Image of Green LEDs](https://github.com/djhedges/exit_speed/blob/master/docs/green_led.png)
 
 Early example of data logged at Portland International Raceway being replayed.
 [![Replayed Data](http://img.youtube.com/vi/2FHSHHTeZAU/0.jpg)](https://youtu.be/2FHSHHTeZAU)
 
 Live data water temperature example.
-https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png
+![Water Temp](https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png)
 
 Lap comparison examples.  Total hack atm but a work in progress.
-https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparision_speed.png
-https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparision_tps_voltage.png
+![Speed](https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparision_speed.png)
+![TPS](https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparision_tps_voltage.png)
 
 ## Hardware
 
