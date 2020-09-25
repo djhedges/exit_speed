@@ -29,7 +29,7 @@ Grafana.  Including lap comparison.
 Early example of data logged at Portland International Raceway being replayed.
 [![Replayed Data](http://img.youtube.com/vi/2FHSHHTeZAU/0.jpg)](https://youtu.be/2FHSHHTeZAU)
 
-Live data water temperature example.
+Water temperature data logged while on track and tethered to a phone.
 ![Water Temp](https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png)
 
 Lap comparison examples.  Total hack atm but a work in progress.
