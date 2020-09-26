@@ -134,7 +134,7 @@ class LEDs(object):
       self.tree = BallTree(np.array(x_y_points), leaf_size=30,
                            metric='pyfunc', func=EarthDistanceSmall)
 
-  def CrossStartFinish(self, lap: gps_pb2.Lap) -> None:
+  def CrossStartFinish(self) -> None:
     self.Fill((0, 0, 255),  # Blue
               additional_delay=1,
               ignore_update_interval=True)

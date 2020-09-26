@@ -14,7 +14,6 @@
 # limitations under the License.
 """Script for replaying a data log.  Super handy for development."""
 
-import sys
 import time
 from absl import app
 from absl import flags
