@@ -22,7 +22,6 @@ from absl import app
 from absl import flags
 import data_logger
 import exit_speed
-from gps import client
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.
