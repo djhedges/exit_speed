@@ -72,7 +72,7 @@ def ReplayLog(filepath, include_sleep=False):
     qsize = len(es.pusher.point_queue)
     while qsize > 0:
       qsize = len(es.pusher.point_queue)
-      logging.info('Queue size %s', qsize)
+      logging.log_every_n_seconds(logging.INFO, 'Queue size %s', 2, qsize)
     es.pusher.stop_process_signal.value = True
     print(time.time())
     es.pusher.process.join(10)
