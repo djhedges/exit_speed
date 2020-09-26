@@ -74,17 +74,17 @@ class TestReplayData(unittest.TestCase):
     return patch.start()
 
   def testEndToEnd(self):
-    test_data_path = os.path.join(FLAGS.test_srcdir, 'testdata')
-    for test_data_file in os.listdir(test_data_path):
-      if test_data_file.endswith('.data'):
-        with self.subTest(name=test_data_file):
-          es = replay_data.ReplayLog(os.path.join(test_data_path,
-                                                  test_data_file))
-          point_count = 0
-          for lap in es.session.laps:
-            point_count += sum(lap.points)
-          self.cursor.execute('SELECT count(*) FROM points')
-          self.assertEqual(point_count, self.cursor.fetchone()[0])
+    test_data_file = os.path.join(
+            FLAGS.test_srcdir,
+            'testdata/test_parking_lot_20hz_2020-06-11T22_1.data')
+    if test_data_file.endswith('.data'):
+      with self.subTest(name=test_data_file):
+        es = replay_data.ReplayLog(test_data_file)
+        point_count = 0
+        for lap in es.session.laps:
+          point_count += len(lap.points)
+        self.cursor.execute('SELECT count(*) FROM points')
+        self.assertEqual(point_count, self.cursor.fetchone()[0])
 
 
 if __name__ == '__main__':

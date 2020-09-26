@@ -33,17 +33,6 @@ flags.DEFINE_boolean('include_sleep', True,
                      'Adds delays to mimic real time replay of data.')
 
 
-def ConvertPointToReport(point):
-  return client.dictwrapper({
-      u'lon': point.lon,
-      u'lat': point.lat,
-      u'mode': 3,
-      u'time': point.time.ToJsonString(),
-      u'alt': point.alt,
-      u'speed': point.speed,
-      u'class': u'TPV'})
-
-
 def ReplayLog(filepath, include_sleep=False):
   """Replays data, extermely useful to LED testing.
 
@@ -70,8 +59,9 @@ def ReplayLog(filepath, include_sleep=False):
       if not session_start:
         session_start = point.time.ToMilliseconds() / 1000
 
-    report = ConvertPointToReport(point)
-    es.ProcessReport(report)
+    es.point = point
+    es.lap.points.append(point)
+    es.ProcessSession()
     if include_sleep:
       run_delta = time.time() - replay_start
       point_delta = point.time.ToMilliseconds() / 1000 - session_start
@@ -84,7 +74,10 @@ def ReplayLog(filepath, include_sleep=False):
     while qsize > 0:
       qsize = len(es.pusher.point_queue)
       logging.info('Queue size %s', qsize)
-      time.sleep(1)  # Wait until queue is emptied by the metric pusher.
+    es.pusher.stop_process_signal.value = True
+    print(time.time())
+    es.pusher.process.join(10)
+    print(time.time())
   return es
 
 

@@ -169,6 +169,13 @@ class ExitSpeed(object):
 
   def ProcessSession(self) -> None:
     """Start/ends the logging of data to log files based on car speed."""
+    if not self.session.track:
+      _, track, start_finish = FindClosestTrack(self.point)
+      logging.info('Closest track: %s', track)
+      self.session.track = track
+      self.session.start_finish.lat = start_finish.lat
+      self.session.start_finish.lon = start_finish.lon
+      self.pusher.Start(self.point.time, track)
     self.ProcessLap()
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
@@ -185,8 +192,7 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
-    lap = self.lap
-    point = lap.points.add()
+    point = self.lap.points.add()
     point.lat = report.lat
     point.lon = report.lon
     point.alt = report.alt
@@ -195,13 +201,6 @@ class ExitSpeed(object):
     self.ReadLabjackValues(point)
     self.ReadWBO2Values(point)
     self.point = point
-    if not self.session.track:
-      _, track, start_finish = FindClosestTrack(self.point)
-      logging.info('Closest track: %s', track)
-      self.session.track = track
-      self.session.start_finish.lat = start_finish.lat
-      self.session.start_finish.lon = start_finish.lon
-      self.pusher.Start(point.time, track)
 
   def ProcessReport(self, report: gps.client.dictwrapper) -> None:
     """Processes a GPS report form the sensor.."""

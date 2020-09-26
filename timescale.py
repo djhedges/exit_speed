@@ -85,6 +85,7 @@ class Pusher(object):
     self.live_data = live_data
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self.stop_process_signal = multiprocessing.Value('b', False)
     self.manager = multiprocessing.Manager()
     self.timescale_conn = None
     self.session_time = None
@@ -164,12 +165,14 @@ class Pusher(object):
     if self.lap_duration_queue.qsize() > 0:
       return self.lap_duration_queue.get()
 
-  def GetPointFromQueue(self) -> Tuple[gps_pb2.Point, int]:
+  def GetPointFromQueue(self) -> Optional[Tuple[gps_pb2.Point, int]]:
     """Blocks until a point is ready to export."""
     if self.retry_point_queue and not self.point_queue:
       return self.retry_point_queue.pop()
-    while not self.point_queue:  # Queue is empty.
-      pass
+    # Queue is empty.
+    while not self.point_queue:
+      if self.stop_process_signal.value:
+        return
     return self.point_queue.pop()
 
   def _Commit(self):
@@ -191,18 +194,19 @@ class Pusher(object):
       lap = self.GetLapFromQueue()
       lap_number_und_duration = self.GetLapDurationFromQueue()
       point_und_lap_number = self.GetPointFromQueue()
-      with self.timescale_conn.cursor() as cursor:
-        self.ExportSession(cursor)
-        if lap:
-          self.ExportLap(lap, cursor)
-        if lap_number_und_duration:
-          self.UpdateLapDuration(lap_number_und_duration[0],
-                                 lap_number_und_duration[1],
-                                 cursor)
-        self.ExportPoint(point_und_lap_number[0],
-                         point_und_lap_number[1],
-                         cursor)
-        self._Commit()
+      if point_und_lap_number:
+        with self.timescale_conn.cursor() as cursor:
+          self.ExportSession(cursor)
+          if lap:
+            self.ExportLap(lap, cursor)
+          if lap_number_und_duration:
+            self.UpdateLapDuration(lap_number_und_duration[0],
+                                   lap_number_und_duration[1],
+                                   cursor)
+          self.ExportPoint(point_und_lap_number[0],
+                           point_und_lap_number[1],
+                           cursor)
+          self._Commit()
     except psycopg2.Error:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
       logging.log_every_n_seconds(logging.ERROR,
@@ -220,8 +224,10 @@ class Pusher(object):
 
   def Loop(self):
     """Tries to export point data to the timescale backend."""
-    while True:
+    while not self.stop_process_signal.value:
       self.Do()
+    if self.timescale_conn:
+      self.timescale_conn.commit()
 
   def Start(self, session_time, track):
     self.session_time = session_time

@@ -21,4 +21,4 @@ for test_file in $(ls "${CODE_PATH}"/*_test.py); do
   fi
 done
 pytype *.py
-pylint --ignore-patterns=.*_pb2.py *.py
+pylint --ignore-patterns=.*_pb2.* *.py
