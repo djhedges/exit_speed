@@ -20,6 +20,8 @@ CREATE TABLE points (
   time                  TIMESTAMPTZ       NOT NULL,
   session_id            INT               REFERENCES sessions (id),
   lap_id                INT               REFERENCES laps (id),
+  lat                   FLOAT             NOT NULL,
+  lon                   FLOAT             NOT NULL,
   alt                   FLOAT             NOT NULL,
   speed                 FLOAT             NOT NULL,
   geohash               TEXT              NOT NULL,
