@@ -51,17 +51,17 @@ WHERE id = %s
 """)
 POINT_PREPARE = textwrap.dedent("""
 PREPARE point_insert AS
-INSERT INTO points (time, session_id, lap_id, alt, speed, geohash,
+INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
                     elapsed_duration_ms, tps_voltage, water_temp_voltage,
                     oil_pressure_voltage, rpm, afr, fuel_level_voltage)
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
-        $11, $12, $13)
+        $11, $12, $13, $14, $15)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s, %s, %s)
+                      %s, %s, %s, %s, %s)
 """)
 
 
@@ -143,6 +143,8 @@ class Pusher(object):
       args = (point.time.ToJsonString(),
               self.session_id,
               lap_id,
+              point.lat,
+              point.lon,
               point.alt,
               point.speed * 2.23694,  # m/s to mph,
               geo_hash,
