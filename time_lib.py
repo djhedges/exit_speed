@@ -14,6 +14,7 @@
 # limitations under the License.
 """Common time functions."""
 
+import datetime
 import gps_pb2
 
 
