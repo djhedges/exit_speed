@@ -132,22 +132,28 @@ class TestTimescale(unittest.TestCase):
       point = gps_pb2.Point()
       self.pusher.AddPointToQueue(point, 1)
       returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertEqual(point, returned_point)
-      self.assertEqual(1, returned_lap_number)
+      self.assertTrue(returned_point)
+      if returned_point:
+        self.assertEqual(point, returned_point)
+        self.assertEqual(1, returned_lap_number)
     with self.subTest(name='Retry Queue'):
       point = gps_pb2.Point()
       self.pusher.retry_point_queue.append((point, 2))
       returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertEqual(point, returned_point)
-      self.assertEqual(2, returned_lap_number)
+      self.assertTrue(returned_point)
+      if returned_point:
+        self.assertEqual(point, returned_point)
+        self.assertEqual(2, returned_lap_number)
     with self.subTest(name='Retry and Point Queue'):
       point = gps_pb2.Point()
       self.pusher.AddPointToQueue(point, 1)
       point = gps_pb2.Point()
       self.pusher.retry_point_queue.append((point, 2))
       returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertEqual(point, returned_point)
-      self.assertEqual(1, returned_lap_number)
+      self.assertTrue(returned_point)
+      if returned_point:
+        self.assertEqual(point, returned_point)
+        self.assertEqual(1, returned_lap_number)
 
   @mock.patch.object(timescale, 'ConnectToDB')
   def testDo(self, mock_conn):
