@@ -108,9 +108,11 @@ class TestTimescale(unittest.TestCase):
     point.fuel_level_voltage = 5
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
-    (_, _, _, alt, speed, geohash, elapsed_duration_ms,
+    (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
      tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr,
      fuel_level_voltage) = self.cursor.fetchone()
+    self.assertEqual(lat, 45.6954583246261)
+    self.assertEqual(lon, -121.525511797518)
     self.assertEqual(alt, 1.0)
     self.assertEqual(speed, 2.23694)
     self.assertEqual(geohash, 'c21efweg66fd')
