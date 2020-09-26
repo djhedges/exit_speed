@@ -51,6 +51,8 @@ def ReplayLog(filepath, include_sleep=False):
     replay_start = time.time()
     time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
     session_start = None
+  else:
+    FLAGS.set_default('commit_cycle', 10000)
   es = exit_speed.ExitSpeed(live_data=not include_sleep)
   for point in points:
     if include_sleep:
