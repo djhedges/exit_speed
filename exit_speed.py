@@ -71,7 +71,8 @@ class ExitSpeed(object):
   def __init__(
       self,
       start_finish_range=10,  # Meters, ~2x the width of straightaways.
-      live_data=True):
+      live_data=True,
+      min_points_per_session=60 * 10):  # 1 min @ gps 10hz):
     """Initializer.
 
     Args:
@@ -79,10 +80,12 @@ class ExitSpeed(object):
                           determining if the car crosses the start/finish.
       live_data: A boolean, if True indicates that this session's data should be
                  tagged as live.
+      min_points_per_session:  Used to prevent sessions from prematurely ending.
     """
     self.start_finish_range = start_finish_range
     self.live_data = live_data
     self.last_gps_report = None
+    self.min_points_per_session = min_points_per_session
 
     self.InitializeSubProcesses()
     self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
@@ -139,21 +142,19 @@ class ExitSpeed(object):
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    lap = self.lap
-    first_point = lap.points[0]
-    last_point = lap.points[-1]
+    first_point = self.lap.points[0]
+    last_point = self.lap.points[-1]
     delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
-    lap.duration.FromNanoseconds(delta)
-    self.leds.SetBestLap(lap)
-    self.pusher.lap_duration_queue.put((lap.number, lap.duration))
+    self.lap.duration.FromNanoseconds(delta)
+    self.leds.SetBestLap(self.lap)
+    self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
-    lap = self.lap
-    if len(lap.points) >= 3:
-      point_a = lap.points[-3]
-      point_b = lap.points[-2]
-      point_c = lap.points[-1]  # Latest point.
+    if len(self.lap.points) >= self.min_points_per_session:
+      point_a = self.lap.points[-3]
+      point_b = self.lap.points[-2]
+      point_c = self.lap.points[-1]  # Latest point.
       if (point_c.start_finish_distance < self.start_finish_range and
           point_a.start_finish_distance > point_b.start_finish_distance and
           point_c.start_finish_distance > point_b.start_finish_distance):
