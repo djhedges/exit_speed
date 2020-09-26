@@ -124,9 +124,8 @@ class LEDs(object):
     """Sets best lap and builds a KDTree for finding closest points."""
     if (not self.best_lap or
         lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
-      duration = lap.duration.ToSeconds()
-      minutes = duration / 60
-      seconds = duration % 60
+      minutes = lap.duration.ToSeconds() // 60
+      seconds = (lap.duration.ToMilliseconds() % 60000) / 1000.0
       logging.info('New Best Lap %d:%.03f', minutes, seconds)
       self.best_lap = lap
       x_y_points = []
@@ -139,4 +138,3 @@ class LEDs(object):
     self.Fill((0, 0, 255),  # Blue
               additional_delay=1,
               ignore_update_interval=True)
-    self.SetBestLap(lap)
