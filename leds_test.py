@@ -149,11 +149,7 @@ class TestLEDs(unittest.TestCase):
 
   @mock.patch.object(leds.LEDs, 'Fill')
   def testCrossStartFinish(self, mock_fill):
-    lap = gps_pb2.Lap()
-    lap.duration.FromSeconds(100)
-    point = lap.points.add()
-    point.speed = 88  # mph
-    self.leds.CrossStartFinish(lap)
+    self.leds.CrossStartFinish()
     blue = (0, 0, 255)
     mock_fill.assert_called_once_with(blue,
                                       additional_delay=1,
