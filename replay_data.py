@@ -14,12 +14,11 @@
 # limitations under the License.
 """Script for replaying a data log.  Super handy for development."""
 
-import logging
 import sys
 import time
-
 from absl import app
 from absl import flags
+from absl import logging
 import data_logger
 import exit_speed
 
