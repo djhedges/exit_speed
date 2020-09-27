@@ -21,6 +21,7 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import common_lib
 import config_lib
 import data_logger
 import gps
@@ -28,6 +29,7 @@ import gps_pb2
 import labjack
 import leds
 import timescale
+import triangles
 import u3
 import wbo2
 
@@ -44,12 +46,6 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
 
 
 
-def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
-  """Returns the distance between two points."""
-  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
-                                (point_b.lat, point_b.lon))
-
-
 def FindClosestTrack(
     point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
   """Returns the distance, track and start/finish of the closest track."""
@@ -59,7 +55,7 @@ def FindClosestTrack(
     track_point = gps_pb2.Point()
     track_point.lat = lat
     track_point.lon = lon
-    distance = PointDelta(point, track_point)
+    distance = common_lib.PointDelta(point, track_point)
     distance_track.append((distance, track, track_point))
   return sorted(distance_track)[0]
 
@@ -135,17 +131,16 @@ class ExitSpeed(object):
     """Populates the session with the latest GPS point."""
     point = self.point
     session = self.session
-    point.start_finish_distance = PointDelta(point, session.start_finish)
+    point.start_finish_distance = common_lib.PointDelta(
+        point, session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
     self.pusher.AddPointToQueue(point, self.lap.number)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    first_point = self.lap.points[0]
-    last_point = self.lap.points[-1]
-    delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
-    self.lap.duration.FromNanoseconds(delta)
+    self.lap.duration.FromNanoseconds(
+        triangles.ImprovedStartFinishCrossing(self.lap))
     self.leds.SetBestLap(self.lap)
     self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
 

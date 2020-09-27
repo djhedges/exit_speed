@@ -24,6 +24,7 @@ import gps
 import gps_pb2
 import psycopg2
 import timescale
+import triangles
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
@@ -56,16 +57,6 @@ class TestExitSpeed(unittest.TestCase):
     patch = mock.patch.object(module, name)
     self.addCleanup(patch.stop)
     return patch.start()
-
-  def testPointDelta(self):
-    point_a = gps_pb2.Point()
-    point_b = gps_pb2.Point()
-    point_a.lat = 1.1
-    point_b.lat = 2.2
-    point_a.lon = -1.1
-    point_b.lon = -2.2
-    self.assertEqual(171979.02735070087,
-                     exit_speed.PointDelta(point_a, point_b))
 
   def testFindClosestTrack(self):
     point = gps_pb2.Point()
@@ -103,7 +94,10 @@ class TestExitSpeed(unittest.TestCase):
     lap.points.append(last_point)
     es.lap = lap
     es.session = session
-    es.SetLapTime()
+    with mock.patch.object(triangles,
+            'ImprovedStartFinishCrossing') as mock_improv:
+      mock_improv.return_value = 76000000000
+      es.SetLapTime()
     self.assertEqual(76, lap.duration.ToSeconds())
     self.assertEqual(es.leds.best_lap, lap)
 
@@ -127,7 +121,10 @@ class TestExitSpeed(unittest.TestCase):
       es = exit_speed.ExitSpeed(min_points_per_session=0)
       es.lap = lap
       es.session = session
-      es.CrossStartFinish()
+      with mock.patch.object(triangles,
+              'ImprovedStartFinishCrossing') as mock_improv:
+        mock_improv.return_value = 76000000000
+        es.CrossStartFinish()
       self.assertEqual(expected_len_of_laps, len(es.session.laps))
 
   def testProcessLap(self):
