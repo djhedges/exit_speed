@@ -133,17 +133,19 @@ class TestTimescale(unittest.TestCase):
     with self.subTest(name='Success'):
       point = gps_pb2.Point()
       self.pusher.AddPointToQueue(point, 1)
-      returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertTrue(returned_point)
-      if returned_point:
+      result = self.pusher.GetPointFromQueue()
+      self.assertTrue(result)
+      if result:
+        returned_point, returned_lap_number = result
         self.assertEqual(point, returned_point)
         self.assertEqual(1, returned_lap_number)
     with self.subTest(name='Retry Queue'):
       point = gps_pb2.Point()
       self.pusher.retry_point_queue.append((point, 2))
-      returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertTrue(returned_point)
-      if returned_point:
+      result = self.pusher.GetPointFromQueue()
+      self.assertTrue(result)
+      if result:
+        returned_point, returned_lap_number = result
         self.assertEqual(point, returned_point)
         self.assertEqual(2, returned_lap_number)
     with self.subTest(name='Retry and Point Queue'):
@@ -151,9 +153,10 @@ class TestTimescale(unittest.TestCase):
       self.pusher.AddPointToQueue(point, 1)
       point = gps_pb2.Point()
       self.pusher.retry_point_queue.append((point, 2))
-      returned_point, returned_lap_number = self.pusher.GetPointFromQueue()
-      self.assertTrue(returned_point)
-      if returned_point:
+      result = self.pusher.GetPointFromQueue()
+      self.assertTrue(result)
+      if result:
+        returned_point, returned_lap_number = result
         self.assertEqual(point, returned_point)
         self.assertEqual(1, returned_lap_number)
 
