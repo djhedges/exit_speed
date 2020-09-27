@@ -74,8 +74,21 @@ def SolveTimeToCrossFinish(point_b: gps_pb2.Point,
   sqrt = math.sqrt(point_b.speed ** 2 + 2 * accelration * improved_b_to_finish)
   return (point_b.speed * -1 + sqrt) / accelration
 
+def _GetFirstPoints(lap: gps_pb2.Lap):
+  """Avoids a divsion by zero if the two points have the same time.
 
-def _GetPoints(lap: gps_pb2.Lap):
+  Older logged data had multiple points at the same time.
+  """
+  a_index = 1
+  point_b = lap.points[0]
+  point_a = lap.points[1]
+  while point_b.time.ToNanoseconds() == point_a.time.ToNanoseconds():
+    a_index += 1
+    point_a = lap.points[a_index]
+  return point_a, point_b
+
+
+def _GetLastPoints(lap: gps_pb2.Lap):
   """Avoids a divsion by zero if the two points have the same time.
 
   Older logged data had multiple points at the same time.
@@ -89,8 +102,7 @@ def _GetPoints(lap: gps_pb2.Lap):
   return point_a, point_b
 
 
-def ImprovedStartFinishCrossing(lap: gps_pb2.Lap):
-  point_a, point_b = _GetPoints(lap)
+def GetImprovedTimeToFinish(point_a, point_b):
   dist_a_b = common_lib.PointDelta(point_a, point_b)
   point_b_angle = SolveOuterAngles(dist_a_b,
                                    point_a.start_finish_distance,
@@ -98,10 +110,18 @@ def ImprovedStartFinishCrossing(lap: gps_pb2.Lap):
   improved_b_to_finish = ImproveDistanceToFinish(point_b_angle,
                                                  point_b.start_finish_distance)
   accelration = CalcAcceleration(point_a, point_b)
-  b_time_to_finish = SolveTimeToCrossFinish(point_b,
-                                            improved_b_to_finish,
-                                            accelration)
+  return SolveTimeToCrossFinish(point_b,
+                                improved_b_to_finish,
+                                accelration)
+
+
+def ImprovedStartFinishCrossing(lap: gps_pb2.Lap):
+  first_point_to_finish = GetImprovedTimeToFinish(*_GetFirstPoints(lap))
+  last_point_to_finish = GetImprovedTimeToFinish(*_GetLastPoints(lap))
   first_point = lap.points[0]
-  duration = (point_b.time.ToNanoseconds() - first_point.time.ToNanoseconds() +
-              b_time_to_finish * 1e09)  # Seconds > Nanoseconds.
+  last_point = lap.points[-1]
+  duration = (last_point.time.ToNanoseconds() -
+              first_point.time.ToNanoseconds() -
+              first_point_to_finish * 1e09 +  # Seconds > Nanoseconds.
+              last_point_to_finish * 1e09)  # Seconds > Nanoseconds.
   return int(duration)
