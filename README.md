@@ -145,7 +145,7 @@ Then modified the following settings:
 
 *   UBX-CFG-RATE  # 10hz
 *   UBX-CFG-CFG   # Save the config so it persists after a power cycle.
-*   TODO: Document other settings that might be useufl.
+*   TODO: Document other settings that might be usefull.
 
 ### Raspberry Pi
 
@@ -155,12 +155,14 @@ pip3 install -r requirements.txt
 ```
 
 If you run into issues I would take a look at the travis config for pointers.
+Travis used to build and run unittests from a clean environment on each change
+and weekly.
 https://github.com/djhedges/exit_speed/blob/master/.travis.yml
 
 ### Labjack
 
 If your setup is using a Labjack for measuring sensors you'll need to install
-Exodrivers.
+the Exodrivers.
 https://labjack.com/support/software/installers/exodriver
 
 ## Examples & Usage
@@ -170,6 +172,7 @@ https://labjack.com/support/software/installers/exodriver
 My current config is checked in as config.yaml.  It provides mapping between
 inputs to point proto fields.  By removing `labjack:` or `wbo2:` from the config
 the corresponding subprocesses are disabled.
+
 ```
 leds: True
 timescale: True
@@ -239,8 +242,8 @@ Starts Exit Speed and logs to stderr.
   --alsologtostderr
 ```
 
-Quck and dirty way to start Exit Speed on boot by adding the following to
-`/etc/rc.local`.  You can connect to the screen session with `screen -rd`.
+Quick and dirty way to start Exit Speed on boot is by adding the following to
+`/etc/rc.local`.  You can than connect to the screen session with `screen -rd`.
 
 ```
 su - pi -c "screen -S exit_speed -dm /home/pi/git/exit_speed/exit_speed.py \
@@ -251,15 +254,20 @@ su - pi -c "screen -S exit_speed -dm /home/pi/git/exit_speed/exit_speed.py \
 #### replay_data.py
 
 Exit Speed logs points to `--log_dir` in files ending in `.data` such as
-`2020-09-24T12:57:12.500000_1.data`.  These data files can be replayed which
-into to timescale.
+`2020-09-24T12:57:12.500000_1.data`.  The data files can be replayed which
+into to Timescale.
 
 ```
 ./replay_data.py ~/lap_logs/2020-09-24T12\:57\:12.500000_1.data \
   --include_sleep=False
 ```
 
+If `--include_sleep=True` is set then delays are added to mimic as if the
+replayed data was being recorded in real time.  `--include_sleep=True` also tagsthe data as "replayed" instead of "live" and is removed by the
+cleanup_timescale.py script.
+
 #### cleanup_timescale.py
+
 cleanup_timescale.py is used to reduce the number of laps stored in Timescale.
 
 ```
