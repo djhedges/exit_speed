@@ -263,7 +263,8 @@ into to Timescale.
 ```
 
 If `--include_sleep=True` is set then delays are added to mimic as if the
-replayed data was being recorded in real time.  `--include_sleep=True` also tagsthe data as "replayed" instead of "live" and is removed by the
+replayed data was being recorded in real time.  `--include_sleep=True` also tags
+the data as "replayed" instead of "live" and is removed by the
 cleanup_timescale.py script.
 
 #### cleanup_timescale.py
