@@ -2,6 +2,8 @@
 
 This is not an officially supported Google product.
 
+[TOC]
+
 ## Status
 
 [![Build Status](https://travis-ci.com/djhedges/exit_speed.svg?branch=master)](https://travis-ci.com/github/djhedges/exit_speed)
@@ -131,3 +133,135 @@ Grafana queries to overlay laps.  It sounds like Grafana plans to add support
 for graphing none time series data in the future.
 https://youtu.be/2FHSHHTeZAU
 https://youtu.be/joWSMB6zanM
+
+## Installation & Setup
+
+### GPS
+
+This going off memory but I believe I downloaded the u-center software from Ublox.
+https://www.u-blox.com/en/product/u-center
+
+Then modified the following settings:
+
+*   UBX-CFG-RATE  # 10hz
+*   UBX-CFG-CFG   # Save the config so it persists after a power cycle.
+*   TODO: Document other settings that might be useufl.
+
+### Raspberry Pi
+
+```
+sudo apt-get install gfortran libatlas3-base libblas-dev libgfortran5 liblapack-dev python3 pip3
+pip3 install -r requirements.txt
+```
+
+If you run into issues I would take a look at the travis config for pointers.
+https://github.com/djhedges/exit_speed/blob/master/.travis.yml
+
+### Labjack
+
+If your setup is using a Labjack for measuring sensors you'll need to install
+Exodrivers.
+https://labjack.com/support/software/installers/exodriver
+
+## Examples & Usage
+
+### Config
+
+My current config is checked in as config.yaml.  It provides mapping between
+inputs to point proto fields.  By removing `labjack:` or `wbo2:` from the config
+the corresponding subprocesses are disabled.
+```
+leds: True
+timescale: True
+labjack:
+  ain0: fuel_level_voltage
+  ain1: water_temp_voltage
+  ain2: oil_pressure_voltage
+wbo2:
+  lambda_16: afr
+  rpm_count: rpm
+  user_3: tps_voltage
+```
+
+### Flags
+
+```
+./exit_speed.py --helpfull
+
+./exit_speed.py:
+  --data_log_path: The directory to save data and logs.
+    (default: '/home/pi/lap_logs')
+
+config_lib:
+  --config_path: The location of the Exit Speed config.
+    (default: './config.yaml')
+
+leds:
+  --led_brightness: Percentage of how bright the LEDs are. IE 0.5 == 50%.
+    (default: '0.5')
+    (a number)
+  --led_update_interval: Limits how often the LEDs are able to change to prevent
+    excessive flickering.
+    (default: '0.2')
+    (a number)
+  --speed_deltas: Used to smooth out GPS data.  This controls how many recent
+    speed deltas are stored.  50 at 10hz means a median of the last 5 seconds is
+    used.
+    (default: '10')
+    (an integer)
+
+timescale:
+  --commit_cycle: Number of points to commit at a time.
+    (default: '3')
+    (an integer)
+  --timescale_db_spec: Postgres URI connection string.
+    (default: 'postgres://exit_speed:faster@cloud:/exit_speed')
+
+wbo2:
+  --cylinders: Number of cylinders in the engine.
+    (default: '6')
+    (an integer)
+  --stoichiometric: This is used to convert the Lambda_16 bytes into an A/F
+    ratio. This should be changed based on fuel.Petrol 14.7, LGP 15.5, Methanol
+    6.4, Diesel 14.5
+    (default: '14.7')
+    (a number)
+```
+
+### Examples
+
+#### exit_speed.py
+
+Starts Exit Speed and logs to stderr.
+
+```
+./exit_speed.py --log_dir ~/lap_logs/ --config_path=./config.yaml \
+  --alsologtostderr
+```
+
+Quck and dirty way to start Exit Speed on boot by adding the following to
+`/etc/rc.local`.  You can connect to the screen session with `screen -rd`.
+
+```
+su - pi -c "screen -S exit_speed -dm /home/pi/git/exit_speed/exit_speed.py \
+  --log_dir ~/lap_logs/ --config_path=/home/pi/git/exit_speed/config.yaml \
+  --alsologtostderr" &
+```
+
+#### replay_data.py
+
+Exit Speed logs points to `--log_dir` in files ending in `.data` such as
+`2020-09-24T12:57:12.500000_1.data`.  These data files can be replayed which
+into to timescale.
+
+```
+./replay_data.py ~/lap_logs/2020-09-24T12\:57\:12.500000_1.data \
+  --include_sleep=False
+```
+
+#### cleanup_timescale.py
+cleanup_timescale.py is used to reduce the number of laps stored in Timescale.
+
+```
+./cleanup_timescale.py --max_lap_duration_ms=180000 --min_lap_duration_ms=60000
+```
