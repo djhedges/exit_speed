@@ -98,11 +98,11 @@ def CalcBTimeToFinish(lap: gps_pb2.Point) -> float:
   This assumes the first/last points of a lap are just past start/finish.
   """
   point_c = lap.points[-1]
-  _, point_b = GetPoints(lap, point_c)
+  point_b = GetPriorUniquePoint(lap, point_c)
   point_b_angle = SolvePointBAngle(point_b, point_c)
   accelration = CalcAcceleration(point_b, point_c)
   perp_dist_b = PerpendicularDistanceToFinish(point_b_angle, point_b)
   time_to_fin = SolveTimeToCrossFinish(point_b, perp_dist_b, accelration)
-  logging.info('Angle B: %s, Accel: %s, Perp_Dist: %s, Time: %s' % (
-          point_b_angle, accelration, perp_dist_b, time_to_fin))
+  logging.info('Angle B: %s, Accel: %s, Perp_Dist: %s, Time: %s',
+          point_b_angle, accelration, perp_dist_b, time_to_fin)
   return time_to_fin
