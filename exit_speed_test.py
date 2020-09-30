@@ -57,16 +57,6 @@ class TestExitSpeed(unittest.TestCase):
     self.addCleanup(patch.stop)
     return patch.start()
 
-  def testPointDelta(self):
-    point_a = gps_pb2.Point()
-    point_b = gps_pb2.Point()
-    point_a.lat = 1.1
-    point_b.lat = 2.2
-    point_a.lon = -1.1
-    point_b.lon = -2.2
-    self.assertEqual(171979.02735070087,
-                     exit_speed.PointDelta(point_a, point_b))
-
   def testFindClosestTrack(self):
     point = gps_pb2.Point()
     point.lat = 45.595412

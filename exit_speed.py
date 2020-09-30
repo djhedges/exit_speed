@@ -21,6 +21,7 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import common_lib
 import config_lib
 import data_logger
 import gps
@@ -43,13 +44,6 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (47.661806, -117.572297): 'Spokane Raceway'}
 
 
-
-def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
-  """Returns the distance between two points."""
-  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
-                                (point_b.lat, point_b.lon))
-
-
 def FindClosestTrack(
     point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
   """Returns the distance, track and start/finish of the closest track."""
@@ -59,7 +53,7 @@ def FindClosestTrack(
     track_point = gps_pb2.Point()
     track_point.lat = lat
     track_point.lon = lon
-    distance = PointDelta(point, track_point)
+    distance = common_lib.PointDelta(point, track_point)
     distance_track.append((distance, track, track_point))
   return sorted(distance_track)[0]
 
@@ -135,7 +129,8 @@ class ExitSpeed(object):
     """Populates the session with the latest GPS point."""
     point = self.point
     session = self.session
-    point.start_finish_distance = PointDelta(point, session.start_finish)
+    point.start_finish_distance = common_lib.PointDelta(point,
+                                                        session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
     self.pusher.AddPointToQueue(point, self.lap.number)
