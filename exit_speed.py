@@ -141,6 +141,9 @@ class ExitSpeed(object):
     """Sets the lap duration based on the first and last point time delta."""
     self.lap.duration.FromNanoseconds(
         triangles.ImprovedStartFinishCrossing(self.lap))
+    minutes = self.lap.duration.ToSeconds() // 60
+    seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
+    logging.info('New Lap %d:%.03f', minutes, seconds)
     self.leds.SetBestLap(self.lap)
     self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
 
