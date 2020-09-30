@@ -107,12 +107,12 @@ crossing start/finish.
 
 For the fastest lap a BallTree is constructed of GPS coordinates for the lap.
 On the current lap each GPS point's speed is compared against the closest point of the best lap by searching the BallTree.  The delta of the speed of these
-points are stored in a collections.deque which holds the last 50 points.  If the
+points are stored in a collections.deque which holds the last 10 points.  If the
 median of the points are faster then the LEDs are set to green.  If slower
 they're set to red.
 https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
 
-Another way to put it is if the median speed of the last 5 seconds is faster set
+Another way to put it is if the median speed of the last second is faster set
 the LEDs to green.  Else red.
 
 Earlier versions experimented with updating the LEDs more often as well as
@@ -146,6 +146,9 @@ Then modified the following settings:
 *   UBX-CFG-RATE  # 10hz
 *   UBX-CFG-CFG   # Save the config so it persists after a power cycle.
 *   TODO: Document other settings that might be usefull.
+
+External documentation on setting the 10hz rate.
+https://gpswebshop.com/blogs/tech-support-by-vendors-stoton/how-to-change-the-gnss100l-or-gnss200l-usb-gps-update-rate-to-10hz/
 
 ### Raspberry Pi
 
