@@ -21,7 +21,6 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
-import common_lib
 import config_lib
 import data_logger
 import gps
@@ -29,7 +28,6 @@ import gps_pb2
 import labjack
 import leds
 import timescale
-import triangles
 import u3
 import wbo2
 
@@ -46,6 +44,12 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
 
 
 
+def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
+  """Returns the distance between two points."""
+  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
+                                (point_b.lat, point_b.lon))
+
+
 def FindClosestTrack(
     point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
   """Returns the distance, track and start/finish of the closest track."""
@@ -55,7 +59,7 @@ def FindClosestTrack(
     track_point = gps_pb2.Point()
     track_point.lat = lat
     track_point.lon = lon
-    distance = common_lib.PointDelta(point, track_point)
+    distance = PointDelta(point, track_point)
     distance_track.append((distance, track, track_point))
   return sorted(distance_track)[0]
 
@@ -131,35 +135,37 @@ class ExitSpeed(object):
     """Populates the session with the latest GPS point."""
     point = self.point
     session = self.session
-    point.start_finish_distance = common_lib.PointDelta(
-        point, session.start_finish)
+    point.start_finish_distance = PointDelta(point, session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
     self.pusher.AddPointToQueue(point, self.lap.number)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    self.lap.duration.FromNanoseconds(
-        triangles.ImprovedStartFinishCrossing(self.lap))
+    first_point = self.lap.points[0]
+    last_point = self.lap.points[-1]
+    delta = last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
+    self.lap.duration.FromNanoseconds(delta)
+    self.leds.SetBestLap(self.lap)
+    self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
-    self.leds.SetBestLap(self.lap)
-    self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     if len(self.lap.points) >= self.min_points_per_session:
-      point_a = self.lap.points[-3]
-      point_b = self.lap.points[-2]
-      point_c = self.lap.points[-1]  # Latest point.
+      point_a = self.lap.points[-2]
+      point_b = self.lap.points[-1]
+      point_c = self.point
       if (point_c.start_finish_distance < self.start_finish_range and
           point_a.start_finish_distance > point_b.start_finish_distance and
-          point_c.start_finish_distance > point_b.start_finish_distance):
+          point_c.start_finish_distance >= point_b.start_finish_distance):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish()
         self.SetLapTime()
         self.AddNewLap()
+    self.lap.points.append(self.point)
 
   def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
@@ -191,7 +197,7 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
     """Populates the point protocol buffer."""
-    point = self.lap.points.add()
+    point = gps_pb2.Point()
     point.lat = report.lat
     point.lon = report.lon
     point.alt = report.alt
