@@ -27,6 +27,7 @@ import data_logger
 import gps
 import gps_pb2
 import labjack
+import lap_lib
 import leds
 import timescale
 import u3
@@ -64,7 +65,7 @@ class ExitSpeed(object):
 
   def __init__(
       self,
-      start_finish_range=10,  # Meters, ~2x the width of straightaways.
+      start_finish_range=20,  # Meters, ~4x the width of straightaways.
       live_data=True,
       min_points_per_session=60 * 10):  # 1 min @ gps 10hz):
     """Initializer.
@@ -150,16 +151,14 @@ class ExitSpeed(object):
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car corsses the start/finish."""
     if len(self.lap.points) >= self.min_points_per_session:
-      point_a = self.lap.points[-2]
-      point_b = self.lap.points[-1]
-      point_c = self.point
-      if (point_c.start_finish_distance < self.start_finish_range and
-          point_a.start_finish_distance > point_b.start_finish_distance and
-          point_c.start_finish_distance >= point_b.start_finish_distance):
+      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
+      if (self.point.start_finish_distance < self.start_finish_range and
+          lap_lib.SolvePointBAngle(prior_point, self.point) > 90):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish()
         self.SetLapTime()
         self.AddNewLap()
+    # Start and end laps on the same point just past start/finish.
     self.lap.points.append(self.point)
 
   def ProcessLap(self) -> None:

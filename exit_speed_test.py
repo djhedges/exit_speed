@@ -98,28 +98,32 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(es.leds.best_lap, lap)
 
   def testCrossStartFinish(self):
-    params = ((2, 1, 3, 2),  # Start finish cross.
-              (102, 101, 103, 1),  # Too far away.
-              )
-    for a_distance, b_distance, c_distance, expected_len_of_laps in params:
-      point_a = gps_pb2.Point()
-      point_b = gps_pb2.Point()
-      point_c = gps_pb2.Point()
-      point_a.start_finish_distance = a_distance
-      point_b.start_finish_distance = b_distance
-      point_c.start_finish_distance = c_distance
-      session = gps_pb2.Session()
-      session.track = 'Portland International Raceway'
-      session.start_finish.lat = 45.595015
-      session.start_finish.lon = -122.694526
-      lap = session.laps.add()
-      lap.points.extend([point_a, point_b])
-      es = exit_speed.ExitSpeed(min_points_per_session=0)
-      es.point = point_c
-      es.lap = lap
-      es.session = session
-      es.CrossStartFinish()
-      self.assertEqual(expected_len_of_laps, len(es.session.laps))
+    point_a = gps_pb2.Point()
+    point_b = gps_pb2.Point()
+    point_c = gps_pb2.Point()
+    point_b.start_finish_distance = 5.613414540798601
+    point_c.start_finish_distance = 8.86833983566463
+    point_a.time.FromMilliseconds(1000)
+    point_b.time.FromMilliseconds(2000)
+    point_c.time.FromMilliseconds(3000)
+    point_a.lat = 45.594961
+    point_a.lon = -122.694508
+    point_b.lat = 45.594988
+    point_b.lon = -122.694587
+    point_c.lat = 45.595000
+    point_c.lon = -122.694638
+    session = gps_pb2.Session()
+    session.track = 'Portland International Raceway'
+    session.start_finish.lat = 45.595015
+    session.start_finish.lon = -122.694526
+    lap = session.laps.add()
+    lap.points.extend([point_a, point_b])
+    es = exit_speed.ExitSpeed(min_points_per_session=0)
+    es.point = point_c
+    es.lap = lap
+    es.session = session
+    es.CrossStartFinish()
+    self.assertEqual(2, len(es.session.laps))
 
   def testProcessLap(self):
     es = exit_speed.ExitSpeed()
