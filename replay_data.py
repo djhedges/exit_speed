@@ -59,7 +59,6 @@ def ReplayLog(filepath, include_sleep=False):
         session_start = point.time.ToMilliseconds() / 1000
 
     es.point = point
-    es.lap.points.append(point)
     es.ProcessSession()
     if include_sleep:
       run_delta = time.time() - replay_start

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # pylint: disable=anomalous-backslash-in-string
-"""Libaries related to lap calculations.
+"""FUnctions related to lap time calculations.
 
 point_c |\
         | \
@@ -37,13 +37,13 @@ point_a |
 """
 # pylint: enable=anomalous-backslash-in-string
 
-from absl import logging
 import common_lib
 import gps_pb2
 import math
 
 
-def GetPriorUniquePoint(lap: gps_pb2.Lap, point_c: gps_pb2.Point):
+def GetPriorUniquePoint(lap: gps_pb2.Lap,
+                        point_c: gps_pb2.Point) -> gps_pb2.Point:
   """Avoids a divsion by zero if the two points have the same time.
 
   Older logged data had multiple points at the same time.
@@ -56,7 +56,7 @@ def GetPriorUniquePoint(lap: gps_pb2.Lap, point_c: gps_pb2.Point):
   return point
 
 
-def SolvePointBAngle(point_b, point_c):
+def SolvePointBAngle(point_b, point_c) -> float:
   dist_b_c = common_lib.PointDelta(point_b, point_c)
   # cos(B) = (c² + a² - b²)/2ca  https://rb.gy/pgi7zm
   a = point_b.start_finish_distance
@@ -65,7 +65,7 @@ def SolvePointBAngle(point_b, point_c):
   return math.degrees(math.acos((c**2 + a**2 - b**2)/(2*c*a)))
 
 
-def CalcAcceleration(point_b: gps_pb2.Point, point_c: gps_pb2.Point):
+def CalcAcceleration(point_b: gps_pb2.Point, point_c: gps_pb2.Point) -> float:
   """a = Δv/Δt"""
   return (((point_b.speed - point_c.speed) /
            (point_b.time.ToNanoseconds() - point_c.time.ToNanoseconds())) /
@@ -92,8 +92,12 @@ def SolveTimeToCrossFinish(point_b: gps_pb2.Point,
   return (point_b.speed * -1 + sqrt) / accelration
 
 
-def CalcBTimeToFinish(lap: gps_pb2.Point) -> float:
-  """Returns how many seconds it took to travel from point_b to start/finish.
+def GetTimeDelta(first_point, last_point):
+  return last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
+
+
+def CalcTimeAfterFinish(lap: gps_pb2.Point) -> float:
+  """Returns how many seconds between crossing start/finish and the last point.
 
   This assumes the first/last points of a lap are just past start/finish.
   """
@@ -103,6 +107,21 @@ def CalcBTimeToFinish(lap: gps_pb2.Point) -> float:
   accelration = CalcAcceleration(point_b, point_c)
   perp_dist_b = PerpendicularDistanceToFinish(point_b_angle, point_b)
   time_to_fin = SolveTimeToCrossFinish(point_b, perp_dist_b, accelration)
-  logging.info('Angle B: %s, Accel: %s, Perp_Dist: %s, Time: %s',
-          point_b_angle, accelration, perp_dist_b, time_to_fin)
-  return time_to_fin
+  delta = GetTimeDelta(point_b, point_c)
+  return delta - time_to_fin
+
+
+def CalcLastLapDuration(session: gps_pb2.Session) -> float:
+  """Calculates the last lap duration for the given session."""
+  if len(session.laps) == 1:
+    first_point = session.laps[0].points[0]
+    last_point = session.laps[0].points[-1]
+    return GetTimeDelta(first_point, last_point)
+  prior_lap = session.laps[-2]
+  current_lap = session.laps[-1]
+  first_point = current_lap.points[0]
+  last_point = current_lap.points[-1]
+  delta = GetTimeDelta(first_point, last_point)
+  prior_after = CalcTimeAfterFinish(prior_lap)
+  current_after = CalcTimeAfterFinish(current_lap)
+  return int(delta - current_after * 1e9 + prior_after * 1e9)

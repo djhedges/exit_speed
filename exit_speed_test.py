@@ -124,6 +124,13 @@ class TestExitSpeed(unittest.TestCase):
     es.session = session
     es.CrossStartFinish()
     self.assertEqual(2, len(es.session.laps))
+    self.assertEqual(2, len(es.session.laps[0].points))
+    self.assertEqual(2, len(es.session.laps[1].points))
+    self.assertIn(point_a, es.session.laps[0].points)
+    self.assertIn(point_b, es.session.laps[0].points)
+    self.assertIn(point_b, es.session.laps[1].points)
+    self.assertIn(point_c, es.session.laps[1].points)
+    self.assertNotIn(point_c, es.session.laps[0].points)
 
   def testProcessLap(self):
     es = exit_speed.ExitSpeed()
