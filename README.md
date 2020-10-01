@@ -129,6 +129,7 @@ Finally we take the time between the first and last points of a lap and subtract
 the time it take for the car to travel from start/finish to point C.  Finally add the time it took on the prior lap for the car to travel from start/finish to
 point C.
 
+```
 point_c |\
         | \
         |  \
@@ -139,6 +140,7 @@ point_c |\
         |  /
         |B/
 point_b |/
+```
 
 Comparison of transponder lap times vs Exit Speed lap times.
 
