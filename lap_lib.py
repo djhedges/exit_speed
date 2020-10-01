@@ -57,6 +57,7 @@ def GetPriorUniquePoint(lap: gps_pb2.Lap,
 
 
 def SolvePointBAngle(point_b, point_c) -> float:
+  """Returns the angle of B."""
   dist_b_c = common_lib.PointDelta(point_b, point_c)
   # cos(B) = (c² + a² - b²)/2ca  https://rb.gy/pgi7zm
   a = point_b.start_finish_distance
@@ -92,7 +93,7 @@ def SolveTimeToCrossFinish(point_b: gps_pb2.Point,
   return (point_b.speed * -1 + sqrt) / accelration
 
 
-def GetTimeDelta(first_point, last_point):
+def GetTimeDelta(first_point, last_point) -> float:
   return last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
 
 
