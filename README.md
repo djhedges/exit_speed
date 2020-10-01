@@ -96,12 +96,68 @@ seperate processes as well.
 
 ### Crossing Start/Finish
 
-Exit Spee has a map of tracks in the NW with GPS locations of
+Exit Speed has a map of tracks in the NW with GPS locations of arbitrary
 start/finish points selected from Google maps.   The ExitSpeed class is
 initialized with a start_finish_range which determines how close the car needs
-to be to the finish line before we consider the lap complete.  Then we look at
-3 points in a row to see if the car started to move away from the finish line.  Without the range limit points on far ends of the track would have counted as
-crossing start/finish.
+to be to the finish line before we consider the lap complete.  Without the range
+limit points on far ends of the track would have counted as crossing
+start/finish.
+
+Once the car is within range triangles are created consisting of two points
+along the straight away and the start/finish point from the prior mapping.
+When the older of the two points obtuse (greater than 90 degress) it is
+determined that the car has crossed start/finish.  The older point becomes the
+first and last point of a lap.
+
+### Lap Timing
+
+To improve upon lap time calculation a bit of trigonometry and physics is used
+to calculate a laptime with a resolution of thousands of a seconds despite the
+10hz GPS refresh.  Accuracy during testing was within ±0.022 seconds while on
+average being off by only 0.008 seconds compared to the transponder timing from
+a race.
+
+We start by calcuating the distance between B & C and from B to start/finish
+and C to start/finish.  Knowing the 3 sides of the triangle we're able to
+deterimine the angle of B.
+
+The timing between points C & B is 0.1 seconds and we know the speed at
+points B & C.  This allows us to calcuate the acceleration between points B & C.
+Next we can calcuate the distance from point B to when the car actually crosses the start finish line.
+
+Finally we take the time between the first and last points of a lap and subtract
+the time it take for the car to travel from start/finish to point C.  Finally add the time it took on the prior lap for the car to travel from start/finish to
+point C.
+
+point_c |\
+        | \
+        |  \
+        |   \
+        |____\______ start/finish
+        |    /
+        |   /
+        |  /
+        |B/
+point_b |/
+
+Comparison of transponder lap times vs Exit Speed lap times.
+
+|Transponder | Exit Speed | Deltas|
+|------------|------------|-------|
+|1:36.530	   | 1:36.508	  | 0.022 |
+|1:32.029	   | 1:32.020	  | 0.009 |
+|1:32.149	   | 1:32.144	  | 0.005 |
+|1:31.832	   | 1:31.838	  | 0.006 |
+|1:30.893	   | 1:30.884	  | 0.009 |
+|1:31.422	   | 1:31.417	  | 0.005 |
+|1:31.500	   | 1:31.510	  | 0.010 |
+|1:33.516	   | 1:33.499	  | 0.017 |
+|1:32.415	   | 1:32.428	  | 0.013 |
+|1:31.665	   | 1:31.658	  | 0.007 |
+|1:31.075	   | 1:31.076	  | 0.001 |
+|1:31.271	   | 1:31.270	  | 0.001 |
+|1:30.932	   | 1:30.930	  | 0.002 |
+|1:31.504	   | 1:31.508	  | 0.004 |
 
 ### Speed Deltas (LEDs)
 

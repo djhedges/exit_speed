@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # pylint: disable=anomalous-backslash-in-string
-"""FUnctions related to lap time calculations.
+"""Functions related to lap time calculations.
 
 point_c |\
         | \
