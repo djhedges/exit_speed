@@ -42,7 +42,7 @@ CREATE TABLE points (
   lap_id                INT               REFERENCES laps (id),
   lat                   FLOAT             NOT NULL,
   lon                   FLOAT             NOT NULL,
-  alt                   TEXT              NOT NULL,
+  alt                   FLOAT             NOT NULL,
   speed                 FLOAT             NOT NULL,
   geohash               TEXT              NOT NULL,
   elapsed_duration_ms   INT               NOT NULL,
