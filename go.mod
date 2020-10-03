@@ -10,5 +10,6 @@ require (
 	github.com/lyft/protoc-gen-star v0.5.2 // indirect
 	github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d // indirect
 	google.golang.org/grpc v1.32.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.0 // indirect
 	google.golang.org/protobuf v1.25.0
 )

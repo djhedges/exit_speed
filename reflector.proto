@@ -13,7 +13,12 @@
 // limitations under the License.
 //
 // Compile with:
-// LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/libatomic.so.1 python3 -m grpc_tools.protoc -I ./ --go_out=./ --go_opt=paths=source_relative --python_out ./ --grpc_python_out ./ reflector.proto
+// go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+// LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/libatomic.so.1 python3 -m grpc_tools.protoc -I ./ --go_out=./reflector_go_proto --go-grpc_out=./reflector_go_proto --go_opt=paths=source_relative --python_out ./ --grpc_python_out ./ reflector.proto
+// Not sure why but something is still screwy with the grpc output path.
+// Why not one more hack?
+// mv reflector_go_proto/github.com/djhedges/exit_speed/reflector_go_proto/reflector_grpc.pb.go reflector_go_proto/
+
 syntax = "proto3";
 
 option go_package = "github.com/djhedges/exit_speed/reflector_go_proto";

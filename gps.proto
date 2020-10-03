@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // sudo apt install python3-protobuf
-// Compile with protoc -I ./ --go_out=./ --go_opt=paths=source_relative --python_out ./ gps.proto
+// Compile with protoc -I ./ --go_out=./gps_go_proto --go_opt=paths=source_relative --python_out ./ gps.proto
 syntax = "proto3";
 
 option go_package = "github.com/djhedges/exit_speed/gps_go_proto;gps_go_proto";

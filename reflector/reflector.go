@@ -17,8 +17,8 @@
 package reflector
 
 import (
-	"google.golang.org/grpc"
-	gpspb "github.com/djhedges/exit_speed/gps_go_proto"
+	"context"
+	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 )
 
 func A() string {
@@ -26,22 +26,9 @@ func A() string {
 }
 
 type reflect struct {
-	gpspb.UnimplementedReflectServer
+	reflectorpb.UnimplementedReflectServer
 }
 
-func (s *reflect) ExportPoint(ctx context.Context, in *gpspb.PointUpdate) (*gpspb.Response, error) {
-	log.Printf('I haz a point')
-	return &gpspb.Response{}, nil
-}
-
-func main() {
-	lis, err := net.Listen("tcp", 65000)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	gpspb.RegisterReflectServer(s, &reflect{})
-	if err := s.Serve(lis); err != nil {
-		log.Fataf("Failed to serve: %v", err)
-	}
+func (s *reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
+	return &reflectorpb.Response{}, nil
 }

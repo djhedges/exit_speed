@@ -14,8 +14,23 @@
 // limitations under the License.
 package reflector
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"net"
+	"google.golang.org/grpc"
+	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
+)
 
 func main() {
 	fmt.Println("Hello, world.")
+	lis, err := net.Listen("tcp", "65000")
+  if err != nil {
+    log.Fatalf("failed to listen: %v", err)
+  }
+  s := grpc.NewServer()
+  reflectorpb.RegisterReflectServer(s, &reflect{})
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to serve: %v", err)
+  }
 }
