@@ -27,8 +27,10 @@ func A() string {
 
 type reflect struct {
 	reflectorpb.UnimplementedReflectServer
+	point_queue []reflectorpb.PointUpdate
 }
 
 func (s *reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
+	s.point_queue = append(s.point_queue, *req)
 	return &reflectorpb.Response{}, nil
 }
