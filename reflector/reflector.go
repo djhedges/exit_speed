@@ -30,7 +30,18 @@ type reflect struct {
 	point_queue []reflectorpb.PointUpdate
 }
 
-func (s *reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
-	s.point_queue = append(s.point_queue, *req)
+// Get the oldest point from point_queue based on the points GPS time.
+func (r *reflect) GetPoint() reflectorpb.PointUpdate {
+	var latest reflectorpb.PointUpdate
+	for i, point_update := range r.point_queue {
+		if (latest == nil || point_update.Point.Time < latest.Point.Time) {
+			latest = point_update
+		}
+	}
+	return latest
+}
+
+func (r *reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
+	r.point_queue = append(r.point_queue, *req)
 	return &reflectorpb.Response{}, nil
 }
