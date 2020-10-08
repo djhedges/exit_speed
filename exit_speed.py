@@ -187,6 +187,9 @@ class ExitSpeed(object):
       point.accelerometer_x = x
       point.accelerometer_y = y
       point.accelerometer_z = z
+      pitch, roll = self.accel.CalcPitchAndRoll(x, y, z)
+      point.pitch = pitch
+      point.roll = roll
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""

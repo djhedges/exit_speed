@@ -56,7 +56,9 @@ CREATE TABLE points (
   fuel_level_voltage    FLOAT,
   accelerometer_x       FLOAT,
   accelerometer_y       FLOAT,
-  accelerometer_z       FLOAT
+  accelerometer_z       FLOAT,
+  pitch                 FLOAT,
+  roll                  FLOAT
 );
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 SELECT create_hypertable('points', 'time');

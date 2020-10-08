@@ -62,12 +62,12 @@ class Accelerometer(object):
     z = self.CorrectValue('z', z)
     return x / self.GRAVITY, y / self.GRAVITY, z / self.GRAVITY
 
-  def CalcPitchAndRoll(self, x_gs, y_gs, z_gs):
+  def CalcPitchAndRoll(self, x_gs, y_gs, z_gs) -> Tuple[float, float]:
     """Calculates the pitch and roll based on the G readings."""
-    roll = (math.atan2(-y_gs, z_gs) * 180)  / math.pi
     pitch = ((math.atan2(x_gs, math.sqrt(y_gs * y_gs + z_gs * z_gs)) * 180) /
         math.pi)
-    return roll, pitch
+    roll = (math.atan2(-y_gs, z_gs) * 180)  / math.pi
+    return pitch, roll
 
 
 def main(unused_argv):
