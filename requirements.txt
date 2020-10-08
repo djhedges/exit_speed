@@ -1,4 +1,6 @@
 absl-py==0.10.0
+adafruit-circuitpython-adxl34x==1.11.4
+adafruit-circuitpython-busdevice==4.3.1
 adafruit-circuitpython-dotstar==2.0.0
 fake_rpi==0.7.1
 gps==3.19
