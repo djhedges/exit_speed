@@ -181,7 +181,7 @@ class ExitSpeed(object):
     self.ProcessLap()
 
   def ReadAccelerometerValues(self):
-    "Populates the accelerometer values."""
+    """Populates the accelerometer values."""
     x, y, z = self.accel.GetGForces()
     self.point.accelerometer_x = x
     self.point.accelerometer_y = y
