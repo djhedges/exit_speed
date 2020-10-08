@@ -56,7 +56,6 @@ class Accelerometer(object):
   def GetGForces(self) -> Tuple[float, float, float]:
     """Returns the number of G forces measured in each dirrection."""
     x, y, z = self.accelerometer.acceleration
-    print(x, y, z)
     x = self.CorrectValue('x', x)
     y = self.CorrectValue('y', y)
     z = self.CorrectValue('z', z)

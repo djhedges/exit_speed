@@ -180,12 +180,12 @@ class ExitSpeed(object):
       self.pusher.Start(self.point.time, track)
     self.ProcessLap()
 
-  def ReadAccelerometerValues(self):
+  def ReadAccelerometerValues(self, point: gps_pb2.Point):
     """Populates the accelerometer values."""
     x, y, z = self.accel.GetGForces()
-    self.point.accelerometer_x = x
-    self.point.accelerometer_y = y
-    self.point.accelerometer_z = z
+    point.accelerometer_x = x
+    point.accelerometer_y = y
+    point.accelerometer_z = z
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
@@ -207,6 +207,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
+    self.ReadAccelerometerValues(point)
     self.ReadLabjackValues(point)
     self.ReadWBO2Values(point)
     self.point = point
