@@ -21,6 +21,7 @@ from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import accelerometer
 import common_lib
 import config_lib
 import data_logger
@@ -93,6 +94,8 @@ class ExitSpeed(object):
   def InitializeSubProcesses(self):
     """Initialize subprocess modules based on config.yaml."""
     self.config = config_lib.LoadConfig()
+    if self.config.get('accelerometer'):
+      self.accel = accelerometer.Accelerometer()
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config)
     if self.config.get('wbo2'):
@@ -176,6 +179,13 @@ class ExitSpeed(object):
       self.session.start_finish.lon = start_finish.lon
       self.pusher.Start(self.point.time, track)
     self.ProcessLap()
+
+  def ReadAccelerometerValues(self):
+    "Populates the accelerometer values."""
+    x, y, z = self.accel.GetGForces()
+    self.point.accelerometer_x = x
+    self.point.accelerometer_y = y
+    self.point.accelerometer_z = z
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""

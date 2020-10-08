@@ -1,3 +1,4 @@
+accelerometer: True
 leds: True
 timescale: True
 labjack:
