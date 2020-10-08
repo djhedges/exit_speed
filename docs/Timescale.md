@@ -28,6 +28,7 @@ CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
   time             TIMESTAMPTZ       NOT NULL,
   track            track             NOT NULL,
+  car              TEXT              NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
