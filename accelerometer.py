@@ -16,23 +16,21 @@
 
 from typing import Text
 from typing import Tuple
-import enum
 import time
 from absl import app
-from absl import flags
-from absl import logging
 import board
 import busio
 import adafruit_adxl34x
 
 
 class Accelerometer(object):
+  """Measures the G forces the car experiences."""
   GRAVITY = 9.81
-  X_LOW = -10.6696352
-  Y_LOW = -10.277369199999999
+  X_LOW = -10.4735022
+  Y_LOW = -10.1596894
   Z_LOW = -8.9828914
-  X_HIGH = 9.924329799999999
-  Y_HIGH = 10.1204628
+  X_HIGH = 9.7674234
+  Y_HIGH = 10.0812362
   Z_HIGH = 10.8657682
 
   def __init__(self):
@@ -40,7 +38,7 @@ class Accelerometer(object):
     self.accelerometer = adafruit_adxl34x.ADXL345(self.i2c)
     self.accelerometer.range = adafruit_adxl34x.Range.RANGE_16_G
 
-  def _CorrectValue(self, axis: Text, value: float) -> float:
+  def CorrectValue(self, axis: Text, value: float) -> float:
     """Returns the values after correcting for calibration.
 
     Args:
@@ -58,9 +56,10 @@ class Accelerometer(object):
   def GetGForces(self) -> Tuple[float, float, float]:
     """Returns the number of G forces measured in each dirrection."""
     x, y, z = self.accelerometer.acceleration
-    x = self._CorrectValue('x', x)
-    y = self._CorrectValue('y', y)
-    z = self._CorrectValue('z', z)
+    print(x, y, z)
+    x = self.CorrectValue('x', x)
+    y = self.CorrectValue('y', y)
+    z = self.CorrectValue('z', z)
     return x / self.GRAVITY, y / self.GRAVITY, z / self.GRAVITY
 
 
