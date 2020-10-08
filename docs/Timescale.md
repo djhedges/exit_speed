@@ -24,11 +24,12 @@ CREATE TYPE track AS ENUM('Test Parking Lot',
                           'The Ridge Motorsport Park',
                           'Pacific Raceway',
                           'Spokane Raceway');
+CREATE TYPE car AS ENUM('Corrado', 'Civic');
 CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
   time             TIMESTAMPTZ       NOT NULL,
   track            track             NOT NULL,
-  car              TEXT              NOT NULL,
+  car              car               NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
