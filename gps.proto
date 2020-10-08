@@ -39,6 +39,8 @@ message Point {
   double accelerometer_x = 13;
   double accelerometer_y = 14;
   double accelerometer_z = 15;
+  double pitch = 16;  // Degrees
+  double roll = 17;  // Degrees
 }
 
 message Lap {

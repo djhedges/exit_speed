@@ -17,9 +17,14 @@
 import mock
 import unittest
 from absl.testing import absltest
-import accelerometer
-import busio
-import adafruit_adxl34x
+# Fixes dotstar import on Travis.
+import adafruit_platformdetect
+with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
+  mock_detector.chip.id.return_value = 'BCM2XXX'
+  import accelerometer
+  import busio
+  import adafruit_adxl34x
+# pylint: enable=wrong-import-position
 
 
 class TestAccelerometer(unittest.TestCase):
