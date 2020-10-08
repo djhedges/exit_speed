@@ -45,5 +45,21 @@ class TestAccelerometer(unittest.TestCase):
     expected = (1.0, 1.0, 1.0)
     self.assertEqual(expected, result)
 
+  def testCalcPitchAndRoll(self):
+    x_gs = 0.02
+    y_gs = -0.71
+    z_gs = 0.70
+    roll, pitch = self.accel.CalcPitchAndRoll(x_gs, y_gs, z_gs)
+    expected = (45.41, 1.15)
+    self.assertEqual(expected, (round(roll, 2), round(pitch, 2)))
+
+    x_gs = 0.72
+    y_gs = -0.03
+    z_gs = 0.69
+    roll, pitch = self.accel.CalcPitchAndRoll(x_gs, y_gs, z_gs)
+    expected = (2.49, 46.19)
+    self.assertEqual(expected, (round(roll, 2), round(pitch, 2)))
+
+
 if __name__ == '__main__':
   absltest.main()

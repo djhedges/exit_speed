@@ -16,6 +16,7 @@
 
 from typing import Text
 from typing import Tuple
+import math
 import time
 from absl import app
 import board
@@ -61,11 +62,20 @@ class Accelerometer(object):
     z = self.CorrectValue('z', z)
     return x / self.GRAVITY, y / self.GRAVITY, z / self.GRAVITY
 
+  def CalcPitchAndRoll(self, x_gs, y_gs, z_gs):
+    """Calculates the pitch and roll based on the G readings."""
+    roll = (math.atan2(-y_gs, z_gs) * 180)  / math.pi
+    pitch = ((math.atan2(x_gs, math.sqrt(y_gs * y_gs + z_gs * z_gs)) * 180) /
+        math.pi)
+    return roll, pitch
+
 
 def main(unused_argv):
   accel = Accelerometer()
   while True:
-    print('%.2f %.2f %.2f' % accel.GetGForces())
+    x, y, z = accel.GetGForces()
+    print('%.2f %.2f %.2f' % (x, y, z))
+    print('Roll: %.2f, Pitch: %.2f' % accel.CalcPitchAndRoll(x, y, z))
     time.sleep(1)
 
 
