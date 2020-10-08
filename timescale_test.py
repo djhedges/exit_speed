@@ -106,6 +106,9 @@ class TestTimescale(unittest.TestCase):
     point.rpm = 1000
     point.afr = 14.7
     point.fuel_level_voltage = 5
+    point.accelerometer_x = 0.0
+    point.accelerometer_y = 1.7
+    point.accelerometer_z = 1.2
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
