@@ -29,6 +29,7 @@ install:
   - cd -
 script:
   # Pytest doesn't play well with absl.
+  - python3 /home/travis/build/djhedges/exit_speed/accelerometer_test.py
   - python3 /home/travis/build/djhedges/exit_speed/data_logger_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed_test.py
   - python3 /home/travis/build/djhedges/exit_speed/labjack_test.py
