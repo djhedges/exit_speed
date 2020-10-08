@@ -44,6 +44,15 @@ The Adafruit DotStar LEDs can be trimmed to a desired length and provide ample
 brightness for use in a race car.
 https://www.adafruit.com/product/2241
 
+### ADXL345
+
+A ADXL345 accelerometer is used to measure the g forces experienced by the car.
+Calibration was done following the Sparkfun guide to set the min/max values.
+I need to take the extra time to read the specsheets to see if there is a more
+accurate way to calibrate the ADXL345.  I read somewhere about a sine instead
+of linear.
+https://learn.sparkfun.com/tutorials/adxl345-hookup-guide#calibration
+
 ### UBlox 8
 
 The USB GPS dongle used is GNSS100L.  It is based on the UBlox 8 chipset which
