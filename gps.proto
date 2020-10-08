@@ -36,9 +36,9 @@ message Point {
   double rpm = 10;
   double afr = 11;  // Air fuel ratio.
   double fuel_level_voltage = 12;  // Air fuel ratio.
-  double accelerometer_x = 13;
-  double accelerometer_y = 14;
-  double accelerometer_z = 15;
+  double accelerometer_x = 13; // G forces.
+  double accelerometer_y = 14; // G forces.
+  double accelerometer_z = 15; // G forces.
   double pitch = 16;  // Degrees
   double roll = 17;  // Degrees
 }
