@@ -53,15 +53,18 @@ POINT_PREPARE = textwrap.dedent("""
 PREPARE point_insert AS
 INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
                     elapsed_duration_ms, tps_voltage, water_temp_voltage,
-                    oil_pressure_voltage, rpm, afr, fuel_level_voltage)
+                    oil_pressure_voltage, rpm, afr, fuel_level_voltage,
+                    accelerometer_x, accelerometer_y, accelerometer_z)
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
-        $11, $12, $13, $14, $15)
+        $11, $12, $13, $14, $15,
+        $16, $17, $18)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s)
+                      %s, %s, %s, %s, %s,
+                      %s, %s, %s)
 """)
 
 
@@ -154,7 +157,10 @@ class Pusher(object):
               point.oil_pressure_voltage,
               point.rpm,
               point.afr,
-              point.fuel_level_voltage)
+              point.fuel_level_voltage,
+              point.accelerometer_x,
+              point.accelerometer_y,
+              point.accelerometer_z)
       cursor.execute(POINT_INSERT, args)
     else:
       self.retry_point_queue.append((point, lap_number))

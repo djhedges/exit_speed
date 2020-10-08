@@ -52,7 +52,10 @@ CREATE TABLE points (
   oil_pressure_voltage  FLOAT,
   rpm                   FLOAT,
   afr                   FLOAT,
-  fuel_level_voltage    FLOAT
+  fuel_level_voltage    FLOAT,
+  accelerometer_x       FLOAT,
+  accelerometer_y       FLOAT,
+  accelerometer_z       FLOAT
 );
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 SELECT create_hypertable('points', 'time');

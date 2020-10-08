@@ -110,7 +110,8 @@ class TestTimescale(unittest.TestCase):
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
      tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr,
-     fuel_level_voltage) = self.cursor.fetchone()
+     fuel_level_voltage, accelerometer_x, accelerometer_y,
+     accelerometer_z) = self.cursor.fetchone()
     self.assertEqual(lat, 45.6954583246261)
     self.assertEqual(lon, -121.525511797518)
     self.assertEqual(alt, 1.0)
@@ -123,6 +124,9 @@ class TestTimescale(unittest.TestCase):
     self.assertEqual(rpm, 1000)
     self.assertEqual(afr, 14.7)
     self.assertEqual(fuel_level_voltage, 5.0)
+    self.assertEqual(accelerometer_x, 0.0)
+    self.assertEqual(accelerometer_y, 1.7)
+    self.assertEqual(accelerometer_z, 1.2)
 
   def testExportPointArrivesBeforeLap(self):
     point = gps_pb2.Point()
@@ -177,6 +181,9 @@ class TestTimescale(unittest.TestCase):
     point.rpm = 1000
     point.afr = 14.7
     point.fuel_level_voltage = 5
+    point.accelerometer_x = 0.0
+    point.accelerometer_y = 1.7
+    point.accelerometer_z = 1.2
     self.pusher.lap_queue.put(lap)
     self.pusher.AddPointToQueue(point, 1)
     with self.subTest(name='Success'):
@@ -248,6 +255,9 @@ class TestTimescale(unittest.TestCase):
     point.rpm = 1000
     point.afr = 14.7
     point.fuel_level_voltage = 5
+    point.accelerometer_x = 0.0
+    point.accelerometer_y = 1.7
+    point.accelerometer_z = 1.2
     self.assertEqual(0, len(self.pusher.point_queue))
     self.pusher.AddPointToQueue(point, 1)
     self.pusher.Do()
