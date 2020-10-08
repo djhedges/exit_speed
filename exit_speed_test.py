@@ -19,12 +19,12 @@ import unittest
 import mock
 from absl import flags
 from absl.testing import absltest
-import fake_rpi
 import gps
 import gps_pb2
 import psycopg2
 import timescale
 # pylint: disable=wrong-import-position
+import fake_rpi
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
