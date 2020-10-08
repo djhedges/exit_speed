@@ -182,10 +182,11 @@ class ExitSpeed(object):
 
   def ReadAccelerometerValues(self, point: gps_pb2.Point):
     """Populates the accelerometer values."""
-    x, y, z = self.accel.GetGForces()
-    point.accelerometer_x = x
-    point.accelerometer_y = y
-    point.accelerometer_z = z
+    if self.config.get('accelerometer'):
+      x, y, z = self.accel.GetGForces()
+      point.accelerometer_x = x
+      point.accelerometer_y = y
+      point.accelerometer_z = z
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
