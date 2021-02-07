@@ -1,5 +1,5 @@
 accelerometer: True
-gryoscope: True
+gyroscope: True
 leds: True
 timescale: True
 #labjack:

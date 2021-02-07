@@ -97,8 +97,8 @@ class ExitSpeed(object):
     self.config = config_lib.LoadConfig()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.Accelerometer()
-    if self.config.get('gryoscope'):
-      self.gryo = gryoscope.Gyroscope()
+    if self.config.get('gyroscope'):
+      self.gyro = gyroscope.Gyroscope()
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config)
     if self.config.get('wbo2'):
@@ -196,10 +196,10 @@ class ExitSpeed(object):
 
   def ReadGyroscopeValues(self, point: gps_pb2.Point):
     if self.config.get('gyroscope'):
-      x, y, z = self.gryo.GetRotationalValues()
-      point.gryo_x = x
-      point.gryo_y = y
-      point.gryo_z = z
+      x, y, z = self.gyro.GetRotationalValues()
+      point.gyro_x = x
+      point.gyro_y = y
+      point.gyro_z = z
 
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
