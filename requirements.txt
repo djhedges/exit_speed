@@ -1,5 +1,6 @@
 absl-py==0.10.0
-adafruit-circuitpython-adxl34x==1.11.4
+adafruit-circuitpython-fxas21002c==2.1.5
+adafruit-circuitpython-fxos8700==2.1.4
 adafruit-circuitpython-busdevice==4.3.1
 adafruit-circuitpython-dotstar==2.0.0
 fake_rpi==0.7.1
