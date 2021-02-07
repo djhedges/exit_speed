@@ -29,7 +29,7 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import accelerometer
   import busio
-  import adafruit_adxl34x
+  import adafruit_fxos8700
 # pylint: enable=wrong-import-position
 
 
@@ -39,21 +39,22 @@ class TestAccelerometer(unittest.TestCase):
   def setUp(self):
     super().setUp()
     with mock.patch.object(busio, 'I2C'):
-      with mock.patch.object(adafruit_adxl34x, 'ADXL345'):
+      with mock.patch.object(adafruit_fxos8700, 'FXOS8700'):
         self.accel = accelerometer.Accelerometer()
 
   def testCorrectValue(self):
-    res = self.accel.CorrectValue('x', 9.924329799999999)
-    self.assertEqual(1, int(res / self.accel.GRAVITY))
-    res = self.accel.CorrectValue('y', 10.1596894)
-    self.assertEqual(1, int(res / self.accel.GRAVITY))
-    res = self.accel.CorrectValue('z', 10.9049948)
-    self.assertEqual(1, int(res / self.accel.GRAVITY))
+    self.assertEqual(9.32704486216904,
+        self.accel.CorrectValue('x', 9.924329799999999))
+    self.assertEqual(10.836155704720122,
+        self.accel.CorrectValue('y', 10.1596894))
+    self.assertEqual(9.76962474276722,
+        self.accel.CorrectValue('z', 10.260423308799998))
 
   def testGetGForces(self):
-    self.accel.accelerometer.acceleration = (9.7674234, 10.0812362, 10.8657682)
+    self.accel.accelerometer.accelerometer = (
+        0.3924229, -0.5072783912, 10.29870)
     result = self.accel.GetGForces()
-    expected = (1.0, 1.0, 1.0)
+    expected = (0.005457996517639941, -0.016599597585513083, 0.9997570415398239)
     self.assertEqual(expected, result)
 
   def testCalcPitchAndRoll(self):

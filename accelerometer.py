@@ -21,32 +21,35 @@ import time
 from absl import app
 import board
 import busio
-import adafruit_adxl34x
+import board
+import busio
+import adafruit_fxos8700
 
 
 class Accelerometer(object):
   """Measures the G forces the car experiences."""
   GRAVITY = 9.81
-  X_LOW = -10.4735022
-  Y_LOW = -10.1596894
-  Z_LOW = -8.9828914
-  X_HIGH = 9.7674234
-  Y_HIGH = 10.0812362
-  Z_HIGH = 10.8657682
+  X_LOW = -9.7459664498
+  Y_LOW = -9.8632147572
+  Z_LOW = -9.4660062056
+  X_HIGH = 10.420742422999998
+  Y_HIGH = 9.164510558
+  Z_HIGH = 10.301101292999999
 
   def __init__(self):
     self.i2c = busio.I2C(board.SCL, board.SDA)
-    self.accelerometer = adafruit_adxl34x.ADXL345(self.i2c)
-    self.accelerometer.range = adafruit_adxl34x.Range.RANGE_16_G
+    self.accelerometer = adafruit_fxos8700.FXOS8700(
+        self.i2c, accel_range=adafruit_fxos8700.ACCEL_RANGE_8G)
 
   def CorrectValue(self, axis: Text, value: float) -> float:
     """Returns the values after correcting for calibration.
 
     Args:
       axis: A string of the axis such as x,y,z.
-      value: A value from self.accelerometer.acceleration
+      value: A value from self.accelerometer.accelerometer
 
     https://learn.sparkfun.com/tutorials/adxl345-hookup-guide#calibration
+    https://www.nxp.com/docs/en/application-note/AN4399.pdf
     """
     low = getattr(self, '%s_LOW' % axis.upper())
     high = getattr(self, '%s_HIGH' % axis.upper())
@@ -55,8 +58,8 @@ class Accelerometer(object):
     return (value - offset) / gain
 
   def GetGForces(self) -> Tuple[float, float, float]:
-    """Returns the number of G forces measured in each dirrection."""
-    x, y, z = self.accelerometer.acceleration
+    """Returns the number of G forces measured in each direction."""
+    x, y, z = self.accelerometer.accelerometer
     x = self.CorrectValue('x', x)
     y = self.CorrectValue('y', y)
     z = self.CorrectValue('z', z)
