@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gps',
   syntax='proto3',
   serialized_options=b'Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_proto',
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf3\x02\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.PointB:Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_protob\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa3\x03\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\x12\x0e\n\x06gyro_x\x18\x12 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x13 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x14 \x01(\x01\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.PointB:Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_protob\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -154,6 +154,27 @@ _POINT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='gyro_x', full_name='gps.Point.gyro_x', index=17,
+      number=18, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='gyro_y', full_name='gps.Point.gyro_y', index=18,
+      number=19, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='gyro_z', full_name='gps.Point.gyro_z', index=19,
+      number=20, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -167,7 +188,7 @@ _POINT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=455,
+  serialized_end=503,
 )
 
 
@@ -211,8 +232,8 @@ _LAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=457,
-  serialized_end=551,
+  serialized_start=505,
+  serialized_end=599,
 )
 
 
@@ -256,8 +277,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=553,
-  serialized_end=635,
+  serialized_start=601,
+  serialized_end=683,
 )
 
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP

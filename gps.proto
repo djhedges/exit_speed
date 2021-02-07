@@ -40,7 +40,10 @@ message Point {
   double accelerometer_y = 14; // G forces.
   double accelerometer_z = 15; // G forces.
   double pitch = 16;  // Degrees
-  double roll = 17;  // Degrees
+  double roll = 17;   // Degrees
+  double gyro_x = 18; // Degrees/second
+  double gyro_y = 19; // Degrees/second
+  double gyro_z = 20; // Degrees/second
 }
 
 message Lap {

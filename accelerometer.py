@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""ADXL345 accelerometer."""
+"""FXOS8700 accelerometer."""
 
 from typing import Text
 from typing import Tuple
