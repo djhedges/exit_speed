@@ -21,8 +21,6 @@ import time
 from absl import app
 import board
 import busio
-import board
-import busio
 import adafruit_fxos8700
 
 
