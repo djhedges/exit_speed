@@ -22,7 +22,6 @@ from typing import Optional
 from typing import Tuple
 from absl import flags
 from absl import logging
-import geohash
 import gps_pb2
 import psycopg2
 
@@ -142,7 +141,6 @@ class Pusher(object):
     """Exports point data to timescale."""
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
-      geo_hash = geohash.encode(point.lat, point.lon)
       elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
       args = (point.time.ToJsonString(),
               self.session_id,
@@ -151,7 +149,7 @@ class Pusher(object):
               point.lon,
               point.alt,
               point.speed * 2.23694,  # m/s to mph,
-              geo_hash,
+              point.geohash,
               elapsed_duration_ms,
               point.tps_voltage,
               point.water_temp_voltage,

@@ -25,6 +25,7 @@ import accelerometer
 import common_lib
 import config_lib
 import data_logger
+import geohash
 import gps
 import gps_pb2
 import gyroscope
@@ -221,6 +222,7 @@ class ExitSpeed(object):
     point.alt = report.alt
     point.speed = report.speed
     point.time.FromJsonString(report.time)
+    point.geohash = geohash.encode(point.lat, point.lon)
     self.ReadAccelerometerValues(point)
     self.ReadGyroscopeValues(point)
     self.ReadLabjackValues(point)

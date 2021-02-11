@@ -44,6 +44,7 @@ message Point {
   double gyro_x = 18; // Degrees/second
   double gyro_y = 19; // Degrees/second
   double gyro_z = 20; // Degrees/second
+  string geohash = 21;
 }
 
 message Lap {

@@ -111,6 +111,7 @@ class TestTimescale(unittest.TestCase):
     point.accelerometer_z = 1.2
     point.pitch = 0.2
     point.roll = 5.0
+    point.geohash = 'c21efweg66fd'
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
