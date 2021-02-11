@@ -44,13 +44,15 @@ INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
-        $16, $17, $18, $19, $20)
+        $16, $17, $18, $19, $20,
+			  $21, $22, $23)
 `
 	POINT_INSERT = `
 EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s)
+                      %s, %s, %s, %s, %s,
+										  %s, %s, %s)
 `
 )
 
@@ -87,6 +89,9 @@ func (r *reflect) TimescaleExportPoint() {
 			point_update.Point.Accelerometer_y,
 			point_update.Point.Accelerometer_z,
 			point_update.Point.Pitch,
-			point_update.Point.Roll)
+			point_update.Point.Roll,
+		  point_update.Point.gyro_x,
+		  point_update.Point.gyro_y,
+		  point_update.Point.gyro_z)
 	}
 }
