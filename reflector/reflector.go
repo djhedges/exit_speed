@@ -19,6 +19,8 @@ package reflector
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"sync"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 	_ "github.com/lib/pq"
 	"log"
@@ -30,7 +32,8 @@ func A() string {
 
 type Reflect struct {
 	reflectorpb.UnimplementedReflectServer
-	point_channel chan reflectorpb.PointUpdate
+	PU_queue []*reflectorpb.PointUpdate
+	puq_lock sync.Mutex
 }
 
 const (
@@ -57,7 +60,9 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
 )
 
 func (r *Reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
-	r.point_channel <- *req
+	fmt.Println("Poke")
+	r.PU_queue = append(r.PU_queue, req)
+	fmt.Println("You're it")
 	return &reflectorpb.Response{}, nil
 }
 
@@ -68,7 +73,10 @@ func (r *Reflect) TimescaleExportPoint() {
 	}
 	db.QueryRow(POINT_PREPARE)
 	for {
-		point_update := <-r.point_channel
+		r.puq_lock.Lock()
+		point_update := r.PU_queue[len(r.PU_queue)-1]
+		//r.PU_queue = r.PU_queue[:len(r.PU_queue)-1]
+		r.puq_lock.Unlock()
 		db.QueryRow(POINT_INSERT,
 			point_update.Point.Time,
 			point_update.SessionId,

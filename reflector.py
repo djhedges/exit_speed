@@ -22,11 +22,12 @@ import reflector_pb2_grpc
 
 
 def main(unused_argv):
-  channel = grpc.insecure_channel('./.reflector_socket')
+  channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
   stub = reflector_pb2_grpc.ReflectStub(channel)
-  lap_number = reflector_pb2.LapNumber()
-  lap_number.lap_number = 7
-  stub.NewLap(lap_number)
+  point_update = reflector_pb2.PointUpdate()
+  point_update.lap_number = 1
+  response = stub.ExportPoint(point_update)
+  import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':
