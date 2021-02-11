@@ -28,7 +28,7 @@ func A() string {
 	return "test"
 }
 
-type reflect struct {
+type Reflect struct {
 	reflectorpb.UnimplementedReflectServer
 	point_channel chan reflectorpb.PointUpdate
 }
@@ -56,12 +56,12 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
 `
 )
 
-func (r *reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
+func (r *Reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
 	r.point_channel <- *req
 	return &reflectorpb.Response{}, nil
 }
 
-func (r *reflect) TimescaleExportPoint() {
+func (r *Reflect) TimescaleExportPoint() {
 	db, err := sql.Open("postgres", "postgres://exit_speed:faster@cloud:/exit_speed")
 	if err != nil {
 		log.Fatal(err)

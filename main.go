@@ -19,7 +19,6 @@ import (
 	"log"
 	"net"
 	"google.golang.org/grpc"
-	"reflector"
 	"github.com/djhedges/exit_speed/reflector"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 )
@@ -31,7 +30,7 @@ func main() {
     log.Fatalf("failed to listen: %v", err)
   }
   s := grpc.NewServer()
-  reflectorpb.RegisterReflectServer(s, &reflector.reflect{})
+  reflectorpb.RegisterReflectServer(s, &reflector.Reflect{})
   if err := s.Serve(lis); err != nil {
     log.Fatalf("Failed to serve: %v", err)
   }
