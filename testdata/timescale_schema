@@ -36,5 +36,8 @@ CREATE TABLE points (
   accelerometer_y       FLOAT,
   accelerometer_z       FLOAT,
   pitch                 FLOAT,
-  roll                  FLOAT
+  roll                  FLOAT,
+  gyro_x                 FLOAT,
+  gyro_y                 FLOAT,
+  gyro_z                 FLOAT
 );
