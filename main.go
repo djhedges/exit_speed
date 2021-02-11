@@ -23,12 +23,16 @@ import (
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 )
 
+const (
+	socket = "/tmp/exit_speed.sock"
+)
+
 func main() {
-	fmt.Println("Hello, world.")
-	lis, err := net.Listen("tcp", "0")
+	lis, err := net.Listen("unix", socket)
   if err != nil {
     log.Fatalf("failed to listen: %v", err)
   }
+	fmt.Printf("Listening on %s\n", socket)
   s := grpc.NewServer()
   reflectorpb.RegisterReflectServer(s, &reflector.Reflect{})
   if err := s.Serve(lis); err != nil {
