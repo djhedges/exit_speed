@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='reflector',
   syntax='proto3',
   serialized_options=_b('Z1github.com/djhedges/exit_speed/reflector_go_proto'),
-  serialized_pb=_b('\n\x0freflector.proto\x12\treflector\x1a\tgps.proto\x1a\x1egoogle/protobuf/duration.proto\"<\n\x0bPointUpdate\x12\x19\n\x05point\x18\x01 \x01(\x0b\x32\n.gps.Point\x12\x12\n\nlap_number\x18\x02 \x01(\x05\"\x1f\n\tLapNumber\x12\x12\n\nlap_number\x18\x01 \x01(\x05\":\n\x0bLapDuration\x12+\n\x08\x64uration\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\"\n\n\x08Response2\xc2\x01\n\x07Reflect\x12<\n\x0b\x45xportPoint\x12\x16.reflector.PointUpdate\x1a\x13.reflector.Response\"\x00\x12\x35\n\x06NewLap\x12\x14.reflector.LapNumber\x1a\x13.reflector.Response\"\x00\x12\x42\n\x11UpdateLapDuration\x12\x16.reflector.LapDuration\x1a\x13.reflector.Response\"\x00\x42\x33Z1github.com/djhedges/exit_speed/reflector_go_protob\x06proto3')
+  serialized_pb=_b('\n\x0freflector.proto\x12\treflector\x1a\tgps.proto\x1a\x1egoogle/protobuf/duration.proto\"}\n\x0bPointUpdate\x12\x19\n\x05point\x18\x01 \x01(\x0b\x32\n.gps.Point\x12\x12\n\nlap_number\x18\x02 \x01(\x05\x12\x0e\n\x06lap_id\x18\x03 \x01(\x05\x12\x12\n\nsession_id\x18\x04 \x01(\x05\x12\x1b\n\x13\x65lapsed_duration_ms\x18\x05 \x01(\x05\"\x1f\n\tLapNumber\x12\x12\n\nlap_number\x18\x01 \x01(\x05\":\n\x0bLapDuration\x12+\n\x08\x64uration\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\"\n\n\x08Response2\xc2\x01\n\x07Reflect\x12<\n\x0b\x45xportPoint\x12\x16.reflector.PointUpdate\x1a\x13.reflector.Response\"\x00\x12\x35\n\x06NewLap\x12\x14.reflector.LapNumber\x1a\x13.reflector.Response\"\x00\x12\x42\n\x11UpdateLapDuration\x12\x16.reflector.LapDuration\x1a\x13.reflector.Response\"\x00\x42\x33Z1github.com/djhedges/exit_speed/reflector_go_protob\x06proto3')
   ,
   dependencies=[gps__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,])
 
@@ -50,6 +50,27 @@ _POINTUPDATE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lap_id', full_name='reflector.PointUpdate.lap_id', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='session_id', full_name='reflector.PointUpdate.session_id', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='elapsed_duration_ms', full_name='reflector.PointUpdate.elapsed_duration_ms', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -63,7 +84,7 @@ _POINTUPDATE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=73,
-  serialized_end=133,
+  serialized_end=198,
 )
 
 
@@ -93,8 +114,8 @@ _LAPNUMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=166,
+  serialized_start=200,
+  serialized_end=231,
 )
 
 
@@ -124,8 +145,8 @@ _LAPDURATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=168,
-  serialized_end=226,
+  serialized_start=233,
+  serialized_end=291,
 )
 
 
@@ -148,8 +169,8 @@ _RESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=228,
-  serialized_end=238,
+  serialized_start=293,
+  serialized_end=303,
 )
 
 _POINTUPDATE.fields_by_name['point'].message_type = gps__pb2._POINT
@@ -197,8 +218,8 @@ _REFLECT = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=241,
-  serialized_end=435,
+  serialized_start=306,
+  serialized_end=500,
   methods=[
   _descriptor.MethodDescriptor(
     name='ExportPoint',
