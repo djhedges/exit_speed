@@ -1,4 +1,3 @@
-//!/usr/bin/python3
 // Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +11,27 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package reflector
+
+package main
 
 import (
 	"fmt"
 	"log"
 	"net"
 	"google.golang.org/grpc"
+	"reflector"
+	"github.com/djhedges/exit_speed/reflector"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 )
 
 func main() {
 	fmt.Println("Hello, world.")
-	lis, err := net.Listen("tcp", "65000")
+	lis, err := net.Listen("tcp", "0")
   if err != nil {
     log.Fatalf("failed to listen: %v", err)
   }
   s := grpc.NewServer()
-  reflectorpb.RegisterReflectServer(s, &reflect{})
+  reflectorpb.RegisterReflectServer(s, &reflector.reflect{})
   if err := s.Serve(lis); err != nil {
     log.Fatalf("Failed to serve: %v", err)
   }

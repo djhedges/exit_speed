@@ -12,9 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Parser for wbo2.
-
-https://www.wbo2.com/sw/logger.htm Frame and byte info.
+"""Client library for the reflector.
 """
 
 from absl import app
