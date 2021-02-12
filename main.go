@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"google.golang.org/grpc"
 	"github.com/djhedges/exit_speed/reflector"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
@@ -28,6 +29,10 @@ const (
 )
 
 func main() {
+	_, err := os.Stat(socket)
+  if err == nil {
+	  os.Remove(socket)
+	}
 	lis, err := net.Listen("unix", socket)
   if err != nil {
     log.Fatalf("failed to listen: %v", err)
