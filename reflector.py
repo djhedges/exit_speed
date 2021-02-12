@@ -46,6 +46,7 @@ def main(unused_argv):
   point_update.point.gyro_z = 2.5
   point_update.point.geohash = 'c21efweg66fd'
   response = stub.ExportPoint(point_update)
+  print(response)
 
 
 if __name__ == '__main__':

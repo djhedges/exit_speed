@@ -262,8 +262,9 @@ class Reflector(Timescale):
   def __init__(self,
                live_data: bool = True,
                start_process: bool = True,
-               go_binary_and_args: List[Text] = ['/home/pi/go/bin/exit_speed']):
+               go_binary_and_args: List[Text] = None):
     super().__init__(live_data, start_process)
+    go_binary_and_args = go_binary_and_args or ['/home/pi/go/bin/exit_speed']
     self.go_process = subprocess.Popen(go_binary_and_args)
     atexit.register(self.go_process.kill)
     self.channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
@@ -281,6 +282,6 @@ class Reflector(Timescale):
       point_update.lap_id = lap_id
       point_update.session_id = self.session_id
       point_update.elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-      response = self.stub.ExportPoint(point_update)
+      self.stub.ExportPoint(point_update)
     else:
       self.retry_point_queue.append((point, lap_number))
