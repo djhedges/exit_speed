@@ -230,7 +230,7 @@ class ExitSpeed(object):
     self.ReadWBO2Values(point)
     self.point = point
 
-  def _CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
+  def CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
     """Verifies required report fields are present."""
     for field in self.REPORT_REQ_FIELDS:
       if not report.get(field):

@@ -201,10 +201,10 @@ class TestExitSpeed(unittest.TestCase):
         u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
     with self.subTest(name='Populated Report'):
-      self.assertTrue(es._CheckReportFields(report))
+      self.assertTrue(es.CheckReportFields(report))
     with self.subTest(name='Empty Report'):
       report = gps.client.dictwrapper({})
-      self.assertFalse(es._CheckReportFields(report))
+      self.assertFalse(es.CheckReportFields(report))
 
   def testProcessReport(self):
     report = gps.client.dictwrapper({
