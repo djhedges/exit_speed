@@ -65,6 +65,7 @@ def FindClosestTrack(
 class ExitSpeed(object):
   """Main object which loops and logs data."""
   LABJACK_TIMER_CMD = u3.Timer0(UpdateReset=True, Value=0, Mode=None)
+  REPORT_REQ_FIELDS = ('lat', 'lon', 'alt', 'time', 'speed')
 
   def __init__(
       self,
@@ -229,10 +230,18 @@ class ExitSpeed(object):
     self.ReadWBO2Values(point)
     self.point = point
 
+  def _CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
+    """Verifies required report fields are present."""
+    for field in self.REPORT_REQ_FIELDS:
+      if not report.get(field):
+        return False
+    return True
+
   def ProcessReport(self, report: gps.client.dictwrapper) -> None:
     """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
-    if report['class'] == 'TPV' and report.mode == 3:
+    if (report.get('class') == 'TPV' and report.get('mode') == 3 and
+        self._CheckReportFields(report)):
       if (not self.last_gps_report or
           self.last_gps_report != report.time):
         self.PopulatePoint(report)

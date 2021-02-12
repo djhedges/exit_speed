@@ -183,6 +183,29 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.time.seconds, 1576733064)
     self.assertEqual(point.time.nanos, 100000000)
 
+  def testCheckReportFields(self):
+    report = gps.client.dictwrapper({
+        u'epx': 7.409,
+        u'epy': 8.266,
+        u'epv': 20.01,
+        u'ept': 0.005,
+        u'lon': -2.1,
+        u'eps': 165.32,
+        u'lat': 14.2,
+        u'track': 0.0,
+        u'mode': 3,
+        u'time': u'2019-12-19T05:24:24.100Z',
+        u'device': u'/dev/ttyACM0',
+        u'alt': 6.9,
+        u'speed': 0.088,
+        u'class': u'TPV'})
+    es = exit_speed.ExitSpeed()
+    with self.subTest(name='Populated Report'):
+      self.assertTrue(es._CheckReportFields(report))
+    with self.subTest(name='Empty Report'):
+      report = gps.client.dictwrapper({})
+      self.assertFalse(es._CheckReportFields(report))
+
   def testProcessReport(self):
     report = gps.client.dictwrapper({
         u'epx': 7.409,
@@ -200,7 +223,7 @@ class TestExitSpeed(unittest.TestCase):
         u'speed': 0.088,
         u'class': u'TPV'})
     es = exit_speed.ExitSpeed()
-    es.PopulatePoint(report)
+    es.ProcessReport(report)
     point = es.point
     self.assertEqual(point.lat, 14.2)
     self.assertEqual(point.lon, -2.1)
@@ -208,6 +231,10 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.speed, 0.088)
     self.assertEqual(point.time.seconds, 1576733064)
     self.assertEqual(point.time.nanos, 100000000)
+    with self.subTest(name='Empty Report'):
+      # Ensure we don't crash if report is missing fields.
+      report = gps.client.dictwrapper({})
+      es.ProcessReport(report)
 
 
 if __name__ == '__main__':
