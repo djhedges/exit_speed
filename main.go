@@ -48,7 +48,7 @@ func main() {
   }
 	fmt.Printf("Listening on %s\n", socket)
 	r := &reflector.Reflect{
-	    PU_chan: make(chan *reflectorpb.PointUpdate),
+	    PU_chan: make(chan *reflectorpb.PointUpdate, 100),
 		  DB_spec: db_spec}
 	for i := 0; i < 5; i++ {
 	  go r.TimescaleExportPoint()
