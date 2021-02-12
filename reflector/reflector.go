@@ -21,7 +21,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 	_ "github.com/lib/pq"
 	"log"
@@ -34,12 +33,16 @@ func A() string {
 type Reflect struct {
 	reflectorpb.UnimplementedReflectServer
 	PU_chan chan *reflectorpb.PointUpdate
-	DB_spec *string
+	DB_spec string
 }
 
 const (
 	POINT_INSERT = `
-INSERT INTO points
+INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
+                    elapsed_duration_ms, tps_voltage, water_temp_voltage,
+                    oil_pressure_voltage, rpm, afr, fuel_level_voltage,
+                    accelerometer_x, accelerometer_y, accelerometer_z,
+                    pitch, roll, gyro_x, gyro_y, gyro_z)
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
@@ -57,20 +60,18 @@ func (r *Reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate)
 
 func (r *Reflect) TimescaleExportPoint() {
 	m := jsonpb.Marshaler{}
-	db_spec := *r.DB_spec
-	db, err := sql.Open("postgres", db_spec)
+	db, err := sql.Open("postgres", r.DB_spec)
 	if err != nil {
 		log.Fatal(err)
 	}
 	db.Prepare(POINT_INSERT)
 	for {
 		point_update := <-r.PU_chan
-		fmt.Println(proto.MarshalTextString(point_update))
 		json_time, err := m.MarshalToString(point_update.Point.Time)
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = db.Exec(POINT_INSERT,
+		db.Exec(POINT_INSERT,
 			json_time,
 			point_update.SessionId,
 			point_update.LapId,

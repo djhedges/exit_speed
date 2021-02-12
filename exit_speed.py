@@ -105,7 +105,7 @@ class ExitSpeed(object):
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config)
     if self.config.get('timescale'):
-      self.timescale = timescale.Timescale(live_data=self.live_data)
+      self.timescale = timescale.Reflector(live_data=self.live_data)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""

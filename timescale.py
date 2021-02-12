@@ -14,16 +14,22 @@
 # limitations under the License.
 """Timescale interface for exporting data."""
 
+import atexit
 import multiprocessing
 import subprocess
 import sys
 import textwrap
 import traceback
 from typing import Optional
+from typing import List
+from typing import Text
 from typing import Tuple
 from absl import flags
 from absl import logging
 import gps_pb2
+import grpc
+import reflector_pb2
+import reflector_pb2_grpc
 import psycopg2
 
 FLAGS = flags.FLAGS
@@ -252,15 +258,16 @@ class Timescale(object):
 
 class Reflector(Timescale):
   """Starts the go reflector process for parallelizing writes to Timescale."""
-  GO_BIN = '/home/$USER/go/bin/exit_speed'
 
   def __init__(self,
                live_data: bool = True,
-               start_process: bool = True):
+               start_process: bool = True,
+               go_binary_and_args: List[Text] = ['/home/pi/go/bin/exit_speed']):
     super().__init__(live_data, start_process)
-    self.go_process = subprocess.Popen([self.GO_BIN])
-    channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
-    stub = reflector_pb2_grpc.ReflectStub(channel)
+    self.go_process = subprocess.Popen(go_binary_and_args)
+    atexit.register(self.go_process.kill)
+    self.channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
+    self.stub = reflector_pb2_grpc.ReflectStub(self.channel)
 
   def ExportPoint(self,
                   point: gps_pb2.Point,
@@ -270,9 +277,10 @@ class Reflector(Timescale):
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
       point_update = reflector_pb2.PointUpdate()
-      point_update.point = point
+      point_update.point.MergeFromString(point.SerializeToString())
       point_update.lap_id = lap_id
+      point_update.session_id = self.session_id
       point_update.elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-      response = stub.ExportPoint(point_update)
+      response = self.stub.ExportPoint(point_update)
     else:
       self.retry_point_queue.append((point, lap_number))

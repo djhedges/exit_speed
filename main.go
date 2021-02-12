@@ -31,10 +31,13 @@ const (
 )
 
 func main() {
-	db_spec := flag.String("timescale_db_spec",
-	                       "postgres://exit_speed:faster@cloud:/exit_speed",
-                         "Postgres URI connection string")
+	var db_spec string
+	flag.StringVar(&db_spec,
+	               "timescale_db_spec",
+	               "postgres://exit_speed:faster@cloud:/exit_speed",
+                 "Postgres URI connection string")
 	flag.Parse()
+  log.Printf("timescale_db_spec=%s", db_spec)
 	_, err := os.Stat(socket)
   if err == nil {
 	  os.Remove(socket)
