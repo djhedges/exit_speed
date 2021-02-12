@@ -16,6 +16,8 @@
 
 import atexit
 import multiprocessing
+import os
+import time
 import subprocess
 import sys
 import textwrap
@@ -258,16 +260,29 @@ class Timescale(object):
 
 class Reflector(Timescale):
   """Starts the go reflector process for parallelizing writes to Timescale."""
+  SOCKET_PATH = '/tmp/exit_speed.sock'
 
   def __init__(self,
                live_data: bool = True,
                start_process: bool = True,
                go_binary_and_args: List[Text] = None):
     super().__init__(live_data, start_process)
-    go_binary_and_args = go_binary_and_args or ['/home/pi/go/bin/exit_speed']
-    self.go_process = subprocess.Popen(go_binary_and_args)
+    self.go_binary_and_args = go_binary_and_args or [
+        '/home/pi/go/bin/exit_speed']
+    self.go_process = None
+    self.channel = None
+    self.stub = None
+
+  def ConnectToReflector(self):
+    """Connects to the reflector once it's ready."""
+    if os.path.exists(self.SOCKET_PATH):
+      os.remove(self.SOCKET_PATH)  # Remove socket from prior run.
+    self.go_process = subprocess.Popen(self.go_binary_and_args)
     atexit.register(self.go_process.kill)
-    self.channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
+    # Wait for the reflector to setup the socket.
+    while not os.path.exists(self.SOCKET_PATH):
+      time.sleep(1)
+    self.channel = grpc.insecure_channel('unix://%s' % self.SOCKET_PATH)
     self.stub = reflector_pb2_grpc.ReflectStub(self.channel)
 
   def ExportPoint(self,
@@ -275,6 +290,8 @@ class Reflector(Timescale):
                   lap_number: int,
                   unused_cursor: psycopg2.extensions.cursor):
     """Sends an RPC to the Go process instead."""
+    if not self.go_process:
+      self.ConnectToReflector()
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
       point_update = reflector_pb2.PointUpdate()
