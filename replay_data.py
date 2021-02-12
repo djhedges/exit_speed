@@ -68,13 +68,13 @@ def ReplayLog(filepath, include_sleep=False):
 
   if not include_sleep:
     time.sleep(1)
-    qsize = len(es.pusher.point_queue)
+    qsize = len(es.timescale.point_queue)
     while qsize > 0:
-      qsize = len(es.pusher.point_queue)
+      qsize = len(es.timescale.point_queue)
       logging.log_every_n_seconds(logging.INFO, 'Queue size %s', 2, qsize)
-    es.pusher.stop_process_signal.value = True
+    es.timescale.stop_process_signal.value = True
     print(time.time())
-    es.pusher.process.join(10)
+    es.timescale.process.join(10)
     print(time.time())
   return es
 

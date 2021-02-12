@@ -25,7 +25,6 @@ def main(unused_argv):
   channel = grpc.insecure_channel('unix:///tmp/exit_speed.sock')
   stub = reflector_pb2_grpc.ReflectStub(channel)
   point_update = reflector_pb2.PointUpdate()
-  point_update.lap_number = 1
   point_update.point.time.FromJsonString('2020-09-13T01:36:38.600Z')
   point_update.point.alt = 1
   point_update.point.speed = 1

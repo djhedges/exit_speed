@@ -50,7 +50,9 @@ func main() {
 	r := &reflector.Reflect{
 	    PU_chan: make(chan *reflectorpb.PointUpdate),
 		  DB_spec: db_spec}
-	go r.TimescaleExportPoint()
+	for i := 0; i < 5; i++ {
+	  go r.TimescaleExportPoint()
+	}
   s := grpc.NewServer()
   reflectorpb.RegisterReflectServer(s, r)
   if err := s.Serve(lis); err != nil {
