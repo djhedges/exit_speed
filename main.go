@@ -33,8 +33,11 @@ func main() {
     log.Fatalf("failed to listen: %v", err)
   }
 	fmt.Printf("Listening on %s\n", socket)
+	r := &reflector.Reflect{
+	    PU_chan: make(chan *reflectorpb.PointUpdate)}
+	go r.TimescaleExportPoint()
   s := grpc.NewServer()
-  reflectorpb.RegisterReflectServer(s, &reflector.Reflect{})
+  reflectorpb.RegisterReflectServer(s, r)
   if err := s.Serve(lis); err != nil {
     log.Fatalf("Failed to serve: %v", err)
   }

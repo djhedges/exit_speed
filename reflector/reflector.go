@@ -20,7 +20,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sync"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 	_ "github.com/lib/pq"
 	"log"
@@ -32,53 +33,43 @@ func A() string {
 
 type Reflect struct {
 	reflectorpb.UnimplementedReflectServer
-	PU_queue []*reflectorpb.PointUpdate
-	puq_lock sync.Mutex
+	PU_chan chan *reflectorpb.PointUpdate
 }
 
 const (
-	POINT_PREPARE = `
-PREPARE point_insert AS
-INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
-                    elapsed_duration_ms, tps_voltage, water_temp_voltage,
-                    oil_pressure_voltage, rpm, afr, fuel_level_voltage,
-                    accelerometer_x, accelerometer_y, accelerometer_z, pitch,
-                    roll)
+	POINT_INSERT = `
+INSERT INTO points
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
         $16, $17, $18, $19, $20,
 			  $21, $22, $23)
 `
-	POINT_INSERT = `
-EXECUTE point_insert (%s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s,
-										  %s, %s, %s)
-`
 )
 
 func (r *Reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate) (*reflectorpb.Response, error) {
-	fmt.Println("Poke")
-	r.PU_queue = append(r.PU_queue, req)
-	fmt.Println("You're it")
+	var pu *reflectorpb.PointUpdate
+	pu = req
+	r.PU_chan <- pu
 	return &reflectorpb.Response{}, nil
 }
 
 func (r *Reflect) TimescaleExportPoint() {
+	m := jsonpb.Marshaler{}
 	db, err := sql.Open("postgres", "postgres://exit_speed:faster@cloud:/exit_speed")
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.QueryRow(POINT_PREPARE)
+	db.Prepare(POINT_INSERT)
 	for {
-		r.puq_lock.Lock()
-		point_update := r.PU_queue[len(r.PU_queue)-1]
-		//r.PU_queue = r.PU_queue[:len(r.PU_queue)-1]
-		r.puq_lock.Unlock()
-		db.QueryRow(POINT_INSERT,
-			point_update.Point.Time,
+		point_update := <-r.PU_chan
+		fmt.Println(proto.MarshalTextString(point_update))
+		json_time, err := m.MarshalToString(point_update.Point.Time)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = db.Exec(POINT_INSERT,
+			json_time,
 			point_update.SessionId,
 			point_update.LapId,
 			point_update.Point.Lat,
@@ -101,5 +92,8 @@ func (r *Reflect) TimescaleExportPoint() {
 			point_update.Point.GyroX,
 			point_update.Point.GyroY,
 			point_update.Point.GyroZ)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
