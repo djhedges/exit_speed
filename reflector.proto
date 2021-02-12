@@ -30,10 +30,9 @@ package reflector;
 
 message PointUpdate {
   gps.Point point = 1;
-  int32 lap_number = 2;
-  int32 lap_id = 3;
-  int32 session_id = 4;
-  int32 elapsed_duration_ms = 5;
+  int32 lap_id = 2;
+  int32 session_id = 3;
+  int32 elapsed_duration_ms = 4;
 }
 
 message LapNumber {

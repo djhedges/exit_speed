@@ -44,7 +44,7 @@ class TestTimescale(unittest.TestCase):
     self.cursor = self.conn.cursor()
     point = gps_pb2.Point()
     point.time.FromJsonString('2020-09-13T01:36:38.600Z')
-    self.pusher = timescale.Pusher(start_process=False)
+    self.pusher = timescale.Timescale(start_process=False)
     self.pusher.timescale_conn = self.conn
     self.pusher.track = 'Test Parking Lot'
     self.pusher.session_time = point.time

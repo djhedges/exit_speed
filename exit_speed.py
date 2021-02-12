@@ -105,7 +105,7 @@ class ExitSpeed(object):
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config)
     if self.config.get('timescale'):
-      self.pusher = timescale.Pusher(live_data=self.live_data)
+      self.timescale = timescale.Timescale(live_data=self.live_data)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -113,7 +113,7 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
-    self.pusher.lap_queue.put(lap)
+    self.timescale.lap_queue.put(lap)
 
   def _InitializeDataLogger(self, point: gps_pb2.Point):
     utc_dt = point.time.ToDatetime()
@@ -141,14 +141,14 @@ class ExitSpeed(object):
                                                         session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
-    self.pusher.AddPointToQueue(point, self.lap.number)
+    self.timescale.AddPointToQueue(point, self.lap.number)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
     delta = lap_lib.CalcLastLapDuration(self.session)
     self.lap.duration.FromNanoseconds(delta)
     self.leds.SetBestLap(self.lap)
-    self.pusher.lap_duration_queue.put((self.lap.number, self.lap.duration))
+    self.timescale.lap_duration_queue.put((self.lap.number, self.lap.duration))
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
@@ -181,7 +181,7 @@ class ExitSpeed(object):
       self.session.track = track
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
-      self.pusher.Start(self.point.time, track)
+      self.timescale.Start(self.point.time, track)
     self.ProcessLap()
 
   def ReadAccelerometerValues(self, point: gps_pb2.Point):
