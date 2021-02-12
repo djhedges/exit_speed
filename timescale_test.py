@@ -44,10 +44,11 @@ class TestTimescale(unittest.TestCase):
     self.cursor = self.conn.cursor()
     point = gps_pb2.Point()
     point.time.FromJsonString('2020-09-13T01:36:38.600Z')
-    self.pusher = timescale.Reflector(
+    self.pusher = timescale.Timescale(
         start_process=False,
-        go_binary_and_args=['/home/pi/go/bin/exit_speed',
-                            '--timescale_db_spec', self.postgresql.url()])
+        )
+        #go_binary_and_args=['/home/pi/go/bin/exit_speed',
+        #                    '--timescale_db_spec', self.postgresql.url()])
     self.pusher.timescale_conn = self.conn
     self.pusher.track = 'Test Parking Lot'
     self.pusher.session_time = point.time
