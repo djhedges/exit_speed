@@ -241,7 +241,7 @@ class ExitSpeed(object):
     """Processes a GPS report form the sensor.."""
     # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if (report.get('class') == 'TPV' and report.get('mode') == 3 and
-        self._CheckReportFields(report)):
+        self.CheckReportFields(report)):
       if (not self.last_gps_report or
           self.last_gps_report != report.time):
         self.PopulatePoint(report)
