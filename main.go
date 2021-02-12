@@ -15,6 +15,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -24,11 +25,16 @@ import (
 	reflectorpb "github.com/djhedges/exit_speed/reflector_go_proto"
 )
 
+
 const (
 	socket = "/tmp/exit_speed.sock"
 )
 
 func main() {
+	db_spec := flag.String("timescale_db_spec",
+	                       "postgres://exit_speed:faster@cloud:/exit_speed",
+                         "Postgres URI connection string")
+	flag.Parse()
 	_, err := os.Stat(socket)
   if err == nil {
 	  os.Remove(socket)
@@ -39,7 +45,8 @@ func main() {
   }
 	fmt.Printf("Listening on %s\n", socket)
 	r := &reflector.Reflect{
-	    PU_chan: make(chan *reflectorpb.PointUpdate)}
+	    PU_chan: make(chan *reflectorpb.PointUpdate),
+		  DB_spec: db_spec}
 	go r.TimescaleExportPoint()
   s := grpc.NewServer()
   reflectorpb.RegisterReflectServer(s, r)

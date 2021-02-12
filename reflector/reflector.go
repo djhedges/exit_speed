@@ -34,6 +34,7 @@ func A() string {
 type Reflect struct {
 	reflectorpb.UnimplementedReflectServer
 	PU_chan chan *reflectorpb.PointUpdate
+	DB_spec *string
 }
 
 const (
@@ -56,7 +57,8 @@ func (r *Reflect) ExportPoint(ctx context.Context, req *reflectorpb.PointUpdate)
 
 func (r *Reflect) TimescaleExportPoint() {
 	m := jsonpb.Marshaler{}
-	db, err := sql.Open("postgres", "postgres://exit_speed:faster@cloud:/exit_speed")
+	db_spec := *r.DB_spec
+	db, err := sql.Open("postgres", db_spec)
 	if err != nil {
 		log.Fatal(err)
 	}
