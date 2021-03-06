@@ -16,6 +16,7 @@
 
 import datetime
 import os
+import sdnotify
 from typing import Text
 from typing import Tuple
 from absl import app
@@ -93,6 +94,8 @@ class ExitSpeed(object):
     self.session = gps_pb2.Session()
     self.AddNewLap()
     self.point = None
+    self.sdnotify = sdnotify.SystemdNotifier()
+    self.sdnotify.notify('READY=1')
 
   def InitializeSubProcesses(self):
     """Initialize subprocess modules based on config.yaml."""
@@ -247,6 +250,7 @@ class ExitSpeed(object):
         self.PopulatePoint(report)
         self.ProcessSession()
         self.last_gps_report = report.time
+        self.sdnotify.notify('STATUS=Last report time:%s' % report.time)
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""
