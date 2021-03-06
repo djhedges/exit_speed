@@ -251,6 +251,7 @@ class ExitSpeed(object):
         self.ProcessSession()
         self.last_gps_report = report.time
         self.sdnotify.notify('STATUS=Last report time:%s' % report.time)
+        self.sdnotify.notify('WATCHDOG=1')
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""

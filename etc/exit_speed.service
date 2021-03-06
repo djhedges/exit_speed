@@ -4,8 +4,9 @@ Description=ExitSpeed
 [Service]
 Type=notify
 ExecStart=/home/pi/git/exit_speed/exit_speed.py --config_path /home/pi/git/exit_speed/etc/config.yaml
-Restart=on-failure
+Restart=always
 RestartSec=3
+WatchdogSec=30
 
 [Install]
 WantedBy=default.target
