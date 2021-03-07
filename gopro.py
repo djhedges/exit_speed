@@ -29,17 +29,16 @@ import pygatt
 COMMAND_UUID = 'b5f90072-aa8d-11e3-9046-0002a5d5c51b'
 RECORD_START = bytearray(b'\x03\x01\x01\x01')
 RECORD_STOP = bytearray(b'\x03\x01\x01\x00')
-ADDRESS = 'E0:86:1C:77:19:59'
 
 
 class GoPro(object):
   """Starts/stops the GoPro recording."""
 
-  def __init__(self):
+  def __init__(self, mac_address):
     self.adapter = pygatt.GATTToolBackend()
     self.adapter.start()
     self.camera = self.adapter.connect(
-        ADDRESS, address_type=pygatt.BLEAddressType.random)
+        mac_address, address_type=pygatt.BLEAddressType.random)
 
   def _WriteCmd(self, command):
     self.camera.char_write(COMMAND_UUID, command)

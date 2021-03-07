@@ -27,6 +27,7 @@ import common_lib
 import config_lib
 import data_logger
 import geohash
+import gopro
 import gps
 import gps_pb2
 import gyroscope
@@ -102,6 +103,8 @@ class ExitSpeed(object):
     self.config = config_lib.LoadConfig()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.Accelerometer()
+    if self.config.get('gopro'):
+      self.gopro = gopro.GoPro(address=self.config['gopro'])
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.Gyroscope()
     if self.config.get('labjack'):
@@ -200,6 +203,7 @@ class ExitSpeed(object):
       point.roll = roll
 
   def ReadGyroscopeValues(self, point: gps_pb2.Point):
+    """Populates the gyroscope values."""
     if self.config.get('gyroscope'):
       x, y, z = self.gyro.GetRotationalValues()
       point.gyro_x = x
