@@ -4,6 +4,7 @@ adafruit-circuitpython-dotstar==2.0.0
 adafruit-circuitpython-fxas21002c==2.1.5
 adafruit-circuitpython-fxos8700==2.1.4
 fake_rpi==0.7.1
+goprocam==4.1.0
 gps==3.19
 grpcio==1.18.0
 LabJackPython==2.0.0
@@ -15,6 +16,7 @@ python-geohash==0.8.5
 pytype==2020.8.28
 PyYAML==5.3.1
 RPi.GPIO==0.7.0
+sdnotify==0.3.2
 testing.postgresql==1.3.0
 
 # scipy deps
