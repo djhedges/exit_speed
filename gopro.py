@@ -24,7 +24,16 @@ Some interesting links:
 
 import time
 from absl import app
+from absl import flags
 import pygatt
+
+FLAGS = flags.FLAGS
+flags.DEFINE_integer('min_speed_mph', 30,
+                     'Minimum speed before the camera is activated.')
+flags.DEFINE_integer('stop_recording_duration_minutes', 5,
+                     'If speed is below the min_speed_mph value for this '
+                     'duration shutoff the recording.  Hopefully we turn off '
+                     'the camera before the car is shutoff.')
 
 COMMAND_UUID = 'b5f90072-aa8d-11e3-9046-0002a5d5c51b'
 RECORD_START = bytearray(b'\x03\x01\x01\x01')
@@ -39,6 +48,9 @@ class GoPro(object):
     self.adapter.start()
     self.camera = self.adapter.connect(
         mac_address, address_type=pygatt.BLEAddressType.random)
+    self.recording = False
+    # Last time in UTC seconds that the min_speed_mph threshold was surpassed.
+    self.last_speed_threshold = None
 
   def _WriteCmd(self, command):
     self.camera.char_write(COMMAND_UUID, command)
@@ -48,6 +60,24 @@ class GoPro(object):
 
   def Stop(self):
     self._WriteCmd(RECORD_STOP)
+
+  def ProcessPoint(self, point):
+    """Start/Stop recording based on point's speed."""
+    if point.speed > FLAGS.min_speed_mph:
+      self.last_speed_threshold = point.time.ToSeconds()
+
+    # Convert point.speed to MPH.
+    if (self.recording and
+        point.speed < FLAGS.min_speed_mph and
+        self.last_speed_threshold and
+        point.time.ToSeconds() - self.last_speed_threshold >
+        FLAGS.stop_recording_duration_minutes * 60):
+      self.Stop()
+      self.recording = False
+    if not self.recording and point.speed > FLAGS.min_speed_mph / 2.23694:
+      self.Start()
+      self.recording = True
+
 
 
 def main(unused_argv):
