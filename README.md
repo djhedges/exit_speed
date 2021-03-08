@@ -237,7 +237,7 @@ https://labjack.com/support/software/installers/exodriver
 
 ### Config
 
-My current config is checked in as config.yaml.  It provides mapping between
+My current config is checked in as corrado.yaml.  It provides mapping between
 inputs to point proto fields.  By removing `labjack:` or `wbo2:` from the config
 the corresponding subprocesses are disabled.
 
@@ -265,7 +265,7 @@ wbo2:
 
 config_lib:
   --config_path: The location of the Exit Speed config.
-    (default: './config.yaml')
+    (default: './etc/corrado.yaml')
 
 leds:
   --led_brightness: Percentage of how bright the LEDs are. IE 0.5 == 50%.
@@ -306,7 +306,7 @@ wbo2:
 Starts Exit Speed and logs to stderr.
 
 ```
-./exit_speed.py --log_dir ~/lap_logs/ --config_path=./config.yaml \
+./exit_speed.py --log_dir ~/lap_logs/ --config_path=./etc/corrado.yaml \
   --alsologtostderr
 ```
 
@@ -315,7 +315,7 @@ Quick and dirty way to start Exit Speed on boot is by adding the following to
 
 ```
 su - pi -c "screen -S exit_speed -dm /home/pi/git/exit_speed/exit_speed.py \
-  --log_dir ~/lap_logs/ --config_path=/home/pi/git/exit_speed/config.yaml \
+  --log_dir ~/lap_logs/ --config_path=/home/pi/git/exit_speed/etc/corrado.yaml \
   --alsologtostderr" &
 ```
 
