@@ -75,7 +75,7 @@ class TestWBO2(unittest.TestCase):
             wbo2.GetBytes(TEST_FRAME, 'user_3'))
 
   def testAddConfigValues(self):
-    config = config_lib.LoadConfig()
+    config = config_lib.LoadConfig('etc/corrado.yaml')
     interface = wbo2.WBO2(config, start_process=False)
     keys = {'afr': None, 'rpm': None, 'tps_voltage': None}.keys()
     self.assertEqual(keys, interface.values.keys())
