@@ -31,7 +31,7 @@ class TestGopro(unittest.TestCase):
       mock_backend.return_value = mock_adapter
       self.gopro = gopro.GoPro('aa:bb:cc:dd:ee:ff', start_process=False)
       self.gopro.last_speed_threshold = time.time()
-      self.gopro._ConnectToCamera()
+      self.gopro.ConnectToCamera()
 
   def testKeepRecordingCheck(self):
     with self.subTest(name='Do not record yet'):

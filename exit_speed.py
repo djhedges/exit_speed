@@ -104,7 +104,7 @@ class ExitSpeed(object):
     if self.config.get('accelerometer'):
       self.accel = accelerometer.Accelerometer()
     if self.config.get('gopro'):
-      self.gopro = gopro.GoPro(address=self.config['gopro'])
+      self.gopro = gopro.GoPro(self.config['gopro'])
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.Gyroscope()
     if self.config.get('labjack'):
