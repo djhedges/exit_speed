@@ -18,7 +18,7 @@ from absl import flags
 import yaml
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string('config_path', './config.yaml',
+flags.DEFINE_string('config_path', './etc/corrado.yaml',
                     'The location of the Exit Speed config.')
 
 
