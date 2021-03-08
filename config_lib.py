@@ -22,6 +22,6 @@ flags.DEFINE_string('config_path', './etc/corrado.yaml',
                     'The location of the Exit Speed config.')
 
 
-def LoadConfig():
-  with open(FLAGS.config_path) as config_file:
+def LoadConfig(config_path):
+  with open(config_path or FLAGS.config_path) as config_file:
     return yaml.load(config_file, Loader=yaml.BaseLoader)
