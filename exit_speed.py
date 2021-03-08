@@ -149,7 +149,8 @@ class ExitSpeed(object):
     self.leds.UpdateLeds(point)
     self.LogPoint()
     self.timescale.AddPointToQueue(point, self.lap.number)
-    self.gopro.ProcessPoint(point)
+    if self.config.get('gopro'):
+      self.gopro.ProcessPoint(point)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
