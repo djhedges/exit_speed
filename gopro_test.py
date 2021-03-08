@@ -15,10 +15,10 @@
 """Unitests for gopro.py"""
 
 import mock
+import time
 import unittest
 from absl.testing import absltest
 import gopro
-import gps_pb2
 import pygatt
 
 
@@ -29,52 +29,46 @@ class TestGopro(unittest.TestCase):
     mock_adapter = mock.create_autospec(pygatt.GATTToolBackend)
     with mock.patch.object(pygatt, 'GATTToolBackend') as mock_backend:
       mock_backend.return_value = mock_adapter
-      self.gopro = gopro.GoPro('aa:bb:cc:dd:ee:ff')
+      self.gopro = gopro.GoPro('aa:bb:cc:dd:ee:ff', start_process=False)
+      self.gopro.last_speed_threshold = time.time()
+      self.gopro._ConnectToCamera()
 
-  def testProcessPoint(self):
-    point = gps_pb2.Point()
+  def testKeepRecordingCheck(self):
     with self.subTest(name='Do not record yet'):
-      point.speed = 4.4  # ~10 mph
-      point.time.FromJsonString(u'2020-05-23T17:47:44.000Z')
-      self.gopro.ProcessPoint(point)
+      self.gopro.AppendSpeed(10)
+      self.gopro.KeepRecordingCheck()
       self.assertFalse(self.gopro.recording)
 
     with self.subTest(name='Start Recording'):
       with mock.patch.object(self.gopro, 'Start') as mock_start:
-        point.speed = 22  # ~50 mph
-        point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-        self.gopro.ProcessPoint(point)
+        self.gopro.AppendSpeed(50)
+        self.gopro.KeepRecordingCheck()
         self.assertTrue(self.gopro.recording)
         mock_start.assert_called_once_with()
 
     with self.subTest(name='Keep Recording'):
-      point.speed = 23  # ~51 mph
-      point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
-      self.gopro.ProcessPoint(point)
+      self.gopro.AppendSpeed(51)
+      self.gopro.KeepRecordingCheck()
       self.assertTrue(self.gopro.recording)
 
     with self.subTest(name='Keep Recording Speed below min'):
-      point.speed = 4.4  # ~10 mph
-      point.time.FromJsonString(u'2020-05-23T17:47:44.300Z')
-      self.gopro.ProcessPoint(point)
+      self.gopro.AppendSpeed(10)
+      self.gopro.KeepRecordingCheck()
       self.assertTrue(self.gopro.recording)
 
     with self.subTest(name='Stop Recording'):
       with mock.patch.object(self.gopro, 'Stop') as mock_stop:
-        self.gopro.last_speed_threshold = (
-            # 1 Second over the FLAGS.stop_recording_duration_minutes.
-            point.time.ToSeconds() - 60 * 5 - 1)
-        point.speed = 4.4  # ~10 mph
-        point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-        self.gopro.ProcessPoint(point)
+        # 1 Second over the FLAGS.stop_recording_duration_minutes.
+        self.gopro.AppendSpeed(10)
+        self.gopro.last_speed_threshold = time.time() - 60 * 5 - 1
+        self.gopro.KeepRecordingCheck()
         self.assertFalse(self.gopro.recording)
         mock_stop.assert_called_once_with()
 
     with self.subTest(name='ReStart Recording'):
       with mock.patch.object(self.gopro, 'Start') as mock_start:
-        point.speed = 22  # ~50 mph
-        point.time.FromJsonString(u'2020-05-24T17:47:44.100Z')
-        self.gopro.ProcessPoint(point)
+        self.gopro.AppendSpeed(50)
+        self.gopro.KeepRecordingCheck()
         self.assertTrue(self.gopro.recording)
         mock_start.assert_called_once_with()
 

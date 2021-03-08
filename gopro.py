@@ -22,6 +22,7 @@ Some interesting links:
   https://github.com/KonradIT/gopro-ble-py
 """
 
+import multiprocessing
 import time
 from absl import app
 from absl import flags
@@ -43,14 +44,23 @@ RECORD_STOP = bytearray(b'\x03\x01\x01\x00')
 class GoPro(object):
   """Starts/stops the GoPro recording."""
 
-  def __init__(self, mac_address):
-    self.adapter = pygatt.GATTToolBackend()
-    self.adapter.start()
-    self.camera = self.adapter.connect(
-        mac_address, address_type=pygatt.BLEAddressType.random)
+  def __init__(self, mac_address, start_process=True):
+    self.mac_address = mac_address
+    self.latest_speed_mph = None
+    self.speed_mph_queue = multiprocessing.Queue()
     self.recording = False
     # Last time in UTC seconds that the min_speed_mph threshold was surpassed.
     self.last_speed_threshold = None
+
+    self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+    if start_process:
+      self.process.start()
+
+  def ConnectToCamera(self):
+    self.adapter = pygatt.GATTToolBackend()
+    self.adapter.start()
+    self.camera = self.adapter.connect(
+        self.mac_address, address_type=pygatt.BLEAddressType.random)
 
   def _WriteCmd(self, command):
     self.camera.char_write(COMMAND_UUID, command)
@@ -61,27 +71,40 @@ class GoPro(object):
   def Stop(self):
     self._WriteCmd(RECORD_STOP)
 
-  def ProcessPoint(self, point):
+  def KeepRecordingCheck(self):
     """Start/Stop recording based on point's speed."""
-    if point.speed > FLAGS.min_speed_mph:
-      self.last_speed_threshold = point.time.ToSeconds()
+    speed = self.speed_mph_queue.get(timeout=3)
+    if speed > FLAGS.min_speed_mph:
+      self.last_speed_threshold = time.time()
 
-    # Convert point.speed to MPH.
     if (self.recording and
-        point.speed < FLAGS.min_speed_mph and
+        speed < FLAGS.min_speed_mph and
         self.last_speed_threshold and
-        point.time.ToSeconds() - self.last_speed_threshold >
+        time.time() - self.last_speed_threshold >
         FLAGS.stop_recording_duration_minutes * 60):
       self.Stop()
       self.recording = False
-    if not self.recording and point.speed > FLAGS.min_speed_mph / 2.23694:
+    if not self.recording and speed > FLAGS.min_speed_mph:
       self.Start()
       self.recording = True
 
+  def Loop(self):
+    try:
+      self.ConnectToCamera()
+      while True:
+        self.KeepRecordingCheck()
+    except pygatt.exceptions.NotConnectedError:
+      time.sleep(5)
+      self.Loop()  # Keep trying to connect.
+
+  def AppendSpeed(self, speed):
+    # Convert GPS speed from m/s to mph.
+    self.speed_mph_queue.put(speed * 2.23694)
 
 
 def main(unused_argv):
-  gopro = GoPro()
+  gopro = GoPro('E0:86:1C:77:19:59')
+  gopro.ConnectToCamera()
   gopro.Start()
   time.sleep(5)
   gopro.Stop()
