@@ -26,6 +26,7 @@ import multiprocessing
 import time
 from absl import app
 from absl import flags
+from absl import logging
 import pygatt
 
 FLAGS = flags.FLAGS
@@ -37,6 +38,7 @@ flags.DEFINE_integer('stop_recording_duration_minutes', 5,
                      'the camera before the car is shutoff.')
 
 COMMAND_UUID = 'b5f90072-aa8d-11e3-9046-0002a5d5c51b'
+MODE_VIDEO = bytearray(b'\x03\x02\x01\x00')
 RECORD_START = bytearray(b'\x03\x01\x01\x01')
 RECORD_STOP = bytearray(b'\x03\x01\x01\x00')
 
@@ -57,23 +59,27 @@ class GoPro(object):
       self.process.start()
 
   def ConnectToCamera(self):
+    logging.info('GoPro Connecting to camera')
     self.adapter = pygatt.GATTToolBackend()
     self.adapter.start()
     self.camera = self.adapter.connect(
         self.mac_address, address_type=pygatt.BLEAddressType.random)
+    self._WriteCmd(MODE_VIDEO)
 
   def _WriteCmd(self, command):
     self.camera.char_write(COMMAND_UUID, command)
 
   def Start(self):
+    logging.info('GoPro Record Start')
     self._WriteCmd(RECORD_START)
 
   def Stop(self):
+    logging.info('GoPro Record Stop')
     self._WriteCmd(RECORD_STOP)
 
   def KeepRecordingCheck(self):
     """Start/Stop recording based on point's speed."""
-    speed = self.speed_mph_queue.get(timeout=3)
+    speed = self.speed_mph_queue.get()
     if speed > FLAGS.min_speed_mph:
       self.last_speed_threshold = time.time()
 
@@ -93,17 +99,19 @@ class GoPro(object):
       self.ConnectToCamera()
       while True:
         self.KeepRecordingCheck()
-    except pygatt.exceptions.NotConnectedError:
+    except pygatt.exceptions.NotConnectedError as err:
+      logging.error('GoPro failed to connect to camera error:%s', err)
       time.sleep(5)
       self.Loop()  # Keep trying to connect.
 
   def AppendSpeed(self, speed):
+    speed = 50
     # Convert GPS speed from m/s to mph.
     self.speed_mph_queue.put(speed * 2.23694)
 
 
 def main(unused_argv):
-  gopro = GoPro('E0:86:1C:77:19:59')
+  gopro = GoPro('EA:BC:1B:FB:FD:C8', start_process=False)
   gopro.ConnectToCamera()
   gopro.Start()
   time.sleep(5)

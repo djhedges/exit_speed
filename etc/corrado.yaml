@@ -1,5 +1,5 @@
 accelerometer: True
-gopro: E0:86:1C:77:19:59
+#gopro: EA:BC:1B:FB:FD:C8
 gyroscope: True
 leds: True
 timescale: True
