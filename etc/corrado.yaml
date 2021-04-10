@@ -8,6 +8,8 @@ labjack:
   ain1: oil_pressure_voltage
   ain2: front_brake_pressure_voltage
   ain3: rear_brake_pressure_voltage
+  fio4: fuel_level_voltage
+  tick_divider_10: [ fio4 ]
 wbo2:
   lambda_16: afr
   rpm_count: rpm

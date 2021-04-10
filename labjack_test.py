@@ -32,20 +32,6 @@ class TestLabjack(unittest.TestCase):
     self.mock_u3 = mock.create_autospec(u3.U3)
     self.labjack.u3 = self.mock_u3
 
-  def testBuildCommands(self):
-    expected_cmds = [u3.AIN(0), u3.AIN(1), u3.AIN(2)]
-    commands, command_proto_field = self.labjack.BuildCommands()
-    for command in commands:
-      index = commands.index(command)
-      self.assertEqual(command.positiveChannel,
-                       expected_cmds[index].positiveChannel)
-    expected_mapping = {0: 'fuel_level_voltage',
-                        1: 'water_temp_voltage',
-                        2: 'oil_pressure_voltage'}
-    for command in command_proto_field:
-      self.assertEqual(expected_mapping[command.positiveChannel],
-                       command_proto_field[command])
-
   def testBuildValues(self):
     expected = {'fuel_level_voltage': None,
                 'water_temp_voltage': None,
@@ -56,14 +42,17 @@ class TestLabjack(unittest.TestCase):
     # pylint: disable=invalid-name
     # pylint: disable=unused-argument
     def _binaryToCalibratedAnalogVoltage(result, isLowVoltage, channelNumber):
-      self.assertFalse(isLowVoltage)
+      if channelNumber in self.labjack.HIGH_VOLTAGE_CHANNELS:
+        self.assertFalse(isLowVoltage)
+      else:
+        self.assertTrue(isLowVoltage)
       mapping = {32816: 1.5,
                  35696: 2.7,
                  32827: 3.9}
       return mapping[result]
     # pylint: enable=invalid-name
     # pylint: enable=unused-argument
-    self.mock_u3.getFeedback.return_value = [32816, 35696, 32827]
+    self.mock_u3.getFeedback.side_effect = [[32816], [35696], [32827], [32816]]
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()

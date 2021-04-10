@@ -18,59 +18,48 @@ import sys
 import traceback
 import multiprocessing
 from typing import Dict
-from typing import List
 from typing import Text
-from typing import Tuple
 from absl import logging
 import u3
 
 
 class Labjack(object):
   """Interface for the labjack DAQ."""
+  HIGH_VOLTAGE_CHANNELS = (0, 1, 2, 3)
 
   def __init__(self, config, start_process=True):
     self.config = config
     self.u3 = None
-    self.commands, self.command_proto_field = self.BuildCommands()
     self.voltage_values = self.BuildValues()
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
 
-  def BuildCommands(self) -> Tuple[List[u3.FeedbackCommand],
-                                    Dict[u3.FeedbackCommand, Text]]:
-    """Builds the list of feedback commands to send to the labjack device."""
-    commands = []
-    command_proto_field = {}
-    if self.config.get('labjack'):
-      for input_name, proto_field in self.config['labjack'].items():
-        input_type = input_name[0:3]
-        channel = int(input_name[-1])
-        feedback_command = getattr(u3, input_type.upper())
-        command = feedback_command(channel)
-        commands.append(command)
-        command_proto_field[command] = proto_field
-    return commands, command_proto_field
-
   def BuildValues(self) -> Dict[Text, multiprocessing.Value]:
     values = {}
     if self.config.get('labjack'):
-      for proto_field in self.config['labjack'].values():
-        values[proto_field] = multiprocessing.Value('d', 0.0)
+      for input_name, proto_field in self.config['labjack'].items():
+        if input_name.startswith('ain') or input_name.startswith('fio'):
+          values[proto_field] = multiprocessing.Value('d', 0.0)
     return values
 
   def ReadValues(self):
     """Reads the labjack voltages."""
     try:
-      results = self.u3.getFeedback(*self.commands)
-      for command in self.commands:
-        result = results[self.commands.index(command)]
-        voltage = self.u3.binaryToCalibratedAnalogVoltage(
-            result,
-            isLowVoltage=False,
-            channelNumber=command.positiveChannel)
-        proto_field = self.command_proto_field[command]
-        self.voltage_values[proto_field].value = voltage
+      if self.config.get('labjack'):
+        for input_name, proto_field in self.config['labjack'].items():
+          if input_name.startswith('ain') or input_name.startswith('fio'):
+            channel = int(input_name[-1])
+            # Note getFeedback(u3.AIN(4)) is reading voltage from FIO4.
+            # Physically AIN4 and FIO4 are identical.  AIN is for analog input
+            # and FIO is flexible input/output.
+            feedback = self.u3.getFeedback(u3.AIN(channel))[0]
+            is_low_voltage = channel not in self.HIGH_VOLTAGE_CHANNELS
+            voltage = self.u3.binaryToCalibratedAnalogVoltage(
+                feedback,
+                isLowVoltage=is_low_voltage,
+                channelNumber=channel)
+            self.voltage_values[proto_field].value = voltage
     except u3.LabJackException:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
       logging.log_every_n_seconds(logging.ERROR,

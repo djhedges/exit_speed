@@ -7,6 +7,8 @@ labjack:
   ain0: fuel_level_voltage
   ain1: water_temp_voltage
   ain2: oil_pressure_voltage
+  fio4: fuel_level_voltage
+  tick_divider_10: [ fio4 ]
 wbo2:
   lambda_16: afr
   rpm_count: rpm
