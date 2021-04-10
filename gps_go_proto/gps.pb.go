@@ -49,27 +49,29 @@ type Point struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Lat                 float64              `protobuf:"fixed64,1,opt,name=lat,proto3" json:"lat,omitempty"`
-	Lon                 float64              `protobuf:"fixed64,2,opt,name=lon,proto3" json:"lon,omitempty"`
-	Alt                 float64              `protobuf:"fixed64,3,opt,name=alt,proto3" json:"alt,omitempty"`
-	Speed               float64              `protobuf:"fixed64,4,opt,name=speed,proto3" json:"speed,omitempty"` // meters/second
-	Time                *timestamp.Timestamp `protobuf:"bytes,5,opt,name=time,proto3" json:"time,omitempty"`
-	StartFinishDistance float64              `protobuf:"fixed64,6,opt,name=start_finish_distance,json=startFinishDistance,proto3" json:"start_finish_distance,omitempty"` // Distance to the start/finish.
-	TpsVoltage          float64              `protobuf:"fixed64,7,opt,name=tps_voltage,json=tpsVoltage,proto3" json:"tps_voltage,omitempty"`                              // Throttle position sensor voltage.
-	WaterTempVoltage    float64              `protobuf:"fixed64,8,opt,name=water_temp_voltage,json=waterTempVoltage,proto3" json:"water_temp_voltage,omitempty"`
-	OilPressureVoltage  float64              `protobuf:"fixed64,9,opt,name=oil_pressure_voltage,json=oilPressureVoltage,proto3" json:"oil_pressure_voltage,omitempty"`
-	Rpm                 float64              `protobuf:"fixed64,10,opt,name=rpm,proto3" json:"rpm,omitempty"`
-	Afr                 float64              `protobuf:"fixed64,11,opt,name=afr,proto3" json:"afr,omitempty"`                                                     // Air fuel ratio.
-	FuelLevelVoltage    float64              `protobuf:"fixed64,12,opt,name=fuel_level_voltage,json=fuelLevelVoltage,proto3" json:"fuel_level_voltage,omitempty"` // Air fuel ratio.
-	AccelerometerX      float64              `protobuf:"fixed64,13,opt,name=accelerometer_x,json=accelerometerX,proto3" json:"accelerometer_x,omitempty"`         // G forces.
-	AccelerometerY      float64              `protobuf:"fixed64,14,opt,name=accelerometer_y,json=accelerometerY,proto3" json:"accelerometer_y,omitempty"`         // G forces.
-	AccelerometerZ      float64              `protobuf:"fixed64,15,opt,name=accelerometer_z,json=accelerometerZ,proto3" json:"accelerometer_z,omitempty"`         // G forces.
-	Pitch               float64              `protobuf:"fixed64,16,opt,name=pitch,proto3" json:"pitch,omitempty"`                                                 // Degrees
-	Roll                float64              `protobuf:"fixed64,17,opt,name=roll,proto3" json:"roll,omitempty"`                                                   // Degrees
-	GyroX               float64              `protobuf:"fixed64,18,opt,name=gyro_x,json=gyroX,proto3" json:"gyro_x,omitempty"`                                    // Degrees/second
-	GyroY               float64              `protobuf:"fixed64,19,opt,name=gyro_y,json=gyroY,proto3" json:"gyro_y,omitempty"`                                    // Degrees/second
-	GyroZ               float64              `protobuf:"fixed64,20,opt,name=gyro_z,json=gyroZ,proto3" json:"gyro_z,omitempty"`                                    // Degrees/second
-	Geohash             string               `protobuf:"bytes,21,opt,name=geohash,proto3" json:"geohash,omitempty"`
+	Lat                       float64              `protobuf:"fixed64,1,opt,name=lat,proto3" json:"lat,omitempty"`
+	Lon                       float64              `protobuf:"fixed64,2,opt,name=lon,proto3" json:"lon,omitempty"`
+	Alt                       float64              `protobuf:"fixed64,3,opt,name=alt,proto3" json:"alt,omitempty"`
+	Speed                     float64              `protobuf:"fixed64,4,opt,name=speed,proto3" json:"speed,omitempty"` // meters/second
+	Time                      *timestamp.Timestamp `protobuf:"bytes,5,opt,name=time,proto3" json:"time,omitempty"`
+	StartFinishDistance       float64              `protobuf:"fixed64,6,opt,name=start_finish_distance,json=startFinishDistance,proto3" json:"start_finish_distance,omitempty"` // Distance to the start/finish.
+	TpsVoltage                float64              `protobuf:"fixed64,7,opt,name=tps_voltage,json=tpsVoltage,proto3" json:"tps_voltage,omitempty"`                              // Throttle position sensor voltage.
+	WaterTempVoltage          float64              `protobuf:"fixed64,8,opt,name=water_temp_voltage,json=waterTempVoltage,proto3" json:"water_temp_voltage,omitempty"`
+	OilPressureVoltage        float64              `protobuf:"fixed64,9,opt,name=oil_pressure_voltage,json=oilPressureVoltage,proto3" json:"oil_pressure_voltage,omitempty"`
+	Rpm                       float64              `protobuf:"fixed64,10,opt,name=rpm,proto3" json:"rpm,omitempty"`
+	Afr                       float64              `protobuf:"fixed64,11,opt,name=afr,proto3" json:"afr,omitempty"`                                                     // Air fuel ratio.
+	FuelLevelVoltage          float64              `protobuf:"fixed64,12,opt,name=fuel_level_voltage,json=fuelLevelVoltage,proto3" json:"fuel_level_voltage,omitempty"` // Air fuel ratio.
+	AccelerometerX            float64              `protobuf:"fixed64,13,opt,name=accelerometer_x,json=accelerometerX,proto3" json:"accelerometer_x,omitempty"`         // G forces.
+	AccelerometerY            float64              `protobuf:"fixed64,14,opt,name=accelerometer_y,json=accelerometerY,proto3" json:"accelerometer_y,omitempty"`         // G forces.
+	AccelerometerZ            float64              `protobuf:"fixed64,15,opt,name=accelerometer_z,json=accelerometerZ,proto3" json:"accelerometer_z,omitempty"`         // G forces.
+	Pitch                     float64              `protobuf:"fixed64,16,opt,name=pitch,proto3" json:"pitch,omitempty"`                                                 // Degrees
+	Roll                      float64              `protobuf:"fixed64,17,opt,name=roll,proto3" json:"roll,omitempty"`                                                   // Degrees
+	GyroX                     float64              `protobuf:"fixed64,18,opt,name=gyro_x,json=gyroX,proto3" json:"gyro_x,omitempty"`                                    // Degrees/second
+	GyroY                     float64              `protobuf:"fixed64,19,opt,name=gyro_y,json=gyroY,proto3" json:"gyro_y,omitempty"`                                    // Degrees/second
+	GyroZ                     float64              `protobuf:"fixed64,20,opt,name=gyro_z,json=gyroZ,proto3" json:"gyro_z,omitempty"`                                    // Degrees/second
+	Geohash                   string               `protobuf:"bytes,21,opt,name=geohash,proto3" json:"geohash,omitempty"`
+	FrontBrakePressureVoltage float64              `protobuf:"fixed64,22,opt,name=front_brake_pressure_voltage,json=frontBrakePressureVoltage,proto3" json:"front_brake_pressure_voltage,omitempty"`
+	RearBrakePressureVoltage  float64              `protobuf:"fixed64,23,opt,name=rear_brake_pressure_voltage,json=rearBrakePressureVoltage,proto3" json:"rear_brake_pressure_voltage,omitempty"`
 }
 
 func (x *Point) Reset() {
@@ -251,6 +253,20 @@ func (x *Point) GetGeohash() string {
 	return ""
 }
 
+func (x *Point) GetFrontBrakePressureVoltage() float64 {
+	if x != nil {
+		return x.FrontBrakePressureVoltage
+	}
+	return 0
+}
+
+func (x *Point) GetRearBrakePressureVoltage() float64 {
+	if x != nil {
+		return x.RearBrakePressureVoltage
+	}
+	return 0
+}
+
 type Lap struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -385,7 +401,7 @@ var file_gps_proto_rawDesc = []byte{
 	0x66, 0x2f, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
 	0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x8e, 0x05, 0x0a, 0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6c,
+	0x6f, 0x22, 0x8e, 0x06, 0x0a, 0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6c,
 	0x61, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x6c, 0x61, 0x74, 0x12, 0x10, 0x0a,
 	0x03, 0x6c, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x6c, 0x6f, 0x6e, 0x12,
 	0x10, 0x0a, 0x03, 0x61, 0x6c, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x61, 0x6c,
@@ -426,7 +442,15 @@ var file_gps_proto_rawDesc = []byte{
 	0x59, 0x12, 0x15, 0x0a, 0x06, 0x67, 0x79, 0x72, 0x6f, 0x5f, 0x7a, 0x18, 0x14, 0x20, 0x01, 0x28,
 	0x01, 0x52, 0x05, 0x67, 0x79, 0x72, 0x6f, 0x5a, 0x12, 0x18, 0x0a, 0x07, 0x67, 0x65, 0x6f, 0x68,
 	0x61, 0x73, 0x68, 0x18, 0x15, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x65, 0x6f, 0x68, 0x61,
-	0x73, 0x68, 0x22, 0x78, 0x0a, 0x03, 0x4c, 0x61, 0x70, 0x12, 0x22, 0x0a, 0x06, 0x70, 0x6f, 0x69,
+	0x73, 0x68, 0x12, 0x3f, 0x0a, 0x1c, 0x66, 0x72, 0x6f, 0x6e, 0x74, 0x5f, 0x62, 0x72, 0x61, 0x6b,
+	0x65, 0x5f, 0x70, 0x72, 0x65, 0x73, 0x73, 0x75, 0x72, 0x65, 0x5f, 0x76, 0x6f, 0x6c, 0x74, 0x61,
+	0x67, 0x65, 0x18, 0x16, 0x20, 0x01, 0x28, 0x01, 0x52, 0x19, 0x66, 0x72, 0x6f, 0x6e, 0x74, 0x42,
+	0x72, 0x61, 0x6b, 0x65, 0x50, 0x72, 0x65, 0x73, 0x73, 0x75, 0x72, 0x65, 0x56, 0x6f, 0x6c, 0x74,
+	0x61, 0x67, 0x65, 0x12, 0x3d, 0x0a, 0x1b, 0x72, 0x65, 0x61, 0x72, 0x5f, 0x62, 0x72, 0x61, 0x6b,
+	0x65, 0x5f, 0x70, 0x72, 0x65, 0x73, 0x73, 0x75, 0x72, 0x65, 0x5f, 0x76, 0x6f, 0x6c, 0x74, 0x61,
+	0x67, 0x65, 0x18, 0x17, 0x20, 0x01, 0x28, 0x01, 0x52, 0x18, 0x72, 0x65, 0x61, 0x72, 0x42, 0x72,
+	0x61, 0x6b, 0x65, 0x50, 0x72, 0x65, 0x73, 0x73, 0x75, 0x72, 0x65, 0x56, 0x6f, 0x6c, 0x74, 0x61,
+	0x67, 0x65, 0x22, 0x78, 0x0a, 0x03, 0x4c, 0x61, 0x70, 0x12, 0x22, 0x0a, 0x06, 0x70, 0x6f, 0x69,
 	0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x70, 0x73, 0x2e,
 	0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x12, 0x35, 0x0a,
 	0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,

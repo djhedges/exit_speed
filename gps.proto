@@ -45,6 +45,8 @@ message Point {
   double gyro_y = 19; // Degrees/second
   double gyro_z = 20; // Degrees/second
   string geohash = 21;
+  double front_brake_pressure_voltage = 22;
+  double rear_brake_pressure_voltage = 23;
 }
 
 message Lap {

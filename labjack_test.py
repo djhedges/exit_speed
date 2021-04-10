@@ -27,7 +27,7 @@ class TestLabjack(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
-    config = config_lib.LoadConfig()
+    config = config_lib.LoadConfig('testdata/test_labjack_config.yaml')
     self.labjack = labjack.Labjack(config, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
     self.labjack.u3 = self.mock_u3

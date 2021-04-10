@@ -4,10 +4,9 @@ gyroscope: True
 leds: True
 timescale: True
 labjack:
-  ain0: water_temp_voltage
-  ain1: oil_pressure_voltage
-  ain2: front_brake_pressure_voltage
-  ain3: rear_brake_pressure_voltage
+  ain0: fuel_level_voltage
+  ain1: water_temp_voltage
+  ain2: oil_pressure_voltage
 wbo2:
   lambda_16: afr
   rpm_count: rpm

@@ -61,7 +61,9 @@ CREATE TABLE points (
   roll                  FLOAT,
   gyo_x                 FLOAT,
   gyo_y                 FLOAT,
-  gyo_z                 FLOAT
+  gyo_z                 FLOAT,
+  front_brake_pressure_voltage FLOAT,
+  rear_brake_pressure_voltage  FLOAT
 );
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 SELECT create_hypertable('points', 'time');
