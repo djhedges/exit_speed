@@ -148,7 +148,7 @@ class ExitSpeed(object):
                                                         session.start_finish)
     self.leds.UpdateLeds(point)
     self.LogPoint()
-    self.timescale.AddPointToQueue(point, self.lap.number)
+    #self.timescale.AddPointToQueue(point, self.lap.number)
     if self.config.get('gopro'):
       self.gopro.AppendSpeed(point.speed)
 
