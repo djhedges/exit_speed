@@ -35,8 +35,9 @@ class TestLabjack(unittest.TestCase):
   def testBuildValues(self):
     expected = {'fuel_level_voltage': None,
                 'water_temp_voltage': None,
-                'oil_pressure_voltage': None}
-    self.assertEqual(expected.keys(), self.labjack.BuildValues().keys())
+                'oil_pressure_voltage': None,
+                'battery_voltage': None}
+    self.assertSequenceEqual(expected.keys(), self.labjack.BuildValues().keys())
 
   def testReadValues(self):
     # pylint: disable=invalid-name
@@ -48,11 +49,12 @@ class TestLabjack(unittest.TestCase):
         self.assertTrue(isLowVoltage)
       mapping = {32816: 1.5,
                  35696: 2.7,
-                 32827: 3.9}
+                 32827: 3.9,
+                 39968: 1.4}
       return mapping[result]
     # pylint: enable=invalid-name
     # pylint: enable=unused-argument
-    self.mock_u3.getFeedback.side_effect = [[32816], [35696], [32827], [32816]]
+    self.mock_u3.getFeedback.side_effect = [[32816], [35696], [32827], [39968]]
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()
@@ -62,6 +64,8 @@ class TestLabjack(unittest.TestCase):
                      self.labjack.voltage_values['water_temp_voltage'].value)
     self.assertEqual(3.9,
                      self.labjack.voltage_values['oil_pressure_voltage'].value)
+    self.assertEqual(14.0,
+                     self.labjack.voltage_values['battery_voltage'].value)
 
 
 if __name__ == '__main__':

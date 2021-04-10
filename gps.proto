@@ -47,6 +47,7 @@ message Point {
   string geohash = 21;
   double front_brake_pressure_voltage = 22;
   double rear_brake_pressure_voltage = 23;
+  double battery_voltage = 24;
 }
 
 message Lap {

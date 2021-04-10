@@ -41,5 +41,6 @@ CREATE TABLE points (
   gyro_y                       FLOAT,
   gyro_z                       FLOAT,
   front_brake_pressure_voltage FLOAT,
-  rear_brake_pressure_voltage  FLOAT
+  rear_brake_pressure_voltage  FLOAT,
+  battery_voltage              FLOAT
 );

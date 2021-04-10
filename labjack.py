@@ -59,6 +59,8 @@ class Labjack(object):
                 feedback,
                 isLowVoltage=is_low_voltage,
                 channelNumber=channel)
+            if input_name in self.config['labjack'].get('tick_divider_10'):
+              voltage = voltage * 10
             self.voltage_values[proto_field].value = voltage
     except u3.LabJackException:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
