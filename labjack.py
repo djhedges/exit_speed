@@ -71,5 +71,8 @@ class Labjack(object):
 
   def Loop(self):
     self.u3 = u3.U3()
+    # AIN0-3 are always analog but we need to set FIO4-7 to analog before we can
+    # read voltages on these terminals.
+    self.u3.configIO(FIOAnalog = 0b11111111)
     while True:
       self.ReadValues()
