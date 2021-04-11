@@ -29,7 +29,7 @@ BYTE_ORDER = 'big'
 
 
 class Logger(object):
-  """Interface for writing protos to disk."""
+  """Interface for writing and reading protos to disk."""
 
   def __init__(self, file_prefix_or_name: Text):
     """Initializer.

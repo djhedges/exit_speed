@@ -198,7 +198,8 @@ class Timescale(object):
 
   def _Commit(self):
     """Commits points to timescale based on FLAGS.commit_cycle."""
-    if self.commit_cycle >= FLAGS.commit_cycle:
+    if (self.commit_cycle >= FLAGS.commit_cycle or
+        self.stop_process_signal.value):
       self.timescale_conn.commit()
       self.commit_cycle = 0
     else:

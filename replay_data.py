@@ -25,7 +25,6 @@ FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.
 FLAGS.set_default('led_brightness', 0.05)
 flags.DEFINE_string('filepath', None, 'Path to the data file to replay')
-flags.mark_flag_as_required('filepath')
 flags.DEFINE_boolean('include_sleep', True,
                      'Adds delays to mimic real time replay of data.')
 
@@ -80,6 +79,7 @@ def ReplayLog(filepath, include_sleep=False):
 
 
 def main(unused_argv):
+  flags.mark_flag_as_required('filepath')
   ReplayLog(FLAGS.filepath, include_sleep=FLAGS.include_sleep)
 
 

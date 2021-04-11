@@ -129,7 +129,8 @@ def NukeHangingSessions(conn):
       cursor.execute(nuke_statement, args)
 
 
-def main(unused_argv):
+def CleanupTimescale():
+  logging.info('Cleaning up Timescale')
   with timescale.ConnectToDB() as conn:
     NukeNonLiveData(conn)
     NukeLapsWithNoDuration(conn)
@@ -139,6 +140,10 @@ def main(unused_argv):
     NukeHangingLaps(conn)
     NukeHangingSessions(conn)
     conn.commit()
+
+
+def main(unused_argv):
+  CleanupTimescale()
 
 
 if __name__ == '__main__':
