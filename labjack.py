@@ -35,6 +35,17 @@ class Labjack(object):
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
 
+  def Set5vOutput(self):
+    """In our case sets DAC0 to output 5v.
+
+    The brake pressure sensors need a 5v reference signal.
+    DAC is more stable than VS.
+    """
+    if self.config.get('labjack'):
+      if self.config['labjack'].get('dac0_5v_out'):
+        dac0_register = 5000
+        self.u3.writeRegister(dac0_register, 5.0)
+
   def BuildValues(self) -> Dict[Text, multiprocessing.Value]:
     values = {}
     if self.config.get('labjack'):
@@ -74,5 +85,6 @@ class Labjack(object):
     # AIN0-3 are always analog but we need to set FIO4-7 to analog before we can
     # read voltages on these terminals.
     self.u3.configIO(FIOAnalog = 0b11111111)
+    self.Set5vOutput()
     while True:
       self.ReadValues()
