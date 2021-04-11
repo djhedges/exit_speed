@@ -47,7 +47,8 @@ TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
           (45.595015, -122.694526): 'Portland International Raceway',
           (47.254702, -123.192676): 'The Ridge Motorsport Park',
           (47.321082, -122.149664): 'Pacific Raceway',
-          (47.661806, -117.572297): 'Spokane Raceway'}
+          (47.661806, -117.572297): 'Spokane Raceway',
+          (49.162303, -119.520422): 'Area 27'}
 
 
 def FindClosestTrack(
