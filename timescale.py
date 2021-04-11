@@ -30,8 +30,6 @@ from absl import flags
 from absl import logging
 import gps_pb2
 import grpc
-import reflector_pb2
-import reflector_pb2_grpc
 import psycopg2
 
 FLAGS = flags.FLAGS
@@ -263,49 +261,3 @@ class Timescale(object):
     self.session_time = session_time
     self.track = track
     self.process.start()
-
-
-class Reflector(Timescale):
-  """Starts the go reflector process for parallelizing writes to Timescale."""
-  SOCKET_PATH = '/tmp/exit_speed.sock'
-
-  def __init__(self,
-               live_data: bool = True,
-               start_process: bool = True,
-               go_binary_and_args: List[Text] = None):
-    super().__init__(live_data, start_process)
-    self.go_binary_and_args = go_binary_and_args or [
-        '/home/pi/go/bin/exit_speed']
-    self.go_process = None
-    self.channel = None
-    self.stub = None
-
-  def ConnectToReflector(self):
-    """Connects to the reflector once it's ready."""
-    if os.path.exists(self.SOCKET_PATH):
-      os.remove(self.SOCKET_PATH)  # Remove socket from prior run.
-    self.go_process = subprocess.Popen(self.go_binary_and_args)
-    atexit.register(self.go_process.kill)
-    # Wait for the reflector to setup the socket.
-    while not os.path.exists(self.SOCKET_PATH):
-      time.sleep(1)
-    self.channel = grpc.insecure_channel('unix://%s' % self.SOCKET_PATH)
-    self.stub = reflector_pb2_grpc.ReflectStub(self.channel)
-
-  def ExportPoint(self,
-                  point: gps_pb2.Point,
-                  lap_number: int,
-                  unused_cursor: psycopg2.extensions.cursor):
-    """Sends an RPC to the Go process instead."""
-    if not self.go_process:
-      self.ConnectToReflector()
-    lap_id = self.lap_number_ids.get(lap_number)
-    if lap_id:
-      point_update = reflector_pb2.PointUpdate()
-      point_update.point.MergeFromString(point.SerializeToString())
-      point_update.lap_id = lap_id
-      point_update.session_id = self.session_id
-      point_update.elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
-      self.stub.ExportPoint(point_update)
-    else:
-      self.retry_point_queue.append((point, lap_number))
