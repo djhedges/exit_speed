@@ -16,7 +16,6 @@
 
 import os
 import sys
-import time
 import unittest
 from absl import flags
 from absl.testing import absltest

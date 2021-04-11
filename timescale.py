@@ -14,22 +14,15 @@
 # limitations under the License.
 """Timescale interface for exporting data."""
 
-import atexit
 import multiprocessing
-import os
-import time
-import subprocess
 import sys
 import textwrap
 import traceback
 from typing import Optional
-from typing import List
-from typing import Text
 from typing import Tuple
 from absl import flags
 from absl import logging
 import gps_pb2
-import grpc
 import psycopg2
 
 FLAGS = flags.FLAGS
