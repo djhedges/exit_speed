@@ -1,6 +1,5 @@
 os: linux
 arch:
-  - amd64
   - arm64
 dist: buster
 language:
@@ -39,5 +38,3 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/wbo2_test.py
   - pytype /home/travis/build/djhedges/exit_speed/*.py --keep-going -o /tmp
   - pylint --ignore-patterns=.*pb2.* *.py
-  # TOOD Fix golang testing on ARM.
-  - uname -m | grep x86_64 && go test ./... || true
