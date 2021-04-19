@@ -97,7 +97,7 @@ class Timescale(object):
     self.live_data = live_data
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self.stop_process_signal = multiprocessing.Value('b', False)
+    self.stop_process_signal = multiprocessing.Value('b', False)
     self.manager = multiprocessing.Manager()
     self.timescale_conn = None
     self.session_time = None
