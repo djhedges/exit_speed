@@ -48,17 +48,19 @@ def GetLocalFiles() -> List:
 def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
                         filepath: Text) -> bool:
   logger = data_logger.Logger(os.path.join(LAP_LOG_PATH, filepath))
+  first_point = None
   for point in logger.ReadProtos():
-    print(point.time.ToJsonString())
+    first_point = point
+    print(first_point.time.ToJsonString())
     break
   else:
     return True  # Data file has no points.
-  session_time = point.time.ToJsonString()
+  session_time = first_point.time.ToJsonString()
   cursor = timescale_conn.cursor()
   if cursor.execute(SELECT_SESSION, (session_time,)):
     return True
-  if point:
-    _, track, _ = exit_speed.FindClosestTrack(point)
+  if first_point:
+    _, track, _ = exit_speed.FindClosestTrack(first_point)
     if track == 'Test Parking Lot':
       return True  # Skip the test parking lot.  Mostly development files.
   return False
