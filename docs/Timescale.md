@@ -66,7 +66,6 @@ CREATE TABLE points (
   rear_brake_pressure_voltage  FLOAT,
   battery_voltage              FLOAT
 );
-CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 EXIT;
 ```
 
@@ -91,8 +90,11 @@ On the pi
 sudo -u postgres psql postgres -d exit_speed
 CREATE USER repuser WITH PASSWORD 'faster';
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO repuser;
-GRANT exit_speed=# GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO repuser;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO repuser;
 CREATE PUBLICATION exit_speed_publication FOR ALL TABLES;
+ALTER TABLE sessions REPLICA IDENTITY FULL;
+ALTER TABLE laps REPLICA IDENTITY FULL;
+ALTER TABLE points REPLICA IDENTITY FULL;
 ```
 
 ## Allow connections to the Pi
@@ -121,4 +123,18 @@ Manually
 
 ```
 CREATE SUBSCRIPTION exit_speed_subscription CONNECTION 'host=10.3.1.3 port=5432 password=faster user=repuser dbname=exit_speed' PUBLICATION exit_speed_publication;
+```
+
+## Troubleshooting Notes
+
+On the pi view replication slots
+
+```
+SELECT * FROM pg_replication_slots;
+```
+
+Postgresql logs
+
+```
+/var/log/postgresql/postgresql-11-main.log
 ```
