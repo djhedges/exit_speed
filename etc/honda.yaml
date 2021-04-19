@@ -1,4 +1,5 @@
 accelerometer: True
+car: Civic
 gopro: E0:86:1C:77:19:59
 gyroscope: True
 leds: True

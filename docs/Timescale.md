@@ -59,15 +59,14 @@ CREATE TABLE points (
   accelerometer_z              FLOAT,
   pitch                        FLOAT,
   roll                         FLOAT,
-  gyo_x                        FLOAT,
-  gyo_y                        FLOAT,
-  gyo_z                        FLOAT,
+  gyro_x                        FLOAT,
+  gyro_y                        FLOAT,
+  gyro_z                        FLOAT,
   front_brake_pressure_voltage FLOAT,
   rear_brake_pressure_voltage  FLOAT,
   battery_voltage              FLOAT
 );
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
-SELECT create_hypertable('points', 'time');
 EXIT;
 ```
 
@@ -82,18 +81,44 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO exit_speed;
 EXIT;
 ```
 
-## Allow connections from the Pi
+### Replication Notes (Likely incomplete)
 
-Add the following to the end of `/etc/postgresql/12/main/pg_hba.conf`
+Streaming replication is not possible between different architectures.
+Logical replication is doable but not for a hypertable.  I guesss we're not really using timescale anymore are we?
+
+On the pi
+```
+sudo -u postgres psql postgres -d exit_speed
+CREATE USER repuser WITH PASSWORD 'faster';
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO repuser;
+GRANT exit_speed=# GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO repuser;
+CREATE PUBLICATION exit_speed_publication FOR ALL TABLES;
+```
+
+## Allow connections to the Pi
+
+Add the following to the end of `/etc/postgresql/11/main/pg_hba.conf`
 
 ```
-host    exit_speed      all             10.3.1.3/32             md5
+host    repuser all             10.3.1.1/32             md5
 ```
 
-Modify the following in `/etc/postgresql/12/main/postgresql.conf`
+Modify the following in `/etc/postgresql/11/main/postgresql.conf`
 
 ```
-listen_addresses = 'localhost,10.3.1.1'
+wal_level = logical
+listen_addresses = 'localhost,10.3.1.3'
 ```
 
 Finally restart with `sudo service postgresql restart`
+
+## On the replicas
+
+Manually
+* Create the tables (they won't be created by the subscription)
+* Create the user exit_speed for grafana
+* Future schema changes will have to be made on the replicas manually
+
+```
+CREATE SUBSCRIPTION exit_speed_subscription CONNECTION 'host=10.3.1.3 port=5432 password=faster user=repuser dbname=exit_speed' PUBLICATION exit_speed_publication;
+```

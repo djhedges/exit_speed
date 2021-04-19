@@ -45,6 +45,7 @@ class TestTimescale(unittest.TestCase):
     point = gps_pb2.Point()
     point.time.FromJsonString('2020-09-13T01:36:38.600Z')
     self.pusher = timescale.Timescale(
+        'Corrado',
         start_process=False,
         )
         #go_binary_and_args=['/home/pi/go/bin/exit_speed',

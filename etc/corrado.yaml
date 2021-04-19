@@ -1,4 +1,5 @@
 accelerometer: True
+car: Corrado
 #gopro: EA:BC:1B:FB:FD:C8
 gyroscope: True
 leds: True

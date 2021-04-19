@@ -19,6 +19,7 @@ import sys
 import textwrap
 import traceback
 from typing import Optional
+from typing import Text
 from typing import Tuple
 from absl import flags
 from absl import logging
@@ -27,15 +28,15 @@ import psycopg2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
-                    'postgres://exit_speed:faster@cloud:/exit_speed',
+                    'postgres://exit_speed:faster@localhost:/exit_speed',
                     'Postgres URI connection string.')
 flags.DEFINE_integer('commit_cycle', 3,
                      'Number of points to commit at a time.')
 
 
 SESSION_INSERT = textwrap.dedent("""
-INSERT INTO sessions (time, track, live_data)
-VALUES (%s, %s, %s)
+INSERT INTO sessions (time, track, car, live_data)
+VALUES (%s, %s, %s, %s)
 RETURNING id
 """)
 LAP_INSERT = textwrap.dedent("""
@@ -89,8 +90,10 @@ class Timescale(object):
   """Interface for publishing data to timescale."""
 
   def __init__(self,
-               live_data: bool = True,
-               start_process: bool = True):
+      car: Text,
+      live_data: bool = True,
+      start_process: bool = True):
+    self.car = car
     self.live_data = live_data
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
@@ -113,7 +116,8 @@ class Timescale(object):
 
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
-      args = (self.session_time.ToJsonString(), self.track, self.live_data)
+      args = (self.session_time.ToJsonString(), self.track, self.car,
+              self.live_data)
       cursor.execute(SESSION_INSERT, args)
       self.session_id = cursor.fetchone()[0]
       self.timescale_conn.commit()
