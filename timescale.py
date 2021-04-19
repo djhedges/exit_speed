@@ -214,7 +214,6 @@ class Timescale(object):
     lap = None
     lap_number_und_duration = None
     point = None
-    print(self.car)
     try:
       if not self.timescale_conn:
         self.timescale_conn = GetConnWithPointPrepare()

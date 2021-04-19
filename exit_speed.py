@@ -114,7 +114,7 @@ class ExitSpeed(object):
       self.wbo2 = wbo2.WBO2(self.config)
     if self.config.get('timescale'):
       car = self.config['car']
-      logging.info('Logging for car: %s' % car)
+      logging.info('Logging for car: %s', car)
       self.timescale = timescale.Timescale(car, live_data=self.live_data)
 
   def AddNewLap(self) -> None:

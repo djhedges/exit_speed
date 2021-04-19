@@ -57,9 +57,10 @@ def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
   cursor = timescale_conn.cursor()
   if cursor.execute(SELECT_SESSION, (session_time,)):
     return True
-  _, track, _ = exit_speed.FindClosestTrack(point)
-  if track == 'Test Parking Lot':
-    return True  # Skip the test parking lot.  Mostly development files.
+  if point:
+    _, track, _ = exit_speed.FindClosestTrack(point)
+    if track == 'Test Parking Lot':
+      return True  # Skip the test parking lot.  Mostly development files.
   return False
 
 
@@ -70,7 +71,7 @@ def SyncFile(filepath):
 def SyncLocalData():
   timescale_conn = timescale.ConnectToDB()
   for filepath in GetLocalFiles():
-    logging.info('Syncing %s' % filepath)
+    logging.info('Syncing %s', filepath)
     if not IsFileAlreadySynced(timescale_conn, filepath):
       SyncFile(os.path.join(LAP_LOG_PATH, filepath))
 
