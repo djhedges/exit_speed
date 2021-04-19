@@ -186,7 +186,7 @@ class ExitSpeed(object):
     self.CrossStartFinish()
 
   def ProcessSession(self) -> None:
-    """Start/ends the logging of data to log files based on car speed."""
+    """Start/ends the logging of data to log files."""
     if not self.session.track:
       _, track, start_finish = FindClosestTrack(self.point)
       logging.info('Closest track: %s', track)
