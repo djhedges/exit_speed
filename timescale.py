@@ -57,13 +57,13 @@ INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
                     accelerometer_x, accelerometer_y, accelerometer_z,
                     pitch, roll, gyro_x, gyro_y, gyro_z,
                     front_brake_pressure_voltage, rear_brake_pressure_voltage,
-                    battery_voltage)
+                    battery_voltage, oil_temp_voltage)
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
         $16, $17, $18, $19, $20,
         $21, $22, $23, $24, $25,
-        $26)
+        $26, $27)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
@@ -71,7 +71,7 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s)
+                      %s, %s)
 """)
 
 
@@ -177,7 +177,8 @@ class Timescale(object):
               point.gyro_z,
               point.front_brake_pressure_voltage,
               point.rear_brake_pressure_voltage,
-              point.battery_voltage)
+              point.battery_voltage,
+              point.oil_temp_voltage)
       cursor.execute(POINT_INSERT, args)
     else:
       self.retry_point_queue.append((point, lap_number))

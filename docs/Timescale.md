@@ -59,12 +59,13 @@ CREATE TABLE points (
   accelerometer_z              FLOAT,
   pitch                        FLOAT,
   roll                         FLOAT,
-  gyro_x                        FLOAT,
-  gyro_y                        FLOAT,
-  gyro_z                        FLOAT,
+  gyro_x                       FLOAT,
+  gyro_y                       FLOAT,
+  gyro_z                       FLOAT,
   front_brake_pressure_voltage FLOAT,
   rear_brake_pressure_voltage  FLOAT,
-  battery_voltage              FLOAT
+  battery_voltage              FLOAT,
+  oil_temp_voltage             FLOAT
 );
 EXIT;
 ```

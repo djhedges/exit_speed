@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // sudo apt install python3-protobuf
-// Compile with protoc -I ./ --go_out=./gps_go_proto --go_opt=paths=source_relative --python_out ./ gps.proto
+// Compile with protoc -I ./ --python_out ./ gps.proto
 syntax = "proto3";
 
 option go_package = "github.com/djhedges/exit_speed/gps_go_proto;gps_go_proto";
@@ -48,6 +48,7 @@ message Point {
   double front_brake_pressure_voltage = 22;
   double rear_brake_pressure_voltage = 23;
   double battery_voltage = 24;
+  double oil_temp_voltage= 25;
 }
 
 message Lap {
