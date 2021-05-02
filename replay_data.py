@@ -65,6 +65,7 @@ def ReplayLog(filepath, include_sleep=False):
       if run_delta < point_delta:
         time.sleep(point_delta - run_delta)
 
+  dj
   if not include_sleep:
     time.sleep(1)
     qsize = len(es.timescale.point_queue)

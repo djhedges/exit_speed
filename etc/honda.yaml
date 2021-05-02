@@ -6,7 +6,5 @@ timescale: True
 labjack:
   ain0: fuel_level_voltage
   ain1: tps_voltage
-  ain2: oil_pressure_voltage
-  ain3: oil_temp_voltage
   fio4: battery_voltage
   tick_divider_10: [ fio4, fio5 ]

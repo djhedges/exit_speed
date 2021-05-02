@@ -3,7 +3,7 @@ Description=ExitSpeed
 
 [Service]
 Type=notify
-ExecStart=/home/pi/git/exit_speed/exit_speed.py --config_path /home/pi/git/exit_speed/etc/honda.yaml
+ExecStart=/home/pi/git/exit_speed/exit_speed.py --config_path /home/pi/git/exit_speed/etc/corrado.yaml
 Restart=always
 RestartSec=3
 WatchdogSec=30
