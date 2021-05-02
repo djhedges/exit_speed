@@ -252,7 +252,6 @@ class ExitSpeed(object):
 
   def ProcessReport(self, report: gps.client.dictwrapper) -> None:
     """Processes a GPS report form the sensor.."""
-    # Mode 1 == no fix, 2 == 2D fix and 3 == 3D fix.
     if (report.get('class') == 'TPV' and self.CheckReportFields(report)):
       if (not self.last_gps_report or
           self.last_gps_report != report.time):
