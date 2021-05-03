@@ -24,6 +24,8 @@ as the throttle position and water temperature.  In turn the data was exported
 to a Timescale database which allows for real time analysis of the data in
 Grafana.  Including lap comparison.
 
+[![4K Demo](https://img.youtube.com/vi/07UoDFVGBuI/0.jpg)](https://youtu.be/07UoDFVGBuI)
+
 [![Image of Green LEDs](https://github.com/djhedges/exit_speed/blob/master/docs/green_led.png)](https://youtu.be/sWjJ_7Hw02U)
 
 Example of data logged at Portland International Raceway being replayed.
