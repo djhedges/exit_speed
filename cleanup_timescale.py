@@ -58,7 +58,7 @@ def NukeLapsWithNoDuration(conn):
     cursor.execute(nuke_statement)
     nuke_statement = """
     DELETE FROM laps
-    WHERE id IN (SELECT id FROM laps WHERE duration_ms is NULL);
+    WHERE duration_ms is NULL;
     """
     logging.info(nuke_statement)
     cursor.execute(nuke_statement)
@@ -72,8 +72,7 @@ def NukeLapsByDuration(conn):
     WHERE lap_id IN (SELECT id FROM laps
                      WHERE duration_ms < %s or duration_ms > %s);
     DELETE FROM laps
-    WHERE id IN (SELECT id FROM laps
-                 WHERE duration_ms < %s or duration_ms > %s);
+    WHERE duration_ms < %s OR duration_ms > %s;
     """
     logging.info(nuke_statement)
     args = (FLAGS.min_lap_duration_ms, FLAGS.max_lap_duration_ms,
