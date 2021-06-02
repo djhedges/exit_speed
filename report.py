@@ -21,88 +21,13 @@ import gps_pb2
 import common_lib
 import timescale
 import tracks
+import attr
 import matplotlib
-import seaborn
 import pandas
+import psycopg2
+import seaborn
 
 FLAGS = flags.FLAGS
-
-def GetSingleLapData(conn, session_id, lap_id):
-  select_statement = """
-    SELECT
-      laps.number AS lap_number,
-      laps.duration_ms AS lap_duration_ms,
-      elapsed_duration_ms,
-      lat,
-      lon,
-      tps_voltage,
-      rpm,
-      oil_pressure_voltage,
-      speed
-    FROM POINTS
-    JOIN laps ON points.lap_id = laps.id
-    JOIN sessions ON laps.session_id = sessions.id
-    WHERE sessions.id = %s AND
-    lap_id = %s
-    ORDER BY points.time
-    """
-  return pandas.io.sql.read_sql(
-      select_statement,
-      conn,
-      params=(session_id,lap_id))
-
-
-def FindLastThreeBestLaps(conn):
-  select_last_session = """
-  SELECT sessions.id FROM sessions
-  JOIN laps ON sessions.id = laps.session_id
-  WHERE laps.duration_ms IS NOT NULL
-  ORDER BY sessions.id DESC LIMIT 1;
-  """
-  data_frames = []
-  with conn.cursor() as cursor:
-    cursor.execute(select_last_session)
-    session_id = cursor.fetchone()[0]
-
-  select_best_three = """
-  SELECT laps.id FROM sessions
-  JOIN laps ON sessions.id = laps.session_id
-  WHERE session_id = %s AND
-    laps.duration_ms IS NOT NULL
-  ORDER BY laps.duration_ms LIMIT 3;
-  """
-  with conn.cursor() as cursor:
-    cursor.execute(select_best_three, (session_id,))
-    for lap_id in cursor.fetchall():
-      data_frames.append(GetSingleLapData(conn, session_id, lap_id))
-  return pandas.concat(data_frames)
-
-
-def FindPersonalBest(conn):
-  return GetSingleLapData(conn, 1360, 244457)
-
-
-def PlotOilPressure(data):
-  fig, ax = matplotlib.pyplot.subplots()
-  ax.set_title('Oil Pressure Scatter (whole lap)')
-  seaborn.scatterplot(
-      x='rpm',
-      y='oil_pressure_voltage',
-      hue='label',
-      data=data)
-  return fig
-
-
-def Plot(data, turn, y, x='elapsed_duration_ms', hue='label', sort=False):
-  fig, ax = matplotlib.pyplot.subplots()
-  ax.set_title('Turn %s %s' % (turn.number, y))
-  seaborn.lineplot(
-      y=y,
-      x=x,
-      hue=hue,
-      sort=sort,
-      data=data)
-  return fig
 
 
 def LabelLaps(row, suffix=''):
@@ -136,23 +61,107 @@ def FindClosestTrack(data):
   return track
 
 
-def main(unused_argv):
-  with timescale.ConnectToDB() as conn:
-    data = FindLastThreeBestLaps(conn)
+@attr.s
+class Report(object):
+  conn = attr.ib(type=psycopg2.extensions.connection)
+
+  def GetSingleLapData(self, session_id, lap_id):
+    select_statement = """
+      SELECT
+        laps.number AS lap_number,
+        laps.duration_ms AS lap_duration_ms,
+        elapsed_duration_ms,
+        lat,
+        lon,
+        tps_voltage,
+        rpm,
+        oil_pressure_voltage,
+        speed
+      FROM POINTS
+      JOIN laps ON points.lap_id = laps.id
+      JOIN sessions ON laps.session_id = sessions.id
+      WHERE sessions.id = %s AND
+      lap_id = %s
+      ORDER BY points.time
+      """
+    return pandas.io.sql.read_sql(
+        select_statement,
+        self.conn,
+        params=(session_id,lap_id))
+
+  def FindLastThreeBestLaps(self):
+    select_last_session = """
+    SELECT sessions.id FROM sessions
+    JOIN laps ON sessions.id = laps.session_id
+    WHERE laps.duration_ms IS NOT NULL
+    ORDER BY sessions.id DESC LIMIT 1;
+    """
+    data_frames = []
+    with self.conn.cursor() as cursor:
+      cursor.execute(select_last_session)
+      self.last_session_id = cursor.fetchone()[0]
+
+    select_best_three = """
+    SELECT laps.id FROM sessions
+    JOIN laps ON sessions.id = laps.session_id
+    WHERE session_id = %s AND
+      laps.duration_ms IS NOT NULL
+    ORDER BY laps.duration_ms LIMIT 3;
+    """
+    with self.conn.cursor() as cursor:
+      cursor.execute(select_best_three, (self.last_session_id,))
+      for lap_id in cursor.fetchall():
+        data_frames.append(self.GetSingleLapData(self.last_session_id, lap_id))
+    return pandas.concat(data_frames)
+
+  def FindPersonalBest(self):
+    return self.GetSingleLapData(1360, 244457)
+
+
+  def PlotOilPressure(self, data):
+    fig, ax = matplotlib.pyplot.subplots()
+    ax.set_title('Oil Pressure Scatter (whole lap)')
+    seaborn.scatterplot(
+        x='rpm',
+        y='oil_pressure_voltage',
+        hue='label',
+        data=data)
+    self.pdf.savefig(fig)
+
+  def Plot(self, data, turn, y,
+           x='elapsed_duration_ms', hue='label', sort=False):
+    fig, ax = matplotlib.pyplot.subplots()
+    ax.set_title('Turn %s %s' % (turn.number, y))
+    seaborn.lineplot(
+        y=y,
+        x=x,
+        hue=hue,
+        sort=sort,
+        data=data)
+    self.pdf.savefig(fig)
+
+  def Run(self):
+    data = self.FindLastThreeBestLaps()
     data['label'] = data.apply(LabelLaps, axis=1)
-    pob_data = FindPersonalBest(conn)
+    pob_data = self.FindPersonalBest()
     pob_data['label'] = pob_data.apply(LabelLaps, axis=1, suffix=' *PoB')
     data = pandas.concat((pob_data, data))
     matplotlib.use('pdf')
     seaborn.set_style('darkgrid')
     track = FindClosestTrack(data)
-    with PdfPages('/tmp/test.pdf') as pdf:
-      pdf.savefig(PlotOilPressure(data))
+    with PdfPages('/tmp/test.pdf') as self.pdf:
+      self.PlotOilPressure(data)
       for turn in track.turns:
         turn_data = ApplyTurnDistance(data, turn, turn.report_range)
-        pdf.savefig(Plot(turn_data, turn, 'lat', x='lon'))
-        pdf.savefig(Plot(turn_data, turn, 'tps_voltage'))
-        pdf.savefig(Plot(turn_data, turn, 'speed'))
+        self.Plot(turn_data, turn, 'lat', x='lon')
+        self.Plot(turn_data, turn, 'tps_voltage')
+        self.Plot(turn_data, turn, 'speed')
+
+
+def main(unused_argv):
+  with timescale.ConnectToDB() as conn:
+    report = Report(conn)
+    report.Run()
 
 
 if __name__ == '__main__':
