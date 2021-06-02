@@ -35,6 +35,7 @@ import labjack
 import lap_lib
 import leds
 import timescale
+import tracks
 import u3
 import wbo2
 
@@ -42,26 +43,18 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
                     'The directory to save data and logs.')
 
-TRACKS = {(45.695079, -121.525848): 'Test Parking Lot',
-          (45.363799, -120.744556): 'Oregon Raceway Park',
-          (45.595015, -122.694526): 'Portland International Raceway',
-          (47.254702, -123.192676): 'The Ridge Motorsport Park',
-          (47.321082, -122.149664): 'Pacific Raceway',
-          (47.661806, -117.572297): 'Spokane Raceway',
-          (49.162303, -119.520422): 'Area 27'}
-
 
 def FindClosestTrack(
     point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
   """Returns the distance, track and start/finish of the closest track."""
   distance_track = []
-  for location, track in TRACKS.items():
-    lat, lon = location
+  for track in tracks.TRACK_LIST:
+    lat, lon = track.start_finish
     track_point = gps_pb2.Point()
     track_point.lat = lat
     track_point.lon = lon
     distance = common_lib.PointDelta(point, track_point)
-    distance_track.append((distance, track, track_point))
+    distance_track.append((distance, track.name, track_point))
   return sorted(distance_track)[0]
 
 
