@@ -57,16 +57,6 @@ class TestExitSpeed(unittest.TestCase):
     self.addCleanup(patch.stop)
     return patch.start()
 
-  def testFindClosestTrack(self):
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    distance, track, _ = exit_speed.FindClosestTrack(point)
-    self.assertEqual(65.64651548636733, distance)
-    self.assertEqual(track, 'Portland International Raceway')
-    self.assertEqual(point.lat, 45.595412)
-    self.assertEqual(point.lon, -122.693901)
-
   def testProcessPoint(self):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000

@@ -44,20 +44,6 @@ flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
                     'The directory to save data and logs.')
 
 
-def FindClosestTrack(
-    point: gps_pb2.Point) -> Tuple[float, Text, gps_pb2.Point]:
-  """Returns the distance, track and start/finish of the closest track."""
-  distance_track = []
-  for track in tracks.TRACK_LIST:
-    lat, lon = track.start_finish
-    track_point = gps_pb2.Point()
-    track_point.lat = lat
-    track_point.lon = lon
-    distance = common_lib.PointDelta(point, track_point)
-    distance_track.append((distance, track.name, track_point))
-  return sorted(distance_track)[0]
-
-
 class ExitSpeed(object):
   """Main object which loops and logs data."""
   LABJACK_TIMER_CMD = u3.Timer0(UpdateReset=True, Value=0, Mode=None)
@@ -181,12 +167,12 @@ class ExitSpeed(object):
   def ProcessSession(self) -> None:
     """Start/ends the logging of data to log files."""
     if not self.session.track:
-      _, track, start_finish = FindClosestTrack(self.point)
+      _, track, start_finish = tracks.FindClosestTrack(self.point)
       logging.info('Closest track: %s', track)
-      self.session.track = track
+      self.session.track = track.name
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
-      self.timescale.Start(self.point.time, track)
+      self.timescale.Start(self.point.time, track.name)
     self.ProcessLap()
 
   def ReadAccelerometerValues(self, point: gps_pb2.Point):

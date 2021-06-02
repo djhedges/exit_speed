@@ -22,9 +22,9 @@ from absl import flags
 from absl import logging
 import cleanup_timescale
 import data_logger
-import exit_speed
 import replay_data
 import timescale
+import tracks
 import psycopg2
 
 FLAGS = flags.FLAGS
@@ -60,8 +60,8 @@ def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
   if cursor.execute(SELECT_SESSION, (session_time,)):
     return True
   if first_point:
-    _, track, _ = exit_speed.FindClosestTrack(first_point)
-    if track == 'Test Parking Lot':
+    _, track, _ = tracks.FindClosestTrack(first_point)
+    if track.name == 'Test Parking Lot':
       return True  # Skip the test parking lot.  Mostly development files.
   return False
 
