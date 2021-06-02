@@ -115,7 +115,32 @@ class Report(object):
     return pandas.concat(data_frames)
 
   def FindPersonalBest(self):
-    return self.GetSingleLapData(1360, 244457)
+    select_last_session_best_time = """
+    SELECT duration_ms, track FROM laps
+    JOIN sessions ON laps.session_id=sessions.id
+    WHERE session_id = %s
+    ORDER BY duration_ms
+    LIMIT 1;
+    """
+    with self.conn.cursor() as cursor:
+      cursor.execute(select_last_session_best_time, (self.last_session_id,))
+      best_time, track = cursor.fetchone()
+      min_time = best_time - 1000
+      max_time = best_time + 1000
+    select_personal_best = """
+    SELECT session_id, laps.id FROM laps
+    JOIN sessions ON laps.session_id=sessions.id
+    WHERE track = %s AND
+    duration_ms IS NOT NULL AND
+    duration_ms > %s AND
+    duration_ms < %s
+    ORDER BY duration_ms
+    LIMIT 1;
+    """
+    with self.conn.cursor() as cursor:
+      cursor.execute(select_personal_best, (track, min_time, max_time))
+      session_id, lap_id = cursor.fetchone()
+    return self.GetSingleLapData(session_id, lap_id)
 
 
   def PlotOilPressure(self, data):
