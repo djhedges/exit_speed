@@ -29,4 +29,4 @@ class Turn(object):
   number = attr.ib(type=str)
   lat = attr.ib(type=float)
   lon = attr.ib(type=float)
-  report_range = attr.ib(type=int, default=100)
+  report_range = attr.ib(type=int, default=200)
