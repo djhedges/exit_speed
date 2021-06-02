@@ -17,8 +17,6 @@
 import datetime
 import os
 import sdnotify
-from typing import Text
-from typing import Tuple
 from absl import app
 from absl import flags
 from absl import logging
