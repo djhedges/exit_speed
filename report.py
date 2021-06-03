@@ -63,6 +63,7 @@ def FindClosestTrack(data):
 
 @attr.s
 class Report(object):
+  """Generates a post session report vs personal best."""
   conn = attr.ib(type=psycopg2.extensions.connection)
 
   def GetSingleLapData(self, session_id, lap_id):
@@ -142,7 +143,6 @@ class Report(object):
       session_id, lap_id = cursor.fetchone()
     return self.GetSingleLapData(session_id, lap_id)
 
-
   def PlotOilPressure(self, data):
     fig, ax = matplotlib.pyplot.subplots()
     ax.set_title('Oil Pressure Scatter (whole lap)')
@@ -150,6 +150,28 @@ class Report(object):
         x='rpm',
         y='oil_pressure_voltage',
         hue='label',
+        data=data)
+    self.pdf.savefig(fig)
+
+  def PlotElapsedTimePerTurn(self, turn_datas):
+    fig, ax = matplotlib.pyplot.subplots()
+    turn_elapsed_time = []
+    for turn_number in sorted(turn_datas):
+      turn_data = turn_datas[turn_number]
+      grouped = turn_data.groupby('label')
+      # Delta per turn per label.
+      agg = grouped.agg(lambda x: x.max() - x.min()).reset_index()
+      agg['turn_number'] = turn_number
+      # Delta - best time in turn per label.
+      agg.update(agg['elapsed_duration_ms'] - agg['elapsed_duration_ms'].min())
+      turn_elapsed_time.append(agg)
+    data = pandas.concat(turn_elapsed_time).reset_index()
+    ax.set_title('Time Delta Per Turn')
+    seaborn.lineplot(
+        x='turn_number',
+        y='elapsed_duration_ms',
+        hue='label',
+        linewidth=0.5,
         data=data)
     self.pdf.savefig(fig)
 
@@ -162,6 +184,7 @@ class Report(object):
         x=x,
         hue=hue,
         sort=sort,
+        linewidth=0.5,
         data=data)
     self.pdf.savefig(fig)
 
@@ -176,8 +199,13 @@ class Report(object):
     track = FindClosestTrack(data)
     with PdfPages('/tmp/test.pdf') as self.pdf:
       self.PlotOilPressure(data)
+      turn_datas = {}
       for turn in track.turns:
-        turn_data = ApplyTurnDistance(data, turn, turn.report_range)
+        turn_datas[turn.number] = ApplyTurnDistance(
+            data, turn, turn.report_range)
+      self.PlotElapsedTimePerTurn(turn_datas)
+      for turn in track.turns:
+        turn_data = turn_datas[turn.number]
         self.Plot(turn_data, turn, 'lat', x='lon')
         self.Plot(turn_data, turn, 'tps_voltage')
         self.Plot(turn_data, turn, 'speed')

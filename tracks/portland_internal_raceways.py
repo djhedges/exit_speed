@@ -20,9 +20,9 @@ PortlandInternationalRaceway = base.Track(
     name='Portland International Raceway',
     start_finish=(45.595015, -122.694526),
     turns=(
-        base.Turn('1', 45.596143, -122.698153),
-        base.Turn('2', 45.596494, -122.698325),
-        base.Turn('3', 45.596531, -122.699786),
+        #base.Turn('1', 45.596143, -122.698153),
+        #base.Turn('2', 45.596494, -122.698325),
+        #base.Turn('3', 45.596531, -122.699786),
         base.Turn('4', 45.597368, -122.702836),
         base.Turn('4a', 45.598057, -122.703058),
         base.Turn('5', 45.598724, -122.701839),
