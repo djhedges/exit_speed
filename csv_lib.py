@@ -136,35 +136,3 @@ def ConvertProtoToTraqmate(session, filepath):
             point.accelerometer_x,
             point.accelerometer_y,
             ])
-
-
-def _FindBestLap(session):
-  best_lap = None
-  for lap in session.laps:
-    if not best_lap and lap.duration.ToMilliseconds():
-      best_lap = lap
-    if (lap.duration.ToMilliseconds() and
-        lap.duration.ToMilliseconds() < best_lap.duration.ToMilliseconds()):
-      best_lap = lap
-  return best_lap
-
-
-def ExportOptimumLapTrackMaker(session, filepath):
-  """Converts a session into a CSV file for creating a track with OptimumG.
-
-  Args:
-    session: A exit speed session proto.
-    filepath: The file path and name of the new CSV file.
-  """
-  best_lap = _FindBestLap(session)
-  distance = 0
-  prior_point = None
-  with open(filepath, 'w', newline='') as csv_file:
-    csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-    csv_writer.writerow(['Distance', 'Speed', 'Lateral Acceleration'])
-    csv_writer.writerow(['m', 'm/s', 'G'])
-    for point in best_lap.points:
-      if prior_point:
-        distance += common_lib.PointDelta(point, prior_point)
-      csv_writer.writerow([distance, point.speed, point.accelerometer_x])
-      prior_point = point
