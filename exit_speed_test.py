@@ -61,9 +61,11 @@ class TestExitSpeed(unittest.TestCase):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000
     prior_point.lon = 23.000000
+    prior_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     point = gps_pb2.Point()
     point.lat = 12.000001
     point.lon = 23.000002
+    point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
     es = exit_speed.ExitSpeed()
     es.lap = gps_pb2.Lap()
     es.lap.points.extend([prior_point, point])
@@ -172,8 +174,6 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.speed, 0.088)
     self.assertEqual(point.time.seconds, 1576733064)
     self.assertEqual(point.time.nanos, 100000000)
-    self.assertEqual(point.elapsed_duration_ms, 0)
-    self.assertEqual(point.elapsed_distance_m, 0)
 
   def testCheckReportFields(self):
     report = gps.client.dictwrapper({

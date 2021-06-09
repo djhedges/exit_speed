@@ -120,12 +120,34 @@ class ExitSpeed(object):
       self._InitializeDataLogger(point)
     self.data_logger.WriteProto(point)
 
+  def CalculateElapsedValues(self):
+    """Populates the elapsed_duration_ms and elapsed_distance_m point values."""
+    point = self.point
+    if len(self.lap.points) > 1:
+      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
+      point.elapsed_duration_ms = (
+          point.time.ToMilliseconds() -
+          prior_point.time.ToMilliseconds() +
+          point.elapsed_duration_ms)
+      point.elapsed_distance_m = (
+          common_lib.PointDelta(point, prior_point) +
+          prior_point.elapsed_distance_m)
+    else:
+      point.elapsed_duration_ms = 0
+      point.elapsed_distance_m = 0
+
   def ProcessPoint(self) -> None:
-    """Populates the session with the latest GPS point."""
+    """Calculate values after PopulatePoint is called.
+
+    The key distinction between ProcessPoint and PopulatePoint is that
+    ProcessPoint is executed when data is replayed and synced to timescale.
+    Where as PopulatePoint is never called again.
+    """
     point = self.point
     session = self.session
     point.start_finish_distance = common_lib.PointDelta(point,
                                                         session.start_finish)
+    self.CalculateElapsedValues()
     self.leds.UpdateLeds(point)
     self.LogPoint()
     self.timescale.AddPointToQueue(point, self.lap.number)
@@ -219,18 +241,6 @@ class ExitSpeed(object):
     self.ReadLabjackValues(point)
     self.ReadWBO2Values(point)
     self.point = point
-    if self.lap.points:
-      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
-      point.elapsed_duration_ms = (
-          point.time.ToMilliseconds() -
-          prior_point.time.ToMilliseconds() +
-          point.elapsed_duration_ms)
-      point.elapsed_distance_m = (
-          common_lib.PointDelta(point, prior_point) +
-          prior_point.elapsed_distance_m)
-    else:
-      point.elapsed_duration_ms = 0
-      point.elapsed_distance_m = 0
 
   def CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
     """Verifies required report fields are present."""
