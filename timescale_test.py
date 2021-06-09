@@ -84,14 +84,6 @@ class TestTimescale(unittest.TestCase):
     self.assertEqual(1, number)
     self.assertEqual(90000, duration_ms)
 
-  def testGetElapsedTime(self):
-    point = gps_pb2.Point()
-    point.time.FromSeconds(10)
-    self.assertEqual(0, self.pusher.GetElapsedTime(point, 1))
-    point = gps_pb2.Point()
-    point.time.FromSeconds(20)
-    self.assertEqual(10 * 1000, self.pusher.GetElapsedTime(point, 1))
-
   def testExportPoint(self):
     lap = gps_pb2.Lap()
     lap.duration.FromMilliseconds(90 * 1000)
@@ -120,6 +112,8 @@ class TestTimescale(unittest.TestCase):
     point.gyro_y = 1.0
     point.gyro_z = 2.5
     point.geohash = 'c21efweg66fd'
+    point.elapsed_duration_ms = 10
+    point.elapsed_distance_m = 33
     point.front_brake_pressure_voltage = 3.5
     point.rear_brake_pressure_voltage = 2.5
     point.battery_voltage = 13.5
@@ -127,10 +121,9 @@ class TestTimescale(unittest.TestCase):
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
-     tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr,
-     fuel_level_voltage, accelerometer_x, accelerometer_y,
-     accelerometer_z, pitch, roll,
-     gyro_x, gyro_y, gyro_z,
+     elapsed_distance_m, tps_voltage, water_temp_voltage, oil_pressure_voltage,
+     rpm, afr, fuel_level_voltage, accelerometer_x, accelerometer_y,
+     accelerometer_z, pitch, roll, gyro_x, gyro_y, gyro_z,
      front_brake_pressure_voltage, rear_brake_pressure_voltage,
      battery_voltage, oil_temp_voltage) = self.cursor.fetchone()
     self.assertEqual(lat, 45.6954583246261)
@@ -138,7 +131,8 @@ class TestTimescale(unittest.TestCase):
     self.assertEqual(alt, 1.0)
     self.assertEqual(speed, 2.23694)
     self.assertEqual(geohash, 'c21efweg66fd')
-    self.assertEqual(elapsed_duration_ms, 0.0)
+    self.assertEqual(elapsed_duration_ms, 10)
+    self.assertEqual(elapsed_distance_m, 33)
     self.assertEqual(tps_voltage, 2.0)
     self.assertEqual(water_temp_voltage, 3.0)
     self.assertEqual(oil_pressure_voltage, 4.0)

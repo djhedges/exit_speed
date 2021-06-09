@@ -219,6 +219,18 @@ class ExitSpeed(object):
     self.ReadLabjackValues(point)
     self.ReadWBO2Values(point)
     self.point = point
+    if self.lap.points:
+      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
+      point.elapsed_duration_ms = (
+          point.time.ToMilliseconds() -
+          prior_point.time.ToMilliseconds() +
+          point.elapsed_duration_ms)
+      point.elapsed_distance_m = (
+          common_lib.PointDelta(point, prior_point) +
+          prior_point.elapsed_distance_m)
+    else:
+      point.elapsed_duration_ms = 0
+      point.elapsed_distance_m = 0
 
   def CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
     """Verifies required report fields are present."""

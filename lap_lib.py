@@ -44,7 +44,7 @@ import math
 
 def GetPriorUniquePoint(lap: gps_pb2.Lap,
                         point_c: gps_pb2.Point) -> gps_pb2.Point:
-  """Avoids a divsion by zero if the two points have the same time.
+  """Avoids a division by zero if the two points have the same time.
 
   Older logged data had multiple points at the same time.
   """

@@ -51,19 +51,20 @@ WHERE id = %s
 """)
 POINT_PREPARE = textwrap.dedent("""
 PREPARE point_insert AS
-INSERT INTO points (time, session_id, lap_id, lat, lon, alt, speed, geohash,
-                    elapsed_duration_ms, tps_voltage, water_temp_voltage,
-                    oil_pressure_voltage, rpm, afr, fuel_level_voltage,
-                    accelerometer_x, accelerometer_y, accelerometer_z,
-                    pitch, roll, gyro_x, gyro_y, gyro_z,
-                    front_brake_pressure_voltage, rear_brake_pressure_voltage,
-                    battery_voltage, oil_temp_voltage)
+INSERT INTO points (
+    time, session_id, lap_id, lat, lon,
+    alt, speed, geohash, elapsed_duration_ms, elapsed_distance_m,
+    tps_voltage, water_temp_voltage, oil_pressure_voltage, rpm, afr,
+    fuel_level_voltage, accelerometer_x, accelerometer_y, accelerometer_z,
+    pitch, roll, gyro_x, gyro_y, gyro_z,
+    front_brake_pressure_voltage, rear_brake_pressure_voltage,
+    battery_voltage, oil_temp_voltage)
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
         $16, $17, $18, $19, $20,
         $21, $22, $23, $24, $25,
-        $26, $27)
+        $26, $27, $28)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
@@ -71,7 +72,7 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s, %s)
+                      %s, %s, %s)
 """)
 
 
@@ -108,7 +109,6 @@ class Timescale(object):
     self.lap_duration_queue = multiprocessing.Queue()
     self.point_queue = self.manager.list()  # Used as LifoQueue.
     self.retry_point_queue = []
-    self.lap_id_first_points = {}
     self.commit_cycle = 0
 
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
@@ -138,12 +138,6 @@ class Timescale(object):
     cursor.execute(LAP_DURATION_UPDATE, args)
     self.timescale_conn.commit()
 
-  def GetElapsedTime(self, point: gps_pb2.Point, lap_id: int) -> int:
-    if not self.lap_id_first_points.get(lap_id):
-      self.lap_id_first_points[lap_id] = point
-    first_point = self.lap_id_first_points[lap_id]
-    return point.time.ToMilliseconds() - first_point.time.ToMilliseconds()
-
   def ExportPoint(self,
                   point: gps_pb2.Point,
                   lap_number: int,
@@ -151,7 +145,6 @@ class Timescale(object):
     """Exports point data to timescale."""
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
-      elapsed_duration_ms = self.GetElapsedTime(point, lap_id)
       args = (point.time.ToJsonString(),
               self.session_id,
               lap_id,
@@ -160,7 +153,8 @@ class Timescale(object):
               point.alt,
               point.speed * 2.23694,  # m/s to mph,
               point.geohash,
-              elapsed_duration_ms,
+              point.elapsed_duration_ms,
+              point.elapsed_distance_m,
               point.tps_voltage,
               point.water_temp_voltage,
               point.oil_pressure_voltage,

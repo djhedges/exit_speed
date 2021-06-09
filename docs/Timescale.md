@@ -48,6 +48,7 @@ CREATE TABLE points (
   speed                        FLOAT             NOT NULL,
   geohash                      TEXT              NOT NULL,
   elapsed_duration_ms          INT               NOT NULL,
+  elapsed_distance_m           FLOAT             NOT NULL,
   tps_voltage                  FLOAT,
   water_temp_voltage           FLOAT,
   oil_pressure_voltage         FLOAT,
@@ -65,7 +66,7 @@ CREATE TABLE points (
   front_brake_pressure_voltage FLOAT,
   rear_brake_pressure_voltage  FLOAT,
   battery_voltage              FLOAT,
-  oil_temp_voltage             FLOAT
+  oil_temp_voltage             FLOAT,
 );
 EXIT;
 ```

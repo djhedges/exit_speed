@@ -17,7 +17,6 @@
 import csv
 import datetime
 import time
-import common_lib
 import exit_speed
 from gps import client
 

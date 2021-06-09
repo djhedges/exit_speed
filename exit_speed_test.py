@@ -172,6 +172,8 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(point.speed, 0.088)
     self.assertEqual(point.time.seconds, 1576733064)
     self.assertEqual(point.time.nanos, 100000000)
+    self.assertEqual(point.elapsed_duration_ms, 0)
+    self.assertEqual(point.elapsed_distance_m, 0)
 
   def testCheckReportFields(self):
     report = gps.client.dictwrapper({

@@ -19,6 +19,6 @@ import gps_pb2
 
 
 def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
-  """Returns the distance between two points."""
+  """Returns the distance in meters between two points."""
   return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
                                 (point_b.lat, point_b.lon))
