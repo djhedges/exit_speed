@@ -128,7 +128,7 @@ class ExitSpeed(object):
       point.elapsed_duration_ms = (
           point.time.ToMilliseconds() -
           prior_point.time.ToMilliseconds() +
-          point.elapsed_duration_ms)
+          prior_point.elapsed_duration_ms)
       point.elapsed_distance_m = (
           common_lib.PointDelta(point, prior_point) +
           prior_point.elapsed_distance_m)
@@ -144,11 +144,10 @@ class ExitSpeed(object):
     Where as PopulatePoint is never called again.
     """
     point = self.point
-    session = self.session
-    point.start_finish_distance = common_lib.PointDelta(point,
-                                                        session.start_finish)
-    self.CalculateElapsedValues()
+    point.start_finish_distance = common_lib.PointDelta(
+        point, self.session.start_finish)
     self.leds.UpdateLeds(point)
+    self.CalculateElapsedValues()
     self.LogPoint()
     self.timescale.AddPointToQueue(point, self.lap.number)
     if self.config.get('gopro'):
@@ -165,7 +164,7 @@ class ExitSpeed(object):
     logging.info('New Lap %d:%.03f', minutes, seconds)
 
   def CrossStartFinish(self) -> None:
-    """Checks and handles when the car corsses the start/finish."""
+    """Checks and handles when the car crosses the start/finish."""
     if len(self.lap.points) >= self.min_points_per_session:
       prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
       if (self.point.start_finish_distance < self.start_finish_range and
@@ -177,6 +176,9 @@ class ExitSpeed(object):
         self.AddNewLap()
         # Start and end laps on the same point just past start/finish.
         self.lap.points.append(prior_point)
+        # Reset elapsed values for first point of the lap.
+        self.point.elapsed_duration_ms = 0
+        self.point.elapsed_distance_m = 0
     self.lap.points.append(self.point)
 
   def ProcessLap(self) -> None:
