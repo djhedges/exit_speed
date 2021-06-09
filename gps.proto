@@ -49,8 +49,8 @@ message Point {
   double rear_brake_pressure_voltage = 23;
   double battery_voltage = 24;
   double oil_temp_voltage= 25;
-  double elapsed_duration_ms = 26;
-  double elapsed_distance_m = 27;  // Meters
+  double elapsed_duration_ms = 26; // Milliseconds thus far this lap.
+  double elapsed_distance_m = 27;  // Meters thus far this lap.
 }
 
 message Lap {
