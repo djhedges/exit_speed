@@ -66,7 +66,7 @@ CREATE TABLE points (
   front_brake_pressure_voltage FLOAT,
   rear_brake_pressure_voltage  FLOAT,
   battery_voltage              FLOAT,
-  oil_temp_voltage             FLOAT,
+  oil_temp_voltage             FLOAT
 );
 EXIT;
 ```

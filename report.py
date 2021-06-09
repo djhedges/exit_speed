@@ -151,7 +151,7 @@ class Report(object):
         y='oil_pressure_voltage',
         hue='label',
         data=data)
-    self.pdf.savefig(fig)
+    self.pdf.savefig(fig) # type: ignore
 
   def PlotElapsedTimePerTurn(self, turn_datas):
     fig, ax = matplotlib.pyplot.subplots()
@@ -173,7 +173,7 @@ class Report(object):
         hue='label',
         linewidth=0.5,
         data=data)
-    self.pdf.savefig(fig)
+    self.pdf.savefig(fig) # type: ignore
 
   def Plot(self, data, turn, y,
            x='elapsed_duration_ms', hue='label', sort=False):
@@ -186,7 +186,7 @@ class Report(object):
         sort=sort,
         linewidth=0.5,
         data=data)
-    self.pdf.savefig(fig)
+    self.pdf.savefig(fig) # type: ignore
 
   def Run(self):
     data = self.FindLastThreeBestLaps()
