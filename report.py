@@ -95,7 +95,7 @@ class Report(object):
     SELECT sessions.id FROM sessions
     JOIN laps ON sessions.id = laps.session_id
     WHERE laps.duration_ms IS NOT NULL
-    ORDER BY sessions.id DESC LIMIT 1;
+    ORDER BY time LIMIT 1;
     """
     data_frames = []
     with self.conn.cursor() as cursor:
@@ -203,7 +203,7 @@ class Report(object):
       for turn in track.turns:
         turn_datas[turn.number] = ApplyTurnDistance(
             data, turn, turn.report_range)
-      self.PlotElapsedTimePerTurn(turn_datas)
+      #self.PlotElapsedTimePerTurn(turn_datas)
       for turn in track.turns:
         turn_data = turn_datas[turn.number]
         self.Plot(turn_data, turn, 'lat', x='lon')

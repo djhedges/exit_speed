@@ -18,6 +18,7 @@ Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
 
+import os
 from absl import logging
 from typing import Generator
 from typing import Text
@@ -59,6 +60,9 @@ class Logger(object):
   def _SetCurrentFile(self):
     if self.current_file:
       self.current_file.flush()
+    parent_dir = os.path.dirname(self.file_path)
+    if not os.path.exists(parent_dir):
+      os.mkdir(parent_dir)
     self.current_file = open(self.file_path, 'wb')
 
   def GetFile(self, proto_len):

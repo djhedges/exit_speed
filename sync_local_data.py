@@ -38,16 +38,17 @@ SELECT_SESSION = 'SELECT * FROM sessions WHERE time = %s'
 
 def GetLocalFiles() -> List:
   data_files = []
-  for filename in os.listdir(LAP_LOG_PATH):
-    if filename.endswith('.data'):
-      data_files.append(filename)
+  for carname in os.listdir(LAP_LOG_PATH):
+    for filename in os.listdir(os.path.join(LAP_LOG_PATH, carname)):
+      if filename.endswith('.data'):
+        data_files.append(os.path.join(LAP_LOG_PATH, carname, filename))
   data_files.reverse()
   return data_files
 
 
 def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
                         filepath: Text) -> bool:
-  logger = data_logger.Logger(os.path.join(LAP_LOG_PATH, filepath))
+  logger = data_logger.Logger(filepath)
   first_point = None
   for point in logger.ReadProtos():
     first_point = point

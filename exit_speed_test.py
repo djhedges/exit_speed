@@ -57,6 +57,13 @@ class TestExitSpeed(unittest.TestCase):
     self.addCleanup(patch.stop)
     return patch.start()
 
+  def testGetLogFilePrefix(self):
+    point = gps_pb2.Point()
+    point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    es = exit_speed.ExitSpeed()
+    expected = '/tmp/Corrado/2020-05-23T10:47:44.100000'
+    self.assertEqual(expected, es._GetLogFilePrefix(point))
+
   def testCalculateElapsedValues(self):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000

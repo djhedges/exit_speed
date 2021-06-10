@@ -14,6 +14,7 @@
 # limitations under the License.
 """Script for replaying a data log.  Super handy for development."""
 
+import os
 import time
 from absl import app
 from absl import flags
@@ -51,6 +52,7 @@ def ReplayLog(filepath, include_sleep=False):
   else:
     FLAGS.set_default('commit_cycle', 10000)
   es = exit_speed.ExitSpeed(live_data=not include_sleep)
+  es.config['car'] = os.path.split(os.path.dirname(filepath))[1]
   for point in points:
     if include_sleep:
       point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
