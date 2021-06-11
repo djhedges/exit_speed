@@ -80,7 +80,7 @@ class TestReplayData(unittest.TestCase):
     if test_data_file.endswith('.data'):
       with self.subTest(name=test_data_file):
         es = replay_data.ReplayLog(test_data_file)
-        point_count = -2  # TODO(figure out why we're missing 2 points)
+        point_count = 0
         for lap in es.session.laps:
           point_count += len(lap.points)
         self.cursor.execute('SELECT count(*) FROM points')

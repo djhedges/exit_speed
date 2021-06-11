@@ -180,6 +180,7 @@ class ExitSpeed(object):
         self.AddNewLap()
         # Start and end laps on the same point just past start/finish.
         self.lap.points.append(prior_point)
+        self.timescale.AddPointToQueue(prior_point, self.lap.number)
         # Reset elapsed values for first point of the lap.
         self.point.elapsed_duration_ms = 0
         self.point.elapsed_distance_m = 0
