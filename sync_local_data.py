@@ -42,7 +42,6 @@ def GetLocalFiles() -> List:
     for filename in os.listdir(os.path.join(LAP_LOG_PATH, carname)):
       if filename.endswith('.data'):
         data_files.append(os.path.join(LAP_LOG_PATH, carname, filename))
-  data_files.reverse()
   return data_files
 
 

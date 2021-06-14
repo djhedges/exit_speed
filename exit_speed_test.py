@@ -14,9 +14,10 @@
 # limitations under the License.
 """ExitSpeed unittest."""
 
+import mock
+import pytz
 import sys
 import unittest
-import mock
 from absl import flags
 from absl.testing import absltest
 import gps
@@ -61,8 +62,8 @@ class TestExitSpeed(unittest.TestCase):
     point = gps_pb2.Point()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     es = exit_speed.ExitSpeed()
-    expected = '/tmp/Corrado/2020-05-23T10:47:44.100000'
-    self.assertEqual(expected, es.GetLogFilePrefix(point))
+    expected = '/tmp/Corrado/2020-05-23T17:47:44.100000'
+    self.assertEqual(expected, es.GetLogFilePrefix(point, tz=pytz.UTC))
 
   def testCalculateElapsedValues(self):
     prior_point = gps_pb2.Point()

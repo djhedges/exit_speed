@@ -102,10 +102,10 @@ class ExitSpeed(object):
     self.lap.number = len(session.laps)
     self.timescale.lap_queue.put(lap)
 
-  def GetLogFilePrefix(self, point: gps_pb2.Point):
+  def GetLogFilePrefix(self, point: gps_pb2.Point, tz=None):
     utc_dt = point.time.ToDatetime()
     current_dt = utc_dt.replace(
-        tzinfo=datetime.timezone.utc).astimezone(tz=None)
+        tzinfo=datetime.timezone.utc).astimezone(tz=tz)
     current_seconds = current_dt.second + current_dt.microsecond / 1e6
     return os.path.join(
         FLAGS.data_log_path,
