@@ -27,7 +27,7 @@ class TestDataLogger(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
-    _, self.file_prefix = tempfile.mkstemp()
+    _, self.file_path = tempfile.mkstemp(suffix='_1.data')
     self.point = gps_pb2.Point()
     self.point.alt = 1
     self.point.speed = 1
@@ -41,20 +41,22 @@ class TestDataLogger(unittest.TestCase):
     self.point.fuel_level_voltage = 5
 
   def testSetFilePath(self):
-    logger = data_logger.Logger(self.file_prefix)
-    expected = os.path.join('%s_1.data' % self.file_prefix)
+    _, prefix = tempfile.mkstemp()
+    logger = data_logger.Logger(prefix)
+    expected = os.path.join('%s_1.data' % prefix)
     self.assertEqual(expected , logger.file_path)
 
   def testGetFile(self):
-    logger = data_logger.Logger(self.file_prefix)
-    expected = os.path.join('%s_1.data' % self.file_prefix)
+    _, prefix = tempfile.mkstemp()
+    logger = data_logger.Logger(prefix)
+    expected = os.path.join('%s_1.data' % prefix)
     self.assertEqual(expected , logger.file_path)
     logger.GetFile(256)
-    expected = os.path.join('%s_2.data' % self.file_prefix)
+    expected = os.path.join('%s_2.data' % prefix)
     self.assertEqual(expected , logger.file_path)
 
   def testWriteAndReadBack(self):
-    logger = data_logger.Logger(self.file_prefix)
+    logger = data_logger.Logger(self.file_path)
     logger.WriteProto(self.point)
     logger.WriteProto(self.point)
     logger.current_file.flush()
@@ -65,7 +67,7 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testShortWrite(self):
-    logger = data_logger.Logger(self.file_prefix)
+    logger = data_logger.Logger(self.file_path)
     logger.WriteProto(self.point)
     logger.WriteProto(self.point)
     logger.current_file.flush()
@@ -81,12 +83,12 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testZeroProtoBytes(self):
-    logger = data_logger.Logger(self.file_prefix)
+    logger = data_logger.Logger(self.file_path)
     logger.WriteProto(self.point)
     logger.current_file.flush()
     with open(logger.file_path, 'ab') as temp_file:
-      temp_file.write((data_logger.PROTO_LEN_BYTES).to_bytes(
-          data_logger.PROTO_LEN_BYTES, data_logger.BYTE_ORDER))
+      temp_file.write((logger.current_proto_len).to_bytes(
+          logger.current_proto_len, data_logger.BYTE_ORDER))
 
     file_points = []
     for file_point in logger.ReadProtos():
@@ -95,13 +97,27 @@ class TestDataLogger(unittest.TestCase):
     self.assertEqual(expected, file_points)
 
   def testMidHeader(self):
-    logger = data_logger.Logger(self.file_prefix)
+    logger = data_logger.Logger(self.file_path)
     logger.WriteProto(self.point)
     logger.current_file.flush()
     with open(logger.file_path, 'ab') as temp_file:
       temp_file.write((1).to_bytes(
-          data_logger.PROTO_LEN_BYTES, data_logger.BYTE_ORDER))
+          logger.current_proto_len, data_logger.BYTE_ORDER))
 
+    file_points = []
+    for file_point in logger.ReadProtos():
+      file_points.append(file_point)
+    expected = [self.point]
+    self.assertEqual(expected, file_points)
+
+  def testReadSplitDataFiles(self):
+    logger = data_logger.Logger(self.file_path)
+    logger.GetFile(256)
+    self.assertEqual(2, logger.current_proto_len)
+    expected = os.path.join('%s_2.data' % logger.file_prefix)
+    self.assertEqual(expected , logger.file_path)
+    logger.WriteProto(self.point)
+    logger.current_file.flush()
     file_points = []
     for file_point in logger.ReadProtos():
       file_points.append(file_point)

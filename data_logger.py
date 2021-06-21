@@ -18,14 +18,15 @@ Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
 
+import glob
 import os
+import re
 from absl import logging
 from typing import Generator
 from typing import Text
 from google.protobuf import message
 import gps_pb2
 
-PROTO_LEN_BYTES = 1
 BYTE_ORDER = 'big'
 
 
@@ -47,7 +48,7 @@ class Logger(object):
       self.file_prefix = file_prefix_or_name
     self.file_path = None
     self.current_file = None
-    self.current_proto_len = PROTO_LEN_BYTES
+    self.current_proto_len = 1
     self._SetFilePath()
 
   def __del__(self):
@@ -80,20 +81,26 @@ class Logger(object):
     proto_len = len(proto_bytes)
     data_file = self.GetFile(proto_len)
     data_file.write(proto_len.to_bytes(
-      PROTO_LEN_BYTES, BYTE_ORDER) + proto_bytes)
+      self.current_proto_len, BYTE_ORDER) + proto_bytes)
 
   def ReadProtos(self) -> Generator[gps_pb2.Point, None, None]:
-    with open(self.file_path, 'rb') as data_file:
-      while True:
-        proto_len = int.from_bytes(data_file.read(PROTO_LEN_BYTES), BYTE_ORDER)
-        proto_bytes = data_file.read(proto_len)
-        if proto_len and proto_bytes:
-          try:
-            point = gps_pb2.Point.FromString(proto_bytes)
-            yield point
-          except message.DecodeError:
-            logging.info('Decode error.  Likely the file writes were '
-                         'interrupted.  Treating as end of file.')
+    files_to_read = glob.glob(self.file_prefix + '*')
+    for file_path in files_to_read:
+      self.file_path = file_path
+      self.current_proto_len = int(
+          re.match(r'.*(\d)\.data', file_path).groups()[0])
+      with open(self.file_path, 'rb') as data_file:
+        while True:
+          proto_len = int.from_bytes(
+              data_file.read(self.current_proto_len), BYTE_ORDER)
+          proto_bytes = data_file.read(proto_len)
+          if proto_len and proto_bytes:
+            try:
+              point = gps_pb2.Point.FromString(proto_bytes)
+              yield point
+            except message.DecodeError:
+              logging.info('Decode error.  Likely the file writes were '
+                           'interrupted.  Treating as end of file.')
+              break
+          else:
             break
-        else:
-          break
