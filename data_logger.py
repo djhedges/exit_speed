@@ -29,6 +29,13 @@ import gps_pb2
 
 BYTE_ORDER = 'big'
 
+class Error(Exception):
+  """Base module exception."""
+
+
+class UnableToDetermineProtoLength(Error):
+  """Raised when unable to determine proto length from filename."""
+
 
 class Logger(object):
   """Interface for writing and reading protos to disk."""
@@ -87,8 +94,12 @@ class Logger(object):
     files_to_read = glob.glob(self.file_prefix + '*')
     for file_path in files_to_read:
       self.file_path = file_path
-      self.current_proto_len = int(
-          re.match(r'.*(\d)\.data', file_path).groups()[0])
+      match = re.match(r'.*(\d)\.data', file_path)
+      if not match:
+        raise UnableToDetermineProtoLength(
+            'Failed to parse proto length from filename.  Files should end in '
+            'the format _#.data where # denotes the proto length.')
+      self.current_proto_len = int(match.groups()[0])
       with open(self.file_path, 'rb') as data_file:
         while True:
           proto_len = int.from_bytes(

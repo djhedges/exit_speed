@@ -116,7 +116,9 @@ def ConvertProtoToTraqmate(session, filepath):
     csv_writer.writerow(['Duration (secs)', duration])
     csv_writer.writerow(['Elapsed Time', 'Lat (Degrees)', 'Lon (Degrees)',
                          'Altitude (meters)', 'Velocity (MPH)', 'Lap',
-                         'RPM', 'TPS', 'Latitude Gs', 'Longitude Gs'])
+                         'RPM', 'TPS', 'Latitude Gs', 'Longitude Gs',
+                         'Front Brake Pressure Voltage',
+                         'Rear Brake Pressure Voltage'])
     for lap in session.laps:
       lap_num += 1
       for point in lap.points:
@@ -134,4 +136,6 @@ def ConvertProtoToTraqmate(session, filepath):
             point.tps_voltage,
             point.accelerometer_x,
             point.accelerometer_y,
+            point.front_brake_pressure_voltage,
+            point.rear_brake_pressure_voltage
             ])
