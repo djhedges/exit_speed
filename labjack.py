@@ -30,6 +30,7 @@ class Labjack(object):
   def __init__(self, config, start_process=True):
     self.config = config
     self.u3 = None
+    self.labjack_temp_f = multiprocessing.Value('d', 0.0)
     self.voltage_values = self.BuildValues()
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
@@ -58,6 +59,8 @@ class Labjack(object):
     """Reads the labjack voltages."""
     try:
       if self.config.get('labjack'):
+        self.labjack_temp_f.value = (
+            self.u3.getTemperature() * 9.0/5.0 - 459.67)
         for input_name, proto_field in self.config['labjack'].items():
           if input_name.startswith('ain') or input_name.startswith('fio'):
             channel = int(input_name[-1])

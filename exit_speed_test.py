@@ -20,6 +20,7 @@ import sys
 import unittest
 from absl import flags
 from absl.testing import absltest
+import labjack
 import gps
 import gps_pb2
 import psycopg2
@@ -175,6 +176,21 @@ class TestExitSpeed(unittest.TestCase):
     point.speed = 1
     es.point = point
     es.ProcessSession()
+
+  def testReadLabjackValues(self):
+    point = gps_pb2.Point()
+    es = exit_speed.ExitSpeed()
+    es.ReadLabjackValues(point)
+    with self.subTest(name='Labjack disabled'):
+      self.assertFalse(point.labjack_temp_f)
+    with self.subTest(name='Labjack enabled'):
+      es.config['labjack'] = {'fio5': 'fuel_level_voltage'}
+      es.labjack = labjack.Labjack(es.config)
+      es.labjack.labjack_temp_f.value = 78.061801842153101916
+      es.labjack.voltage_values['fuel_level_voltage'].value = 1.5
+      es.ReadLabjackValues(point)
+      self.assertEqual(78.061801842153101916, point.labjack_temp_f)
+      self.assertEqual(1.5, point.fuel_level_voltage)
 
   def testPopulatePoint(self):
     report = gps.client.dictwrapper({

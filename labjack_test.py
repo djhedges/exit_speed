@@ -55,10 +55,12 @@ class TestLabjack(unittest.TestCase):
       return mapping[result]
     # pylint: enable=invalid-name
     # pylint: enable=unused-argument
+    self.mock_u3.getTemperature.return_value = 298.73988991230726
     self.mock_u3.getFeedback.side_effect = [[32816], [35696], [32827], [39968]]
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()
+    self.assertEqual(78.061801842153101916, self.labjack.labjack_temp_f.value)
     self.assertEqual(1.5,
                      self.labjack.voltage_values['fuel_level_voltage'].value)
     self.assertEqual(2.7,

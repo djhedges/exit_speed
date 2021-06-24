@@ -224,6 +224,7 @@ class ExitSpeed(object):
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
     if self.config.get('labjack'):
+      point.labjack_temp_f = self.labjack.labjack_temp_f.value
       for point_value, voltage in self.labjack.voltage_values.items():
         setattr(point, point_value, voltage.value)
 

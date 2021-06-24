@@ -118,6 +118,7 @@ class TestTimescale(unittest.TestCase):
     point.rear_brake_pressure_voltage = 2.5
     point.battery_voltage = 13.5
     point.oil_temp_voltage = 2.5
+    point.labjack_temp_f = 77.9
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
@@ -125,7 +126,7 @@ class TestTimescale(unittest.TestCase):
      rpm, afr, fuel_level_voltage, accelerometer_x, accelerometer_y,
      accelerometer_z, pitch, roll, gyro_x, gyro_y, gyro_z,
      front_brake_pressure_voltage, rear_brake_pressure_voltage,
-     battery_voltage, oil_temp_voltage) = self.cursor.fetchone()
+     battery_voltage, oil_temp_voltage, labjack_temp_f) = self.cursor.fetchone()
     self.assertEqual(lat, 45.6954583246261)
     self.assertEqual(lon, -121.525511797518)
     self.assertEqual(alt, 1.0)
@@ -151,6 +152,7 @@ class TestTimescale(unittest.TestCase):
     self.assertEqual(rear_brake_pressure_voltage, 2.5)
     self.assertEqual(battery_voltage, 13.5)
     self.assertEqual(oil_temp_voltage, 2.5)
+    self.assertEqual(labjack_temp_f, 77.9)
 
   def testExportPointArrivesBeforeLap(self):
     point = gps_pb2.Point()

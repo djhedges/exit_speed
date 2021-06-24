@@ -51,6 +51,7 @@ message Point {
   double oil_temp_voltage= 25;
   double elapsed_duration_ms = 26; // Milliseconds thus far this lap.
   double elapsed_distance_m = 27;  // Meters thus far this lap.
+  double labjack_temp_f = 28;  // Labjack ambient temperature in Fahrenheit.
 }
 
 message Lap {
