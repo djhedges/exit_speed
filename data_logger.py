@@ -91,14 +91,15 @@ class Logger(object):
       self.current_proto_len, BYTE_ORDER) + proto_bytes)
 
   def ReadProtos(self) -> Generator[gps_pb2.Point, None, None]:
-    files_to_read = glob.glob(self.file_prefix + '*')
+    files_to_read = glob.glob(self.file_prefix + '*.data')
     for file_path in files_to_read:
       self.file_path = file_path
       match = re.match(r'.*(\d)\.data', file_path)
       if not match:
         raise UnableToDetermineProtoLength(
             'Failed to parse proto length from filename.  Files should end in '
-            'the format _#.data where # denotes the proto length.')
+            'the format _#.data where # denotes the proto length. \n'
+            'Filepath: %s' % file_path)
       self.current_proto_len = int(match.groups()[0])
       with open(self.file_path, 'rb') as data_file:
         while True:
