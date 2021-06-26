@@ -44,6 +44,16 @@ adding the following /etc/rc.local.  I had zero luck with /etc/dhcpcd.confg
 route add default gw 192.168.4.3
 ```
 
+### Exit Speed Setup
+
+```
+sudo apt install git python3-pip
+mkdir ~/git
+cd ~/git
+git clone https://github.com/djhedges/exit_speed.git
+sudo pip3 install -r ~/git/exit_speed/requirements.txt
+```
+
 ## Main Pi Host
 
 On the Pi host that runs Exit Speed and is not connected to the tire infrared
