@@ -58,13 +58,22 @@ INSERT INTO points (
     fuel_level_voltage, accelerometer_x, accelerometer_y, accelerometer_z,
     pitch, roll, gyro_x, gyro_y, gyro_z,
     front_brake_pressure_voltage, rear_brake_pressure_voltage,
-    battery_voltage, oil_temp_voltage, labjack_temp_f)
+    battery_voltage, oil_temp_voltage, labjack_temp_f,
+    lf_tire_temp_inner, lf_tire_temp_middle, lf_tire_temp_outer,
+    rf_tire_temp_inner, rf_tire_temp_middle, rf_tire_temp_outer,
+    lr_tire_temp_inner, lr_tire_temp_middle, lr_tire_temp_outer,
+    rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer
+    )
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
         $16, $17, $18, $19, $20,
         $21, $22, $23, $24, $25,
-        $26, $27, $28, $29)
+        $26, $27, $28, $29,
+        $30, $31, $32,
+        $33, $34, $35,
+        $36, $37, $38,
+        $39, $40, $41)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
@@ -72,7 +81,11 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
                       %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s)
+                      %s, %s, %s, %s,
+                      %s, %s, %s,
+                      %s, %s, %s,
+                      %s, %s, %s,
+                      %s, %s, %s)
 """)
 
 
@@ -173,7 +186,20 @@ class Timescale(object):
               point.rear_brake_pressure_voltage,
               point.battery_voltage,
               point.oil_temp_voltage,
-              point.labjack_temp_f)
+              point.labjack_temp_f,
+              point.lf_tire_temp.inner,
+              point.lf_tire_temp.middle,
+              point.lf_tire_temp.outer,
+              point.rf_tire_temp.inner,
+              point.rf_tire_temp.middle,
+              point.rf_tire_temp.outer,
+              point.lr_tire_temp.inner,
+              point.lr_tire_temp.middle,
+              point.lr_tire_temp.outer,
+              point.rr_tire_temp.inner,
+              point.rr_tire_temp.middle,
+              point.rr_tire_temp.outer,
+              )
       cursor.execute(POINT_INSERT, args)
     else:
       self.retry_point_queue.append((point, lap_number))

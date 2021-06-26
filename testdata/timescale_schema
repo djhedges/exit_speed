@@ -47,5 +47,17 @@ CREATE TABLE points (
   rear_brake_pressure_voltage  FLOAT,
   battery_voltage              FLOAT,
   oil_temp_voltage             FLOAT,
-  labjack_temp_f               FLOAT
+  labjack_temp_f               FLOAT,
+  lf_tire_temp_inner           FLOAT,
+  lf_tire_temp_middle          FLOAT,
+  lf_tire_temp_outer           FLOAT,
+  rf_tire_temp_inner           FLOAT,
+  rf_tire_temp_middle          FLOAT,
+  rf_tire_temp_outer           FLOAT,
+  lr_tire_temp_inner           FLOAT,
+  lr_tire_temp_middle          FLOAT,
+  lr_tire_temp_outer           FLOAT,
+  rr_tire_temp_inner           FLOAT,
+  rr_tire_temp_middle          FLOAT,
+  rr_tire_temp_outer           FLOAT
 );

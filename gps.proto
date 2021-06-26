@@ -52,6 +52,10 @@ message Point {
   double elapsed_duration_ms = 26; // Milliseconds thus far this lap.
   double elapsed_distance_m = 27;  // Meters thus far this lap.
   double labjack_temp_f = 28;  // Labjack ambient temperature in Fahrenheit.
+  TireIrSensor lf_tire_temp = 29;  // Left Front
+  TireIrSensor rf_tire_temp = 30;  // Right Front
+  TireIrSensor lr_tire_temp = 31;  // Left Rear
+  TireIrSensor rr_tire_temp = 32;  // Right Rear
 }
 
 message Lap {
@@ -64,4 +68,10 @@ message Session {
   repeated Lap laps = 1;
   string track = 2;
   Point start_finish = 3;  // Location of start/finish.
+}
+
+message TireIrSensor {
+  double inner = 1;
+  double middle = 2;
+  double outer = 3;
 }

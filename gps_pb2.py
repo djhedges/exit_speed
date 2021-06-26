@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gps',
   syntax='proto3',
   serialized_options=b'Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_proto',
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x83\x05\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\x12\x0e\n\x06gyro_x\x18\x12 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x13 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x14 \x01(\x01\x12\x0f\n\x07geohash\x18\x15 \x01(\t\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x16 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\x17 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x18 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x19 \x01(\x01\x12\x1b\n\x13\x65lapsed_duration_ms\x18\x1a \x01(\x01\x12\x1a\n\x12\x65lapsed_distance_m\x18\x1b \x01(\x01\x12\x16\n\x0elabjack_temp_f\x18\x1c \x01(\x01\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.PointB:Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_protob\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa7\x06\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\x12\x0e\n\x06gyro_x\x18\x12 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x13 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x14 \x01(\x01\x12\x0f\n\x07geohash\x18\x15 \x01(\t\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x16 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\x17 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x18 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x19 \x01(\x01\x12\x1b\n\x13\x65lapsed_duration_ms\x18\x1a \x01(\x01\x12\x1a\n\x12\x65lapsed_distance_m\x18\x1b \x01(\x01\x12\x16\n\x0elabjack_temp_f\x18\x1c \x01(\x01\x12\'\n\x0clf_tire_temp\x18\x1d \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0crf_tire_temp\x18\x1e \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0clr_tire_temp\x18\x1f \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0crr_tire_temp\x18  \x01(\x0b\x32\x11.gps.TireIrSensor\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.Point\"<\n\x0cTireIrSensor\x12\r\n\x05inner\x18\x01 \x01(\x01\x12\x0e\n\x06middle\x18\x02 \x01(\x01\x12\r\n\x05outer\x18\x03 \x01(\x01\x42:Z8github.com/djhedges/exit_speed/gps_go_proto;gps_go_protob\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -231,6 +231,34 @@ _POINT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lf_tire_temp', full_name='gps.Point.lf_tire_temp', index=28,
+      number=29, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rf_tire_temp', full_name='gps.Point.rf_tire_temp', index=29,
+      number=30, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lr_tire_temp', full_name='gps.Point.lr_tire_temp', index=30,
+      number=31, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rr_tire_temp', full_name='gps.Point.rr_tire_temp', index=31,
+      number=32, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -244,7 +272,7 @@ _POINT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=727,
+  serialized_end=891,
 )
 
 
@@ -288,8 +316,8 @@ _LAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=729,
-  serialized_end=823,
+  serialized_start=893,
+  serialized_end=987,
 )
 
 
@@ -333,11 +361,60 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=825,
-  serialized_end=907,
+  serialized_start=989,
+  serialized_end=1071,
+)
+
+
+_TIREIRSENSOR = _descriptor.Descriptor(
+  name='TireIrSensor',
+  full_name='gps.TireIrSensor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='inner', full_name='gps.TireIrSensor.inner', index=0,
+      number=1, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='middle', full_name='gps.TireIrSensor.middle', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='outer', full_name='gps.TireIrSensor.outer', index=2,
+      number=3, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1073,
+  serialized_end=1133,
 )
 
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_POINT.fields_by_name['lf_tire_temp'].message_type = _TIREIRSENSOR
+_POINT.fields_by_name['rf_tire_temp'].message_type = _TIREIRSENSOR
+_POINT.fields_by_name['lr_tire_temp'].message_type = _TIREIRSENSOR
+_POINT.fields_by_name['rr_tire_temp'].message_type = _TIREIRSENSOR
 _LAP.fields_by_name['points'].message_type = _POINT
 _LAP.fields_by_name['duration'].message_type = google_dot_protobuf_dot_duration__pb2._DURATION
 _SESSION.fields_by_name['laps'].message_type = _LAP
@@ -345,6 +422,7 @@ _SESSION.fields_by_name['start_finish'].message_type = _POINT
 DESCRIPTOR.message_types_by_name['Point'] = _POINT
 DESCRIPTOR.message_types_by_name['Lap'] = _LAP
 DESCRIPTOR.message_types_by_name['Session'] = _SESSION
+DESCRIPTOR.message_types_by_name['TireIrSensor'] = _TIREIRSENSOR
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), {
@@ -367,6 +445,13 @@ Session = _reflection.GeneratedProtocolMessageType('Session', (_message.Message,
   # @@protoc_insertion_point(class_scope:gps.Session)
   })
 _sym_db.RegisterMessage(Session)
+
+TireIrSensor = _reflection.GeneratedProtocolMessageType('TireIrSensor', (_message.Message,), {
+  'DESCRIPTOR' : _TIREIRSENSOR,
+  '__module__' : 'gps_pb2'
+  # @@protoc_insertion_point(class_scope:gps.TireIrSensor)
+  })
+_sym_db.RegisterMessage(TireIrSensor)
 
 
 DESCRIPTOR._options = None
