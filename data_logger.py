@@ -51,6 +51,7 @@ class Logger(object):
     super().__init__()
     if file_prefix_or_name.endswith('.data'):
       self.file_prefix = file_prefix_or_name[:-7]  # Chop off the _1.data
+      logging.info('file_prefix: %s' % self.file_prefix)
     else:
       self.file_prefix = file_prefix_or_name
     self.file_path = None
@@ -92,6 +93,7 @@ class Logger(object):
 
   def ReadProtos(self) -> Generator[gps_pb2.Point, None, None]:
     files_to_read = glob.glob(self.file_prefix + '*.data')
+    logging.info('Data files to read: %s' % ','.join(files_to_read))
     for file_path in files_to_read:
       self.file_path = file_path
       match = re.match(r'.*(\d)\.data', file_path)
