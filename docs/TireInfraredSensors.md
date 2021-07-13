@@ -47,7 +47,7 @@ route add default gw 192.168.4.3
 ### Exit Speed Setup
 
 ```
-sudo apt install git python3-pip
+sudo apt install git python3-pip libatlas-base-dev
 mkdir ~/git
 cd ~/git
 git clone https://github.com/djhedges/exit_speed.git
