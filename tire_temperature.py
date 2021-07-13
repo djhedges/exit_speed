@@ -12,8 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""MLX90640 InfraRed sensor."""
+"""MLX90640 InfraRed sensor.
 
+https://github.com/melexis-fir/mlx9064x-driver-py
+"""
+
+import statistics
 from typing import List
 from absl import app
 from mlx import mlx90640
@@ -48,9 +52,29 @@ class InfraRedSensor(object):
     return formatted
 
 
+class TireSensor(InfraRedSensor):
+
+  def GetTempsByColumn(self):
+    formated_frame = sensor.FormatFrame(sensor.ReadFrame())
+    column_temps = {}
+    col_index = 0
+    for row in formated_frame:
+      for temp in row:
+        column_temps.setdefault(col_index, []).append(temp)
+      col_index += 1
+    return column_temps
+
+  def GetMedianColumnTemps(self):
+    column_temps = self.GetTempsByColumn()
+    median_temps = {}
+    for column, temps in column_temps.items():
+      median_temps[column] = statistics.median(temps)
+    return median_temps
+
+
 def main(unused_argv):
-  sensor = InfraRedSensor()
-  print(sensor.FormatFrame(sensor.ReadFrame()))
+  sensor = TireSensor()
+  print(sensor.GetMedianColumnTemps())
 
 
 if __name__ == '__main__':
