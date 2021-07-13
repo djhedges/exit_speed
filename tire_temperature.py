@@ -55,7 +55,7 @@ class InfraRedSensor(object):
 class TireSensor(InfraRedSensor):
 
   def GetTempsByColumn(self):
-    formated_frame = sensor.FormatFrame(sensor.ReadFrame())
+    formated_frame = self.FormatFrame(self.ReadFrame())
     column_temps = {}
     col_index = 0
     for row in formated_frame:
