@@ -28,6 +28,7 @@ from typing import Text
 from typing import Tuple
 from absl import app
 from absl import flags
+from absl import logging
 from mlx import mlx90640
 
 FLAGS = flags.FLAGS
@@ -133,6 +134,7 @@ class TireSensorClient(object):
     self.sock.sendto(temps, (self.ip_addr, self.port))
 
   def Loop(self):
+    logging.info('Sending tire temperature data...')
     while True:
       self.ReadAndSendData()
 
