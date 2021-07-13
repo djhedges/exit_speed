@@ -299,7 +299,8 @@ def main(unused_argv) -> None:
   except KeyboardInterrupt:
     logging.info('Keyboard interrupt')
   finally:
-    logging.info('Logging last point\n %s', es.point)
+    if hasattr(es, 'point'):
+      logging.info('Logging last point\n %s', es.point)
     logging.info('Done.\nExiting.')
     logging.exception('Ensure we log any exceptions')
     if es:
