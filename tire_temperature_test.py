@@ -148,6 +148,7 @@ class TestTireSensor(MockMlx9064xSensorBase):
 
 
 class TestClientServer(unittest.TestCase):
+  """Tests the ability for the Pi zero client to send data to the server."""
 
   def testClientServer(self):
     mock_sensor = mock.create_autospec(tire_temperature.TireSensor)

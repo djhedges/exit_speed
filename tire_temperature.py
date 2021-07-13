@@ -164,8 +164,14 @@ class TireSensorServer(object):
 
 
 class MultiTireInterface(object):
+  """Main class used by exit speed to hold each tire server."""
 
   def __init__(self, config):
+    """Initializer.
+
+    Args:
+      config: A dict created from parsing the exit speed yaml config.
+    """
     self.config = config
     self.servers = {}
     for corner, ip_port in self.config['tire_temps'].items():
