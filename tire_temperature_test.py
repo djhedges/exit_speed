@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unitests for gyroscope.py"""
+"""Unitests for tire_temperature.py"""
 
 import mock
 import unittest
@@ -26,15 +26,32 @@ def _CreateRawFrame():
     frame.append(30.0)
   return frame
 
+def _CreateFormattedFrame():
+  formatted_frame = []
+  for _ in range(32):
+    row = []
+    temp = 0
+    for _ in range(24):
+      row.append(temp)
+      temp += 10
+    formatted_frame.append(row)
+  return formatted_frame
 
-class TestInfraRedSensor(unittest.TestCase):
-  """Gyroscope unittests."""
+
+class MockMlx9064xSensorBase(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
     patch = mock.patch.object(mlx90640, 'Mlx9064x')
     self.addCleanup(patch.stop)
     self.mock_mlx = patch.start()
+
+
+class TestInfraRedSensor(MockMlx9064xSensorBase):
+  """Infrared Sensor unittests."""
+
+  def setUp(self):
+    super().setUp()
     self.sensor = tire_temperature.InfraRedSensor()
 
   def testReadFrame(self):
@@ -49,6 +66,85 @@ class TestInfraRedSensor(unittest.TestCase):
       row_count += 1
       self.assertEqual(32, len(row))
     self.assertEqual(24, row_count)
+
+
+class TestTireSensor(MockMlx9064xSensorBase):
+  """Tire Temperature unittests."""
+
+  def setUp(self):
+    super().setUp()
+    self.sensor = tire_temperature.TireSensor()
+
+  def testGetTempsByColumn(self):
+    expected = {}
+    col_index = 0
+    for _ in range(32):
+      temp = 0
+      temps = []
+      for _ in range(24):
+        temps.append(temp)
+        temp += 10
+      expected[col_index] = temps
+      col_index += 1
+    with mock.patch.object(self.sensor, 'FormatFrame') as mock_format_frame:
+      mock_format_frame.return_value = _CreateFormattedFrame()
+      self.assertDictEqual(expected, self.sensor.GetTempsByColumn())
+
+  def testGetMedianColumnTemps(self):
+    expected = {}
+    col_index = 0
+    for _ in range(32):
+      expected[col_index] = 115.0
+      col_index += 1
+    with mock.patch.object(self.sensor, 'FormatFrame') as mock_format_frame:
+      mock_format_frame.return_value = _CreateFormattedFrame()
+      self.assertDictEqual(expected, self.sensor.GetMedianColumnTemps())
+
+  def testGetTireTemps(self):
+    column_temp = {
+        # Air
+        0: 80.0,
+        1: 80.0,
+        2: 80.0,
+        3: 80.0,
+        4: 80.0,
+        5: 80.0,
+        6: 80.0,
+        7: 80.0,
+        8: 80.0,
+        9: 135.0,  # Avg temp between tire and ambient air
+        # Inside tire
+        10: 190.0,
+        11: 190.0,
+        12: 190.0,
+        13: 190.0,
+        14: 190.0,
+        # Middle Tire
+        15: 200.0,
+        16: 200.0,
+        17: 200.0,
+        18: 200.0,
+        19: 200.0,
+        20: 200.0,
+        # Outside Tire
+        21: 230.0,
+        22: 230.0,
+        23: 230.0,
+        24: 230.0,
+        # Shock heat/spindle
+        25: 185.0,  # Avg temp between tire & spindle
+        26: 140.0,
+        27: 140.0,
+        28: 140.0,
+        29: 140.0,
+        30: 140.0,
+        31: 140.0,
+    }
+    expected = (190.0, 200.0, 230.0)
+    with mock.patch.object(self.sensor, 'GetMedianColumnTemps') as mock_col:
+      mock_col.return_value = column_temp
+      self.assertTupleEqual(expected, self.sensor.GetTireTemps())
+
 
 if __name__ == '__main__':
   absltest.main()

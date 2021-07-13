@@ -18,7 +18,10 @@ https://github.com/melexis-fir/mlx9064x-driver-py
 """
 
 import statistics
+import numpy
+from typing import Dict
 from typing import List
+from typing import Tuple
 from absl import app
 from mlx import mlx90640
 
@@ -52,9 +55,24 @@ class InfraRedSensor(object):
     return formatted
 
 
-class TireSensor(InfraRedSensor):
+def FindTireIndex(jumps) -> int:
+  first_jump = False
+  index = 0
+  for jump in jumps:
+    if jump:
+      first_jump = True
+    if not jump and first_jump:
+      return index
+    index += 1
+  return 0
 
-  def GetTempsByColumn(self):
+
+class TireSensor(InfraRedSensor):
+  # Temperature delta from tire edge to air/suspension.
+  TEMP_EDGE_SENSITIVITY = 40
+
+  def GetTempsByColumn(self) -> Dict[int, List[float]]:
+    """Returns temperature in Celsius per column where key is column index."""
     formated_frame = self.FormatFrame(self.ReadFrame())
     column_temps = {}
     col_index = 0
@@ -64,17 +82,36 @@ class TireSensor(InfraRedSensor):
       col_index += 1
     return column_temps
 
-  def GetMedianColumnTemps(self):
+  def GetMedianColumnTemps(self) -> Dict[int, float]:
+    """Returns the median temperature in Celsius per column."""
     column_temps = self.GetTempsByColumn()
     median_temps = {}
     for column, temps in column_temps.items():
       median_temps[column] = statistics.median(temps)
     return median_temps
 
+  def GetTireTemps(self) -> Tuple[float, float, float]:
+    """Attempts to find the edge of the tire based on temperature changes."""
+    median_temps = self.GetMedianColumnTemps()
+    diff = numpy.diff(list(median_temps.values()))
+    jumps = abs(diff) > self.TEMP_EDGE_SENSITIVITY
+    reverse_jumps = list(jumps)
+    reverse_jumps.reverse()
+    left_tire_index = FindTireIndex(jumps)
+    right_tire_index = len(median_temps) - FindTireIndex(reverse_jumps) - 1
+    middle_tire_index = round(statistics.mean(
+        [left_tire_index, right_tire_index]))
+    return (
+        median_temps[left_tire_index],
+        median_temps[middle_tire_index],
+        median_temps[right_tire_index])
+
 
 def main(unused_argv):
   sensor = TireSensor()
-  print(sensor.GetMedianColumnTemps())
+  while True:
+    print(sensor.GetMedianColumnTemps())
+    print(sensor.GetTireTemps())
 
 
 if __name__ == '__main__':
