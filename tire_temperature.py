@@ -161,7 +161,7 @@ class MultiTireInterface(object):
     self.servers = {}
     for corner, ip_port in self.config['tire_temps'].items():
       self.servers[corner] = TireSensorServer(ip_port['ip_addr'],
-                                              ip_port['port'])
+                                              int(ip_port['port']))
 
 
 

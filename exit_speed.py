@@ -238,9 +238,9 @@ class ExitSpeed(object):
     if self.config.get('tire_temps'):
       for corner, server in self.tire_temps.servers.items():
         tire_temp = getattr(point, '%s_tire_temp' % corner)
-        tire_temp.inner = self.tire_temps.inside_temp_f.value
-        tire_temp.middle = self.tire_temps.middle_temp_f.value
-        tire_temp.outer = self.tire_temps.outside_temp_f.value
+        tire_temp.inner = server.inside_temp_f.value
+        tire_temp.middle = server.middle_temp_f.value
+        tire_temp.outer = server.outside_temp_f.value
 
   def ReadWBO2Values(self, point) -> None:
     """Populate wide band readings."""
@@ -261,6 +261,7 @@ class ExitSpeed(object):
     self.ReadAccelerometerValues(point)
     self.ReadGyroscopeValues(point)
     self.ReadLabjackValues(point)
+    self.ReadTireTemperatures(point)
     self.ReadWBO2Values(point)
     self.point = point
 
@@ -300,6 +301,7 @@ def main(unused_argv) -> None:
   except KeyboardInterrupt:
     logging.info('Keyboard interrupt')
   finally:
+    logging.info('Logging last point\n %s', es.point)
     logging.info('Done.\nExiting.')
     logging.exception('Ensure we log any exceptions')
     if es:

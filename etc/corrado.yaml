@@ -17,7 +17,7 @@ labjack:
   fio5: fuel_level_voltage
   tick_divider_10: [ fio4, fio5 ]
   dac0_5v_out: True
-wbo2:
-  lambda_16: afr
-  rpm_count: rpm
-  user_3: tps_voltage
+#wbo2:
+#  lambda_16: afr
+#  rpm_count: rpm
+#  user_3: tps_voltage
