@@ -110,7 +110,6 @@ class TireSensor(InfraRedSensor):
 def main(unused_argv):
   sensor = TireSensor()
   while True:
-    print(sensor.GetMedianColumnTemps())
     print(sensor.GetTireTemps())
 
 
