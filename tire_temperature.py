@@ -72,6 +72,7 @@ def FindTireIndex(jumps) -> int:
 
 
 class TireSensor(InfraRedSensor):
+  """Tire temperature sensor."""
   # Temperature delta from tire edge to air/suspension.
   TEMP_EDGE_SENSITIVITY = 40
 
