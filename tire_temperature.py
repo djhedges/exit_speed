@@ -17,10 +17,14 @@
 https://github.com/melexis-fir/mlx9064x-driver-py
 """
 
-import statistics
+import multiprocessing
 import numpy
+import socket
+import statistics
+import struct
 from typing import Dict
 from typing import List
+from typing import Text
 from typing import Tuple
 from absl import app
 from mlx import mlx90640
@@ -105,6 +109,46 @@ class TireSensor(InfraRedSensor):
         median_temps[left_tire_index],
         median_temps[middle_tire_index],
         median_temps[right_tire_index])
+
+
+class TireSensorClient(object):
+
+  def __init__(self, ip_addr: Text, port: int):
+    self.ip_addr = ip_addr
+    self.port = port
+    self.sensor = TireSensor()
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+  def ReadAndSendData(self):
+    temps = struct.pack("fff", *self.sensor.GetTireTemps())
+    self.sock.sendto(temps, (self.ip_addr, self.port))
+
+  def Loop(self):
+    while True:
+      self.ReadAndSendData()
+
+
+class TireSensorServer(object):
+
+  def __init__(self, ip_addr: Text, port: int, start_process=True):
+    self.ip_addr = ip_addr
+    self.port = port
+    self.inside_temp_f = multiprocessing.Value('d', 0.0)
+    self.middle_temp_f = multiprocessing.Value('d', 0.0)
+    self.outside_temp_f = multiprocessing.Value('d', 0.0)
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    if start_process:
+      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self.process.start()
+
+  def Loop(self):
+    self.sock.bind((self.ip_addr, self.port))
+    while True:
+      data, _ = self.sock.recvfrom(1024)
+      inside, middle, outside = struct.unpack('fff', data)
+      self.inside_temp_f.value = (inside * 9/5) + 32
+      self.middle_temp_f.value = (middle * 9/5) + 32
+      self.outside_temp_f.value = (outside * 9/5) + 32
 
 
 def main(unused_argv):

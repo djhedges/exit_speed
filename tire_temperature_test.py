@@ -15,10 +15,11 @@
 """Unitests for tire_temperature.py"""
 
 import mock
+import time
 import unittest
 from absl.testing import absltest
-import tire_temperature
 from mlx import mlx90640
+import tire_temperature
 
 def _CreateRawFrame():
   frame = []
@@ -144,6 +145,23 @@ class TestTireSensor(MockMlx9064xSensorBase):
     with mock.patch.object(self.sensor, 'GetMedianColumnTemps') as mock_col:
       mock_col.return_value = column_temp
       self.assertTupleEqual(expected, self.sensor.GetTireTemps())
+
+
+class TestClientServer(unittest.TestCase):
+
+  def testClientServer(self):
+    mock_sensor = mock.create_autospec(tire_temperature.TireSensor)
+    mock_sensor.GetTireTemps.return_value = (87.0, 93.0, 98)
+    server = tire_temperature.TireSensorServer('127.0.0.1', 27001)
+    with mock.patch.object(tire_temperature, 'TireSensor') as mock_tire_sensor:
+      mock_tire_sensor.return_value = mock_sensor
+      client = tire_temperature.TireSensorClient('127.0.0.1', 27001)
+    time.sleep(3)
+    client.ReadAndSendData()
+    time.sleep(3)
+    self.assertEqual(server.inside_temp_f.value, 188.6)
+    self.assertEqual(server.middle_temp_f.value, 199.4)
+    self.assertEqual(server.outside_temp_f.value, 208.4)
 
 
 if __name__ == '__main__':
