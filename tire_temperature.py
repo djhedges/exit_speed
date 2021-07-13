@@ -153,9 +153,8 @@ class TireSensorServer(object):
 
 
 def main(unused_argv):
-  sensor = TireSensor()
-  while True:
-    print(sensor.GetTireTemps())
+  client = TireSensorClient()
+  client.Loop()
 
 
 if __name__ == '__main__':

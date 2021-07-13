@@ -35,6 +35,7 @@ import labjack
 import lap_lib
 import leds
 import timescale
+import tire_temperature
 import tracks
 import u3
 import wbo2
@@ -91,6 +92,8 @@ class ExitSpeed(object):
       self.gyro = gyroscope.Gyroscope()
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config)
+    if self.config.get('tire_temps'):
+      self.tire_temps = tire_temperature.TireSensorServer()
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config)
     if self.config.get('timescale'):
@@ -234,6 +237,13 @@ class ExitSpeed(object):
       point.labjack_temp_f = self.labjack.labjack_temp_f.value
       for point_value, voltage in self.labjack.voltage_values.items():
         setattr(point, point_value, voltage.value)
+
+  def ReadTireTemperatures(self, point: gps_pb2.Point) -> None:
+    """Populate tire temperature readings."""
+    if self.config.get('tire_temps'):
+      point.lf_tire_temp.inner = self.tire_temps.inside_temp_f.value
+      point.lf_tire_temp.middle = self.tire_temps.middle_temp_f.value
+      point.lf_tire_temp.outer = self.tire_temps.outside_temp_f.value
 
   def ReadWBO2Values(self, point) -> None:
     """Populate wide band readings."""
