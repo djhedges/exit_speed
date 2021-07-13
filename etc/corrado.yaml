@@ -4,7 +4,10 @@ accelerometer: True
 gyroscope: True
 leds: True
 timescale: True
-tire_temps: True
+tire_temps:
+  lf:
+    ip_addr: 192.168.4.3
+    port: 27001
 labjack:
   ain0: water_temp_voltage
   ain1: oil_pressure_voltage

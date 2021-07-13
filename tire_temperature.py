@@ -152,6 +152,17 @@ class TireSensorServer(object):
       self.outside_temp_f.value = (outside * 9/5) + 32
 
 
+class MultiTireInterface(object):
+
+  def __init__(self, config):
+    self.config = config
+    self.servers = {}
+    for corner, ip_port in self.config['tire_temps'].items():
+      self.servers[corner] = TireSensorServer(ip_port['ip_addr'],
+                                              ip_port['port'])
+
+
+
 def main(unused_argv):
   client = TireSensorClient()
   client.Loop()

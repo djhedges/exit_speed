@@ -93,7 +93,7 @@ class ExitSpeed(object):
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config)
     if self.config.get('tire_temps'):
-      self.tire_temps = tire_temperature.TireSensorServer()
+      self.tire_temps = tire_temperature.MultiTireInterface(self.config)
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config)
     if self.config.get('timescale'):
@@ -241,9 +241,11 @@ class ExitSpeed(object):
   def ReadTireTemperatures(self, point: gps_pb2.Point) -> None:
     """Populate tire temperature readings."""
     if self.config.get('tire_temps'):
-      point.lf_tire_temp.inner = self.tire_temps.inside_temp_f.value
-      point.lf_tire_temp.middle = self.tire_temps.middle_temp_f.value
-      point.lf_tire_temp.outer = self.tire_temps.outside_temp_f.value
+      for corner, server in self.tire_temps.servers.items():
+        tire_temp = getattr(point, '%s_tire_temp' % corner)
+        tire_temp.inner = self.tire_temps.inside_temp_f.value
+        tire_temp.middle = self.tire_temps.middle_temp_f.value
+        tire_temp.outer = self.tire_temps.outside_temp_f.value
 
   def ReadWBO2Values(self, point) -> None:
     """Populate wide band readings."""
