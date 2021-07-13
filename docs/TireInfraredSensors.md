@@ -44,7 +44,7 @@ adding the following /etc/rc.local.  I had zero luck with /etc/dhcpcd.confg
 route add default gw 192.168.4.3
 ```
 
-### Sensor Setup
+### Pi Zero Setup
 
 ```
 sudo apt install git python3-pip libatlas-base-dev
@@ -52,8 +52,15 @@ mkdir ~/git
 cd ~/git
 git clone https://github.com/djhedges/exit_speed.git
 sudo pip3 install -r ~/git/exit_speed/requirements.txt
+```
+
+Setting Systemd
+
+```
+mkdir -p ~/.config/systemd/user/
 cd ~/.config/systemd/user/
 ln -s /home/pi/git/exit_speed/etc/$CORNER_tire_sensor.service
+systemctl --user enable lf_tire_sensor
 ```
 
 ## Main Pi Host
