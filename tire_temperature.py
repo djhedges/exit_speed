@@ -113,6 +113,7 @@ class TireSensor(InfraRedSensor):
 
 
 class TireSensorClient(object):
+  """Client for sending data from the Pi zeros."""
 
   def __init__(self, ip_addr: Text, port: int):
     self.ip_addr = ip_addr
@@ -121,7 +122,7 @@ class TireSensorClient(object):
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
   def ReadAndSendData(self):
-    temps = struct.pack("fff", *self.sensor.GetTireTemps())
+    temps = struct.pack('fff', *self.sensor.GetTireTemps())
     self.sock.sendto(temps, (self.ip_addr, self.port))
 
   def Loop(self):
@@ -130,6 +131,7 @@ class TireSensorClient(object):
 
 
 class TireSensorServer(object):
+  """Server for receiving data from the Pi zeros."""
 
   def __init__(self, ip_addr: Text, port: int, start_process=True):
     self.ip_addr = ip_addr
@@ -164,7 +166,7 @@ class MultiTireInterface(object):
 
 
 def main(unused_argv):
-  client = TireSensorClient()
+  client = TireSensorClient('192.168.4.3', 27001)
   client.Loop()
 
 
