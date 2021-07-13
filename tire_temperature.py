@@ -27,6 +27,7 @@ from typing import List
 from typing import Text
 from typing import Tuple
 from absl import app
+from absl import flags
 from mlx import mlx90640
 
 FLAGS = flags.FLAGS
