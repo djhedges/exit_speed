@@ -57,6 +57,8 @@ class InfraRedSensor(object):
       self.mlx.clear_error(self.frame_rate)
     frame = self.mlx.do_compensation(frame)
     frame = self.mlx.do_handle_bad_pixels(frame)
+    logging.log_every_n_seconds(
+        logging.INFO, 'Raw frame: \n%s', 60 * 5, frame)
     return frame
 
   def FormatFrame(self, frame: List[float]) -> List[List[float]]:
@@ -64,6 +66,8 @@ class InfraRedSensor(object):
     formatted = []
     for row_number in range(24):
       formatted.append(frame[row_number:row_number + 32])
+    logging.log_every_n_seconds(
+        logging.INFO, 'Formatted frame: \n%s', 60 * 5, formatted)
     return formatted
 
 
@@ -93,6 +97,8 @@ class TireSensor(InfraRedSensor):
       for temp in row:
         column_temps.setdefault(col_index, []).append(temp)
       col_index += 1
+    logging.log_every_n_seconds(
+        logging.INFO, 'Column temps: \n%s', 60 * 5, column_temps)
     return column_temps
 
   def GetMedianColumnTemps(self) -> Dict[int, float]:
@@ -101,6 +107,8 @@ class TireSensor(InfraRedSensor):
     median_temps = {}
     for column, temps in column_temps.items():
       median_temps[column] = statistics.median(temps)
+    logging.log_every_n_seconds(
+        logging.INFO, 'Median temps: \n%s', 60 * 5, median_temps)
     return median_temps
 
   def GetTireTemps(self) -> Tuple[float, float, float]:
@@ -110,14 +118,17 @@ class TireSensor(InfraRedSensor):
     jumps = abs(diff) > self.TEMP_EDGE_SENSITIVITY
     reverse_jumps = list(jumps)
     reverse_jumps.reverse()
-    left_tire_index = FindTireIndex(jumps)
-    right_tire_index = len(median_temps) - FindTireIndex(reverse_jumps) - 1
+    inner_tire_index = FindTireIndex(jumps)
+    outer_tire_index = len(median_temps) - FindTireIndex(reverse_jumps) - 1
     middle_tire_index = round(statistics.mean(
-        [left_tire_index, right_tire_index]))
+        [inner_tire_index, outer_tire_index]))
+    logging.log_every_n_seconds(
+        logging.INFO, 'Inner index: %s, Middle index: %s, Outer index:%s',
+        60 * 5, inner_tire_index, middle_tire_index, outer_tire_index,)
     return (
-        median_temps[left_tire_index],
+        median_temps[inner_tire_index],
         median_temps[middle_tire_index],
-        median_temps[right_tire_index])
+        median_temps[outer_tire_index])
 
 
 class TireSensorClient(object):
