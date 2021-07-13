@@ -43,8 +43,6 @@ import wbo2
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
                     'The directory to save data and logs.')
-flags.DEFINE_boolean('log_test_track_data', False,
-                     'If True log when the test track is the closet track.')
 
 
 class ExitSpeed(object):
@@ -203,9 +201,6 @@ class ExitSpeed(object):
     if not self.session.track:
       _, track, start_finish = tracks.FindClosestTrack(self.point)
       logging.info('Closest track: %s', track.name)
-      if track == test_track.TestTrack and FLAGS.log_test_track_data:
-        logging.info('Exiting due to being near test track: %s', track.name)
-        sys.exit(1)
       self.session.track = track.name
       self.session.start_finish.lat = start_finish.lat
       self.session.start_finish.lon = start_finish.lon
