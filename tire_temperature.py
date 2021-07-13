@@ -29,6 +29,12 @@ from typing import Tuple
 from absl import app
 from mlx import mlx90640
 
+FLAGS = flags.FLAGS
+flags.DEFINE_string('ip_addr', None,
+                    'IP address of the main Exit Speed process.')
+flags.DEFINE_integer('port', None,
+                     'Port number that corresponds to this corner.')
+
 
 class InfraRedSensor(object):
   """Measures a 32x24 grid of temperature."""
@@ -166,7 +172,7 @@ class MultiTireInterface(object):
 
 
 def main(unused_argv):
-  client = TireSensorClient('192.168.4.3', 27001)
+  client = TireSensorClient(FLAGS.ip_addr, FLAGS.port)
   client.Loop()
 
 

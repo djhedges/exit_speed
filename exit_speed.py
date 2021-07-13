@@ -17,11 +17,9 @@
 import datetime
 import os
 import sdnotify
-import sys
 from absl import app
 from absl import flags
 from absl import logging
-from tracks import test_track
 import accelerometer
 import common_lib
 import config_lib
