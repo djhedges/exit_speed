@@ -22,7 +22,7 @@ CREATE TYPE track AS ENUM('Test Parking Lot',
                           'Oregon Raceway Park',
                           'Portland International Raceway',
                           'The Ridge Motorsport Park',
-                          'Pacific Raceway',
+                          'Pacific Raceways',
                           'Spokane Raceway');
 CREATE TYPE car AS ENUM('Corrado', 'Civic');
 CREATE TABLE sessions(
