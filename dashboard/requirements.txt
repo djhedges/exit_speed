@@ -1,1 +1,6 @@
-Flask
+dash
+dash-core-components
+dash-html-components
+gunicorn
+pandas
+plotly
