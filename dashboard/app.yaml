@@ -17,3 +17,5 @@ runtime: python38
 handlers:
 - url: /.*
   script: main.app
+  login: admin
+  secure: always
