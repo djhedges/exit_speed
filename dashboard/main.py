@@ -75,7 +75,9 @@ app.layout = html.Div(
     dcc.Dropdown(
       id='track-dropdown',
       options=[{'label': i, 'value': i} for i in TRACKS],
-      value='Filter by track',
+      value=TRACKS[0],
+      searchable=False,
+      clearable=False,
     ),
     dash_table.DataTable(
         id='sessions-table',
