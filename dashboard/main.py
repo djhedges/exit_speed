@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import dash
+import db_conn
 from dash import dcc
 from dash import html
 import plotly.express as px
@@ -29,12 +30,16 @@ df = pd.DataFrame({
 
 fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
+conn = db_conn.pool.connect()
+res = conn.execute('SELECT * FROM points LIMIT 1')
+
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
 
     html.Div(children='''
         Dash: A web application framework for your data.
-    '''),
+        %s
+    ''' % res.fetchall()),
 
     dcc.Graph(
         id='example-graph',

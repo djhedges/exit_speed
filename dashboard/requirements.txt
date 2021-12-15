@@ -1,6 +1,9 @@
+cloud-sql-python-connector[pg8000]
 dash
 dash-core-components
 dash-html-components
+google-cloud-secret-manager
 gunicorn
 pandas
 plotly
+sqlalchemy
