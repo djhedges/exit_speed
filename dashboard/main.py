@@ -20,6 +20,7 @@ from dash import html
 from dash.dependencies import Input
 from dash.dependencies import Output
 import pandas as pd
+import plotly.express as px
 import textwrap
 
 app = dash.Dash(__name__)
@@ -31,6 +32,7 @@ def GetSessions():
     track, 
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
     sessions.id AS session_id, 
+    laps.id as lap_id,
     laps.number AS lap_number,
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
@@ -38,10 +40,26 @@ def GetSessions():
   JOIN points ON laps.id=points.lap_id
   JOIN sessions ON laps.session_id=sessions.id
   WHERE duration_ms IS NOT null
-  GROUP BY sessions.id, track, sessions.time, laps.number, lap_time, laps.duration_ms
+  GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ms
   """)
   conn = db_conn.POOL.connect()
   return pd.io.sql.read_sql(select_statement, conn)
+
+
+def GetSingleLapData(session_id, lap_id):
+  select_statement = textwrap.dedent("""
+    SELECT points.time, speed
+    FROM POINTS
+    JOIN laps ON points.lap_id = laps.id
+    JOIN sessions ON laps.session_id = sessions.id
+    WHERE sessions.id = %s AND
+    lap_id = %s
+    ORDER BY points.time
+    """)
+  return pd.io.sql.read_sql(
+      select_statement,
+      db_conn.POOL.connect(),
+      params=(int(session_id), int(lap_id)))
   
 df = GetSessions()
 TRACKS = df['track'].unique()
@@ -57,7 +75,7 @@ app.layout = html.Div(
         id='sessions-table',
         columns=[
             {'name': i, 'id': i} for i in df.columns
-            if 'id' not in i
+            #if 'id' not in i
         ],
         sort_action='native',
         sort_mode='single',
@@ -65,12 +83,13 @@ app.layout = html.Div(
                   'direction': 'asc'},
                  {'column_id': 'session_time',
                   'direction': 'desc'}],
-        row_selectable='multi',
+        row_selectable='single',
         page_action='native',
         page_current= 0,
         page_size= 10,
       ),
-  ],
+    dcc.Graph(id='lap-graph'),
+  ], 
   style={'width': '50%'},
 )
 
@@ -82,6 +101,21 @@ app.layout = html.Div(
 def UpdateSessions(track):
   filtered_df = df[df.track == track]
   return filtered_df.to_dict('records')
+
+
+@app.callback(
+  Output('lap-graph', 'figure'),
+  Input('sessions-table', 'selected_rows'),
+)
+def UpdateGraph(selected_rows):
+  if selected_rows:
+    data = None
+    for selected_row in selected_rows:
+      row = df.iloc[selected_row]
+      data = GetSingleLapData(row['session_id'], row['lap_id'])
+    fig = px.line(data, x='time', y='speed')
+    return fig
+  return px.line()  # Empty line when no rows have been selected.
 
 
 if __name__ == '__main__':
