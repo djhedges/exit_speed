@@ -23,17 +23,18 @@ server = app.server
 
 def GetSessions():
   select_statement = textwrap.dedent("""
-  SELECT track, TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
-       sessions.id AS session_id, 
-       laps.number AS lap_number,
-       TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
-       (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
+  SELECT 
+    track, 
+    TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
+    sessions.id AS session_id, 
+    laps.number AS lap_number,
+    TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
+    (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
   FROM laps
   JOIN points ON laps.id=points.lap_id
   JOIN sessions ON laps.session_id=sessions.id
   WHERE duration_ms IS NOT null
   GROUP BY sessions.id, track, sessions.time, laps.number, lap_time, laps.duration_ms
-  ORDER BY sessions.id, track, sessions.time, laps.number, lap_time DESC
   """)
   conn = db_conn.POOL.connect()
   return pd.io.sql.read_sql(select_statement, conn)
@@ -42,9 +43,18 @@ df = GetSessions()
 
 app.layout = dash_table.DataTable(
     id='table',
-    columns=[{'name': i, 'id': i} for i in df.columns],
-    row_selectable='multi',
+    columns=[
+        {'name': i, 'id': i} for i in df.columns
+        if 'id' not in i
+    ],
     data=df.to_dict('records'),
+    filter_action="native",
+    sort_action="native",
+    sort_mode='multi',
+    row_selectable='multi',
+    page_action='native',
+    page_current= 0,
+    page_size= 10,
 )
 
 if __name__ == '__main__':
