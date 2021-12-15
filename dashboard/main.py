@@ -16,12 +16,25 @@ import db_conn
 import dash
 from dash import dash_table
 import pandas as pd
+import textwrap
 
 app = dash.Dash(__name__)
 server = app.server
 
 def GetSessions():
-  select_statement = 'SELECT * FROM sessions ORDER BY time DESC'
+  select_statement = textwrap.dedent("""
+  SELECT track, TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
+       sessions.id AS session_id, 
+       laps.number AS lap_number,
+       TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
+       (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
+  FROM laps
+  JOIN points ON laps.id=points.lap_id
+  JOIN sessions ON laps.session_id=sessions.id
+  WHERE duration_ms IS NOT null
+  GROUP BY sessions.id, track, sessions.time, laps.number, lap_time, laps.duration_ms
+  ORDER BY sessions.id, track, sessions.time, laps.number, lap_time DESC
+  """)
   conn = db_conn.POOL.connect()
   return pd.io.sql.read_sql(select_statement, conn)
   
