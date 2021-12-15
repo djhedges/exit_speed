@@ -28,18 +28,44 @@ import sqlalchemy
 #  'enable_iam_auth': True
 # }
 # print(json.dumps(db_conn_args))
-
 SECRET_ID = 'projects/794720490237/secrets/db-conn-args/versions/latest'
 
+# Local args used when running a development instance.
+# {'password': '',
+#  'username': '',
+#  'database': 'exit-speed',
+#  'drivername': 'postgresql+psycopg2',
+#  'host': 'ip-address'}
+SECRET_LOCAL_ID = 'projects/794720490237/secrets/db-conn-local-args/versions/latest'
 
-def getconn():
+
+def _GetSecret(secret_id):
   client = secretmanager.SecretManagerServiceClient()
-  response = client.access_secret_version(request={"name": SECRET_ID})
-  db_conn_args = json.loads(response.payload.data)
+  response = client.access_secret_version(request={"name": secret_id})
+  return json.loads(response.payload.data)
+
+
+def _GetAppEngineConn():
+  db_conn_args = _GetSecret(SECRET_ID)
   return connector.connect(**db_conn_args)
 
 
-pool = sqlalchemy.create_engine(
-  'postgresql+pg8000://',
-  creator=getconn,
-)
+def GetAppEnginePool():
+  return sqlalchemy.create_engine(
+    'postgresql+pg8000://',
+    creator=_GetAppEngineConn,
+  )
+
+
+def GetLocalPool():
+  local_args = _GetSecret(SECRET_LOCAL_ID)
+  return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
+
+
+def InitPool():
+  if os.getenv('GOOGLE_CLOUD_PROJECT'):
+    return GetAppEnginePool()
+  return GetLocalPool()
+
+
+POOL = InitPool()

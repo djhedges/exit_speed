@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import dash
 import db_conn
 from dash import dcc
@@ -30,7 +31,7 @@ df = pd.DataFrame({
 
 fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
-conn = db_conn.pool.connect()
+conn = db_conn.POOL.connect()
 res = conn.execute('SELECT * FROM points LIMIT 1')
 
 app.layout = html.Div(children=[
@@ -39,7 +40,9 @@ app.layout = html.Div(children=[
     html.Div(children='''
         Dash: A web application framework for your data.
         %s
-    ''' % res.fetchall()),
+        %s
+    ''' % (res.fetchall(), os.environ
+        )),
 
     dcc.Graph(
         id='example-graph',
