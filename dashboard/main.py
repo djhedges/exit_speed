@@ -15,6 +15,10 @@
 import db_conn
 import dash
 from dash import dash_table
+from dash import dcc
+from dash import html
+from dash.dependencies import Input
+from dash.dependencies import Output
 import pandas as pd
 import textwrap
 
@@ -40,22 +44,41 @@ def GetSessions():
   return pd.io.sql.read_sql(select_statement, conn)
   
 df = GetSessions()
+TRACKS = df['track'].unique()
 
-app.layout = dash_table.DataTable(
-    id='table',
-    columns=[
-        {'name': i, 'id': i} for i in df.columns
-        if 'id' not in i
-    ],
-    data=df.to_dict('records'),
-    filter_action="native",
-    sort_action="native",
-    sort_mode='multi',
-    row_selectable='multi',
-    page_action='native',
-    page_current= 0,
-    page_size= 10,
+app.layout = html.Div(
+  children=[
+    dcc.Dropdown(
+      id='track-dropdown',
+      options=[{'label': i, 'value': i} for i in TRACKS],
+      value='Filter by track',
+    ),
+    dash_table.DataTable(
+        id='sessions-table',
+        columns=[
+            {'name': i, 'id': i} for i in df.columns
+            if 'id' not in i
+        ],
+        sort_action="native",
+        sort_mode='single',
+        row_selectable='multi',
+        page_action='native',
+        page_current= 0,
+        page_size= 10,
+      ),
+  ],
+  style={"width": "50%"},
 )
+
+
+@app.callback(
+  Output('sessions-table', 'data'),
+  Input('track-dropdown', 'value'),
+)
+def UpdateSessions(track):
+  filtered_df = df[df.track == track]
+  return filtered_df.to_dict('records')
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
