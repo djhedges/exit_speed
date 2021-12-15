@@ -48,13 +48,17 @@ def GetSessions():
 
 def GetSingleLapData(session_id, lap_id):
   select_statement = textwrap.dedent("""
-    SELECT points.time, speed
+    SELECT 
+      points.time,
+      elapsed_duration_ms,
+      elapsed_distance_m, 
+      laps.number as lap_number, 
+      speed
     FROM POINTS
     JOIN laps ON points.lap_id = laps.id
     JOIN sessions ON laps.session_id = sessions.id
     WHERE sessions.id = %s AND
     lap_id = %s
-    ORDER BY points.time
     """)
   return pd.io.sql.read_sql(
       select_statement,
@@ -83,7 +87,7 @@ app.layout = html.Div(
                   'direction': 'asc'},
                  {'column_id': 'session_time',
                   'direction': 'desc'}],
-        row_selectable='single',
+        row_selectable='multi',
         page_action='native',
         page_current= 0,
         page_size= 10,
@@ -109,11 +113,13 @@ def UpdateSessions(track):
 )
 def UpdateGraph(selected_rows):
   if selected_rows:
-    data = None
+    data = []
     for selected_row in selected_rows:
       row = df.iloc[selected_row]
-      data = GetSingleLapData(row['session_id'], row['lap_id'])
-    fig = px.line(data, x='time', y='speed')
+      lap_data = GetSingleLapData(row['session_id'], row['lap_id'])
+      lap_data.sort_values(by='elapsed_distance_m')
+      data.append(lap_data)
+    fig = px.line(pd.concat(data), x='elapsed_distance_m', y='speed', color='lap_number')
     return fig
   return px.line()  # Empty line when no rows have been selected.
 
