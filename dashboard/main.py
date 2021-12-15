@@ -31,7 +31,6 @@ def GetSessions():
   SELECT 
     track, 
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
-    sessions.id AS session_id, 
     laps.id as lap_id,
     laps.number AS lap_number,
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
@@ -46,7 +45,7 @@ def GetSessions():
   return pd.io.sql.read_sql(select_statement, conn)
 
 
-def GetSingleLapData(session_id, lap_id):
+def GetSingleLapData(lap_ids):
   select_statement = textwrap.dedent("""
     SELECT 
       points.time,
@@ -56,14 +55,13 @@ def GetSingleLapData(session_id, lap_id):
       speed
     FROM POINTS
     JOIN laps ON points.lap_id = laps.id
-    JOIN sessions ON laps.session_id = sessions.id
-    WHERE sessions.id = %s AND
-    lap_id = %s
+    WHERE lap_id IN %(lap_ids)s
     """)
+  lap_ids = tuple(str(lap_id) for lap_id in lap_ids)
   return pd.io.sql.read_sql(
       select_statement,
       db_conn.POOL.connect(),
-      params=(int(session_id), int(lap_id)))
+      params={'lap_ids': lap_ids})
   
 df = GetSessions()
 TRACKS = df['track'].unique()
@@ -113,13 +111,13 @@ def UpdateSessions(track):
 )
 def UpdateGraph(selected_rows):
   if selected_rows:
-    data = []
+    lap_ids = []
     for selected_row in selected_rows:
       row = df.iloc[selected_row]
-      lap_data = GetSingleLapData(row['session_id'], row['lap_id'])
-      lap_data.sort_values(by='elapsed_distance_m')
-      data.append(lap_data)
-    fig = px.line(pd.concat(data), x='elapsed_distance_m', y='speed', color='lap_number')
+      lap_ids.append(row['lap_id'])
+    lap_data = GetSingleLapData(lap_ids)
+    lap_data.sort_values(by='elapsed_distance_m')
+    fig = px.line(lap_data, x='elapsed_distance_m', y='speed', color='lap_number')
     return fig
   return px.line()  # Empty line when no rows have been selected.
 
