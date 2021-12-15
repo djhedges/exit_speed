@@ -21,7 +21,7 @@ app = dash.Dash(__name__)
 server = app.server
 
 def GetSessions():
-  select_statement = 'SELECT * FROM sessions'
+  select_statement = 'SELECT * FROM sessions ORDER BY time DESC'
   conn = db_conn.POOL.connect()
   return pd.io.sql.read_sql(select_statement, conn)
   
@@ -29,7 +29,8 @@ df = GetSessions()
 
 app.layout = dash_table.DataTable(
     id='table',
-    columns=[{"name": i, "id": i} for i in df.columns],
+    columns=[{'name': i, 'id': i} for i in df.columns],
+    row_selectable='multi',
     data=df.to_dict('records'),
 )
 
