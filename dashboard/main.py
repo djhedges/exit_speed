@@ -48,14 +48,17 @@ def GetSessions():
 def GetSingleLapData(lap_ids):
   select_statement = textwrap.dedent("""
     SELECT 
-      points.time,
-      elapsed_duration_ms,
       elapsed_distance_m, 
       laps.number as lap_number, 
       speed
     FROM POINTS
     JOIN laps ON points.lap_id = laps.id
     WHERE lap_id IN %(lap_ids)s
+    GROUP BY 
+      laps.id,
+      elapsed_distance_m, 
+      lap_number, 
+      speed
     """)
   lap_ids = tuple(str(lap_id) for lap_id in lap_ids)
   return pd.io.sql.read_sql(
@@ -65,6 +68,7 @@ def GetSingleLapData(lap_ids):
   
 df = GetSessions()
 TRACKS = df['track'].unique()
+
 
 app.layout = html.Div(
   children=[
