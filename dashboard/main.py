@@ -12,43 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import dash
 import db_conn
-from dash import dcc
-from dash import html
-import plotly.express as px
+import dash
+from dash import dash_table
 import pandas as pd
 
 app = dash.Dash(__name__)
 server = app.server
 
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
+def GetSessions():
+  select_statement = 'SELECT * FROM sessions'
+  conn = db_conn.POOL.connect()
+  return pd.io.sql.read_sql(select_statement, conn)
+  
+df = GetSessions()
 
-fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
-
-conn = db_conn.POOL.connect()
-res = conn.execute('SELECT * FROM points LIMIT 1')
-
-app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
-
-    html.Div(children='''
-        Dash: A web application framework for your data.
-        %s
-        %s
-    ''' % (res.fetchall(), os.environ
-        )),
-
-    dcc.Graph(
-        id='example-graph',
-        figure=fig
-    )
-])
+app.layout = dash_table.DataTable(
+    id='table',
+    columns=[{"name": i, "id": i} for i in df.columns],
+    data=df.to_dict('records'),
+)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
