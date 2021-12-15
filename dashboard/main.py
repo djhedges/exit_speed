@@ -81,7 +81,7 @@ app.layout = html.Div(
         id='sessions-table',
         columns=[
             {'name': i, 'id': i} for i in df.columns
-            #if 'id' not in i
+            if 'id' not in i
         ],
         sort_action='native',
         sort_mode='single',
