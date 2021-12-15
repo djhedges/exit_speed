@@ -59,15 +59,19 @@ app.layout = html.Div(
             {'name': i, 'id': i} for i in df.columns
             if 'id' not in i
         ],
-        sort_action="native",
+        sort_action='native',
         sort_mode='single',
+        sort_by=[{'column_id': 'lap_time',
+                  'direction': 'asc'},
+                 {'column_id': 'session_time',
+                  'direction': 'desc'}],
         row_selectable='multi',
         page_action='native',
         page_current= 0,
         page_size= 10,
       ),
   ],
-  style={"width": "50%"},
+  style={'width': '50%'},
 )
 
 
