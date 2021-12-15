@@ -121,7 +121,9 @@ def UpdateGraph(selected_rows):
       lap_ids.append(row['lap_id'])
     lap_data = GetSingleLapData(lap_ids)
     lap_data.sort_values(by='elapsed_distance_m')
-    fig = px.line(lap_data, x='elapsed_distance_m', y='speed', color='lap_number')
+    fig = px.line(lap_data, x='elapsed_distance_m', y='speed', color='lap_number', hover_data=['lap_number', 'speed'])
+    fig.update_xaxes(showspikes=True)
+    fig.update_layout(hovermode="x unified")
     return fig
   return px.line()  # Empty line when no rows have been selected.
 
