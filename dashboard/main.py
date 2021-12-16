@@ -103,7 +103,6 @@ app.layout = html.Div(
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
-      value=['speed', 'tps_voltage', 'front_brake_pressure_percentage'],
       clearable=False,
       multi=True,
     ),
@@ -139,26 +138,33 @@ def _GetLapIds(selected_rows):
   Input('url', 'href'),
   Input('track-dropdown', 'value'),
   Input('sessions-table', 'selected_rows'),
+  Input('points-dropdown', 'value'),
 )
-def UpdateURL(href, track, selected_rows):
-  args = {'track': track}
+def UpdateURL(href, track, selected_rows, points):
+  args = {'track': track,
+          'points': points}
   if selected_rows:
     args['lap_ids'] = _GetLapIds(selected_rows)
-  return urllib.parse.urljoin(href, urllib.parse.urlencode(args))
+  return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
 @app.callback(
   Output('track-dropdown', 'value'),
+  Output('points-dropdown', 'value'),
   Input('url', 'pathname'),
 )
 def ParseURL(pathname):
-  params = urllib.parse.parse_qs(pathname)
-  url_track = params.get('/track')
+  # Strip a leading "/" with [1:]
+  params = urllib.parse.parse_qs(pathname[1:])
+  url_track = params.get('track')
   if url_track:
     track = url_track[0]
   else:
     track = TRACKS[0]
-  return track
+  points = params.get(
+              'points',  
+              ['speed', 'tps_voltage', 'front_brake_pressure_percentage'])
+  return track, points
 
 
 @app.callback(
@@ -193,7 +199,8 @@ def UpdateGraph(selected_rows, point_values):
       graph = dcc.Graph(figure=fig)
       graphs.append(graph)
     return graphs
-  return [dcc.Graph(figure=px.line())]  # Empty line when no rows have been selected.
+  # Empty line when no rows have been selected.
+  return [dcc.Graph(figure=px.line())]  
 
 
 if __name__ == '__main__':
