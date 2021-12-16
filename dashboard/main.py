@@ -151,6 +151,7 @@ def UpdateURL(href, track, selected_rows, points):
 @app.callback(
   Output('track-dropdown', 'value'),
   Output('points-dropdown', 'value'),
+  Output('sessions-table', 'selected_rows'),
   Input('url', 'pathname'),
 )
 def ParseURL(pathname):
@@ -164,7 +165,12 @@ def ParseURL(pathname):
   points = params.get(
               'points',  
               ['speed', 'tps_voltage', 'front_brake_pressure_percentage'])
-  return track, points
+  session_row_indexes = []
+  for lap_id in params.get('lap_ids', []):
+    lap_id = int(lap_id)
+    session_row_index = df.index[df['lap_id'] == lap_id].tolist()[0]
+    session_row_indexes.append(session_row_index)
+  return track, points, session_row_indexes
 
 
 @app.callback(
