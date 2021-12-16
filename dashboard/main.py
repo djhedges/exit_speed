@@ -21,6 +21,7 @@ from dash.dependencies import Input
 from dash.dependencies import Output
 import pandas as pd
 import plotly.express as px
+import urllib
 import textwrap
 
 app = dash.Dash(__name__)
@@ -87,6 +88,7 @@ POINTS_COLUMNS = GetPointsColumns()
 
 app.layout = html.Div(
   children=[
+    dcc.Location(id='url', refresh=False),
     dcc.Dropdown(
       id='track-dropdown',
       options=[{'label': i, 'value': i} for i in TRACKS],
@@ -122,6 +124,24 @@ app.layout = html.Div(
   ], 
 )
 
+def _GetLapIds(selected_rows):
+  lap_ids = []
+  for selected_row in selected_rows:
+    row = df.iloc[selected_row]
+    lap_ids.append(row['lap_id'])
+  return lap_ids
+
+@app.callback(
+  Output('url', 'pathname'),
+  Input('track-dropdown', 'value'),
+  Input('sessions-table', 'selected_rows'),
+)
+def UpdateURL(track, selected_rows):
+  args = {'track': track}
+  if selected_rows:
+    args['lap_ids'] = _GetLapIds(selected_rows)
+  return urllib.parse.urlencode(args)
+
 
 @app.callback(
   Output('sessions-table', 'data'),
@@ -142,10 +162,7 @@ def UpdateGraph(selected_rows, point_values):
     point_values = [point_values]
   if selected_rows:
     graphs = []
-    lap_ids = []
-    for selected_row in selected_rows:
-      row = df.iloc[selected_row]
-      lap_ids.append(row['lap_id'])
+    lap_ids = _GetLapIds(selected_rows)
     for point_value in point_values:
       lap_data = GetSingleLapData(lap_ids)
       fig = px.line(
