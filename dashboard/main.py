@@ -59,6 +59,10 @@ def GetSingleLapData(lap_ids):
       select_statement,
       db_conn.POOL.connect(),
       params={'lap_ids': lap_ids})
+  df['front_brake_pressure_percentage'] = (
+    df['front_brake_pressure_voltage'] / df['front_brake_pressure_voltage'].max())
+  df['rear_brake_pressure_percentage'] = (
+    df['rear_brake_pressure_voltage'] / df['rear_brake_pressure_voltage'].max())
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
@@ -72,7 +76,9 @@ def GetPointsColumns():
   """)
   conn = db_conn.POOL.connect()
   resp = conn.execute(select_statement)
-  return [row[0] for row in resp.fetchall()]
+  columns = [row[0] for row in resp.fetchall()]
+  columns.extend(['front_brake_pressure_percentage', 'rear_brake_pressure_percentage'])
+  return columns
   
 df = GetSessions()
 TRACKS = df['track'].unique()
@@ -92,10 +98,9 @@ app.layout = html.Div(
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
-      value=['speed', 'tps_voltage'],
+      value=['speed', 'tps_voltage', 'front_brake_pressure_percentage'],
       clearable=False,
       multi=True,
-      style={'width': '50%'},
     ),
     dash_table.DataTable(
         id='sessions-table',
