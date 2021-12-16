@@ -18,5 +18,5 @@ entrypoint: gunicorn -b 0.0.0.0:8080 main:server
 handlers:
 - url: /.*
   script: main.app
-  login: admin
+  login: required
   secure: always
