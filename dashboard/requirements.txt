@@ -6,4 +6,5 @@ google-cloud-secret-manager
 gunicorn
 pandas
 plotly
+psycopg2
 sqlalchemy
