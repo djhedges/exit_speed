@@ -99,7 +99,6 @@ app.layout = html.Div(
         id='sessions-table',
         columns=[
             {'name': i, 'id': i} for i in df.columns
-            #if 'id' not in i
         ],
         sort_action='native',
         sort_mode='single',
@@ -139,7 +138,7 @@ def UpdateGraph(selected_rows, point_value):
       row = df.iloc[selected_row]
       lap_ids.append(row['lap_id'])
     lap_data = GetSingleLapData(lap_ids)
-    fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_number', hover_data=['lap_number', point_value])
+    fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_id', hover_data=['lap_id', 'lap_number', point_value])
     fig.update_xaxes(showspikes=True)
     fig.update_layout(hovermode="x unified")
     return fig
