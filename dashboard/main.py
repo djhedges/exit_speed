@@ -92,8 +92,9 @@ app.layout = html.Div(
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
-      value='speed',
+      value=['speed', 'tps_voltage'],
       clearable=False,
+      multi=True,
       style={'width': '50%'},
     ),
     dash_table.DataTable(
@@ -112,7 +113,7 @@ app.layout = html.Div(
         page_current= 0,
         page_size= 10,
       ),
-    dcc.Graph(id='lap-graph'),
+    html.Div(id='graphs'),
   ], 
 )
 
@@ -127,22 +128,29 @@ def UpdateSessions(track):
 
 
 @app.callback(
-  Output('lap-graph', 'figure'),
+  Output('graphs', 'children'),
   Input('sessions-table', 'selected_rows'),
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(selected_rows, point_value):
+def UpdateGraph(selected_rows, point_values):
+  if not isinstance(point_values, list):
+    point_values = [point_values]
+  print(point_values)
   if selected_rows:
+    graphs = []
     lap_ids = []
     for selected_row in selected_rows:
       row = df.iloc[selected_row]
       lap_ids.append(row['lap_id'])
-    lap_data = GetSingleLapData(lap_ids)
-    fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_id', hover_data=['lap_id', 'lap_number', point_value])
-    fig.update_xaxes(showspikes=True)
-    fig.update_layout(hovermode="x unified")
-    return fig
-  return px.line()  # Empty line when no rows have been selected.
+    for point_value in point_values:
+      lap_data = GetSingleLapData(lap_ids)
+      fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_id', hover_data=['lap_id', 'lap_number', point_value])
+      fig.update_xaxes(showspikes=True)
+      fig.update_layout(hovermode="x unified")
+      graph = dcc.Graph(figure=fig)
+      graphs.append(graph)
+    return graphs
+  return [dcc.Graph(figure=px.line())]  # Empty line when no rows have been selected.
 
 
 if __name__ == '__main__':
