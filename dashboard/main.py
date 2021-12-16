@@ -18,7 +18,9 @@ from dash import dash_table
 from dash import dcc
 from dash import html
 from dash.dependencies import Input
+from dash.dependencies import State
 from dash.dependencies import Output
+import flask
 import pandas as pd
 import plotly.express as px
 import urllib
@@ -88,11 +90,12 @@ POINTS_COLUMNS = GetPointsColumns()
 
 app.layout = html.Div(
   children=[
+    dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
+    html.Div(id='shareable-link'),
     dcc.Dropdown(
       id='track-dropdown',
       options=[{'label': i, 'value': i} for i in TRACKS],
-      value=TRACKS[0],
       searchable=False,
       clearable=False,
       style={'width': '50%'},
@@ -132,15 +135,30 @@ def _GetLapIds(selected_rows):
   return lap_ids
 
 @app.callback(
-  Output('url', 'pathname'),
+  Output('shareable-link', 'children'),
+  Input('url', 'href'),
   Input('track-dropdown', 'value'),
   Input('sessions-table', 'selected_rows'),
 )
-def UpdateURL(track, selected_rows):
+def UpdateURL(href, track, selected_rows):
   args = {'track': track}
   if selected_rows:
     args['lap_ids'] = _GetLapIds(selected_rows)
-  return urllib.parse.urlencode(args)
+  return urllib.parse.urljoin(href, urllib.parse.urlencode(args))
+
+
+@app.callback(
+  Output('track-dropdown', 'value'),
+  Input('url', 'pathname'),
+)
+def ParseURL(pathname):
+  params = urllib.parse.parse_qs(pathname)
+  url_track = params.get('/track')
+  if url_track:
+    track = url_track[0]
+  else:
+    track = TRACKS[0]
+  return track
 
 
 @app.callback(
