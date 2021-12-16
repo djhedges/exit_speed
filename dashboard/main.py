@@ -26,6 +26,8 @@ import textwrap
 app = dash.Dash(__name__)
 server = app.server
 
+
+
 def GetSessions():
   select_statement = textwrap.dedent("""
   SELECT 
@@ -47,27 +49,34 @@ def GetSessions():
 
 def GetSingleLapData(lap_ids):
   select_statement = textwrap.dedent("""
-    SELECT 
-      elapsed_distance_m, 
-      laps.number as lap_number, 
-      speed
+    SELECT *
     FROM POINTS
     JOIN laps ON points.lap_id = laps.id
     WHERE lap_id IN %(lap_ids)s
-    GROUP BY 
-      laps.id,
-      elapsed_distance_m, 
-      lap_number, 
-      speed
     """)
   lap_ids = tuple(str(lap_id) for lap_id in lap_ids)
-  return pd.io.sql.read_sql(
+  df = pd.io.sql.read_sql(
       select_statement,
       db_conn.POOL.connect(),
       params={'lap_ids': lap_ids})
+  df.rename(columns={'number': 'lap_number'}, inplace=True)
+  df.sort_values(by='elapsed_distance_m', inplace=True)
+  return df
+
+
+def GetPointsColumns():
+  select_statement = textwrap.dedent("""
+  SELECT column_name
+  FROM information_schema.columns
+  WHERE table_name = 'points'
+  """)
+  conn = db_conn.POOL.connect()
+  resp = conn.execute(select_statement)
+  return [row[0] for row in resp.fetchall()]
   
 df = GetSessions()
 TRACKS = df['track'].unique()
+POINTS_COLUMNS = GetPointsColumns()
 
 
 app.layout = html.Div(
@@ -79,11 +88,18 @@ app.layout = html.Div(
       searchable=False,
       clearable=False,
     ),
+    dcc.Dropdown(
+      id='points-dropdown',
+      options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
+      value='speed',
+      searchable=False,
+      clearable=False,
+    ),
     dash_table.DataTable(
         id='sessions-table',
         columns=[
             {'name': i, 'id': i} for i in df.columns
-            if 'id' not in i
+            #if 'id' not in i
         ],
         sort_action='native',
         sort_mode='single',
@@ -114,16 +130,16 @@ def UpdateSessions(track):
 @app.callback(
   Output('lap-graph', 'figure'),
   Input('sessions-table', 'selected_rows'),
+  Input('points-dropdown', 'value'),
 )
-def UpdateGraph(selected_rows):
+def UpdateGraph(selected_rows, point_value):
   if selected_rows:
     lap_ids = []
     for selected_row in selected_rows:
       row = df.iloc[selected_row]
       lap_ids.append(row['lap_id'])
     lap_data = GetSingleLapData(lap_ids)
-    lap_data.sort_values(by='elapsed_distance_m')
-    fig = px.line(lap_data, x='elapsed_distance_m', y='speed', color='lap_number', hover_data=['lap_number', 'speed'])
+    fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_number', hover_data=['lap_number', point_value])
     fig.update_xaxes(showspikes=True)
     fig.update_layout(hovermode="x unified")
     return fig
