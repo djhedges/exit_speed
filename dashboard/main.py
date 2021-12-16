@@ -135,7 +135,6 @@ def UpdateSessions(track):
 def UpdateGraph(selected_rows, point_values):
   if not isinstance(point_values, list):
     point_values = [point_values]
-  print(point_values)
   if selected_rows:
     graphs = []
     lap_ids = []
@@ -144,7 +143,11 @@ def UpdateGraph(selected_rows, point_values):
       lap_ids.append(row['lap_id'])
     for point_value in point_values:
       lap_data = GetSingleLapData(lap_ids)
-      fig = px.line(lap_data, x='elapsed_distance_m', y=point_value, color='lap_id', hover_data=['lap_id', 'lap_number', point_value])
+      fig = px.line(
+        lap_data, x='elapsed_distance_m', 
+        y=point_value, 
+        color='lap_id', 
+        hover_data=['lap_id', 'lap_number', point_value])
       fig.update_xaxes(showspikes=True)
       fig.update_layout(hovermode="x unified")
       graph = dcc.Graph(figure=fig)
