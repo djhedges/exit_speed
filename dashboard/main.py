@@ -31,11 +31,11 @@ server = app.server
 def GetSessions():
   select_statement = textwrap.dedent("""
   SELECT 
-    track, 
+    TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
     laps.id as lap_id,
     laps.number AS lap_number,
-    TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
+    track, 
     (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
   FROM laps
   JOIN points ON laps.id=points.lap_id
@@ -87,12 +87,14 @@ app.layout = html.Div(
       value=TRACKS[0],
       searchable=False,
       clearable=False,
+      style={'width': '50%'},
     ),
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
       value='speed',
       clearable=False,
+      style={'width': '50%'},
     ),
     dash_table.DataTable(
         id='sessions-table',
@@ -112,7 +114,6 @@ app.layout = html.Div(
       ),
     dcc.Graph(id='lap-graph'),
   ], 
-  style={'width': '50%'},
 )
 
 
