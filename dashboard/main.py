@@ -92,7 +92,6 @@ app.layout = html.Div(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
       value='speed',
-      searchable=False,
       clearable=False,
     ),
     dash_table.DataTable(
