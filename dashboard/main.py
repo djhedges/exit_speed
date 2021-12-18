@@ -30,7 +30,6 @@ app = dash.Dash(__name__)
 server = app.server
 
 
-
 def GetSessions():
   select_statement = textwrap.dedent("""
   SELECT 
@@ -111,6 +110,7 @@ app.layout = html.Div(
         columns=[
             {'name': i, 'id': i} for i in df.columns
         ],
+        filter_action='native',
         sort_action='native',
         sort_mode='single',
         sort_by=[{'column_id': 'lap_time',
