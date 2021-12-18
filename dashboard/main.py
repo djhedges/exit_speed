@@ -88,6 +88,7 @@ POINTS_COLUMNS = GetPointsColumns()
 
 
 app.layout = html.Div(
+  style={'display': 'grid'},
   children=[
     dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
@@ -202,7 +203,8 @@ def UpdateGraph(selected_rows, point_values):
         hover_data=['lap_id', 'lap_number', point_value])
       fig.update_xaxes(showspikes=True)
       fig.update_layout(hovermode="x unified")
-      graph = dcc.Graph(figure=fig)
+      graph = dcc.Graph(figure=fig,
+                        style={'display': 'inline-grid', 'width': '50%'})
       graphs.append(graph)
     return graphs
   # Empty line when no rows have been selected.
