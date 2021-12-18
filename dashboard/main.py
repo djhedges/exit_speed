@@ -203,6 +203,7 @@ def UpdateGraph(selected_rows, point_values):
         color='lap_id', 
         hover_data=['lap_id', 'lap_number', point_value])
       fig.update_xaxes(showspikes=True)
+      fig.update_yaxes(fixedrange=True)
       fig.update_layout(hovermode="x unified")
       graph = dcc.Graph({'type': 'graph', 
                          'index': point_values.index(point_value)},
