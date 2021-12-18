@@ -92,7 +92,6 @@ app.layout = html.Div(
   children=[
     dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
-    html.Div(id='shareable-link'),
     dcc.Dropdown(
       id='track-dropdown',
       options=[{'label': i, 'value': i} for i in TRACKS],
@@ -135,11 +134,12 @@ def _GetLapIds(selected_rows):
   return lap_ids
 
 @app.callback(
-  Output('shareable-link', 'children'),
+  Output('url', 'href'),
   Input('url', 'href'),
   Input('track-dropdown', 'value'),
   Input('sessions-table', 'selected_rows'),
   Input('points-dropdown', 'value'),
+  prevent_initial_call=True,
 )
 def UpdateURL(href, track, selected_rows, points):
   args = {'track': track,
