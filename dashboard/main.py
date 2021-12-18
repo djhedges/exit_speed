@@ -17,6 +17,7 @@ import dash
 from dash import dash_table
 from dash import dcc
 from dash import html
+from dash.dependencies import ALL
 from dash.dependencies import Input
 from dash.dependencies import State
 from dash.dependencies import Output
@@ -90,6 +91,7 @@ POINTS_COLUMNS = GetPointsColumns()
 app.layout = html.Div(
   style={'display': 'grid'},
   children=[
+    html.Div(id='test'),
     dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
     dcc.Dropdown(
@@ -203,12 +205,35 @@ def UpdateGraph(selected_rows, point_values):
         hover_data=['lap_id', 'lap_number', point_value])
       fig.update_xaxes(showspikes=True)
       fig.update_layout(hovermode="x unified")
-      graph = dcc.Graph(figure=fig,
+      graph = dcc.Graph({'type': 'graph', 
+                         'index': point_values.index(point_value)},
+                        figure=fig,
                         style={'display': 'inline-grid', 'width': '50%'})
       graphs.append(graph)
     return graphs
   # Empty line when no rows have been selected.
-  return [dcc.Graph(figure=px.line())]  
+  return [dcc.Graph(figure=px.line())]
+
+
+@app.callback(
+    Output({'type': 'graph', 'index': ALL}, 'relayoutData'),
+    Output({'type': 'graph', 'index': ALL}, 'figure'),
+    Input({'type': 'graph', 'index': ALL}, 'relayoutData'),
+    State({'type': 'graph', 'index': ALL}, 'figure'))
+def LinkedZoom(relayout_data, figure_states):
+    unique_data = None
+    for data in relayout_data:
+      if relayout_data.count(data) == 1:
+        unique_data = data
+    if unique_data:
+      for figure_state in figure_states:
+        if unique_data.get('xaxis.autorange'):
+          figure_state['layout']['xaxis']['autorange'] = True
+        else:
+          figure_state['layout']['xaxis']['range'] = [unique_data['xaxis.range[0]'], unique_data['xaxis.range[1]']]
+          figure_state['layout']['xaxis']['autorange'] = False
+      return [unique_data] * len(relayout_data), figure_states
+    return relayout_data, figure_states
 
 
 if __name__ == '__main__':
