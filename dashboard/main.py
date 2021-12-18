@@ -91,7 +91,6 @@ POINTS_COLUMNS = GetPointsColumns()
 app.layout = html.Div(
   style={'display': 'grid'},
   children=[
-    html.Div(id='test'),
     dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
     dcc.Dropdown(
