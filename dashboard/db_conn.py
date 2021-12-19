@@ -14,7 +14,6 @@
 
 import json
 import os
-from google.cloud import secretmanager
 from google.cloud.sql.connector import connector
 import sqlalchemy
 
@@ -28,14 +27,22 @@ SECRET_LOCAL_ID = 'projects/794720490237/secrets/db-conn-local-args/versions/lat
 
 
 def _GetSecret(secret_id):
+  from google.cloud import secretmanager
   client = secretmanager.SecretManagerServiceClient()
   response = client.access_secret_version(request={"name": secret_id})
   return json.loads(response.payload.data)
 
 
 def InitPool():
-  local_args = _GetSecret(SECRET_LOCAL_ID)
-  return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
+  if os.getenv('GOOGLE_CLOUD_PROJECT'):
+    local_args = _GetSecret(SECRET_LOCAL_ID)
+    return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
+  return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(
+      **{'password': 'faster',
+         'username': 'exit_speed',
+         'database': 'exit_speed',
+         'drivername': 'postgresql+psycopg2',
+         'host': 'localhost'}))
 
 
 POOL = InitPool()
