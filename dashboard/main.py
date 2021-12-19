@@ -33,12 +33,12 @@ server = app.server
 
 def GetSessions():
   select_statement = textwrap.dedent("""
-  SELECT 
+  SELECT
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
     laps.id as lap_id,
     laps.number AS lap_number,
-    track, 
+    track,
     (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
   FROM laps
   JOIN points ON laps.id=points.lap_id
@@ -80,9 +80,11 @@ def GetPointsColumns():
   conn = db_conn.POOL.connect()
   resp = conn.execute(select_statement)
   columns = [row[0] for row in resp.fetchall()]
-  columns.extend(['front_brake_pressure_percentage', 'rear_brake_pressure_percentage'])
+  columns.extend(['front_brake_pressure_percentage', 'rear_brake_pressure_percentage', 'racing_line'])
+  columns.remove('lat')
+  columns.remove('lon')
   return columns
-  
+
 df = GetSessions()
 TRACKS = df['track'].unique()
 POINTS_COLUMNS = GetPointsColumns()
@@ -124,7 +126,7 @@ app.layout = html.Div(
         page_size= 10,
       ),
     html.Div(id='graphs'),
-  ], 
+  ],
 )
 
 def _GetLapIds(selected_rows):
@@ -165,8 +167,8 @@ def ParseURL(pathname):
   else:
     track = TRACKS[0]
   points = params.get(
-              'points',  
-              ['speed', 'tps_voltage', 'front_brake_pressure_percentage'])
+              'points',
+              ['racing_line', 'speed', 'tps_voltage', 'front_brake_pressure_percentage'])
   session_row_indexes = []
   for lap_id in params.get('lap_ids', []):
     lap_id = int(lap_id)
@@ -197,15 +199,27 @@ def UpdateGraph(selected_rows, point_values):
     lap_ids = _GetLapIds(selected_rows)
     for point_value in point_values:
       lap_data = GetSingleLapData(lap_ids)
-      fig = px.line(
-        lap_data, x='elapsed_distance_m', 
-        y=point_value, 
-        color='lap_id', 
-        hover_data=['lap_id', 'lap_number', point_value])
-      fig.update_xaxes(showspikes=True)
-      fig.update_yaxes(fixedrange=True)
-      fig.update_layout(hovermode="x unified")
-      graph = dcc.Graph({'type': 'graph', 
+      if point_value == 'racing_line':
+        graph_type = 'map'
+        fig = px.line_geo(
+            lap_data,
+            lat='lat',
+            lon='lon',
+            color='lap_id',
+            fitbounds='locations',
+            )
+      else:
+        graph_type = 'graph'
+        fig = px.line(
+          lap_data,
+          x='elapsed_distance_m',
+          y=point_value,
+          color='lap_id',
+          hover_data=['lap_id', 'lap_number', point_value])
+        fig.update_xaxes(showspikes=True)
+        fig.update_yaxes(fixedrange=True)
+        fig.update_layout(hovermode="x unified")
+      graph = dcc.Graph({'type': graph_type,
                          'index': point_values.index(point_value)},
                         figure=fig,
                         style={'display': 'inline-grid', 'width': '50%'})
