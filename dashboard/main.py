@@ -75,6 +75,7 @@ def GetSingleLapData(lap_ids):
     df['front_brake_pressure_voltage'] / df['front_brake_pressure_voltage'].max())
   df['rear_brake_pressure_percentage'] = (
     df['rear_brake_pressure_voltage'] / df['rear_brake_pressure_voltage'].max())
+  df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
@@ -89,7 +90,11 @@ def GetPointsColumns():
   conn = db_conn.POOL.connect()
   resp = conn.execute(select_statement)
   columns = [row[0] for row in resp.fetchall()]
-  columns.extend(['front_brake_pressure_percentage', 'rear_brake_pressure_percentage', 'racing_line'])
+  columns.extend([
+    'front_brake_pressure_percentage',
+    'rear_brake_pressure_percentage',
+    'racing_line',
+    'gsum'])
   columns.remove('lat')
   columns.remove('lon')
   return columns
