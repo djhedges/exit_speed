@@ -59,7 +59,7 @@ def GetSessions():
   return pd.io.sql.read_sql(select_statement, conn)
 
 
-def GetSingleLapData(lap_ids):
+def GetLapsData(lap_ids):
   select_statement = textwrap.dedent("""
     SELECT *
     FROM POINTS
@@ -199,12 +199,12 @@ def UpdateGraph(lap_ids, point_values):
     point_values = [point_values]
   if lap_ids:
     graphs = []
+    laps_data = GetLapsData(lap_ids)
     for point_value in point_values:
-      lap_data = GetSingleLapData(lap_ids)
       if point_value == 'racing_line':
         graph_type = 'map'
         fig = px.line_geo(
-            lap_data,
+            laps_data,
             title=point_value,
             lat='lat',
             lon='lon',
@@ -214,7 +214,7 @@ def UpdateGraph(lap_ids, point_values):
       else:
         graph_type = 'graph'
         fig = px.line(
-          lap_data,
+          laps_data,
           title=point_value,
           x='elapsed_distance_m',
           y=point_value,
