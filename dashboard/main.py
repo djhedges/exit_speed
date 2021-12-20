@@ -46,6 +46,7 @@ def GetSessions():
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
     laps.id as lap_id,
+    laps.id,
     laps.number AS lap_number,
     track,
     (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
@@ -138,33 +139,26 @@ app.layout = html.Div(
   ],
 )
 
-def _GetLapIds(selected_rows):
-  lap_ids = []
-  for selected_row in selected_rows:
-    row = df.iloc[selected_row]
-    lap_ids.append(row['lap_id'])
-  return lap_ids
-
 @app.callback(
   Output('url', 'href'),
   Input('url', 'href'),
   Input('track-dropdown', 'value'),
-  Input('sessions-table', 'selected_rows'),
+  Input('sessions-table', 'selected_row_ids'),  # lap_ids
   Input('points-dropdown', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href, track, selected_rows, points):
+def UpdateURL(href, track, lap_ids, points):
   args = {'track': track,
           'points': points}
-  if selected_rows:
-    args['lap_ids'] = _GetLapIds(selected_rows)
+  if lap_ids:
+    args['lap_ids'] = lap_ids
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
 @app.callback(
   Output('track-dropdown', 'value'),
   Output('points-dropdown', 'value'),
-  Output('sessions-table', 'selected_rows'),
+  Output('sessions-table', 'selected_row_ids'),
   Input('url', 'pathname'),
 )
 def ParseURL(pathname):
@@ -178,12 +172,8 @@ def ParseURL(pathname):
   points = params.get(
               'points',
               ['racing_line', 'speed', 'tps_voltage', 'front_brake_pressure_percentage'])
-  session_row_indexes = []
-  for lap_id in params.get('lap_ids', []):
-    lap_id = int(lap_id)
-    session_row_index = df.index[df['lap_id'] == lap_id].tolist()[0]
-    session_row_indexes.append(session_row_index)
-  return track, points, session_row_indexes
+  lap_ids = [int(lap_id) for lap_id in params.get('lap_ids', [])]
+  return track, points, lap_ids
 
 
 @app.callback(
@@ -197,15 +187,14 @@ def UpdateSessions(track):
 
 @app.callback(
   Output('graphs', 'children'),
-  Input('sessions-table', 'selected_rows'),
+  Input('sessions-table', 'selected_row_ids'),  # lap_ids
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(selected_rows, point_values):
+def UpdateGraph(lap_ids, point_values):
   if not isinstance(point_values, list):
     point_values = [point_values]
-  if selected_rows:
+  if lap_ids:
     graphs = []
-    lap_ids = _GetLapIds(selected_rows)
     for point_value in point_values:
       lap_data = GetSingleLapData(lap_ids)
       if point_value == 'racing_line':
