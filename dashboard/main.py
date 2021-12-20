@@ -45,7 +45,6 @@ def GetSessions():
   SELECT
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
-    laps.id as lap_id,
     laps.id,
     laps.number AS lap_number,
     track,
