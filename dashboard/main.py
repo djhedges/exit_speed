@@ -31,6 +31,15 @@ app = dash.Dash(__name__)
 server = app.server
 
 
+def GetTracks():
+  select_statement = textwrap.dedent("""
+  SELECT DISTINCT track
+  FROM sessions
+  """)
+  conn = db_conn.POOL.connect()
+  return pd.io.sql.read_sql(select_statement, conn)['track']
+
+
 def GetSessions():
   select_statement = textwrap.dedent("""
   SELECT
@@ -86,8 +95,8 @@ def GetPointsColumns():
   return columns
 
 df = GetSessions()
-TRACKS = df['track'].unique()
 POINTS_COLUMNS = GetPointsColumns()
+TRACKS = GetTracks()
 
 
 app.layout = html.Div(
