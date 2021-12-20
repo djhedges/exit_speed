@@ -205,6 +205,7 @@ def UpdateGraph(lap_ids, point_values):
         graph_type = 'map'
         fig = px.line_geo(
             lap_data,
+            title=point_value,
             lat='lat',
             lon='lon',
             color='lap_id',
@@ -214,6 +215,7 @@ def UpdateGraph(lap_ids, point_values):
         graph_type = 'graph'
         fig = px.line(
           lap_data,
+          title=point_value,
           x='elapsed_distance_m',
           y=point_value,
           color='lap_id',
