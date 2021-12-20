@@ -175,7 +175,7 @@ def ParseURL(pathname):
     track = TRACKS[0]
   points = params.get(
               'points',
-              ['racing_line', 'speed', 'tps_voltage', 'front_brake_pressure_percentage'])
+              ['racing_line', 'speed', 'tps_voltage', 'front_brake_pressure_percentage', 'gsum'])
   lap_ids = [int(lap_id) for lap_id in params.get('lap_ids', [])]
   return track, points, lap_ids
 
