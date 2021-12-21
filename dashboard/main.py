@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""App Engine dashboard using Dash, Plotly and Pandas."""
 
 import db_conn
 import dash
@@ -21,7 +22,6 @@ from dash.dependencies import ALL
 from dash.dependencies import Input
 from dash.dependencies import State
 from dash.dependencies import Output
-import flask
 import pandas as pd
 import plotly.express as px
 import urllib
@@ -72,9 +72,11 @@ def GetLapsData(lap_ids):
       db_conn.POOL.connect(),
       params={'lap_ids': lap_ids})
   df['front_brake_pressure_percentage'] = (
-    df['front_brake_pressure_voltage'] / df['front_brake_pressure_voltage'].max())
+    df['front_brake_pressure_voltage'] /
+    df['front_brake_pressure_voltage'].max())
   df['rear_brake_pressure_percentage'] = (
-    df['rear_brake_pressure_voltage'] / df['rear_brake_pressure_voltage'].max())
+    df['rear_brake_pressure_voltage'] /
+    df['rear_brake_pressure_voltage'].max())
   df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   df.sort_values(by='elapsed_distance_m', inplace=True)
@@ -175,7 +177,11 @@ def ParseURL(pathname):
     track = TRACKS[0]
   points = params.get(
               'points',
-              ['racing_line', 'speed', 'tps_voltage', 'front_brake_pressure_percentage', 'gsum'])
+              ['racing_line',
+               'speed',
+               'tps_voltage',
+               'front_brake_pressure_percentage',
+               'gsum'])
   lap_ids = [int(lap_id) for lap_id in params.get('lap_ids', [])]
   return track, points, lap_ids
 
@@ -222,7 +228,7 @@ def UpdateGraph(lap_ids, point_values):
           hover_data=['lap_id', 'lap_number', point_value])
         fig.update_xaxes(showspikes=True)
         fig.update_yaxes(fixedrange=True)
-        fig.update_layout(hovermode="x unified")
+        fig.update_layout(hovermode='x unified')
       graph = dcc.Graph({'type': graph_type,
                          'index': point_values.index(point_value)},
                         figure=fig,
@@ -234,26 +240,26 @@ def UpdateGraph(lap_ids, point_values):
 
 
 @app.callback(
-    Output({'type': 'graph', 'index': ALL}, 'relayoutData'),
-    Output({'type': 'graph', 'index': ALL}, 'figure'),
-    Input({'type': 'graph', 'index': ALL}, 'relayoutData'),
-    State({'type': 'graph', 'index': ALL}, 'figure'))
+  Output({'type': 'graph', 'index': ALL}, 'relayoutData'),
+  Output({'type': 'graph', 'index': ALL}, 'figure'),
+  Input({'type': 'graph', 'index': ALL}, 'relayoutData'),
+  State({'type': 'graph', 'index': ALL}, 'figure'))
 def LinkedZoom(relayout_data, figure_states):
-    unique_data = None
-    for data in relayout_data:
-      if relayout_data.count(data) == 1:
-        unique_data = data
-    if unique_data:
-      for figure_state in figure_states:
-        if unique_data.get('xaxis.autorange'):
-          figure_state['layout']['xaxis']['autorange'] = True
-        else:
-          figure_state['layout']['xaxis']['range'] = [
-              unique_data['xaxis.range[0]'], unique_data['xaxis.range[1]']]
-          figure_state['layout']['xaxis']['autorange'] = False
-      return [unique_data] * len(relayout_data), figure_states
-    return relayout_data, figure_states
+  unique_data = None
+  for data in relayout_data:
+    if relayout_data.count(data) == 1:
+      unique_data = data
+  if unique_data:
+    for figure_state in figure_states:
+      if unique_data.get('xaxis.autorange'):
+        figure_state['layout']['xaxis']['autorange'] = True
+      else:
+        figure_state['layout']['xaxis']['range'] = [
+            unique_data['xaxis.range[0]'], unique_data['xaxis.range[1]']]
+        figure_state['layout']['xaxis']['autorange'] = False
+    return [unique_data] * len(relayout_data), figure_states
+  return relayout_data, figure_states
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+  app.run_server(debug=True)
