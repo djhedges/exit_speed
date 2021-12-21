@@ -13,7 +13,6 @@
 # limitations under the License.
 """App Engine dashboard using Dash, Plotly and Pandas."""
 
-import db_conn
 import dash
 from dash import dash_table
 from dash import dcc
@@ -22,7 +21,6 @@ from dash.dependencies import ALL
 from dash.dependencies import Input
 from dash.dependencies import State
 from dash.dependencies import Output
-import pandas as pd
 import plotly.express as px
 import queries
 import urllib

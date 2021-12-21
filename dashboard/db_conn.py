@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Database connection library."""
 
 import json
 import os
-from google.cloud.sql.connector import connector
 import sqlalchemy
 
 # Local args used when running a development instance.
@@ -23,13 +23,17 @@ import sqlalchemy
 #  'database': 'exit-speed',
 #  'drivername': 'postgresql+psycopg2',
 #  'host': 'ip-address'}
-SECRET_LOCAL_ID = 'projects/794720490237/secrets/db-conn-local-args/versions/latest'
+SECRET_LOCAL_ID = (
+    'projects/794720490237/secrets/db-conn-local-args/versions/latest')
 
 
 def _GetSecret(secret_id):
+  # This module is difficult to get working on a Pi so let's load it only on
+  # App Engine for now.
+  # pylint: disable=import-outside-toplevel
   from google.cloud import secretmanager
   client = secretmanager.SecretManagerServiceClient()
-  response = client.access_secret_version(request={"name": secret_id})
+  response = client.access_secret_version(request={'name': secret_id})
   return json.loads(response.payload.data)
 
 
