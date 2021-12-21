@@ -58,7 +58,7 @@ app.layout = html.Div(
         ],
         filter_action='native',
         sort_action='native',
-        sort_mode='multi',
+        sort_mode='single',
         sort_by=[{'column_id': 'lap_time',
                   'direction': 'asc'},
                  {'column_id': 'session_time',
