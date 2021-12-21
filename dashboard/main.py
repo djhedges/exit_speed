@@ -27,7 +27,7 @@ import urllib
 
 app = dash.Dash(__name__)
 server = app.server
-df = queries.GetSessions()
+SESSIONS = queries.GetSessions()
 POINTS_COLUMNS = queries.GetPointsColumns()
 TRACKS = queries.GetTracks()
 
@@ -53,7 +53,7 @@ app.layout = html.Div(
     dash_table.DataTable(
         id='sessions-table',
         columns=[
-            {'name': i, 'id': i} for i in df.columns
+            {'name': i, 'id': i} for i in SESSIONS.columns
         ],
         filter_action='native',
         sort_action='native',
@@ -117,7 +117,7 @@ def ParseURL(pathname):
   Input('track-dropdown', 'value'),
 )
 def UpdateSessions(track):
-  filtered_df = df[df.track == track]
+  filtered_df = SESSIONS[SESSIONS.track == track]
   return filtered_df.to_dict('records')
 
 
