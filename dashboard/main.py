@@ -35,8 +35,9 @@ TRACKS = queries.GetTracks()
 app.layout = html.Div(
   style={'display': 'grid'},
   children=[
-    dcc.Store(id='memory'),
     dcc.Location(id='url', refresh=False),
+    dcc.Link('Home', href='/'),
+    dcc.Link('Clear', href='/track=None&points=None'),
     dcc.Dropdown(
       id='track-dropdown',
       options=[{'label': i, 'value': i} for i in TRACKS],
