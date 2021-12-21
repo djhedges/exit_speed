@@ -24,86 +24,14 @@ from dash.dependencies import State
 from dash.dependencies import Output
 import pandas as pd
 import plotly.express as px
+import queries
 import urllib
-import textwrap
 
 app = dash.Dash(__name__)
 server = app.server
-
-
-def GetTracks():
-  select_statement = textwrap.dedent("""
-  SELECT DISTINCT track
-  FROM sessions
-  """)
-  conn = db_conn.POOL.connect()
-  return pd.io.sql.read_sql(select_statement, conn)['track']
-
-
-def GetSessions():
-  select_statement = textwrap.dedent("""
-  SELECT
-    TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
-    TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
-    laps.id,
-    laps.number AS lap_number,
-    track,
-    (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
-  FROM laps
-  JOIN points ON laps.id=points.lap_id
-  JOIN sessions ON laps.session_id=sessions.id
-  WHERE duration_ms IS NOT null
-  GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ms
-  """)
-  conn = db_conn.POOL.connect()
-  return pd.io.sql.read_sql(select_statement, conn)
-
-
-def GetLapsData(lap_ids):
-  select_statement = textwrap.dedent("""
-    SELECT *
-    FROM POINTS
-    JOIN laps ON points.lap_id = laps.id
-    WHERE lap_id IN %(lap_ids)s
-    """)
-  lap_ids = tuple(str(lap_id) for lap_id in lap_ids)
-  df = pd.io.sql.read_sql(
-      select_statement,
-      db_conn.POOL.connect(),
-      params={'lap_ids': lap_ids})
-  df['front_brake_pressure_percentage'] = (
-    df['front_brake_pressure_voltage'] /
-    df['front_brake_pressure_voltage'].max())
-  df['rear_brake_pressure_percentage'] = (
-    df['rear_brake_pressure_voltage'] /
-    df['rear_brake_pressure_voltage'].max())
-  df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
-  df.rename(columns={'number': 'lap_number'}, inplace=True)
-  df.sort_values(by='elapsed_distance_m', inplace=True)
-  return df
-
-
-def GetPointsColumns():
-  select_statement = textwrap.dedent("""
-  SELECT column_name
-  FROM information_schema.columns
-  WHERE table_name = 'points'
-  """)
-  conn = db_conn.POOL.connect()
-  resp = conn.execute(select_statement)
-  columns = [row[0] for row in resp.fetchall()]
-  columns.extend([
-    'front_brake_pressure_percentage',
-    'rear_brake_pressure_percentage',
-    'racing_line',
-    'gsum'])
-  columns.remove('lat')
-  columns.remove('lon')
-  return columns
-
-df = GetSessions()
-POINTS_COLUMNS = GetPointsColumns()
-TRACKS = GetTracks()
+df = queries.GetSessions()
+POINTS_COLUMNS = queries.GetPointsColumns()
+TRACKS = queries.GetTracks()
 
 
 app.layout = html.Div(
@@ -205,7 +133,7 @@ def UpdateGraph(lap_ids, point_values):
     point_values = [point_values]
   if lap_ids:
     graphs = []
-    laps_data = GetLapsData(lap_ids)
+    laps_data = queries.GetLapsData(lap_ids)
     for point_value in point_values:
       if point_value == 'racing_line':
         graph_type = 'map'
