@@ -122,7 +122,7 @@ def GetPointsColumns():
     'rear_brake_pressure_percentage',
     'racing_line',
     'gsum',
-    'time_deltas'
+    'time_delta'
     ])
   columns.remove('lat')
   columns.remove('lon')
