@@ -105,6 +105,7 @@ def ParseURL(pathname):
   points = params.get(
               'points',
               ['racing_line',
+               'time_delta',
                'speed',
                'tps_voltage',
                'front_brake_pressure_percentage',
@@ -134,6 +135,10 @@ def UpdateGraph(lap_ids, point_values):
     graphs = []
     laps_data = queries.GetLapsData(lap_ids)
     for point_value in point_values:
+      figure_data = laps_data
+      # Copied so that time_delta can redefine without breaking other graphs.
+      if point_value == 'time_delta':
+        figure_data = laps_data.copy()
       if point_value == 'racing_line':
         graph_type = 'map'
         fig = px.line_geo(
@@ -145,9 +150,13 @@ def UpdateGraph(lap_ids, point_values):
             fitbounds='locations',
             )
       else:
+        if point_value == 'time_delta':
+          if len(lap_ids) < 2:
+            continue  # Need at least two laps to make a comparison.
+          figure_data = queries.GetTimeDelta(lap_ids)
         graph_type = 'graph'
         fig = px.line(
-          laps_data,
+          figure_data,
           title=point_value,
           x='elapsed_distance_m',
           y=point_value,

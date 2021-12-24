@@ -46,6 +46,45 @@ def GetSessions():
   return pd.io.sql.read_sql(select_statement, conn)
 
 
+def GetTimeDelta(lap_ids):
+  select_statement = textwrap.dedent("""
+    SELECT
+      a.elapsed_distance_m,
+      b.elapsed_duration_ms - a.elapsed_duration_ms AS time_delta,
+      b.number AS lap_number
+    FROM (
+      SELECT
+        elapsed_duration_ms,
+        ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m
+      FROM points
+      JOIN laps ON laps.id=points.lap_id
+      WHERE lap_id = %(lap_id_a)s
+    ) AS a INNER JOIN (
+      SELECT
+        elapsed_duration_ms,
+        ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m,
+        number
+      FROM points
+      JOIN laps ON laps.id=points.lap_id
+      WHERE lap_id = %(lap_id_b)s
+      ) as b
+    ON a.elapsed_distance_m = b.elapsed_distance_m
+    """)
+  lap_id_a = lap_ids[0]
+  lap_dfs = []
+  for lap_id in lap_ids[1:]:
+    df = pd.io.sql.read_sql(
+        select_statement,
+        db_conn.POOL.connect(),
+        params={'lap_id_a': str(lap_id_a),
+                'lap_id_b': str(lap_id)})
+    df['lap_id'] = lap_id
+    lap_dfs.append(df)
+  combined_df = pd.concat(lap_dfs)
+  combined_df.sort_values(by='elapsed_distance_m', inplace=True)
+  return combined_df
+
+
 def GetLapsData(lap_ids):
   select_statement = textwrap.dedent("""
     SELECT *
@@ -53,11 +92,11 @@ def GetLapsData(lap_ids):
     JOIN laps ON points.lap_id = laps.id
     WHERE lap_id IN %(lap_ids)s
     """)
-  lap_ids = tuple(str(lap_id) for lap_id in lap_ids)
   df = pd.io.sql.read_sql(
       select_statement,
       db_conn.POOL.connect(),
-      params={'lap_ids': lap_ids})
+      params={'lap_ids': tuple(str(lap_id) for lap_id in lap_ids)})
+  df.sort_values(by='elapsed_distance_m', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
     df['front_brake_pressure_voltage'].max())
@@ -66,7 +105,6 @@ def GetLapsData(lap_ids):
     df['rear_brake_pressure_voltage'].max())
   df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   df.rename(columns={'number': 'lap_number'}, inplace=True)
-  df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
 
 
@@ -83,7 +121,9 @@ def GetPointsColumns():
     'front_brake_pressure_percentage',
     'rear_brake_pressure_percentage',
     'racing_line',
-    'gsum'])
+    'gsum',
+    'time_deltas'
+    ])
   columns.remove('lat')
   columns.remove('lon')
   return columns
