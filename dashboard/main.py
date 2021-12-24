@@ -136,6 +136,7 @@ def UpdateGraph(lap_ids, point_values):
     laps_data = queries.GetLapsData(lap_ids)
     for point_value in point_values:
       figure_data = laps_data
+      title = point_value
       # Copied so that time_delta can redefine without breaking other graphs.
       if point_value == 'time_delta':
         figure_data = laps_data.copy()
@@ -143,7 +144,7 @@ def UpdateGraph(lap_ids, point_values):
         graph_type = 'map'
         fig = px.line_geo(
             laps_data,
-            title=point_value,
+            title=title,
             lat='lat',
             lon='lon',
             color='lap_id',
@@ -154,10 +155,11 @@ def UpdateGraph(lap_ids, point_values):
           if len(lap_ids) < 2:
             continue  # Need at least two laps to make a comparison.
           figure_data = queries.GetTimeDelta(lap_ids)
+          title = 'time_delta vs first selected lap (lap_id: %s)' % lap_ids[0]
         graph_type = 'graph'
         fig = px.line(
           figure_data,
-          title=point_value,
+          title=title,
           x='elapsed_distance_m',
           y=point_value,
           color='lap_id',
