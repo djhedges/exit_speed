@@ -39,7 +39,7 @@ def main(unused_argv):
   storage_client = storage.Client()
   bucket = storage_client.bucket(FLAGS.gcs_bucket_name)
   today = datetime.date.today()
-  blob_name = 'lap_logs-%s.tar.bz2' % today.strftime('%Y%m%d')
+  blob_name = 'lap_logs_%s.tar.bz2' % today.strftime('%Y%m%d')
   blob = bucket.blob(blob_name)
   blob.upload_from_file(mem_file)
 
