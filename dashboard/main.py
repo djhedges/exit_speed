@@ -191,7 +191,7 @@ def LinkedZoom(relayout_data, figure_states):
     for figure_state in figure_states:
       if unique_data.get('xaxis.autorange'):
         figure_state['layout']['xaxis']['autorange'] = True
-      if figure_state['layout']['xaxis']['range'].get('xaxis.range[0]'):
+      if unique_data.get('xaxis.range[0]'):
         figure_state['layout']['xaxis']['range'] = [
             unique_data['xaxis.range[0]'], unique_data['xaxis.range[1]']]
         figure_state['layout']['xaxis']['autorange'] = False
