@@ -1,0 +1,17 @@
+# Enable by running:
+# cd ~/.config/systemd/user
+# ln -s /home/pi/git/exit_speed/etc/exit_speed_dash.service
+# systemctl --user enable exit_speed_dash.service
+# systemctl --user start exit_speed_dash.service
+# systemctl --user status exit_speed_dash.service
+[Unit]
+Description=ExitSpeedDashboard
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/git/exit_speed/dashboard/main.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

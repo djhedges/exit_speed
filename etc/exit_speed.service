@@ -1,3 +1,9 @@
+# Enable by running:
+# cd ~/.config/systemd/user
+# ln -s /home/pi/git/exit_speed/etc/exit_speed.service
+# systemctl --user enable exit_speed.service
+# systemctl --user start exit_speed.service
+# systemctl --user status exit_speed.service
 [Unit]
 Description=ExitSpeed
 
