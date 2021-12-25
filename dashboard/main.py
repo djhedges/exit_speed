@@ -28,7 +28,13 @@ import urllib
 app = dash.Dash(__name__)
 server = app.server
 SESSIONS = queries.GetSessions()
-POINTS_COLUMNS = queries.GetPointsColumns()
+POINTS_COLUMNS = queries.GetPointsColumns() + [
+    'front_brake_pressure_percentage',
+    'rear_brake_pressure_percentage',
+    'racing_line',
+    'gsum',
+    'time_delta'
+    ]
 TRACKS = queries.GetTracks()
 
 
@@ -133,7 +139,7 @@ def UpdateGraph(lap_ids, point_values):
     point_values = [point_values]
   if lap_ids:
     graphs = []
-    laps_data = queries.GetLapsData(lap_ids)
+    laps_data = queries.GetLapsData(lap_ids, point_values)
     for point_value in point_values:
       figure_data = laps_data
       title = point_value

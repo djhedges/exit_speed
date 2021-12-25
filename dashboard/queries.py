@@ -16,6 +16,7 @@
 import db_conn
 import pandas as pd
 import textwrap
+from psycopg2 import sql
 
 
 def GetTracks():
@@ -85,15 +86,48 @@ def GetTimeDelta(lap_ids):
   return combined_df
 
 
-def GetLapsData(lap_ids):
+def GetPointsColumns():
   select_statement = textwrap.dedent("""
-    SELECT *
+  SELECT column_name
+  FROM information_schema.columns
+  WHERE table_name = 'points'
+  """)
+  conn = db_conn.POOL.connect()
+  resp = conn.execute(select_statement)
+  columns = [row[0] for row in resp.fetchall()]
+  columns.remove('lat')
+  columns.remove('lon')
+  return columns
+
+
+def GetLapsData(lap_ids, point_values):
+  all_columns = GetPointsColumns()
+  # Only select columns that map to point_values.
+  columns = set(point_values).intersection(set(all_columns))
+  # Columns used for graph labels and should always be included.
+  columns.update(['elapsed_distance_m', 'number', 'lap_id'])
+  if ('front_brake_pressure_percentage' in point_values or
+      'rear_brake_pressure_percentage' in point_values):
+    columns.update(['front_brake_pressure_voltage',
+                    'rear_brake_pressure_voltage'])
+  if 'gsum' in point_values:
+    columns.update(['accelerometer_x', 'accelerometer_y', 'accelerometer_z'])
+  if 'racing_line' in point_values:
+    columns.update(['lat', 'lon'])
+  select_statement = textwrap.dedent("""
+    SELECT {columns}
     FROM POINTS
     JOIN laps ON points.lap_id = laps.id
     WHERE lap_id IN %(lap_ids)s
     """)
+  query = sql.SQL(select_statement).format(
+      columns=sql.SQL(',').join(
+          [sql.Identifier(col) for col in columns]))
+  #    lap_ids=sql.SQL(',').join(
+  #        [sql.Identifier(str(lap_id)) for lap_id in lap_ids]))
+  raw_conn = db_conn.POOL.raw_connection()
   df = pd.io.sql.read_sql(
-      select_statement,
+      query.as_string(raw_conn.cursor()),
       db_conn.POOL.connect(),
       params={'lap_ids': tuple(str(lap_id) for lap_id in lap_ids)})
   df.sort_values(by='elapsed_distance_m', inplace=True)
@@ -106,24 +140,3 @@ def GetLapsData(lap_ids):
   df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   return df
-
-
-def GetPointsColumns():
-  select_statement = textwrap.dedent("""
-  SELECT column_name
-  FROM information_schema.columns
-  WHERE table_name = 'points'
-  """)
-  conn = db_conn.POOL.connect()
-  resp = conn.execute(select_statement)
-  columns = [row[0] for row in resp.fetchall()]
-  columns.extend([
-    'front_brake_pressure_percentage',
-    'rear_brake_pressure_percentage',
-    'racing_line',
-    'gsum',
-    'time_delta'
-    ])
-  columns.remove('lat')
-  columns.remove('lon')
-  return columns
