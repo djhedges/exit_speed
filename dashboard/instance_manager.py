@@ -23,12 +23,20 @@ SECRET_PROJECT_ID = (
 INSTANCE_NAME = 'exit-speed'
 
 
+def IsSQLInstanceUp():
+  service = discovery.build('sqladmin', 'v1beta4')
+  project = secret_manager.GetSecret(SECRET_PROJECT_ID)
+  request = service.instances().get(project=project, instance=INSTANCE_NAME)
+  response = request.execute()
+  return response['settings']['activationPolicy'] == 'ALWAYS'
+
+
 def StartInstance():
   service = discovery.build('sqladmin', 'v1beta4')
   project = secret_manager.GetSecret(SECRET_PROJECT_ID)
   request = service.instances().get(project=project, instance=INSTANCE_NAME)
   response = request.execute()
-  if response['settings']['activationPolicy'] == 'ALWAYS':
+  if IsSQLInstanceUp():
     logging.info('SQL instance is already up')
   else:
     request = service.instances().patch(
