@@ -14,7 +14,7 @@
 """Database connection library."""
 
 import os
-import instannce_manager
+import instance_manager
 import secret_manager
 import sqlalchemy
 
@@ -30,7 +30,7 @@ SECRET_LOCAL_ID = (
 
 def InitPool():
   if os.getenv('GOOGLE_CLOUD_PROJECT'):
-    instannce_manager.StartInstance()
+    instance_manager.StartInstance()
     local_args = secret_manager.GetSecret(SECRET_LOCAL_ID)
     return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
   return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(
