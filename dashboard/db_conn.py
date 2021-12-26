@@ -13,9 +13,9 @@
 # limitations under the License.
 """Database connection library."""
 
-import json
 import logging
 import os
+import secret_manager
 import sqlalchemy
 from googleapiclient import discovery
 
@@ -33,19 +33,9 @@ SECRET_PROJECT_ID = (
 INSTANCE_NAME = 'exit-speed'
 
 
-def _GetSecret(secret_id):
-  # This module is difficult to get working on a Pi so let's load it only on
-  # App Engine for now.
-  # pylint: disable=import-outside-toplevel
-  from google.cloud import secretmanager
-  client = secretmanager.SecretManagerServiceClient()
-  response = client.access_secret_version(request={'name': secret_id})
-  return json.loads(response.payload.data)
-
-
 def StartInstance():
   service = discovery.build('sqladmin', 'v1beta4')
-  project = _GetSecret(SECRET_PROJECT_ID)
+  project = secret_manager.GetSecret(SECRET_PROJECT_ID)
   request = service.instances().get(project=project, instance=INSTANCE_NAME)
   response = request.execute()
   if response['settings']['activationPolicy'] == 'ALWAYS':
@@ -62,7 +52,7 @@ def StartInstance():
 def InitPool():
   if os.getenv('GOOGLE_CLOUD_PROJECT'):
     StartInstance()
-    local_args = _GetSecret(SECRET_LOCAL_ID)
+    local_args = secret_manager.GetSecret(SECRET_LOCAL_ID)
     return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
   return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(
       **{'password': 'faster',
