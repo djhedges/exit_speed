@@ -14,7 +14,6 @@
 # limitations under the License.
 """Track list and helper functions."""
 
-import config_lib
 import attr
 
 @attr.s(frozen=True)

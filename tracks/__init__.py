@@ -18,8 +18,6 @@ from typing import Tuple
 from tracks import base
 import common_lib
 import gps_pb2
-
-# Tracks
 from tracks import area27
 from tracks import oregon_raceway_park
 from tracks import pacific_raceways
