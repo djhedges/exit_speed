@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common library unittest."""
-
 import unittest
+
 from absl.testing import absltest
+
 import common_lib
 import gps_pb2
 

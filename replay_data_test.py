@@ -13,17 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for replay_data.py"""
-
 import os
 import sys
 import unittest
-from absl import flags
-from absl.testing import absltest
+
 import fake_rpi
 import gps
 import mock
 import psycopg2
 import testing.postgresql
+from absl import flags
+from absl.testing import absltest
+
 import timescale
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi

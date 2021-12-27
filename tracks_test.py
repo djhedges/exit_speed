@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tracks."""
-
 import unittest
+
 from absl.testing import absltest
+
 import gps_pb2
 import tracks
 

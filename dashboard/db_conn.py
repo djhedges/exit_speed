@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Database connection library."""
-
 import os
+
 import instance_manager
 import secret_manager
 import sqlalchemy

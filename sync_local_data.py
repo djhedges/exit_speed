@@ -13,19 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Syncs local data to timescale."""
-
 import os
 from typing import List
 from typing import Text
+
+import psycopg2
 from absl import app
 from absl import flags
 from absl import logging
+
 import cleanup_timescale
 import data_logger
 import replay_data
 import timescale
 import tracks
-import psycopg2
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.

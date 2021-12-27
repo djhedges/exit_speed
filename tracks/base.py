@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Track list and helper functions."""
-
 import attr
 
 @attr.s(frozen=True)

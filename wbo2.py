@@ -16,14 +16,14 @@
 
 https://www.wbo2.com/sw/logger.htm Frame and byte info.
 """
-
 import multiprocessing
 from typing import Generator
 from typing import Text
+
+import serial
 from absl import app
 from absl import flags
 from absl import logging
-import serial
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('stoichiometric', 14.7,

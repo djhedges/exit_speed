@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Libaries for parsing yaml configs for Exit Speed."""
-
-from absl import flags
 import yaml
+from absl import flags
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('config_path', './etc/corrado.yaml',

@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tire_temperature.py"""
-
-import mock
 import time
 import unittest
+
+import mock
 from absl.testing import absltest
 from mlx import mlx90640
+
 import tire_temperature
 
 def _CreateRawFrame():

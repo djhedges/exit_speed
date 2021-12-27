@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Track list and helper functions."""
-
 from typing import Tuple
-from tracks import base
+
 import common_lib
 import gps_pb2
 from tracks import area27
+from tracks import base
 from tracks import oregon_raceway_park
 from tracks import pacific_raceways
 from tracks import portland_internal_raceways

@@ -16,10 +16,10 @@
 
 GOOGLE_APPLICATION_CREDENTIALS=<service>.json ./gcs_archive.py
 """
-
 import datetime
 import io
 import tarfile
+
 from absl import app
 from absl import flags
 from google.cloud import storage

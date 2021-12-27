@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """FXOS8700 accelerometer."""
-
-from typing import Text
-from typing import Tuple
 import math
 import time
-from absl import app
+from typing import Text
+from typing import Tuple
+
+import adafruit_fxos8700
 import board
 import busio
-import adafruit_fxos8700
+from absl import app
 
 
 class Accelerometer(object):

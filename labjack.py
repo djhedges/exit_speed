@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Library for reading values from labjack."""
-
+import multiprocessing
 import sys
 import traceback
-import multiprocessing
 from typing import Dict
 from typing import Text
-from absl import logging
+
 import u3
+from absl import logging
 
 
 class Labjack(object):

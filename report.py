@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Generate a PDF report using seaborn."""
-
-from absl import app
-from absl import flags
-from matplotlib.backends.backend_pdf import PdfPages
-import gps_pb2
-import common_lib
-import timescale
-import tracks
 import attr
 import matplotlib
 import pandas
 import psycopg2
 import seaborn
+from absl import app
+from absl import flags
+from matplotlib.backends.backend_pdf import PdfPages
+
+import common_lib
+import gps_pb2
+import timescale
+import tracks
 
 FLAGS = flags.FLAGS
 

@@ -13,19 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Controls the Adafruit LEDs."""
-
 import collections
 import statistics
 import time
 from typing import Tuple
-from absl import flags
-from absl import logging
+
 import adafruit_dotstar
 import board
-from gps import EarthDistanceSmall
-import gps_pb2
 import numpy as np
+from absl import flags
+from absl import logging
+from gps import EarthDistanceSmall
 from sklearn.neighbors import BallTree
+
+import gps_pb2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('led_brightness', 0.5,

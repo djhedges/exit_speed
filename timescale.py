@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Timescale interface for exporting data."""
-
 import multiprocessing
 import sys
 import textwrap
@@ -21,10 +20,12 @@ import traceback
 from typing import Optional
 from typing import Text
 from typing import Tuple
+
+import psycopg2
 from absl import flags
 from absl import logging
+
 import gps_pb2
-import psycopg2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',

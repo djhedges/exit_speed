@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for gopro.py"""
-
-import mock
 import time
 import unittest
-from absl.testing import absltest
-import gopro
+
+import mock
 import pygatt
+from absl.testing import absltest
+
+import gopro
 
 
 class TestGopro(unittest.TestCase):

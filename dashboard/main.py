@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """App Engine dashboard using Dash, Plotly and Pandas."""
+import urllib
 
 import dash
+import plotly.express as px
+import queries
 from dash import dash_table
 from dash import dcc
 from dash import html
 from dash.dependencies import ALL
 from dash.dependencies import Input
-from dash.dependencies import State
 from dash.dependencies import Output
-import plotly.express as px
-import queries
-import urllib
+from dash.dependencies import State
 
 app = dash.Dash(__name__)
 server = app.server

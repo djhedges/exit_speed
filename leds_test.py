@@ -13,15 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unittests for leds_test.py"""
-
 import collections
 import sys
 import time
 import unittest
+
+import fake_rpi
 import mock
 from absl import flags
 from absl.testing import absltest
-import fake_rpi
+
 import gps_pb2
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO

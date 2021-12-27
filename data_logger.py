@@ -17,14 +17,15 @@
 Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
-
 import glob
 import os
 import re
-from absl import logging
 from typing import Generator
 from typing import Text
+
+from absl import logging
 from google.protobuf import message
+
 import gps_pb2
 
 BYTE_ORDER = 'big'

@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for gyroscope.py"""
-
 import sys
-import mock
 import unittest
+
+import fake_rpi
+import mock
 from absl.testing import absltest
 # pylint: disable=wrong-import-position
 # Fixes dotstar import on Travis.
-import fake_rpi
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)

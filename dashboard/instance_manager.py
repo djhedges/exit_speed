@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Library for starting/stopping SQL & VM instances."""
-
 import logging
+
 import secret_manager
 from googleapiclient import discovery
 

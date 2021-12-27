@@ -16,9 +16,7 @@
 
 https://github.com/melexis-fir/mlx9064x-driver-py
 """
-
 import multiprocessing
-import numpy
 import socket
 import statistics
 import struct
@@ -26,6 +24,8 @@ from typing import Dict
 from typing import List
 from typing import Text
 from typing import Tuple
+
+import numpy
 from absl import app
 from absl import flags
 from absl import logging

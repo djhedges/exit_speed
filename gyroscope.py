@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """FXAS21002C gyroscope."""
-
-from typing import Tuple
 import math
 import time
-from absl import app
+from typing import Tuple
+
+import adafruit_fxas21002c
 import board
 import busio
-import adafruit_fxas21002c
+from absl import app
 
 
 class Gyroscope(object):

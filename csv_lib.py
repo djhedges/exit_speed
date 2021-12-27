@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """CSV library for converting data from Traqmate to exit speed or vice versa."""
-
 import csv
 import datetime
 import time
-import exit_speed
+
 from gps import client
+
+import exit_speed
 
 
 def _ReadCsvFile(filepath):

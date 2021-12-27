@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for timescale.py"""
-
 import unittest
-from absl.testing import absltest
-import gps_pb2
-import psycopg2
-import timescale
-import testing.postgresql
+
 import mock
+import psycopg2
+import testing.postgresql
+from absl.testing import absltest
+
+import gps_pb2
+import timescale
 
 Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
 

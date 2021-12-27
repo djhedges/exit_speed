@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Dashboard queries."""
+import textwrap
 
 import db_conn
 import pandas as pd
-import textwrap
 from psycopg2 import sql
 
 

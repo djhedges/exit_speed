@@ -13,20 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ExitSpeed unittest."""
-
-import mock
-import pytz
 import sys
 import unittest
+
+import fake_rpi
+import gps
+import mock
+import psycopg2
+import pytz
 from absl import flags
 from absl.testing import absltest
-import labjack
-import gps
+
 import gps_pb2
-import psycopg2
+import labjack
 import timescale
 # pylint: disable=wrong-import-position
-import fake_rpi
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)

@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for lab_lib.py"""
+import unittest
 
 import mock
-import unittest
 from absl.testing import absltest
+
 import common_lib
-import lap_lib
 import gps_pb2
+import lap_lib
 
 
 

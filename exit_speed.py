@@ -13,20 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The main script for starting exit speed."""
-
 import datetime
 import os
+
+import geohash
+import gps
 import sdnotify
+import u3
 from absl import app
 from absl import flags
 from absl import logging
+
 import accelerometer
 import common_lib
 import config_lib
 import data_logger
-import geohash
 import gopro
-import gps
 import gps_pb2
 import gyroscope
 import labjack
@@ -35,7 +37,6 @@ import leds
 import timescale
 import tire_temperature
 import tracks
-import u3
 import wbo2
 
 FLAGS = flags.FLAGS

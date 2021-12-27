@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Used to cleanup database entries created during testing."""
-
 from absl import app
 from absl import flags
 from absl import logging
+
 import timescale
 
 FLAGS = flags.FLAGS

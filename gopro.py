@@ -21,13 +21,13 @@ Some interesting links:
   https://github.com/KonradIT/goprowifihack/blob/master/Bluetooth/Platforms/RaspberryPi.md
   https://github.com/KonradIT/gopro-ble-py
 """
-
 import multiprocessing
 import time
+
+import pygatt
 from absl import app
 from absl import flags
 from absl import logging
-import pygatt
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer('min_speed_mph', 30,
