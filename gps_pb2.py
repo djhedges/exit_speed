@@ -178,7 +178,7 @@ _POINT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='geohash', full_name='gps.Point.geohash', index=20,
       number=21, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      has_default_value=False, default_value=b''.decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -338,7 +338,7 @@ _SESSION = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='track', full_name='gps.Session.track', index=1,
       number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      has_default_value=False, default_value=b''.decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
