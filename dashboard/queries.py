@@ -97,6 +97,26 @@ def GetPointsColumns():
   columns = [row[0] for row in resp.fetchall()]
   columns.remove('lat')
   columns.remove('lon')
+  columns.remove('geohash')
+  columns.remove('lf_tire_temp_inner')
+  columns.remove('lf_tire_temp_middle')
+  columns.remove('lf_tire_temp_outer')
+  columns.remove('rf_tire_temp_inner')
+  columns.remove('rf_tire_temp_middle')
+  columns.remove('rf_tire_temp_outer')
+  columns.remove('lr_tire_temp_inner')
+  columns.remove('lr_tire_temp_middle')
+  columns.remove('lr_tire_temp_outer')
+  columns.remove('rr_tire_temp_inner')
+  columns.remove('rr_tire_temp_middle')
+  columns.remove('rr_tire_temp_outer')
+  columns.extend([
+    'front_brake_pressure_percentage',
+    'rear_brake_pressure_percentage',
+    'racing_line',
+    'gsum',
+    'time_delta'
+    ])
   return columns
 
 
