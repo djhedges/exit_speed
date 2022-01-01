@@ -14,9 +14,9 @@
 """App Engine dashboard using Dash, Plotly and Pandas."""
 import urllib
 
+import dash
 import plotly.express as px
 import queries
-from app import app
 from dash import dash_table
 from dash import dcc
 from dash import html
@@ -25,6 +25,8 @@ from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
 
+app = dash.Dash(__name__)
+server = app.server
 SESSIONS = queries.GetSessions()
 POINTS_COLUMNS = queries.GetPointsColumns() + [
     'front_brake_pressure_percentage',
@@ -36,8 +38,7 @@ POINTS_COLUMNS = queries.GetPointsColumns() + [
 TRACKS = queries.GetTracks()
 
 
-def LapComparisonLayout():
-  return html.Div(
+app.layout = html.Div(
   style={'display': 'grid'},
   children=[
     dcc.Location(id='url', refresh=False),
@@ -202,3 +203,7 @@ def LinkedZoom(relayout_data, figure_states):
         figure_state['layout']['xaxis']['autorange'] = False
     return [unique_data] * len(relayout_data), figure_states
   return relayout_data, figure_states
+
+
+if __name__ == '__main__':
+  app.run_server(debug=True)
