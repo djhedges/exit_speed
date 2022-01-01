@@ -26,7 +26,13 @@ from dash.dependencies import Output
 from dash.dependencies import State
 
 SESSIONS = queries.GetSessions()
-POINTS_COLUMNS = queries.GetPointsColumns()
+POINTS_COLUMNS = queries.GetPointsColumns() + [
+    'front_brake_pressure_percentage',
+    'rear_brake_pressure_percentage',
+    'racing_line',
+    'gsum',
+    'time_delta'
+    ]
 TRACKS = queries.GetTracks()
 
 
