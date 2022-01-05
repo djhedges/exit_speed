@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Live data dashboard."""
+import queries
+from dash import dcc
 from dash import html
 
+POINTS_COLUMNS = queries.GetPointsColumns()
+
 LAYOUT = html.Div([
-    html.H3('Future Live Data'),
+    html.H3('Live Data'),
+    dcc.Dropdown(
+      id='points-dropdown',
+      options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
+      clearable=False,
+      multi=True,
+    ),
 ])
