@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""App Engine dashboard using Dash, Plotly and Pandas."""
+"""Live data dashboard."""
 import urllib
 
 import dash
@@ -30,6 +30,21 @@ app.layout = html.Div(
   children=[
     dcc.Location(id='url', refresh=False),
     dcc.Link('Home', href='/'),
+    dcc.Slider(
+      id='time-slider',
+      min=5,
+      max=60,
+      step=5,
+      value=15,
+      tooltip={'placement': 'bottom', 'always_visible': True},
+      marks={
+          5:  {'label': '5m'},
+          10: {'label': '10m'},
+          15: {'label': '15m'},
+          30: {'label': '30m'},
+          60: {'label': '60m'},
+      },
+    ),
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
