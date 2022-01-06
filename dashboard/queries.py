@@ -161,5 +161,6 @@ def GetLiveData(start_time, point_values):
       query.as_string(raw_conn.cursor()),
       db_conn.POOL.connect(),
       params={'start_time': start_time})
+  df.sort_values(by='time', inplace=True)
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   return df
