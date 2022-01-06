@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Live data dashboard."""
+import datetime
 import urllib
 
 import dash
+import plotly.express as px
 import queries
 from dash import dcc
 from dash import html
@@ -75,8 +77,41 @@ def ParseURL(pathname):
   params = urllib.parse.parse_qs(pathname[1:])
   points = params.get(
               'points',
-              ['speed'])
+              ['speed', 'accelerometer_z'])
   return points
+
+
+@app.callback(
+  Output('graphs', 'children'),
+  Input('time-slider', 'value'),  # lap_ids
+  Input('points-dropdown', 'value'),
+)
+def UpdateGraph(time_slider, point_values):
+  print(point_values)
+  now = datetime.datetime.today()
+  start_time = now - datetime.timedelta(minutes=time_slider)
+  if not isinstance(point_values, list):
+    point_values = [point_values]
+  graphs = []
+  laps_data = queries.GetLiveData(start_time, point_values)
+  for point_value in point_values:
+    graph_type = 'graph'
+    fig = px.line(
+      laps_data,
+      title=point_value,
+      x='time',
+      y=point_value,
+      color='lap_id',
+      hover_data=['lap_id', 'lap_number', point_value])
+    fig.update_xaxes(showspikes=True)
+    fig.update_yaxes(fixedrange=True)
+    fig.update_layout(hovermode='x unified')
+    graph = dcc.Graph({'type': graph_type,
+                       'index': point_values.index(point_value)},
+                      figure=fig,
+                      style={'display': 'inline-grid', 'width': '50%'})
+    graphs.append(graph)
+  return graphs
 
 
 if __name__ == '__main__':

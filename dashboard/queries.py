@@ -116,15 +116,13 @@ def GetLapsData(lap_ids, point_values):
     columns.update(['lat', 'lon'])
   select_statement = textwrap.dedent("""
     SELECT {columns}
-    FROM POINTS
+    FROM points
     JOIN laps ON points.lap_id = laps.id
     WHERE lap_id IN %(lap_ids)s
     """)
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]))
-  #    lap_ids=sql.SQL(',').join(
-  #        [sql.Identifier(str(lap_id)) for lap_id in lap_ids]))
   raw_conn = db_conn.POOL.raw_connection()
   df = pd.io.sql.read_sql(
       query.as_string(raw_conn.cursor()),
@@ -138,5 +136,30 @@ def GetLapsData(lap_ids, point_values):
     df['rear_brake_pressure_voltage'] /
     df['rear_brake_pressure_voltage'].max())
   df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
+  df.rename(columns={'number': 'lap_number'}, inplace=True)
+  return df
+
+
+def GetLiveData(start_time, point_values):
+  all_columns = GetPointsColumns()
+  # Only select columns that map to point_values.
+  columns = set(point_values).intersection(set(all_columns))
+  # Columns used for graph labels and should always be included.
+  columns.update(['time', 'number', 'lap_id'])
+  select_statement = textwrap.dedent("""
+    SELECT {columns}
+    FROM points
+    JOIN laps ON points.lap_id = laps.id
+    WHERE
+      time > %(start_time)s
+    """)
+  query = sql.SQL(select_statement).format(
+      columns=sql.SQL(',').join(
+          [sql.Identifier(col) for col in columns]))
+  raw_conn = db_conn.POOL.raw_connection()
+  df = pd.io.sql.read_sql(
+      query.as_string(raw_conn.cursor()),
+      db_conn.POOL.connect(),
+      params={'start_time': start_time})
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   return df
