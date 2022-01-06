@@ -101,7 +101,7 @@ def UpdateGraph(time_slider, point_values):
       title=point_value,
       x='time',
       y=point_value,
-      color='lap_id',
+      color='lap_number',
       hover_data=['lap_id', 'lap_number', point_value])
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(fixedrange=True)
