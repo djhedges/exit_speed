@@ -14,6 +14,8 @@
 """Live data dashboard."""
 import datetime
 import urllib
+from typing import List
+from typing import Text
 
 import dash
 import plotly.express as px
@@ -64,7 +66,7 @@ app.layout = html.Div(
   Input('points-dropdown', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href, points):
+def UpdateURL(href: Text, points: List[Text]):
   args = {'points': points}
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
@@ -73,7 +75,7 @@ def UpdateURL(href, points):
   Output('points-dropdown', 'value'),
   Input('url', 'pathname'),
 )
-def ParseURL(pathname):
+def ParseURL(pathname: Text) -> List[Text]:
   # Strip a leading "/" with [1:]
   params = urllib.parse.parse_qs(pathname[1:])
   points = params.get(
@@ -87,7 +89,7 @@ def ParseURL(pathname):
   Input('time-slider', 'value'),  # lap_ids
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(time_slider, point_values):
+def UpdateGraph(time_slider: int, point_values: List[Text]) -> List[dcc.Graph]:
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_slider)
   if not isinstance(point_values, list):

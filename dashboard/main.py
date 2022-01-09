@@ -13,8 +13,13 @@
 # limitations under the License.
 """App Engine dashboard using Dash, Plotly and Pandas."""
 import urllib
+from typing import Dict
+from typing import List
+from typing import Text
+from typing import Tuple
 
 import dash
+import pandas as pd
 import plotly.express as px
 from dash import dash_table
 from dash import dcc
@@ -87,7 +92,12 @@ app.layout = html.Div(
   Input('points-dropdown', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href, track, lap_ids, points):
+def UpdateURL(
+    href: Text,
+    track: Text,
+    lap_ids: List[int],
+    points: List[Text],
+  ) -> Text:
   args = {'track': track,
           'points': points}
   if lap_ids:
@@ -101,7 +111,7 @@ def UpdateURL(href, track, lap_ids, points):
   Output('sessions-table', 'selected_row_ids'),
   Input('url', 'pathname'),
 )
-def ParseURL(pathname):
+def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
   # Strip a leading "/" with [1:]
   params = urllib.parse.parse_qs(pathname[1:])
   url_track = params.get('track')
@@ -125,7 +135,7 @@ def ParseURL(pathname):
   Output('sessions-table', 'data'),
   Input('track-dropdown', 'value'),
 )
-def UpdateSessions(track):
+def UpdateSessions(track: pd.DataFrame) -> pd.DataFrame:
   filtered_df = SESSIONS[SESSIONS.track == track]
   return filtered_df.to_dict('records')
 
@@ -135,7 +145,8 @@ def UpdateSessions(track):
   Input('sessions-table', 'selected_row_ids'),  # lap_ids
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(lap_ids, point_values):
+def UpdateGraph(
+    lap_ids: List[int], point_values: List[Text]) -> List[dcc.Graph]:
   if not isinstance(point_values, list):
     point_values = [point_values]
   if lap_ids:
@@ -189,7 +200,9 @@ def UpdateGraph(lap_ids, point_values):
   Output({'type': 'graph', 'index': ALL}, 'figure'),
   Input({'type': 'graph', 'index': ALL}, 'relayoutData'),
   State({'type': 'graph', 'index': ALL}, 'figure'))
-def LinkedZoom(relayout_data, figure_states):
+def LinkedZoom(
+    relayout_data: List[Dict],
+    figure_states: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
   unique_data = None
   for data in relayout_data:
     if relayout_data.count(data) == 1:
