@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Dashboard queries."""
+import datetime
 import textwrap
+from typing import List
+from typing import Text
 
 import pandas as pd
 from psycopg2 import sql
@@ -20,7 +23,7 @@ from psycopg2 import sql
 from dashboard import db_conn
 
 
-def GetTracks():
+def GetTracks() -> pd.DataFrame:
   select_statement = textwrap.dedent("""
   SELECT DISTINCT track
   FROM sessions
@@ -29,7 +32,7 @@ def GetTracks():
   return pd.io.sql.read_sql(select_statement, conn)['track']
 
 
-def GetSessions():
+def GetSessions() -> pd.DataFrame:
   select_statement = textwrap.dedent("""
   SELECT
     TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
@@ -48,7 +51,7 @@ def GetSessions():
   return pd.io.sql.read_sql(select_statement, conn)
 
 
-def GetTimeDelta(lap_ids):
+def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
     SELECT
       a.elapsed_distance_m,
@@ -87,7 +90,7 @@ def GetTimeDelta(lap_ids):
   return combined_df
 
 
-def GetPointsColumns():
+def GetPointsColumns() -> List[Text]:
   select_statement = textwrap.dedent("""
   SELECT column_name
   FROM information_schema.columns
@@ -101,7 +104,7 @@ def GetPointsColumns():
   return columns
 
 
-def GetLapsData(lap_ids, point_values):
+def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
   columns = set(point_values).intersection(set(all_columns))
@@ -141,7 +144,7 @@ def GetLapsData(lap_ids, point_values):
   return df
 
 
-def GetLiveData(start_time, point_values):
+def GetLiveData(start_time: datetime.datetime, point_values: List[Text]):
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
   columns = set(point_values).intersection(set(all_columns))
