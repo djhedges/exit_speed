@@ -28,7 +28,6 @@ import accelerometer
 import common_lib
 import config_lib
 import data_logger
-import gopro
 import gps_pb2
 import gyroscope
 import labjack
@@ -83,8 +82,6 @@ class ExitSpeed(object):
     self.config = config_lib.LoadConfig()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.Accelerometer()
-    if self.config.get('gopro'):
-      self.gopro = gopro.GoPro(self.config['gopro'])
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.Gyroscope()
     if self.config.get('labjack'):
@@ -158,8 +155,6 @@ class ExitSpeed(object):
     self.CalculateElapsedValues()
     self.LogPoint()
     self.timescale.AddPointToQueue(point, self.lap.number)
-    if self.config.get('gopro'):
-      self.gopro.AppendSpeed(point.speed)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""

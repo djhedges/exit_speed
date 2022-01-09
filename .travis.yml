@@ -32,7 +32,6 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/common_lib_test.py
   - python3 /home/travis/build/djhedges/exit_speed/data_logger_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed_test.py
-  #- python3 /home/travis/build/djhedges/exit_speed/gopro_test.py
   - python3 /home/travis/build/djhedges/exit_speed/gyroscope_test.py
   - python3 /home/travis/build/djhedges/exit_speed/labjack_test.py
   - python3 /home/travis/build/djhedges/exit_speed/lap_lib_test.py
