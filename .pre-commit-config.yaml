@@ -1,4 +1,22 @@
 repos:
+-   repo: local
+    hooks:
+    -   id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        require_serial: true
+        args:
+          - --ignore-patterns=.*pb2.*
+    -   id: pytype
+        name: pytype
+        entry: pytype
+        language: python
+        types: [python]
+        #        require_serial: true
+        args:
+          - --config=./.pytype.cfg
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
@@ -11,12 +29,6 @@ repos:
     -   id: double-quote-string-fixer
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
--   repo: https://github.com/pycqa/pylint
-    rev: pylint-2.6.0
-    hooks:
-    -  id: pylint
-       args:
-         - --ignore-patterns=.*pb2.*
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v2.6.0
     hooks:
