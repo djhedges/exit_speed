@@ -29,7 +29,7 @@ SECRET_LOCAL_ID = (
     'projects/794720490237/secrets/db-conn-local-args/versions/latest')
 
 
-def InitPool():
+def InitPool() -> sqlalchemy.engine.base.Engine:
   if os.getenv('GOOGLE_CLOUD_PROJECT'):
     instance_manager.StartInstance()
     local_args = secret_manager.GetSecret(SECRET_LOCAL_ID)
