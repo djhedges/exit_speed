@@ -15,13 +15,12 @@
 """Unitests for timescale.py"""
 import unittest
 
+import gps_pb2
 import mock
 import psycopg2
 import testing.postgresql
-from absl.testing import absltest
-
-import gps_pb2
 import timescale
+from absl.testing import absltest
 
 Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
 

@@ -18,9 +18,8 @@ from typing import List
 from typing import Text
 
 import pandas as pd
-from psycopg2 import sql
-
 from dashboard import db_conn
+from psycopg2 import sql
 
 
 def GetTracks() -> pd.DataFrame:

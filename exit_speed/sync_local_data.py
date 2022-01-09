@@ -17,16 +17,15 @@ import os
 from typing import List
 from typing import Text
 
-import psycopg2
-from absl import app
-from absl import flags
-from absl import logging
-
 import cleanup_timescale
 import data_logger
+import psycopg2
 import replay_data
 import timescale
 import tracks
+from absl import app
+from absl import flags
+from absl import logging
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.

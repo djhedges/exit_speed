@@ -17,10 +17,9 @@ import time
 import unittest
 
 import mock
+import tire_temperature
 from absl.testing import absltest
 from mlx import mlx90640
-
-import tire_temperature
 
 def _CreateRawFrame():
   frame = []

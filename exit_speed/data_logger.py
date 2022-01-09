@@ -23,10 +23,9 @@ import re
 from typing import Generator
 from typing import Text
 
+import gps_pb2
 from absl import logging
 from google.protobuf import message
-
-import gps_pb2
 
 BYTE_ORDER = 'big'
 

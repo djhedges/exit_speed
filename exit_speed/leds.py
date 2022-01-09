@@ -20,13 +20,12 @@ from typing import Tuple
 
 import adafruit_dotstar
 import board
+import gps_pb2
 import numpy as np
 from absl import flags
 from absl import logging
 from gps import EarthDistanceSmall
 from sklearn.neighbors import BallTree
-
-import gps_pb2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('led_brightness', 0.5,

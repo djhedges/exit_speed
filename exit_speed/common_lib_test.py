@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright 2021 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,26 +12,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unitests for tracks."""
+"""Common library unittest."""
 import unittest
 
+import common_lib
+import gps_pb2
 from absl.testing import absltest
 
-import gps_pb2
-import tracks
 
-class TestTracks(unittest.TestCase):
-  """Gyroscope unittests."""
+class TestExitSpeed(unittest.TestCase):
+  """Common library unittest."""
 
-  def testFindClosestTrack(self):
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    distance, track, _ = tracks.FindClosestTrack(point)
-    self.assertEqual(65.64651548636733, distance)
-    self.assertEqual(track.name, 'Portland International Raceway')
-    self.assertEqual(point.lat, 45.595412)
-    self.assertEqual(point.lon, -122.693901)
+  def testPointDelta(self):
+    point_a = gps_pb2.Point()
+    point_b = gps_pb2.Point()
+    point_a.lat = 1.1
+    point_b.lat = 2.2
+    point_a.lon = -1.1
+    point_b.lon = -2.2
+    self.assertEqual(171979.02735070087,
+                     common_lib.PointDelta(point_a, point_b))
 
 
 if __name__ == '__main__':

@@ -17,10 +17,9 @@ import os
 import tempfile
 import unittest
 
-from absl.testing import absltest
-
 import data_logger
 import gps_pb2
+from absl.testing import absltest
 
 
 class TestDataLogger(unittest.TestCase):

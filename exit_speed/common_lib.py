@@ -14,7 +14,6 @@
 # limitations under the License.
 """Common libaries."""
 import gps
-
 import gps_pb2
 
 

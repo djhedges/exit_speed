@@ -16,11 +16,11 @@
 import os
 import time
 
+import data_logger
 from absl import app
 from absl import flags
 from absl import logging
 
-import data_logger
 import exit_speed
 
 FLAGS = flags.FLAGS

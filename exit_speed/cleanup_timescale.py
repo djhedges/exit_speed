@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Used to cleanup database entries created during testing."""
+import timescale
 from absl import app
 from absl import flags
 from absl import logging
-
-import timescale
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer('min_lap_duration_ms', 60 * 1000,

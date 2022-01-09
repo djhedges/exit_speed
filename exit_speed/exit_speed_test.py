@@ -18,15 +18,14 @@ import unittest
 
 import fake_rpi
 import gps
+import gps_pb2
+import labjack
 import mock
 import psycopg2
 import pytz
+import timescale
 from absl import flags
 from absl.testing import absltest
-
-import gps_pb2
-import labjack
-import timescale
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO

@@ -22,10 +22,9 @@ import gps
 import mock
 import psycopg2
 import testing.postgresql
+import timescale
 from absl import flags
 from absl.testing import absltest
-
-import timescale
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO

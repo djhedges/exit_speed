@@ -16,27 +16,26 @@
 import datetime
 import os
 
-import geohash
-import gps
-import sdnotify
-import u3
-from absl import app
-from absl import flags
-from absl import logging
-
 import accelerometer
 import common_lib
 import config_lib
 import data_logger
+import geohash
+import gps
 import gps_pb2
 import gyroscope
 import labjack
 import lap_lib
 import leds
+import sdnotify
 import timescale
 import tire_temperature
 import tracks
+import u3
 import wbo2
+from absl import app
+from absl import flags
+from absl import logging
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',

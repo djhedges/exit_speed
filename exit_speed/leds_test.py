@@ -19,11 +19,10 @@ import time
 import unittest
 
 import fake_rpi
+import gps_pb2
 import mock
 from absl import flags
 from absl.testing import absltest
-
-import gps_pb2
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)

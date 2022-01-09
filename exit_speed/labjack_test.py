@@ -15,12 +15,11 @@
 """Unitests for Labjack."""
 import unittest
 
+import config_lib
+import labjack
 import mock
 import u3
 from absl.testing import absltest
-
-import config_lib
-import labjack
 
 
 class TestLabjack(unittest.TestCase):

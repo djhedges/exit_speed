@@ -14,9 +14,8 @@
 """Library for starting/stopping SQL & VM instances."""
 import logging
 
-from googleapiclient import discovery
-
 from dashboard import secret_manager
+from googleapiclient import discovery
 
 # Obscuring the project id.  This is probably overkill but this code is public.
 SECRET_PROJECT_ID = (

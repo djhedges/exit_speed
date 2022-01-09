@@ -15,12 +15,11 @@
 """Unitests for wbo2.py"""
 import unittest
 
+import config_lib
 import mock
 import serial
-from absl.testing import absltest
-
-import config_lib
 import wbo2
+from absl.testing import absltest
 
 TEST_FRAME = (b'Z\xa5\x08\x0c\xf8\x0f\xff \x00\x020\x01`\x03\xd0\x00\x15\x00'
               b'\x1a\x00 \x01\xa4\x00\x00\x03\x00i')
@@ -76,7 +75,7 @@ class TestWBO2(unittest.TestCase):
             wbo2.GetBytes(TEST_FRAME, 'user_3'))
 
   def testAddConfigValues(self):
-    config = config_lib.LoadConfig('etc/corrado.yaml')
+    config = config_lib.LoadConfig('../etc/corrado.yaml')
     interface = wbo2.WBO2(config, start_process=False)
     keys = {'afr': None, 'rpm': None, 'tps_voltage': None}.keys()
     self.assertEqual(keys, interface.values.keys())

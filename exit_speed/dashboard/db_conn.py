@@ -15,7 +15,6 @@
 import os
 
 import sqlalchemy
-
 from dashboard import instance_manager
 from dashboard import secret_manager
 

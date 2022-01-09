@@ -15,12 +15,11 @@
 """Unitests for lab_lib.py"""
 import unittest
 
-import mock
-from absl.testing import absltest
-
 import common_lib
 import gps_pb2
 import lap_lib
+import mock
+from absl.testing import absltest
 
 
 
