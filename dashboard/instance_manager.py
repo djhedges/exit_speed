@@ -24,7 +24,7 @@ SECRET_PROJECT_ID = (
 INSTANCE_NAME = 'exit-speed'
 
 
-def IsSQLInstanceUp():
+def IsSQLInstanceUp() -> bool:
   service = discovery.build('sqladmin', 'v1beta4')
   project = secret_manager.GetSecret(SECRET_PROJECT_ID)
   request = service.instances().get(project=project, instance=INSTANCE_NAME)
