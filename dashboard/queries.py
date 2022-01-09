@@ -14,9 +14,10 @@
 """Dashboard queries."""
 import textwrap
 
-import db_conn
 import pandas as pd
 from psycopg2 import sql
+
+from dashboard import db_conn
 
 
 def GetTracks():

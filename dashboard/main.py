@@ -16,7 +16,6 @@ import urllib
 
 import dash
 import plotly.express as px
-import queries
 from dash import dash_table
 from dash import dcc
 from dash import html
@@ -24,6 +23,8 @@ from dash.dependencies import ALL
 from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
+
+from dashboard import queries
 
 app = dash.Dash(__name__)
 server = app.server

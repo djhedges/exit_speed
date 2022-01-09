@@ -14,9 +14,10 @@
 """Database connection library."""
 import os
 
-import instance_manager
-import secret_manager
 import sqlalchemy
+
+from dashboard import instance_manager
+from dashboard import secret_manager
 
 # Local args used when running a development instance.
 # {'password': '',
