@@ -88,7 +88,6 @@ def ParseURL(pathname):
   Input('points-dropdown', 'value'),
 )
 def UpdateGraph(time_slider, point_values):
-  print(point_values)
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_slider)
   if not isinstance(point_values, list):
