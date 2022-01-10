@@ -38,7 +38,9 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
 # pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS
-FLAGS.set_default('config_path', 'testdata/test_config.yaml')
+FLAGS.set_default('config_path',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    'testdata/test_config.yaml'))
 FLAGS.set_default('data_log_path', '/tmp')
 FLAGS.set_default('filepath', '/dev/null')
 
@@ -57,7 +59,9 @@ class TestReplayData(unittest.TestCase):
     self._AddMock(adafruit_dotstar, 'DotStar')
     self._AddMock(gps, 'gps')
     self.postgresql = Postgresql()
-    with open('testdata/timescale_schema') as schema_file:
+    with open(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        'testdata/timescale_schema')) as schema_file:
       statements = ''.join(schema_file.readlines())
     self.conn = psycopg2.connect(**self.postgresql.dsn())
     self.cursor = self.conn.cursor()
@@ -75,8 +79,8 @@ class TestReplayData(unittest.TestCase):
 
   def testEndToEnd(self):
     test_data_file = os.path.join(
-            FLAGS.test_srcdir,
-            'testdata/test_parking_lot_20hz_2020-06-11T22_1.data')
+            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            'testdata/test_parking_lot_20hz_2020-06-11T22_1.data'))
     if test_data_file.endswith('.data'):
       with self.subTest(name=test_data_file):
         es = replay_data.ReplayLog(test_data_file)
