@@ -17,9 +17,8 @@ import csv
 import datetime
 import time
 
+import main
 from gps import client
-
-import exit_speed
 
 
 def _ReadCsvFile(filepath):
@@ -62,7 +61,7 @@ def ConvertTraqmateToProto(filepath):
   Returns:
     A exit speed session proto.
   """
-  es = exit_speed.ExitSpeed()
+  es = main.ExitSpeed()
   start = time.time()
   first_elapsed = None
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):

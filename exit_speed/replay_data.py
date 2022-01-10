@@ -17,11 +17,10 @@ import os
 import time
 
 import data_logger
+import main as exit_speed_main
 from absl import app
 from absl import flags
 from absl import logging
-
-import exit_speed
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.
@@ -40,7 +39,7 @@ def ReplayLog(filepath, include_sleep=False):
                    processed in real time.
 
   Returns:
-    A exit_speed.ExitSpeed instance that has replayed the given data.
+    A exit_speed_main.ExitSpeed instance that has replayed the given data.
   """
   logging.info('Replaying %s', filepath)
   logger = data_logger.Logger(filepath)
@@ -52,7 +51,7 @@ def ReplayLog(filepath, include_sleep=False):
     session_start = None
   else:
     FLAGS.set_default('commit_cycle', 10000)
-  es = exit_speed.ExitSpeed(live_data=not include_sleep)
+  es = exit_speed_main.ExitSpeed(live_data=not include_sleep)
   es.config['car'] = os.path.split(os.path.dirname(filepath))[1]
   for point in points:
     if include_sleep:

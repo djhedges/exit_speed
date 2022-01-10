@@ -35,7 +35,7 @@ import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_dotstar
-  import exit_speed
+  import main
 # pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS
@@ -62,7 +62,7 @@ class TestExitSpeed(unittest.TestCase):
   def testGetLogFilePrefix(self):
     point = gps_pb2.Point()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     expected = '/tmp/Corrado/2020-05-23T17:47:44.100000'
     self.assertEqual(expected, es.GetLogFilePrefix(point, tz=pytz.UTC))
 
@@ -75,7 +75,7 @@ class TestExitSpeed(unittest.TestCase):
     point.lat = 12.000001
     point.lon = 23.000002
     point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.lap = gps_pb2.Lap()
     es.lap.points.extend([prior_point, point])
     es.point = point
@@ -94,7 +94,7 @@ class TestExitSpeed(unittest.TestCase):
     point.lat = 12.000001
     point.lon = 23.000002
     point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.lap = gps_pb2.Lap()
     es.lap.points.extend([prior_point, point])
     es.point = point
@@ -102,7 +102,7 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(2856514.6203466402, point.start_finish_distance)
 
   def testSetLapTime(self):
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     first_point = gps_pb2.Point()
     first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     last_point = gps_pb2.Point()
@@ -138,7 +138,7 @@ class TestExitSpeed(unittest.TestCase):
     session.start_finish.lon = -122.694526
     lap = session.laps.add()
     lap.points.extend([point_a, point_b])
-    es = exit_speed.ExitSpeed(min_points_per_session=0)
+    es = main.ExitSpeed(min_points_per_session=0)
     es.point = point_c
     es.lap = lap
     es.session = session
@@ -153,7 +153,7 @@ class TestExitSpeed(unittest.TestCase):
     self.assertNotIn(point_c, es.session.laps[0].points)
 
   def testProcessLap(self):
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.point = es.lap.points.add()
     es.ProcessLap()
     self.assertTrue(es.lap.points)
@@ -163,7 +163,7 @@ class TestExitSpeed(unittest.TestCase):
     point.speed = 21
     lap = gps_pb2.Lap()
     session = gps_pb2.Session()
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.point = point
     es.session = session
     es.ProcessSession()
@@ -179,7 +179,7 @@ class TestExitSpeed(unittest.TestCase):
 
   def testReadLabjackValues(self):
     point = gps_pb2.Point()
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.ReadLabjackValues(point)
     with self.subTest(name='Labjack disabled'):
       self.assertFalse(point.labjack_temp_f)
@@ -208,7 +208,7 @@ class TestExitSpeed(unittest.TestCase):
         u'alt': 6.9,
         u'speed': 0.088,
         u'class': u'TPV'})
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.PopulatePoint(report)
     point = es.point
     self.assertEqual(point.lat, 14.2)
@@ -234,7 +234,7 @@ class TestExitSpeed(unittest.TestCase):
         u'alt': 6.9,
         u'speed': 0.088,
         u'class': u'TPV'})
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     with self.subTest(name='Populated Report'):
       self.assertTrue(es.CheckReportFields(report))
     with self.subTest(name='Empty Report'):
@@ -257,7 +257,7 @@ class TestExitSpeed(unittest.TestCase):
         u'alt': 6.9,
         u'speed': 0.088,
         u'class': u'TPV'})
-    es = exit_speed.ExitSpeed()
+    es = main.ExitSpeed()
     es.ProcessReport(report)
     point = es.point
     self.assertEqual(point.lat, 14.2)
