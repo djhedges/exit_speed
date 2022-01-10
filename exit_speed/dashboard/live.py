@@ -14,16 +14,21 @@
 # limitations under the License.
 """Live data dashboard."""
 import datetime
+import json
 import urllib
+from typing import Dict
 from typing import List
 from typing import Text
 from typing import Tuple
 
 import dash
+import dateutil
+import pandas as pd
 import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input
+from dash.dependencies import MATCH
 from dash.dependencies import Output
 
 from exit_speed.dashboard import queries
@@ -36,6 +41,8 @@ app.layout = html.Div(
   style={'display': 'grid'},
   children=[
     dcc.Location(id='url', refresh=False),
+    dcc.Store(id='max-time'),
+    dcc.Interval(id='interval', interval=15 * 1000, n_intervals=-1),
     dcc.Link('Home', href='/'),
     dcc.Slider(
       id='time-window',
@@ -54,13 +61,12 @@ app.layout = html.Div(
     ),
     dcc.Slider(
       id='refresh',
-      min=1,
+      min=3,
       max=60,
       value=3,
       step=5,
       tooltip={'placement': 'bottom', 'always_visible': True},
       marks={
-          1:  {'label': '1s'},
           3:  {'label': '3s'},
           5:  {'label': '5s'},
           10: {'label': '10s'},
@@ -117,12 +123,19 @@ def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
   return time_window, points, refresh
 
 
+def _GetMaxTime(laps_data: pd.DataFrame) -> Text:
+  max_time = laps_data['time'].max().to_pydatetime()
+  return json.dumps(max_time.isoformat())
+
+
 @app.callback(
   Output('graphs', 'children'),
+  Output('max-time', 'data'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(time_window: int, point_values: List[Text]) -> List[dcc.Graph]:
+def UpdateGraph(
+    time_window: int, point_values: List[Text]) -> Tuple[List[dcc.Graph], str]:
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_window)
   if not isinstance(point_values, list):
@@ -146,7 +159,48 @@ def UpdateGraph(time_window: int, point_values: List[Text]) -> List[dcc.Graph]:
                       figure=fig,
                       style={'display': 'inline-grid', 'width': '50%'})
     graphs.append(graph)
-  return graphs
+  return graphs, _GetMaxTime(laps_data)
+
+
+@app.callback(
+    Output('interval', 'interval'),
+    Input('refresh', 'value'),
+)
+def SetIntervalRefresh(refresh: int) -> int:
+  return refresh * 1000
+
+
+@app.callback(
+  Output({'type': 'graph', 'index': MATCH}, 'extendData'),
+  Input({'type': 'graph', 'index': MATCH}, 'id'),
+  Input('points-dropdown', 'value'),
+  Input('max-time', 'data'),
+  Input('interval', 'n_intervals'),
+  Input('refresh', 'value'),
+  prevent_initial_call=True,
+)
+def ExtendGraphData(
+    graph_id: Dict,
+    #figure: Dict,
+    point_values: List[Text],
+    max_time: str,
+    n_interval: int,
+    refresh: int):
+  if n_interval:
+    if not isinstance(point_values, list):
+      point_values = [point_values]
+    max_time = dateutil.parser.parse(json.loads(max_time))
+    start_time = max_time + datetime.timedelta(
+        seconds=n_interval * refresh)
+    point_value = point_values[graph_id['index']]
+    df = queries.GetLiveData(start_time, [point_value])
+    x_data = df['time'].astype(str).values
+    y_data = df[point_value].values
+    # Hover data.
+    customdata = df[['lap_id', 'lap_number']].values
+    return {'x': [x_data],
+            'y': [y_data],
+            'customdata': [customdata]}
 
 
 if __name__ == '__main__':
