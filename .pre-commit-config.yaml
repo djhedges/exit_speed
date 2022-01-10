@@ -6,6 +6,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
+        files: '.*.py$'
         args:
           - --ignore-patterns=.*pb2.*
     -   id: pytype
@@ -13,6 +14,7 @@ repos:
         entry: pytype
         language: python
         types: [python]
+        files: '.*.py$'
         args:
           - --config=./.pytype.cfg
 -   repo: https://github.com/pre-commit/pre-commit-hooks
