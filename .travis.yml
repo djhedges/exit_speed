@@ -31,7 +31,7 @@ script:
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/accelerometer_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/common_lib_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/data_logger_test.py
-  - python3 /home/travis/build/djhedges/exit_speed/exit_speed/exit_speed_test.py
+  - python3 /home/travis/build/djhedges/exit_speed/exit_speed/main_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/gyroscope_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/labjack_test.py
   - python3 /home/travis/build/djhedges/exit_speed/exit_speed/lap_lib_test.py
