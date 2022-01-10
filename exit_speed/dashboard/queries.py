@@ -18,8 +18,9 @@ from typing import List
 from typing import Text
 
 import pandas as pd
-from dashboard import db_conn
 from psycopg2 import sql
+
+from exit_speed.dashboard import db_conn
 
 
 def GetTracks() -> pd.DataFrame:

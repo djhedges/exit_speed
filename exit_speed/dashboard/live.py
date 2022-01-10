@@ -23,7 +23,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input
 from dash.dependencies import Output
-from dashboard import queries
+
+from exit_speed.dashboard import queries
 
 app = dash.Dash(__name__)
 server = app.server

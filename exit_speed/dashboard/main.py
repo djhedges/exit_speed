@@ -28,7 +28,8 @@ from dash.dependencies import ALL
 from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
-from dashboard import queries
+
+from exit_speed.dashboard import queries
 
 app = dash.Dash(__name__)
 server = app.server

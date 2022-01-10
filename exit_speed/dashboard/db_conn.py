@@ -15,8 +15,9 @@
 import os
 
 import sqlalchemy
-from dashboard import instance_manager
-from dashboard import secret_manager
+
+from exit_speed.dashboard import instance_manager
+from exit_speed.dashboard import secret_manager
 
 # Local args used when running a development instance.
 # {'password': '',
