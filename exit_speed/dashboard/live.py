@@ -37,13 +37,14 @@ app.layout = html.Div(
     dcc.Location(id='url', refresh=False),
     dcc.Link('Home', href='/'),
     dcc.Slider(
-      id='time-slider',
-      min=5,
+      id='time-window',
+      min=1,
       max=60,
       step=5,
       value=15,
       tooltip={'placement': 'bottom', 'always_visible': True},
       marks={
+          1:  {'label': '1m'},
           5:  {'label': '5m'},
           10: {'label': '10m'},
           15: {'label': '15m'},
@@ -64,11 +65,13 @@ app.layout = html.Div(
 @app.callback(
   Output('url', 'href'),
   Input('url', 'href'),
+  Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href: Text, points: List[Text]):
-  args = {'points': points}
+def UpdateURL(href: Text, time_window: int, points: List[Text]):
+  args = {'time_window': time_window,
+          'points': points}
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
@@ -81,18 +84,18 @@ def ParseURL(pathname: Text) -> List[Text]:
   params = urllib.parse.parse_qs(pathname[1:])
   points = params.get(
               'points',
-              ['speed', 'accelerometer_z'])
+              ['speed', 'rpm'])
   return points
 
 
 @app.callback(
   Output('graphs', 'children'),
-  Input('time-slider', 'value'),  # lap_ids
+  Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
 )
-def UpdateGraph(time_slider: int, point_values: List[Text]) -> List[dcc.Graph]:
+def UpdateGraph(time_window: int, point_values: List[Text]) -> List[dcc.Graph]:
   now = datetime.datetime.today()
-  start_time = now - datetime.timedelta(minutes=time_slider)
+  start_time = now - datetime.timedelta(minutes=time_window)
   if not isinstance(point_values, list):
     point_values = [point_values]
   graphs = []
