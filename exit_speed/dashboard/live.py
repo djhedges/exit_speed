@@ -84,11 +84,13 @@ app.layout = html.Div(
   Input('url', 'href'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
+  Input('refresh', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href: Text, time_window: int, points: List[Text]):
+def UpdateURL(href: Text, time_window: int, points: List[Text], refresh: int):
   args = {'time_window': time_window,
-          'points': points}
+          'points': points,
+          'refresh': refresh}
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
