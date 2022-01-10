@@ -17,6 +17,7 @@ import datetime
 import urllib
 from typing import List
 from typing import Text
+from typing import Tuple
 
 import dash
 import plotly.express as px
@@ -41,7 +42,6 @@ app.layout = html.Div(
       min=1,
       max=60,
       step=5,
-      value=15,
       tooltip={'placement': 'bottom', 'always_visible': True},
       marks={
           1:  {'label': '1m'},
@@ -76,16 +76,21 @@ def UpdateURL(href: Text, time_window: int, points: List[Text]):
 
 
 @app.callback(
+  Output('time-window', 'value'),
   Output('points-dropdown', 'value'),
   Input('url', 'pathname'),
 )
-def ParseURL(pathname: Text) -> List[Text]:
+def ParseURL(pathname: Text) -> Tuple[int, List[Text]]:
   # Strip a leading "/" with [1:]
   params = urllib.parse.parse_qs(pathname[1:])
+  if params.get('time_window'):
+    time_window = int(params.get('time_window')[0])
+  else:
+    time_window = 15
   points = params.get(
               'points',
               ['speed', 'rpm'])
-  return points
+  return time_window, points
 
 
 @app.callback(
