@@ -97,19 +97,24 @@ def UpdateURL(href: Text, time_window: int, points: List[Text], refresh: int):
 @app.callback(
   Output('time-window', 'value'),
   Output('points-dropdown', 'value'),
+  Output('refresh', 'value'),
   Input('url', 'pathname'),
 )
-def ParseURL(pathname: Text) -> Tuple[int, List[Text]]:
+def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
   # Strip a leading "/" with [1:]
   params = urllib.parse.parse_qs(pathname[1:])
   if params.get('time_window'):
     time_window = int(params.get('time_window')[0])
   else:
     time_window = 15
+  if params.get('refresh'):
+    refresh = int(params.get('refresh')[0])
+  else:
+    refresh = 3
   points = params.get(
               'points',
               ['speed', 'rpm'])
-  return time_window, points
+  return time_window, points, refresh
 
 
 @app.callback(
