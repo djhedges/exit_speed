@@ -52,6 +52,23 @@ app.layout = html.Div(
           60: {'label': '60m'},
       },
     ),
+    dcc.Slider(
+      id='refresh',
+      min=1,
+      max=60,
+      value=3,
+      step=5,
+      tooltip={'placement': 'bottom', 'always_visible': True},
+      marks={
+          1:  {'label': '1s'},
+          3:  {'label': '3s'},
+          5:  {'label': '5s'},
+          10: {'label': '10s'},
+          15: {'label': '15s'},
+          30: {'label': '30s'},
+          60: {'label': '60s'},
+      },
+    ),
     dcc.Dropdown(
       id='points-dropdown',
       options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
