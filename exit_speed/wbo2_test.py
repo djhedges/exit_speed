@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for wbo2.py"""
+import os
 import unittest
 
 import config_lib
@@ -75,7 +76,9 @@ class TestWBO2(unittest.TestCase):
             wbo2.GetBytes(TEST_FRAME, 'user_3'))
 
   def testAddConfigValues(self):
-    config = config_lib.LoadConfig('../etc/corrado.yaml')
+    config = config_lib.LoadConfig(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            '../etc/corrado.yaml'))
     interface = wbo2.WBO2(config, start_process=False)
     keys = {'afr': None, 'rpm': None, 'tps_voltage': None}.keys()
     self.assertEqual(keys, interface.values.keys())
