@@ -9,7 +9,7 @@ Description=ExitSpeedDashboard
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/nice 10 /usr/bin/python3 /home/pi/git/exit_speed/dashboard/main.py
+ExecStart=/usr/bin/nice 10 /usr/bin/python3 /home/pi/git/exit_speed/exit_speed/dashboard/main.py
 Restart=always
 RestartSec=3
 
