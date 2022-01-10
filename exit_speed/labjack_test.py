@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for Labjack."""
+import os
 import unittest
 
 import config_lib
@@ -27,7 +28,9 @@ class TestLabjack(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
-    config = config_lib.LoadConfig('testdata/test_labjack_config.yaml')
+    config = config_lib.LoadConfig(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            'testdata/test_labjack_config.yaml'))
     self.labjack = labjack.Labjack(config, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
     self.labjack.u3 = self.mock_u3

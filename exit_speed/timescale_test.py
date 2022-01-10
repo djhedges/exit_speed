@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for timescale.py"""
+import os
 import unittest
 
 import gps_pb2
@@ -34,7 +35,10 @@ class TestTimescale(unittest.TestCase):
 
   def setUp(self):
     self.postgresql = Postgresql()
-    with open('testdata/timescale_schema') as schema_file:
+    schema_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'testdata/timescale_schema')
+    with open(schema_path) as schema_file:
       statements = ''.join(schema_file.readlines())
     conn = psycopg2.connect(**self.postgresql.dsn())
     cursor = conn.cursor()
