@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ExitSpeed unittest."""
+import os
 import sys
 import unittest
 
@@ -39,7 +40,9 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
 # pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS
-FLAGS.set_default('config_path', 'testdata/test_config.yaml')
+FLAGS.set_default('config_path',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        'testdata/test_config.yaml'))
 FLAGS.set_default('data_log_path', '/tmp')
 
 
