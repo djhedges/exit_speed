@@ -204,9 +204,12 @@ def ExtendGraphData(
     y_data = lap_data[point_value].values
     # Hover data.
     customdata = lap_data[['lap_id', 'lap_number']].values
-    return {'x': [x_data],
-            'y': [y_data],
-            'customdata': [customdata]}, [0]
+    return {'updateData': {'x': [x_data],
+                           'y': [y_data],
+                           'customdata': [customdata]},
+            'traceIndices': [0],
+            # Makes the assumption data was logged at 10hz.
+            'maxPoints': 10 * 60 * refresh}
 
 
 def main(unused_argv):
