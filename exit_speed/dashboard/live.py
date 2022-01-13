@@ -149,7 +149,6 @@ def UpdateGraph(
       title=point_value,
       x='time',
       y=point_value,
-      color='lap_number',
       hover_data=['lap_id', 'lap_number', point_value])
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(fixedrange=True)
@@ -170,48 +169,9 @@ def SetIntervalRefresh(refresh: int) -> int:
   return refresh * 1000
 
 
-def _FindDataIndexes(figure, new_data):
-  figure_lap_index = {}
-  new_lap_index = {}
-  figure_index = 0
-  for figure_data in figure['data']:
-    _, lap_number = figure_data['customdata'][1]
-    figure_lap_index[lap_number] = figure_index
-    figure_index += 1
-  lap_index = figure_index
-  for lap_number in new_data['lap_number'].unique():
-    if figure_lap_index.get(lap_number):
-      lap_index = figure_lap_index.get(lap_number)
-    else:
-      # This happens when crossing start/finish and Dash is not happy.
-      # Bug atm.
-      lap_index += 1
-    new_lap_index[lap_number] = lap_index
-  return new_lap_index
-
-
-def _FormatNewData(figure, new_data, point_value):
-  x_data = []
-  y_data = []
-  customdata = []
-  new_lap_index = _FindDataIndexes(figure, new_data)
-  for _ in range(max(new_lap_index.values()) + 1):
-    x_data.append([])
-    y_data.append([])
-    customdata.append([])
-  for lap_number in new_data['lap_number'].unique():
-    lap_index = new_lap_index[lap_number]
-    lap_data = new_data[new_data['lap_number'] == lap_number]
-    x_data[lap_index] = lap_data['time'].astype(str).values
-    y_data[lap_index] = lap_data[point_value].values
-    # Hover data.
-    customdata[lap_index] = lap_data[['lap_id', 'lap_number']].values
-  return x_data, y_data, customdata
-
 @app.callback(
   Output({'type': 'graph', 'index': MATCH}, 'extendData'),
   Input({'type': 'graph', 'index': MATCH}, 'id'),
-  Input({'type': 'graph', 'index': MATCH}, 'figure'),
   Input('points-dropdown', 'value'),
   Input('max-time', 'data'),
   Input('interval', 'n_intervals'),
@@ -220,7 +180,6 @@ def _FormatNewData(figure, new_data, point_value):
 )
 def ExtendGraphData(
     graph_id: Dict,
-    figure: Dict,
     point_values: List[Text],
     max_time: str,
     n_interval: int,
@@ -232,11 +191,14 @@ def ExtendGraphData(
     start_time = max_time + datetime.timedelta(
         seconds=n_interval * refresh)
     point_value = point_values[graph_id['index']]
-    df = queries.GetLiveData(start_time, [point_value])
-    x_data, y_data, customdata = _FormatNewData(figure, df, point_value)
-    return {'x': x_data,
-            'y': y_data,
-            'customdata': customdata}, [3]
+    lap_data = queries.GetLiveData(start_time, [point_value])
+    x_data = lap_data['time'].astype(str).values
+    y_data = lap_data[point_value].values
+    # Hover data.
+    customdata = lap_data[['lap_id', 'lap_number']].values
+    return {'x': [x_data],
+            'y': [y_data],
+            'customdata': [customdata]}, [0]
 
 
 if __name__ == '__main__':
