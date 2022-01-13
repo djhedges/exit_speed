@@ -52,8 +52,6 @@ class TestTimescale(unittest.TestCase):
         'Corrado',
         start_process=False,
         )
-        #go_binary_and_args=['/home/pi/go/bin/exit_speed',
-        #                    '--timescale_db_spec', self.postgresql.url()])
     self.pusher.timescale_conn = self.conn
     self.pusher.track = 'Test Parking Lot'
     self.pusher.session_time = point.time

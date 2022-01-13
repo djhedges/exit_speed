@@ -16,8 +16,6 @@
 // Compile with protoc -I ./ --python_out ./ gps.proto
 syntax = "proto3";
 
-option go_package = "github.com/djhedges/exit_speed/gps_go_proto;gps_go_proto";
-
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
