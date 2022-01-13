@@ -22,6 +22,8 @@ from typing import Tuple
 import dash
 import pandas as pd
 import plotly.express as px
+from absl import app as absl_app
+from absl import flags
 from dash import dash_table
 from dash import dcc
 from dash import html
@@ -31,6 +33,12 @@ from dash.dependencies import Output
 from dash.dependencies import State
 
 from exit_speed.dashboard import queries
+
+FLAGS = flags.FLAGS
+flags.DEFINE_bool(
+    'debug', True,
+    'Set to true to enable auto reloading of Python code at the expense of '
+    'high CPU load.')
 
 app = dash.Dash(__name__)
 server = app.server
@@ -220,5 +228,9 @@ def LinkedZoom(
   return relayout_data, figure_states
 
 
+def main(unused_argv):
+  app.run_server(debug=FLAGS.debug)
+
+
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  absl_app.run(main)

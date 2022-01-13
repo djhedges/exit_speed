@@ -25,6 +25,8 @@ import dash
 import dateutil
 import pandas as pd
 import plotly.express as px
+from absl import app as absl_app
+from absl import flags
 from dash import dcc
 from dash import html
 from dash.dependencies import Input
@@ -32,6 +34,12 @@ from dash.dependencies import MATCH
 from dash.dependencies import Output
 
 from exit_speed.dashboard import queries
+
+FLAGS = flags.FLAGS
+flags.DEFINE_bool(
+    'debug', True,
+    'Set to true to enable auto reloading of Python code at the expense of '
+    'high CPU load.')
 
 app = dash.Dash(__name__)
 server = app.server
@@ -201,5 +209,9 @@ def ExtendGraphData(
             'customdata': [customdata]}, [0]
 
 
+def main(unused_argv):
+  app.run_server(debug=FLAGS.debug)
+
+
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  absl_app.run(main)
