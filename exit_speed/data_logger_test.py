@@ -124,6 +124,21 @@ class TestDataLogger(unittest.TestCase):
     expected = [self.point]
     self.assertEqual(expected, file_points)
 
+  def testWriteAndReadBackProcess(self):
+    _, file_path = tempfile.mkstemp(suffix='_1.data')
+    file_path = '/tmp/test_foo'
+    logger_proc = data_logger.LoggerProcess(file_path, flush_on_write=True)
+    logger_proc.start()
+    logger_proc.WriteProto(self.point)
+    logger_proc.WriteProto(self.point)
+    logger_proc.terminate()
+    logger = data_logger.Logger(file_path)
+    file_points = []
+    for file_point in logger.ReadProtos():
+      file_points.append(file_point)
+    expected = [self.point, self.point]
+    self.assertEqual(expected, file_points)
+
 
 if __name__ == '__main__':
   absltest.main()
