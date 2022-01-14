@@ -15,6 +15,7 @@
 """DataLogger unittest."""
 import os
 import tempfile
+import time
 import unittest
 
 import data_logger
@@ -131,6 +132,8 @@ class TestDataLogger(unittest.TestCase):
     logger_proc.start()
     logger_proc.WriteProto(self.point)
     logger_proc.WriteProto(self.point)
+    # Pause for the infinitesimal between the put and get between processes.
+    time.sleep(1)
     logger_proc.stop_process_signal.value = True
     logger_proc.join()
     logger = data_logger.Logger(file_path)
