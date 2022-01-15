@@ -40,8 +40,9 @@ def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
 class SensorBase(object):
   """Base class for sensor processes."""
 
-  def __init__(self, start_process: bool=True):
-    self.point_queue =  multiprocessing.Queue()
+  def __init__(
+      self, point_queue: multiprocessing.Queue, start_process: bool=True):
+    self.point_queue = point_queue
     self._stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
       self._process = multiprocessing.Process(
@@ -52,6 +53,10 @@ class SensorBase(object):
 
   def StopProcess(self):
     self._stop_process_signal.value = True
+
+  def Join(self):
+    self.StopProcess()
+    self._process.join()
 
   def Loop(self, point_queue: multiprocessing.Queue, stop_process_signal):
     raise NotImplementedError('Subclasses should override this method.')

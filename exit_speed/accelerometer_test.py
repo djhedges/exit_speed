@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for accelerometer.py"""
+import multiprocessing
 import sys
 import unittest
 
@@ -77,10 +78,10 @@ class TestAccelerometer(unittest.TestCase):
         0.3924229, -0.5072783912, 10.29870)
     with mock.patch.object(accelerometer, 'Accelerometer') as mock_accel:
       mock_accel.return_value = self.accel
-      proc = accelerometer.AccelerometerProcess()
+      proc = accelerometer.AccelerometerProcess(multiprocessing.Queue())
       while proc.point_queue.empty():
         pass
-      proc.StopProcess()
+      proc.Join()
       self.assertGreaterEqual(proc.point_queue.qsize(), 0)
 
 
