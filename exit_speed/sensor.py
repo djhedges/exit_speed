@@ -52,9 +52,11 @@ class SensorBase(object):
       self._process.start()
 
   def StopProcess(self):
+    """Sets the stop process signal."""
     self._stop_process_signal.value = True
 
   def Join(self):
+    """Sends the stop process signal and joins the process until it finishes."""
     self.StopProcess()
     self._process.join()
 
