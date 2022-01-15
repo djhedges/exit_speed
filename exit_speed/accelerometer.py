@@ -14,6 +14,7 @@
 # limitations under the License.
 """FXOS8700 accelerometer."""
 import math
+import multiprocessing
 import time
 from typing import Text
 from typing import Tuple
@@ -21,6 +22,9 @@ from typing import Tuple
 import adafruit_fxos8700
 import board
 import busio
+import config_lib
+import gps_pb2
+import sensor
 from absl import app
 
 
@@ -69,6 +73,29 @@ class Accelerometer(object):
         math.pi)
     roll = (math.atan2(-y_gs, z_gs) * 180)  / math.pi
     return pitch, roll
+
+
+class AccelerometerProcess(sensor.SensorBase):
+  """Populates the SensorBase.point_queue with accelerometer values per loop."""
+
+  def Loop(
+      self,
+      point_queue: multiprocessing.Queue,
+      stop_process_signal: multiprocessing.Value):
+    """Adds point data with accelerometer values to point queue."""
+    accel = Accelerometer()
+    config = config_lib.LoadConfig()
+    frequency_hz = int(config.get('accelerometer').get('frequency_hz'))
+    while not stop_process_signal.value:
+      cycle_time = time.time()
+      x, y, z = accel.GetGForces()
+      point = gps_pb2.Point()
+      point.accelerometer_x = x
+      point.accelerometer_y = y
+      point.accelerometer_z = z
+      point_queue.put(point)
+      time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
+
 
 
 def main(unused_argv):

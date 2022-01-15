@@ -1,5 +1,6 @@
 car: Corrado
-accelerometer: True
+accelerometer:
+  frequency_hz: 1
 gyroscope: True
 leds: True
 timescale: True
