@@ -78,8 +78,9 @@ class TestAccelerometer(unittest.TestCase):
         0.3924229, -0.5072783912, 10.29870)
     with mock.patch.object(accelerometer, 'Accelerometer') as mock_accel:
       mock_accel.return_value = self.accel
+      config = {'accelerometer': {'frequency_hz': 10}}
       point_queue = multiprocessing.Queue()
-      proc = accelerometer.AccelerometerProcess(point_queue)
+      proc = accelerometer.AccelerometerProcess(config, point_queue)
       while point_queue.empty():
         pass
       proc.Join()

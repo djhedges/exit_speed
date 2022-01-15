@@ -21,7 +21,6 @@ from typing import Tuple
 import adafruit_fxos8700
 import board
 import busio
-import config_lib
 import gps_pb2
 import sensor
 from absl import app
@@ -80,8 +79,8 @@ class AccelerometerProcess(sensor.SensorBase):
   def Loop(self):
     """Adds point data with accelerometer values to point queue."""
     accel = Accelerometer()
-    config = config_lib.LoadConfig()
-    frequency_hz = int(config.get('accelerometer').get('frequency_hz'))
+    frequency_hz = int(
+        self.config.get('accelerometer', {}).get('frequency_hz')) or 10
     while not self.stop_process_signal.value:
       cycle_time = time.time()
       x, y, z = accel.GetGForces()

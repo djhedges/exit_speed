@@ -20,6 +20,7 @@ https://developers.google.com/protocol-buffers/docs/techniques
 import datetime
 import multiprocessing
 import time
+from typing import Dict
 
 import gps_pb2
 
@@ -44,7 +45,10 @@ class SensorBase(object):
   """Base class for sensor processes."""
 
   def __init__(
-      self, point_queue: multiprocessing.Queue, start_process: bool=True):
+      self,
+      config: Dict,
+      point_queue: multiprocessing.Queue, start_process: bool=True):
+    self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:

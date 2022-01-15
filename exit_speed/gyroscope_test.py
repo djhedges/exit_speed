@@ -54,8 +54,9 @@ class TestGyroscope(unittest.TestCase):
         0.024816400301794373, -0.27052603405912107, -0.9467047653591117)
     with mock.patch.object(gyroscope, 'Gyroscope') as mock_gyro:
       mock_gyro.return_value = self.gyroscope
+      config = {'gyroscope': {'frequency_hz': 10}}
       point_queue = multiprocessing.Queue()
-      proc = gyroscope.GyroscopeProcess(point_queue)
+      proc = gyroscope.GyroscopeProcess(config, point_queue)
       while point_queue.empty():
         pass
       proc.Join()

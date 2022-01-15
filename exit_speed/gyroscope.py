@@ -20,7 +20,6 @@ from typing import Tuple
 import adafruit_fxas21002c
 import board
 import busio
-import config_lib
 import gps_pb2
 import sensor
 from absl import app
@@ -47,8 +46,8 @@ class GyroscopeProcess(sensor.SensorBase):
   def Loop(self):
     """Adds point data with gryoscope values to point queue."""
     gyro = Gyroscope()
-    config = config_lib.LoadConfig()
-    frequency_hz = int(config.get('gyroscope').get('frequency_hz'))
+    frequency_hz = int(
+        self.config.get('gyroscope', {}).get('frequency_hz')) or 10
     while not self.stop_process_signal.value:
       cycle_time = time.time()
       x, y, z = gyro.GetRotationalValues()
