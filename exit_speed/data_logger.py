@@ -18,7 +18,6 @@ Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
 import glob
-import multiprocessing
 import os
 import re
 from typing import Generator
@@ -85,14 +84,12 @@ class Logger(object):
       self._SetCurrentFile()
     return self.current_file
 
-  def WriteProto(self, proto: gps_pb2.Point, flush_on_write=False):
+  def WriteProto(self, proto: gps_pb2.Point):
     proto_bytes = proto.SerializePartialToString()
     proto_len = len(proto_bytes)
     data_file = self.GetFile(proto_len)
     data_file.write(proto_len.to_bytes(
       self.current_proto_len, BYTE_ORDER) + proto_bytes)
-    if flush_on_write:
-      data_file.flush()
 
   def ReadProtos(self) -> Generator[gps_pb2.Point, None, None]:
     files_to_read = glob.glob(self.file_prefix + '*.data')
@@ -121,23 +118,3 @@ class Logger(object):
               break
           else:
             break
-
-
-class LoggerProcess(multiprocessing.Process):
-  """Multiprocessing interface for the logger."""
-
-  def __init__(self, file_prefix_or_name: Text, flush_on_write: bool = False):
-    self.file_prefix_or_name = file_prefix_or_name
-    self.flush_on_write = flush_on_write
-    self.point_queue = multiprocessing.SimpleQueue()
-    self._logger = None
-    super().__init__(daemon=True)
-
-  def WriteProto(self, proto):
-    self.point_queue.put(proto)
-
-  def run(self):
-    self._logger = Logger(self.file_prefix_or_name)
-    while True:
-      proto = self.point_queue.get()
-      self._logger.WriteProto(proto, flush_on_write=self.flush_on_write)
