@@ -54,11 +54,12 @@ class TestGyroscope(unittest.TestCase):
         0.024816400301794373, -0.27052603405912107, -0.9467047653591117)
     with mock.patch.object(gyroscope, 'Gyroscope') as mock_gyro:
       mock_gyro.return_value = self.gyroscope
-      proc = gyroscope.GyroscopeProcess(multiprocessing.Queue())
-      while proc.point_queue.empty():
+      point_queue = multiprocessing.Queue()
+      proc = gyroscope.GyroscopeProcess(point_queue)
+      while point_queue.empty():
         pass
       proc.Join()
-      self.assertGreaterEqual(proc.point_queue.qsize(), 0)
+      self.assertGreaterEqual(point_queue.qsize(), 0)
 
 
 if __name__ == '__main__':

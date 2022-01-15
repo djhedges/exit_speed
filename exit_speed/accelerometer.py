@@ -14,7 +14,6 @@
 # limitations under the License.
 """FXOS8700 accelerometer."""
 import math
-import multiprocessing
 import time
 from typing import Text
 from typing import Tuple
@@ -78,15 +77,12 @@ class Accelerometer(object):
 class AccelerometerProcess(sensor.SensorBase):
   """Populates the SensorBase.point_queue with accelerometer values per loop."""
 
-  def Loop(
-      self,
-      point_queue: multiprocessing.Queue,
-      stop_process_signal: multiprocessing.Value):
+  def Loop(self):
     """Adds point data with accelerometer values to point queue."""
     accel = Accelerometer()
     config = config_lib.LoadConfig()
     frequency_hz = int(config.get('accelerometer').get('frequency_hz'))
-    while not stop_process_signal.value:
+    while not self.stop_process_signal.value:
       cycle_time = time.time()
       x, y, z = accel.GetGForces()
       point = gps_pb2.Point()
@@ -96,7 +92,7 @@ class AccelerometerProcess(sensor.SensorBase):
       pitch, roll = accel.CalcPitchAndRoll(x, y, z)
       point.pitch = pitch
       point.roll = roll
-      point_queue.put(point)
+      self.AddPointToQueue(point)
       time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
 
 

@@ -14,7 +14,6 @@
 # limitations under the License.
 """FXAS21002C gyroscope."""
 import math
-import multiprocessing
 import time
 from typing import Tuple
 
@@ -45,22 +44,19 @@ class Gyroscope(object):
 class GyroscopeProcess(sensor.SensorBase):
   """Populates the SensorBase.point_queue with gyroscope values per loop."""
 
-  def Loop(
-      self,
-      point_queue: multiprocessing.Queue,
-      stop_process_signal: multiprocessing.Value):
+  def Loop(self):
     """Adds point data with gryoscope values to point queue."""
     gyro = Gyroscope()
     config = config_lib.LoadConfig()
     frequency_hz = int(config.get('gyroscope').get('frequency_hz'))
-    while not stop_process_signal.value:
+    while not self.stop_process_signal.value:
       cycle_time = time.time()
       x, y, z = gyro.GetRotationalValues()
       point = gps_pb2.Point()
       point.gyro_x = x
       point.gyro_y = y
       point.gyro_z = z
-      point_queue.put(point)
+      self.AddPointToQueue(point)
       time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
 
 

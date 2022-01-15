@@ -17,8 +17,11 @@
 Based the recommendation here.
 https://developers.google.com/protocol-buffers/docs/techniques
 """
+import datetime
 import multiprocessing
 import time
+
+import gps_pb2
 
 def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
   """Calculates how to sleep to maintain the expected cycle reading.
@@ -42,23 +45,26 @@ class SensorBase(object):
 
   def __init__(
       self, point_queue: multiprocessing.Queue, start_process: bool=True):
-    self.point_queue = point_queue
-    self._stop_process_signal = multiprocessing.Value('b', False)
+    self._point_queue = point_queue
+    self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
-          args=(self.point_queue, self._stop_process_signal),
           daemon=True)
       self._process.start()
 
   def StopProcess(self):
     """Sets the stop process signal."""
-    self._stop_process_signal.value = True
+    self.stop_process_signal.value = True
 
   def Join(self):
     """Sends the stop process signal and joins the process until it finishes."""
     self.StopProcess()
     self._process.join()
 
-  def Loop(self, point_queue: multiprocessing.Queue, stop_process_signal):
+  def AddPointToQueue(self, point: gps_pb2.Point):
+    point.time.FromDatetime(datetime.datetime.now())
+    self._point_queue.put(point)
+
+  def Loop(self):
     raise NotImplementedError('Subclasses should override this method.')
