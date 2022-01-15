@@ -131,8 +131,7 @@ class TestDataLogger(unittest.TestCase):
     logger_proc.start()
     logger_proc.WriteProto(self.point)
     logger_proc.WriteProto(self.point)
-    logger_proc.stop_process_signal.value = True
-    logger_proc.join()
+    logger_proc.terminate()
     logger = data_logger.Logger(file_path)
     file_points = []
     for file_point in logger.ReadProtos():

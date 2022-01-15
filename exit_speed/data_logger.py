@@ -130,7 +130,6 @@ class LoggerProcess(multiprocessing.Process):
     self.file_prefix_or_name = file_prefix_or_name
     self.flush_on_write = flush_on_write
     self.point_queue = multiprocessing.SimpleQueue()
-    self.stop_process_signal = multiprocessing.Value('b', False)
     self._logger = None
     super().__init__(daemon=True)
 
@@ -139,6 +138,6 @@ class LoggerProcess(multiprocessing.Process):
 
   def run(self):
     self._logger = Logger(self.file_prefix_or_name)
-    while not self.stop_process_signal.value:
+    while True:
       proto = self.point_queue.get()
       self._logger.WriteProto(proto, flush_on_write=self.flush_on_write)
