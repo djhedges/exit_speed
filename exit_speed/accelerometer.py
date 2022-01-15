@@ -93,6 +93,9 @@ class AccelerometerProcess(sensor.SensorBase):
       point.accelerometer_x = x
       point.accelerometer_y = y
       point.accelerometer_z = z
+      pitch, roll = accel.CalcPitchAndRoll(x, y, z)
+      point.pitch = pitch
+      point.roll = roll
       point_queue.put(point)
       time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
 
