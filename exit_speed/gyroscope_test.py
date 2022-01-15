@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for gyroscope.py"""
+import multiprocessing
 import sys
 import unittest
 
@@ -47,6 +48,17 @@ class TestGyroscope(unittest.TestCase):
         0.024816400301794373, -0.27052603405912107, -0.9467047653591117)
     expected = (1.421875, -15.5, -54.2421875)
     self.assertTupleEqual(expected, self.gyroscope.GetRotationalValues())
+
+  def testGryoscopeProcessLoop(self):
+    self.gyroscope.sensor.gyroscope = (
+        0.024816400301794373, -0.27052603405912107, -0.9467047653591117)
+    with mock.patch.object(gyroscope, 'Gyroscope') as mock_gyro:
+      mock_gyro.return_value = self.gyroscope
+      proc = gyroscope.GyroscopeProcess(multiprocessing.Queue())
+      while proc.point_queue.empty():
+        pass
+      proc.Join()
+      self.assertGreaterEqual(proc.point_queue.qsize(), 0)
 
 
 if __name__ == '__main__':

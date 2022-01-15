@@ -14,12 +14,16 @@
 # limitations under the License.
 """FXAS21002C gyroscope."""
 import math
+import multiprocessing
 import time
 from typing import Tuple
 
 import adafruit_fxas21002c
 import board
 import busio
+import config_lib
+import gps_pb2
+import sensor
 from absl import app
 
 
@@ -36,6 +40,29 @@ class Gyroscope(object):
     return (math.degrees(gyro_x),
             math.degrees(gyro_y),
             math.degrees(gyro_z))
+
+
+class GyroscopeProcess(sensor.SensorBase):
+  """Populates the SensorBase.point_queue with gyroscope values per loop."""
+
+  def Loop(
+      self,
+      point_queue: multiprocessing.Queue,
+      stop_process_signal: multiprocessing.Value):
+    """Adds point data with gryoscope values to point queue."""
+    gyro = Gyroscope()
+    config = config_lib.LoadConfig()
+    frequency_hz = int(config.get('gyroscope').get('frequency_hz'))
+    while not stop_process_signal.value:
+      cycle_time = time.time()
+      x, y, z = gyro.GetRotationalValues()
+      point = gps_pb2.Point()
+      point.gyro_x = x
+      point.gyro_y = y
+      point.gyro_z = z
+      point_queue.put(point)
+      time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
+
 
 
 def main(unused_argv):

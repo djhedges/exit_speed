@@ -1,7 +1,8 @@
 car: Corrado
 accelerometer:
-  frequency_hz: 1
-gyroscope: True
+  frequency_hz: 10
+gyroscope:
+  frequency_hz: 10
 leds: True
 timescale: True
 tire_temps:

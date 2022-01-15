@@ -1,6 +1,8 @@
 car: Civic
-accelerometer: True
-gyroscope: True
+accelerometer:
+  frequency_hz: 10
+gyroscope:
+  frequency_hz: 10
 leds: True
 timescale: True
 labjack:
