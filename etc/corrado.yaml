@@ -6,11 +6,12 @@ gyroscope:
   frequency_hz: 40
 leds: True
 timescale: True
-tire_temps:
-  lf:
-    ip_addr: 192.168.4.3
-    port: 27001
+#tire_temps:
+#  lf:
+#    ip_addr: 192.168.4.3
+#    port: 27001
 labjack:
+  frequency_hz: 40
   ain0: water_temp_voltage
   ain1: oil_pressure_voltage
   ain2: front_brake_pressure_voltage

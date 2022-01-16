@@ -93,7 +93,7 @@ class ExitSpeed(object):
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.GyroscopeProcess(self.config, self.point_queue)
     if self.config.get('labjack'):
-      self.labjack = labjack.Labjack(self.config)
+      self.labjack = labjack.Labjack(self.config, self.point_queue)
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(self.config)
     if self.config.get('wbo2'):
@@ -209,13 +209,6 @@ class ExitSpeed(object):
       self.timescale.Start(self.point.time, track.name)
     self.ProcessLap()
 
-  def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
-    """Populate voltage readings if labjack initialzed successfully."""
-    if self.config.get('labjack'):
-      point.labjack_temp_f = self.labjack.labjack_temp_f.value
-      for point_value, voltage in self.labjack.voltage_values.items():
-        setattr(point, point_value, voltage.value)
-
   def ReadTireTemperatures(self, point: gps_pb2.Point) -> None:
     """Populate tire temperature readings."""
     if self.config.get('tire_temps'):
@@ -234,7 +227,6 @@ class ExitSpeed(object):
   def PopulatePoint(self, point: gps_pb2.Point) -> None:
     """Populates the point protocol buffer."""
     point.geohash = geohash.encode(point.lat, point.lon)
-    self.ReadLabjackValues(point)
     self.ReadTireTemperatures(point)
     self.ReadWBO2Values(point)
     self.point = point

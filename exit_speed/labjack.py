@@ -15,26 +15,27 @@
 """Library for reading values from labjack."""
 import multiprocessing
 import sys
+import time
 import traceback
 from typing import Dict
-from typing import Text
 
+import gps_pb2
+import sensor
 import u3
 from absl import logging
 
 
-class Labjack(object):
+class Labjack(sensor.SensorBase):
   """Interface for the labjack DAQ."""
   HIGH_VOLTAGE_CHANNELS = (0, 1, 2, 3)
 
-  def __init__(self, config, start_process=True):
-    self.config = config
+  def __init__(
+      self,
+      config: Dict,
+      point_queue: multiprocessing.Queue,
+      start_process:bool=True):
     self.u3 = None
-    self.labjack_temp_f = multiprocessing.Value('d', 0.0)
-    self.voltage_values = self.BuildValues()
-    if start_process:
-      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self.process.start()
+    super().__init__(config, point_queue, start_process=start_process)
 
   def Set5vOutput(self):
     """In our case sets DAC0 to output 5v.
@@ -47,19 +48,12 @@ class Labjack(object):
         dac0_register = 5000
         self.u3.writeRegister(dac0_register, 5.0)
 
-  def BuildValues(self) -> Dict[Text, multiprocessing.Value]:
-    values = {}
-    if self.config.get('labjack'):
-      for input_name, proto_field in self.config['labjack'].items():
-        if input_name.startswith('ain') or input_name.startswith('fio'):
-          values[proto_field] = multiprocessing.Value('d', 0.0)
-    return values
-
   def ReadValues(self):
     """Reads the labjack voltages."""
     try:
       if self.config.get('labjack'):
-        self.labjack_temp_f.value = (
+        point = gps_pb2.Point()
+        point.labjack_temp_f = (
             self.u3.getTemperature() * 9.0/5.0 - 459.67)
         for input_name, proto_field in self.config['labjack'].items():
           if input_name.startswith('ain') or input_name.startswith('fio'):
@@ -75,7 +69,9 @@ class Labjack(object):
                 channelNumber=channel)
             if input_name in self.config['labjack'].get('tick_divider_10'):
               voltage = voltage * 10
-            self.voltage_values[proto_field].value = voltage
+            setattr(point, proto_field, voltage)
+        self.AddPointToQueue(point)
+        print(point)
     except u3.LabJackException:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
       logging.log_every_n_seconds(logging.ERROR,
@@ -89,5 +85,9 @@ class Labjack(object):
     # read voltages on these terminals.
     self.u3.configIO(FIOAnalog = 0b11111111)
     self.Set5vOutput()
-    while True:
+    frequency_hz = int(
+        self.config.get('labjack', {}).get('frequency_hz')) or 10
+    while not self.stop_process_signal.value:
+      cycle_time = time.time()
       self.ReadValues()
+      time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))

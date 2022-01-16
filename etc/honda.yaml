@@ -7,6 +7,7 @@ gyroscope:
 leds: True
 timescale: True
 labjack:
+  frequency_hz: 40
   ain0: fuel_level_voltage
   ain1: tps_voltage
   fio4: battery_voltage

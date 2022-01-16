@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for Labjack."""
+import multiprocessing
 import os
 import unittest
 
@@ -31,17 +32,11 @@ class TestLabjack(unittest.TestCase):
     config = config_lib.LoadConfig(
         os.path.join(os.path.dirname(os.path.abspath(__file__)),
             'testdata/test_labjack_config.yaml'))
-    self.labjack = labjack.Labjack(config, start_process=False)
+    self.point_queue = multiprocessing.Queue()
+    self.labjack = labjack.Labjack(
+        config, self.point_queue, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
     self.labjack.u3 = self.mock_u3
-
-  def testBuildValues(self):
-    expected = {'fuel_level_voltage': None,
-                'water_temp_voltage': None,
-                'oil_pressure_voltage': None,
-                'battery_voltage': None}
-    self.assertSequenceEqual(list(expected.keys()),
-                             list(self.labjack.BuildValues().keys()))
 
   def testReadValues(self):
     # pylint: disable=invalid-name
@@ -63,15 +58,12 @@ class TestLabjack(unittest.TestCase):
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()
-    self.assertEqual(78.061801842153101916, self.labjack.labjack_temp_f.value)
-    self.assertEqual(1.5,
-                     self.labjack.voltage_values['fuel_level_voltage'].value)
-    self.assertEqual(2.7,
-                     self.labjack.voltage_values['water_temp_voltage'].value)
-    self.assertEqual(3.9,
-                     self.labjack.voltage_values['oil_pressure_voltage'].value)
-    self.assertEqual(14.0,
-                     self.labjack.voltage_values['battery_voltage'].value)
+    point = self.point_queue.get()
+    self.assertEqual(78.061801842153101916, point.labjack_temp_f)
+    self.assertEqual(1.5, point.fuel_level_voltage)
+    self.assertEqual(2.7, point.water_temp_voltage)
+    self.assertEqual(3.9, point.oil_pressure_voltage)
+    self.assertEqual(14.0, point.battery_voltage)
 
 
 if __name__ == '__main__':
