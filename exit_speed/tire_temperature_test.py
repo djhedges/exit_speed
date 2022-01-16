@@ -159,7 +159,6 @@ class TestClientServer(unittest.TestCase):
         'lf_tire_temp', '127.0.0.1', 27001, {}, point_queue)
     with mock.patch.object(tire_temperature, 'TireSensor') as mock_tire_sensor:
       mock_tire_sensor.return_value = mock_sensor
-      time.sleep(5)
       client = tire_temperature.TireSensorClient('127.0.0.1', 27001)
     time.sleep(3)
     client.ReadAndSendData()
