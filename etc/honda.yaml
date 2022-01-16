@@ -1,4 +1,5 @@
 car: Civic
+gps: True
 accelerometer:
   frequency_hz: 10
 gyroscope:

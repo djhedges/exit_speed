@@ -14,6 +14,7 @@
 # limitations under the License.
 """The main script for starting exit speed."""
 import datetime
+import multiprocessing
 import os
 
 import accelerometer
@@ -21,8 +22,8 @@ import common_lib
 import config_lib
 import data_logger
 import geohash
-import gps
 import gps_pb2
+import gps_sensor
 import gyroscope
 import labjack
 import lap_lib
@@ -63,11 +64,10 @@ class ExitSpeed(object):
     """
     self.start_finish_range = start_finish_range
     self.live_data = live_data
-    self.last_gps_report = None
     self.min_points_per_session = min_points_per_session
+    self.point_queue = multiprocessing.Queue()
 
     self.InitializeSubProcesses()
-    self.gpsd = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
     self.leds = leds.LEDs()
     self.data_logger = None
     self.session = gps_pb2.Session()
@@ -79,6 +79,14 @@ class ExitSpeed(object):
   def InitializeSubProcesses(self):
     """Initialize subprocess modules based on config.yaml."""
     self.config = config_lib.LoadConfig()
+    if self.config.get('gps'):
+      self.gps = gps_sensor.GPSProcess(self.config, self.point_queue)
+      while self.point_queue.empty():
+        logging.log_every_n_seconds(
+            logging.INFO,
+            'Waiting for GPS fix to determine track before starting other '
+            'sensor subprocesses',
+            10)
     if self.config.get('accelerometer'):
       self.accel = accelerometer.Accelerometer()
     if self.config.get('gyroscope'):
@@ -241,15 +249,8 @@ class ExitSpeed(object):
       for point_value, value in self.wbo2.values.items():
         setattr(point, point_value, value.value)
 
-  def PopulatePoint(self, report: gps.client.dictwrapper) -> None:
+  def PopulatePoint(self, point: gps_pb2.Point) -> None:
     """Populates the point protocol buffer."""
-    point = gps_pb2.Point()
-    point.lat = report.lat
-    point.lon = report.lon
-    if report.get('alt'):
-      point.alt = report.alt
-    point.speed = report.speed
-    point.time.FromJsonString(report.time)
     point.geohash = geohash.encode(point.lat, point.lon)
     self.ReadAccelerometerValues(point)
     self.ReadGyroscopeValues(point)
@@ -258,29 +259,15 @@ class ExitSpeed(object):
     self.ReadWBO2Values(point)
     self.point = point
 
-  def CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
-    """Verifies required report fields are present."""
-    for field in self.REPORT_REQ_FIELDS:
-      if not report.get(field):
-        return False
-    return True
-
-  def ProcessReport(self, report: gps.client.dictwrapper) -> None:
-    """Processes a GPS report form the sensor.."""
-    if (report.get('class') == 'TPV' and self.CheckReportFields(report)):
-      if (not self.last_gps_report or
-          self.last_gps_report != report.time):
-        self.PopulatePoint(report)
-        self.ProcessSession()
-        self.last_gps_report = report.time
-        self.sdnotify.notify('STATUS=Last report time:%s' % report.time)
-        self.sdnotify.notify('WATCHDOG=1')
-
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      report = self.gpsd.next()  # pylint: disable=not-callable
-      self.ProcessReport(report)
+      point = self.point_queue.get()
+      self.PopulatePoint(point)
+      self.ProcessSession()
+      self.sdnotify.notify(
+          'STATUS=Last report time:%s' % point.time.ToJsonString())
+      self.sdnotify.notify('WATCHDOG=1')
 
 
 def main(unused_argv) -> None:

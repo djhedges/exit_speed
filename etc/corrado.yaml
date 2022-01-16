@@ -1,4 +1,5 @@
 car: Corrado
+gps: True
 accelerometer:
   frequency_hz: 10
 gyroscope:

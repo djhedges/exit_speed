@@ -52,19 +52,20 @@ class GPSProcess(sensor.SensorBase):
     gps_sensor = GPS()
     while not self.stop_process_signal.value:
       report = gps_sensor.GetReport()
-      point = gps_pb2.Point()
-      point.lat = report.lat
-      point.lon = report.lon
-      if report.get('alt'):
-        point.alt = report.alt
-      point.speed = report.speed
-      self.AddPointToQueue(point)
+      if report:
+        point = gps_pb2.Point()
+        point.lat = report.lat
+        point.lon = report.lon
+        if report.get('alt'):
+          point.alt = report.alt
+        point.speed = report.speed
+        self.AddPointToQueue(point)
 
 
 def main(unused_argv):
   gps_sensor = GPS()
-  for report in gps_sensor.GetReport():
-    print(report)
+  while True:
+    print(gps_sensor.GetReport())
 
 
 if __name__ == '__main__':

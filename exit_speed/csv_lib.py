@@ -1,3 +1,4 @@
+# pytype: skip-file
 #!/usr/bin/python3
 # Copyright 2020 Google LLC
 #
@@ -17,8 +18,8 @@ import csv
 import datetime
 import time
 
+import gps_pb2
 import main
-from gps import client
 
 
 def _ReadCsvFile(filepath):
@@ -65,15 +66,12 @@ def ConvertTraqmateToProto(filepath):
   start = time.time()
   first_elapsed = None
   for elapsed_time, json_time, lat, lon, alt, speed in _ReadCsvFile(filepath):
-    report = client.dictwrapper({
-        u'lon': lon,
-        u'lat': lat,
-        u'mode': 3,
-        u'time': json_time,
-        u'alt': alt,
-        u'speed': speed,
-        u'class': u'TPV'})
-    es.ProcessReport(report)
+    point = gps_pb2.Point()
+    point.lon = lon
+    point.lat = lat
+    point.alt = alt
+    point.speed = speed
+    es.ProcessReport(point)
     now = time.time()
     elapsed_time = float(elapsed_time)
     if not first_elapsed:
