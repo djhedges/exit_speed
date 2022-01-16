@@ -71,7 +71,6 @@ class Labjack(sensor.SensorBase):
               voltage = voltage * 10
             setattr(point, proto_field, voltage)
         self.AddPointToQueue(point)
-        print(point)
     except u3.LabJackException:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
       logging.log_every_n_seconds(logging.ERROR,
