@@ -88,9 +88,10 @@ class ExitSpeed(object):
             'sensor subprocesses',
             10)
     if self.config.get('accelerometer'):
-      self.accel = accelerometer.Accelerometer()
+      self.accel = accelerometer.AccelerometerProcess(
+          self.config, self.point_queue)
     if self.config.get('gyroscope'):
-      self.gyro = gyroscope.Gyroscope()
+      self.gyro = gyroscope.GyroscopeProcess(self.config, self.point_queue)
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config)
     if self.config.get('tire_temps'):
@@ -208,25 +209,6 @@ class ExitSpeed(object):
       self.timescale.Start(self.point.time, track.name)
     self.ProcessLap()
 
-  def ReadAccelerometerValues(self, point: gps_pb2.Point):
-    """Populates the accelerometer values."""
-    if self.config.get('accelerometer'):
-      x, y, z = self.accel.GetGForces()
-      point.accelerometer_x = x
-      point.accelerometer_y = y
-      point.accelerometer_z = z
-      pitch, roll = self.accel.CalcPitchAndRoll(x, y, z)
-      point.pitch = pitch
-      point.roll = roll
-
-  def ReadGyroscopeValues(self, point: gps_pb2.Point):
-    """Populates the gyroscope values."""
-    if self.config.get('gyroscope'):
-      x, y, z = self.gyro.GetRotationalValues()
-      point.gyro_x = x
-      point.gyro_y = y
-      point.gyro_z = z
-
   def ReadLabjackValues(self, point: gps_pb2.Point) -> None:
     """Populate voltage readings if labjack initialzed successfully."""
     if self.config.get('labjack'):
@@ -252,8 +234,6 @@ class ExitSpeed(object):
   def PopulatePoint(self, point: gps_pb2.Point) -> None:
     """Populates the point protocol buffer."""
     point.geohash = geohash.encode(point.lat, point.lon)
-    self.ReadAccelerometerValues(point)
-    self.ReadGyroscopeValues(point)
     self.ReadLabjackValues(point)
     self.ReadTireTemperatures(point)
     self.ReadWBO2Values(point)
@@ -285,8 +265,6 @@ def main(unused_argv) -> None:
       logging.info('Logging last point\n %s', es.point)
     logging.info('Done.\nExiting.')
     logging.exception('Ensure we log any exceptions')
-    if es:
-      es.gpsd.close()
 
 
 if __name__ == '__main__':
