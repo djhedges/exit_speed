@@ -21,6 +21,7 @@ labjack:
   tick_divider_10: [ fio4, fio5 ]
   dac0_5v_out: True
 wbo2:
+  frequency_hz: 40
   lambda_16: afr
   rpm_count: rpm
   user_3: tps_voltage

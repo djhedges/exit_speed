@@ -97,7 +97,7 @@ class ExitSpeed(object):
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(self.config)
     if self.config.get('wbo2'):
-      self.wbo2 = wbo2.WBO2(self.config)
+      self.wbo2 = wbo2.WBO2(self.config, self.point_queue)
     if self.config.get('timescale'):
       car = self.config['car']
       logging.info('Logging for car: %s', car)
@@ -218,17 +218,10 @@ class ExitSpeed(object):
         tire_temp.middle = server.middle_temp_f.value
         tire_temp.outer = server.outside_temp_f.value
 
-  def ReadWBO2Values(self, point) -> None:
-    """Populate wide band readings."""
-    if self.config.get('wbo2'):
-      for point_value, value in self.wbo2.values.items():
-        setattr(point, point_value, value.value)
-
   def PopulatePoint(self, point: gps_pb2.Point) -> None:
     """Populates the point protocol buffer."""
     point.geohash = geohash.encode(point.lat, point.lon)
     self.ReadTireTemperatures(point)
-    self.ReadWBO2Values(point)
     self.point = point
 
   def Run(self) -> None:

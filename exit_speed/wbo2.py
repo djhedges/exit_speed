@@ -17,9 +17,13 @@
 https://www.wbo2.com/sw/logger.htm Frame and byte info.
 """
 import multiprocessing
+import time
+from typing import Dict
 from typing import Generator
 from typing import Text
 
+import gps_pb2
+import sensor
 import serial
 from absl import app
 from absl import flags
@@ -119,29 +123,29 @@ def RPMCountToRPM(rpm_count: float, cylinders: int) -> float:
   return 0
 
 
-class WBO2(object):
+class WBO2(sensor.SensorBase):
   """Interface for the WBO2 wideband lambda/AFR controller."""
 
-  def __init__(self, config, start_process=True):
-    self.config = config
-    self.values = {}
-    self._AddConfigValues()
-    if start_process:
-      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self.process.start()
-
-  def _AddConfigValues(self):
-    if self.config.get('wbo2'):
-      for point_value in self.config['wbo2'].values():
-        self.values[point_value] = multiprocessing.Value('d', 0.0)
+  def __init__(self, config: Dict, point_queue: multiprocessing.Queue):
+    self._next_cycle = 0
+    super().__init__(config, point_queue)
 
   def Loop(self):
+    frequency_hz = int(
+        self.config.get('wbo2', {}).get('frequency_hz')) or 10
     with serial.Serial('/dev/ttyUSB0', 19200) as ser:
       for frame in ReadSerial(ser):
-        logging.log_every_n_seconds(logging.DEBUG, 'WBO2 Frame: %s',
-                                    10, frame)
-        for frame_key, point_value in self.config['wbo2'].items():
-          self.values[point_value].value = GetBytes(frame, frame_key)
+        while not self.stop_process_signal.value:
+          logging.log_every_n_seconds(logging.DEBUG, 'WBO2 Frame: %s',
+                                      10, frame)
+          now = time.time()
+          if now > self._next_cycle:
+            self._next_cycle = now + 1.0 / frequency_hz
+            point = gps_pb2.Point()
+            for frame_key, point_value in self.config['wbo2'].items():
+              if frame_key in FRAME_FORMAT:
+                setattr(point, point_value, GetBytes(frame, frame_key))
+            self.AddPointToQueue(point)
 
 
 def main(unused_argv):
