@@ -1,9 +1,9 @@
 car: Corrado
 gps: True
 accelerometer:
-  frequency_hz: 10
+  frequency_hz: 40
 gyroscope:
-  frequency_hz: 10
+  frequency_hz: 40
 leds: True
 timescale: True
 tire_temps:
