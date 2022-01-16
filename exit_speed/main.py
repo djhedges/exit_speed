@@ -237,6 +237,11 @@ class ExitSpeed(object):
       point = self.point_queue.get()
       self.PopulatePoint(point)
       self.ProcessSession()
+      logging.log_every_n_seconds(
+          logging.INFO,
+          'Point queue size currently at %d.',
+          10,
+          self.point_queue.qsize())
       self.sdnotify.notify(
           'STATUS=Last report time:%s' % point.time.ToJsonString())
       self.sdnotify.notify('WATCHDOG=1')
