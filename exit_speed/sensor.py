@@ -39,7 +39,10 @@ def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
     A float duration in seconds.
   """
   seconds = 1.0 / frequency_hz
-  return seconds - (time.time() - cycle_time)
+  sleep = seconds - (time.time() - cycle_time)
+  if sleep < 0:
+    return 0
+  return sleep
 
 class SensorBase(object):
   """Base class for sensor processes."""
