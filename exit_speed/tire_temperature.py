@@ -25,7 +25,9 @@ from typing import List
 from typing import Text
 from typing import Tuple
 
+import gps_pb2
 import numpy
+import sensor
 from absl import app
 from absl import flags
 from absl import logging
@@ -150,44 +152,52 @@ class TireSensorClient(object):
       self.ReadAndSendData()
 
 
-class TireSensorServer(object):
+class TireSensorServer(sensor.SensorBase):
   """Server for receiving data from the Pi zeros."""
 
-  def __init__(self, ip_addr: Text, port: int, start_process=True):
+  def __init__(
+      self,
+      corner: Text,
+      ip_addr: Text,
+      port: int,
+      config: Dict,
+      point_queue: multiprocessing.Queue,
+      start_process: bool=True):
+    self.corner = corner
     self.ip_addr = ip_addr
     self.port = port
-    self.inside_temp_f = multiprocessing.Value('d', 0.0)
-    self.middle_temp_f = multiprocessing.Value('d', 0.0)
-    self.outside_temp_f = multiprocessing.Value('d', 0.0)
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    if start_process:
-      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self.process.start()
+    super().__init__(config, point_queue, start_process=start_process)
 
   def Loop(self):
     self.sock.bind((self.ip_addr, self.port))
-    while True:
+    while not self.stop_process_signal.value:
       data, _ = self.sock.recvfrom(1024)
       inside, middle, outside = struct.unpack('fff', data)
-      self.inside_temp_f.value = (inside * 9/5) + 32
-      self.middle_temp_f.value = (middle * 9/5) + 32
-      self.outside_temp_f.value = (outside * 9/5) + 32
+      point = gps_pb2.Point()
+      corner = getattr(point, self.corner)
+      setattr(corner, 'inner', (inside * 9/5) + 32)
+      setattr(corner, 'middle', (middle * 9/5) + 32)
+      setattr(corner, 'outer', (outside * 9/5) + 32)
+      self.AddPointToQueue(point)
 
 
 class MultiTireInterface(object):
   """Main class used by exit speed to hold each tire server."""
 
-  def __init__(self, config):
+  def __init__(self, config: Dict, point_queue: multiprocessing.Queue):
     """Initializer.
 
     Args:
       config: A dict created from parsing the exit speed yaml config.
     """
-    self.config = config
     self.servers = {}
-    for corner, ip_port in self.config['tire_temps'].items():
-      self.servers[corner] = TireSensorServer(ip_port['ip_addr'],
-                                              int(ip_port['port']))
+    for corner, ip_port in config['tire_temps'].items():
+      self.servers[corner] = TireSensorServer(corner,
+                                              ip_port['ip_addr'],
+                                              int(ip_port['port']),
+                                              config,
+                                              point_queue)
 
 
 

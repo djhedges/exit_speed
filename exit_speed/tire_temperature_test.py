@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tire_temperature.py"""
+import multiprocessing
 import time
 import unittest
 
@@ -153,16 +154,20 @@ class TestClientServer(unittest.TestCase):
   def testClientServer(self):
     mock_sensor = mock.create_autospec(tire_temperature.TireSensor)
     mock_sensor.GetTireTemps.return_value = (87.0, 93.0, 98)
-    server = tire_temperature.TireSensorServer('127.0.0.1', 27001)
+    point_queue = multiprocessing.Queue()
+    self.server = tire_temperature.TireSensorServer(
+        'lf_tire_temp', '127.0.0.1', 27001, {}, point_queue)
     with mock.patch.object(tire_temperature, 'TireSensor') as mock_tire_sensor:
       mock_tire_sensor.return_value = mock_sensor
+      time.sleep(5)
       client = tire_temperature.TireSensorClient('127.0.0.1', 27001)
     time.sleep(3)
     client.ReadAndSendData()
     time.sleep(3)
-    self.assertEqual(server.inside_temp_f.value, 188.6)
-    self.assertEqual(server.middle_temp_f.value, 199.4)
-    self.assertEqual(server.outside_temp_f.value, 208.4)
+    point = point_queue.get()
+    self.assertEqual(point.lf_tire_temp.inner, 188.6)
+    self.assertEqual(point.lf_tire_temp.middle, 199.4)
+    self.assertEqual(point.lf_tire_temp.outer, 208.4)
 
 
 if __name__ == '__main__':

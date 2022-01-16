@@ -50,7 +50,8 @@ class SensorBase(object):
   def __init__(
       self,
       config: Dict,
-      point_queue: multiprocessing.Queue, start_process: bool=True):
+      point_queue: multiprocessing.Queue,
+      start_process: bool=True):
     self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)

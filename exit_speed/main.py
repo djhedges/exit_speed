@@ -94,7 +94,8 @@ class ExitSpeed(object):
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(self.config, self.point_queue)
     if self.config.get('tire_temps'):
-      self.tire_temps = tire_temperature.MultiTireInterface(self.config)
+      self.tire_temps = tire_temperature.MultiTireInterface(
+          self.config, self.point_queue)
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config, self.point_queue)
     if self.config.get('timescale'):
@@ -149,12 +150,7 @@ class ExitSpeed(object):
       point.elapsed_distance_m = 0
 
   def ProcessPoint(self) -> None:
-    """Calculate values after PopulatePoint is called.
-
-    The key distinction between ProcessPoint and PopulatePoint is that
-    ProcessPoint is executed when data is replayed and synced to timescale.
-    Where as PopulatePoint is never called again.
-    """
+    """Updates LEDs, logs point and writes data to PostgresSQL."""
     point = self.point
     point.start_finish_distance = common_lib.PointDelta(
         point, self.session.start_finish)
@@ -208,25 +204,10 @@ class ExitSpeed(object):
       self.timescale.Start(self.point.time, track.name)
     self.ProcessLap()
 
-  def ReadTireTemperatures(self, point: gps_pb2.Point) -> None:
-    """Populate tire temperature readings."""
-    if self.config.get('tire_temps'):
-      for corner, server in self.tire_temps.servers.items():
-        tire_temp = getattr(point, '%s_tire_temp' % corner)
-        tire_temp.inner = server.inside_temp_f.value
-        tire_temp.middle = server.middle_temp_f.value
-        tire_temp.outer = server.outside_temp_f.value
-
-  def PopulatePoint(self, point: gps_pb2.Point) -> None:
-    """Populates the point protocol buffer."""
-    self.ReadTireTemperatures(point)
-    self.point = point
-
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      point = self.point_queue.get()
-      self.PopulatePoint(point)
+      self.point = self.point_queue.get()
       self.ProcessSession()
       logging.log_every_n_seconds(
           logging.INFO,
@@ -234,7 +215,7 @@ class ExitSpeed(object):
           10,
           self.point_queue.qsize())
       self.sdnotify.notify(
-          'STATUS=Last report time:%s' % point.time.ToJsonString())
+          'STATUS=Last report time:%s' % self.point.time.ToJsonString())
       self.sdnotify.notify('WATCHDOG=1')
 
 

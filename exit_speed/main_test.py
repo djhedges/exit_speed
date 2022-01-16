@@ -177,23 +177,6 @@ class TestExitSpeed(unittest.TestCase):
     es.point = point
     es.ProcessSession()
 
-  def testPopulatePoint(self):
-    point = gps_pb2.Point()
-    point.lat = 14.2
-    point.lon = -2.1
-    point.alt = 6.9
-    point.speed = 0.088
-    point.time.FromJsonString(u'2019-12-19T05:24:24.100Z')
-    es = main.ExitSpeed()
-    es.PopulatePoint(point)
-    point = es.point
-    self.assertEqual(point.lat, 14.2)
-    self.assertEqual(point.lon, -2.1)
-    self.assertEqual(point.alt, 6.9)
-    self.assertEqual(point.speed, 0.088)
-    self.assertEqual(point.time.seconds, 1576733064)
-    self.assertEqual(point.time.nanos, 100000000)
-
 
 if __name__ == '__main__':
   absltest.main()
