@@ -18,9 +18,11 @@ import time
 import unittest
 
 import mock
-import tire_temperature
 from absl.testing import absltest
 from mlx import mlx90640
+
+from exit_speed import gps_pb2
+from exit_speed import tire_temperature
 
 def _CreateRawFrame():
   frame = []
@@ -163,7 +165,7 @@ class TestClientServer(unittest.TestCase):
     time.sleep(3)
     client.ReadAndSendData()
     time.sleep(3)
-    point = point_queue.get()
+    point = gps_pb2.Point().FromString(point_queue.get())
     self.assertEqual(point.lf_tire_temp.inner, 188.6)
     self.assertEqual(point.lf_tire_temp.middle, 199.4)
     self.assertEqual(point.lf_tire_temp.outer, 208.4)

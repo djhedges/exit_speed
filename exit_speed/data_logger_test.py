@@ -17,9 +17,10 @@ import os
 import tempfile
 import unittest
 
-import data_logger
-import gps_pb2
 from absl.testing import absltest
+
+from exit_speed import data_logger
+from exit_speed import gps_pb2
 
 
 class TestDataLogger(unittest.TestCase):

@@ -15,11 +15,12 @@
 """Unitests for lab_lib.py"""
 import unittest
 
-import common_lib
-import gps_pb2
-import lap_lib
 import mock
 from absl.testing import absltest
+
+from exit_speed import common_lib
+from exit_speed import gps_pb2
+from exit_speed import lap_lib
 
 
 

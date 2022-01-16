@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Parking Lot."""
-from tracks import base
+from exit_speed.tracks import base
 
 TestTrack = base.Track(
     name='Test Parking Lot',

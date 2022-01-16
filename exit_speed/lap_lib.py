@@ -38,8 +38,8 @@ point_a |
 # pylint: enable=anomalous-backslash-in-string
 import math
 
-import common_lib
-import gps_pb2
+from exit_speed import common_lib
+from exit_speed import gps_pb2
 
 
 def GetPriorUniquePoint(lap: gps_pb2.Lap,

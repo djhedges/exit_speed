@@ -17,25 +17,26 @@ import datetime
 import multiprocessing
 import os
 
-import accelerometer
-import common_lib
-import config_lib
-import data_logger
-import gps_pb2
-import gps_sensor
-import gyroscope
-import labjack
-import lap_lib
-import leds
 import sdnotify
-import timescale
-import tire_temperature
-import tracks
 import u3
-import wbo2
 from absl import app
 from absl import flags
 from absl import logging
+
+from exit_speed import accelerometer
+from exit_speed import common_lib
+from exit_speed import config_lib
+from exit_speed import data_logger
+from exit_speed import gps_pb2
+from exit_speed import gps_sensor
+from exit_speed import gyroscope
+from exit_speed import labjack
+from exit_speed import lap_lib
+from exit_speed import leds
+from exit_speed import timescale
+from exit_speed import tire_temperature
+from exit_speed import tracks
+from exit_speed import wbo2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
@@ -109,7 +110,7 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
-    self.timescale.lap_queue.put(lap)
+    self.timescale.lap_queue.put(lap.SerializeToString())
 
   def GetLogFilePrefix(self, point: gps_pb2.Point, tz=None):
     utc_dt = point.time.ToDatetime()
@@ -207,7 +208,7 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      self.point = self.point_queue.get()
+      self.point = gps_pb2.FromString(self.point_queue.get())
       self.ProcessSession()
       logging.log_every_n_seconds(
           logging.INFO,

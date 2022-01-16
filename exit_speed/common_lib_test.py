@@ -15,9 +15,10 @@
 """Common library unittest."""
 import unittest
 
-import common_lib
-import gps_pb2
 from absl.testing import absltest
+
+from exit_speed import common_lib
+from exit_speed import gps_pb2
 
 
 class TestExitSpeed(unittest.TestCase):

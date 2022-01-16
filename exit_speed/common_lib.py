@@ -14,7 +14,8 @@
 # limitations under the License.
 """Common libaries."""
 import gps
-import gps_pb2
+
+from exit_speed import gps_pb2
 
 
 def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:

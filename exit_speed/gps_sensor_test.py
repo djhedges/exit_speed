@@ -17,9 +17,11 @@ import multiprocessing
 import unittest
 
 import gps
-import gps_sensor
 import mock
 from absl.testing import absltest
+
+from exit_speed import gps_pb2
+from exit_speed import gps_sensor
 
 
 TEST_REPORT_VALUES = {
@@ -79,7 +81,7 @@ class TestGPSSensor(unittest.TestCase):
         pass
       proc.Join()
       self.assertEqual(point_queue.qsize(), 1)
-      point = point_queue.get()
+      point = gps_pb2.Point().FromString(point_queue.get())
       self.assertEqual(point.lat, TEST_REPORT_VALUES['lat'])
       self.assertEqual(point.lon, TEST_REPORT_VALUES['lon'])
       self.assertEqual(point.alt, TEST_REPORT_VALUES['alt'])

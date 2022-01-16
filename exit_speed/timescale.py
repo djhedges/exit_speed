@@ -21,10 +21,11 @@ from typing import Optional
 from typing import Text
 from typing import Tuple
 
-import gps_pb2
 import psycopg2
 from absl import flags
 from absl import logging
+
+from exit_speed import gps_pb2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
@@ -125,7 +126,7 @@ class Timescale(object):
     self.commit_cycle = 0
 
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
-    self.point_queue.append((point, lap_number))
+    self.point_queue.append((point.SerializeToString(), lap_number))
 
   def ExportSession(self, cursor: psycopg2.extensions.cursor):
     if not self.session_id:
@@ -206,7 +207,7 @@ class Timescale(object):
 
   def GetLapFromQueue(self) -> Optional[gps_pb2.Lap]:
     if self.lap_queue.qsize() > 0:
-      return self.lap_queue.get()
+      return gps_pb2.Lap().FromString(self.lap_queue.get())
 
   def GetLapDurationFromQueue(self) -> Optional[Tuple[int, int]]:
     if self.lap_duration_queue.qsize() > 0:
@@ -220,7 +221,8 @@ class Timescale(object):
     while not self.point_queue:
       if self.stop_process_signal.value:
         return
-    return self.point_queue.pop()
+    serialized_point, lap_number = self.point_queue.pop()
+    return gps_pb2.Point().FromString(serialized_point), lap_number
 
   def _Commit(self):
     """Commits points to timescale based on FLAGS.commit_cycle."""

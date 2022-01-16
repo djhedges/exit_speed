@@ -16,10 +16,11 @@
 import logging
 import sys
 
-import csv_lib
-import replay_data
 from absl import app
 from absl import flags
+
+from exit_speed import csv_lib
+from exit_speed import replay_data
 
 FLAGS = flags.FLAGS
 

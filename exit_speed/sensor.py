@@ -22,7 +22,7 @@ import multiprocessing
 import time
 from typing import Dict
 
-import gps_pb2
+from exit_speed import gps_pb2
 
 def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
   """Calculates how to sleep to maintain the expected cycle reading.
@@ -72,7 +72,7 @@ class SensorBase(object):
 
   def AddPointToQueue(self, point: gps_pb2.Point):
     point.time.FromDatetime(datetime.datetime.now())
-    self._point_queue.put(point)
+    self._point_queue.put(point.SerializeToString())
 
   def Loop(self):
     raise NotImplementedError('Subclasses should override this method.')

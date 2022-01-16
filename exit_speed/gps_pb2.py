@@ -17,10 +17,10 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='gps.proto',
-  package='gps',
+  package='exit_speed',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\tgps.proto\x12\x03gps\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa7\x06\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\x12\x0e\n\x06gyro_x\x18\x12 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x13 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x14 \x01(\x01\x12\x0f\n\x07geohash\x18\x15 \x01(\t\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x16 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\x17 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x18 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x19 \x01(\x01\x12\x1b\n\x13\x65lapsed_duration_ms\x18\x1a \x01(\x01\x12\x1a\n\x12\x65lapsed_distance_m\x18\x1b \x01(\x01\x12\x16\n\x0elabjack_temp_f\x18\x1c \x01(\x01\x12\'\n\x0clf_tire_temp\x18\x1d \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0crf_tire_temp\x18\x1e \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0clr_tire_temp\x18\x1f \x01(\x0b\x32\x11.gps.TireIrSensor\x12\'\n\x0crr_tire_temp\x18  \x01(\x0b\x32\x11.gps.TireIrSensor\"^\n\x03Lap\x12\x1a\n\x06points\x18\x01 \x03(\x0b\x32\n.gps.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"R\n\x07Session\x12\x16\n\x04laps\x18\x01 \x03(\x0b\x32\x08.gps.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12 \n\x0cstart_finish\x18\x03 \x01(\x0b\x32\n.gps.Point\"<\n\x0cTireIrSensor\x12\r\n\x05inner\x18\x01 \x01(\x01\x12\x0e\n\x06middle\x18\x02 \x01(\x01\x12\r\n\x05outer\x18\x03 \x01(\x01\x62\x06proto3'
+  serialized_pb=b'\n\tgps.proto\x12\nexit_speed\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc3\x06\n\x05Point\x12\x0b\n\x03lat\x18\x01 \x01(\x01\x12\x0b\n\x03lon\x18\x02 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x03 \x01(\x01\x12\r\n\x05speed\x18\x04 \x01(\x01\x12(\n\x04time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1d\n\x15start_finish_distance\x18\x06 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x07 \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\x08 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\t \x01(\x01\x12\x0b\n\x03rpm\x18\n \x01(\x01\x12\x0b\n\x03\x61\x66r\x18\x0b \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x0c \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\r \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x0e \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x0f \x01(\x01\x12\r\n\x05pitch\x18\x10 \x01(\x01\x12\x0c\n\x04roll\x18\x11 \x01(\x01\x12\x0e\n\x06gyro_x\x18\x12 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x13 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x14 \x01(\x01\x12\x0f\n\x07geohash\x18\x15 \x01(\t\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x16 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\x17 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x18 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x19 \x01(\x01\x12\x1b\n\x13\x65lapsed_duration_ms\x18\x1a \x01(\x01\x12\x1a\n\x12\x65lapsed_distance_m\x18\x1b \x01(\x01\x12\x16\n\x0elabjack_temp_f\x18\x1c \x01(\x01\x12.\n\x0clf_tire_temp\x18\x1d \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0crf_tire_temp\x18\x1e \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0clr_tire_temp\x18\x1f \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0crr_tire_temp\x18  \x01(\x0b\x32\x18.exit_speed.TireIrSensor\"e\n\x03Lap\x12!\n\x06points\x18\x01 \x03(\x0b\x32\x11.exit_speed.Point\x12+\n\x08\x64uration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0e\n\x06number\x18\x03 \x01(\x05\"`\n\x07Session\x12\x1d\n\x04laps\x18\x01 \x03(\x0b\x32\x0f.exit_speed.Lap\x12\r\n\x05track\x18\x02 \x01(\t\x12\'\n\x0cstart_finish\x18\x03 \x01(\x0b\x32\x11.exit_speed.Point\"<\n\x0cTireIrSensor\x12\r\n\x05inner\x18\x01 \x01(\x01\x12\x0e\n\x06middle\x18\x02 \x01(\x01\x12\r\n\x05outer\x18\x03 \x01(\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -29,230 +29,230 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _POINT = _descriptor.Descriptor(
   name='Point',
-  full_name='gps.Point',
+  full_name='exit_speed.Point',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='lat', full_name='gps.Point.lat', index=0,
+      name='lat', full_name='exit_speed.Point.lat', index=0,
       number=1, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lon', full_name='gps.Point.lon', index=1,
+      name='lon', full_name='exit_speed.Point.lon', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='alt', full_name='gps.Point.alt', index=2,
+      name='alt', full_name='exit_speed.Point.alt', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='speed', full_name='gps.Point.speed', index=3,
+      name='speed', full_name='exit_speed.Point.speed', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='time', full_name='gps.Point.time', index=4,
+      name='time', full_name='exit_speed.Point.time', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='start_finish_distance', full_name='gps.Point.start_finish_distance', index=5,
+      name='start_finish_distance', full_name='exit_speed.Point.start_finish_distance', index=5,
       number=6, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='tps_voltage', full_name='gps.Point.tps_voltage', index=6,
+      name='tps_voltage', full_name='exit_speed.Point.tps_voltage', index=6,
       number=7, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='water_temp_voltage', full_name='gps.Point.water_temp_voltage', index=7,
+      name='water_temp_voltage', full_name='exit_speed.Point.water_temp_voltage', index=7,
       number=8, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='oil_pressure_voltage', full_name='gps.Point.oil_pressure_voltage', index=8,
+      name='oil_pressure_voltage', full_name='exit_speed.Point.oil_pressure_voltage', index=8,
       number=9, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rpm', full_name='gps.Point.rpm', index=9,
+      name='rpm', full_name='exit_speed.Point.rpm', index=9,
       number=10, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='afr', full_name='gps.Point.afr', index=10,
+      name='afr', full_name='exit_speed.Point.afr', index=10,
       number=11, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fuel_level_voltage', full_name='gps.Point.fuel_level_voltage', index=11,
+      name='fuel_level_voltage', full_name='exit_speed.Point.fuel_level_voltage', index=11,
       number=12, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_x', full_name='gps.Point.accelerometer_x', index=12,
+      name='accelerometer_x', full_name='exit_speed.Point.accelerometer_x', index=12,
       number=13, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_y', full_name='gps.Point.accelerometer_y', index=13,
+      name='accelerometer_y', full_name='exit_speed.Point.accelerometer_y', index=13,
       number=14, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_z', full_name='gps.Point.accelerometer_z', index=14,
+      name='accelerometer_z', full_name='exit_speed.Point.accelerometer_z', index=14,
       number=15, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='pitch', full_name='gps.Point.pitch', index=15,
+      name='pitch', full_name='exit_speed.Point.pitch', index=15,
       number=16, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='roll', full_name='gps.Point.roll', index=16,
+      name='roll', full_name='exit_speed.Point.roll', index=16,
       number=17, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_x', full_name='gps.Point.gyro_x', index=17,
+      name='gyro_x', full_name='exit_speed.Point.gyro_x', index=17,
       number=18, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_y', full_name='gps.Point.gyro_y', index=18,
+      name='gyro_y', full_name='exit_speed.Point.gyro_y', index=18,
       number=19, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_z', full_name='gps.Point.gyro_z', index=19,
+      name='gyro_z', full_name='exit_speed.Point.gyro_z', index=19,
       number=20, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='geohash', full_name='gps.Point.geohash', index=20,
+      name='geohash', full_name='exit_speed.Point.geohash', index=20,
       number=21, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b''.decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='front_brake_pressure_voltage', full_name='gps.Point.front_brake_pressure_voltage', index=21,
+      name='front_brake_pressure_voltage', full_name='exit_speed.Point.front_brake_pressure_voltage', index=21,
       number=22, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rear_brake_pressure_voltage', full_name='gps.Point.rear_brake_pressure_voltage', index=22,
+      name='rear_brake_pressure_voltage', full_name='exit_speed.Point.rear_brake_pressure_voltage', index=22,
       number=23, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='battery_voltage', full_name='gps.Point.battery_voltage', index=23,
+      name='battery_voltage', full_name='exit_speed.Point.battery_voltage', index=23,
       number=24, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='oil_temp_voltage', full_name='gps.Point.oil_temp_voltage', index=24,
+      name='oil_temp_voltage', full_name='exit_speed.Point.oil_temp_voltage', index=24,
       number=25, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='elapsed_duration_ms', full_name='gps.Point.elapsed_duration_ms', index=25,
+      name='elapsed_duration_ms', full_name='exit_speed.Point.elapsed_duration_ms', index=25,
       number=26, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='elapsed_distance_m', full_name='gps.Point.elapsed_distance_m', index=26,
+      name='elapsed_distance_m', full_name='exit_speed.Point.elapsed_distance_m', index=26,
       number=27, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='labjack_temp_f', full_name='gps.Point.labjack_temp_f', index=27,
+      name='labjack_temp_f', full_name='exit_speed.Point.labjack_temp_f', index=27,
       number=28, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lf_tire_temp', full_name='gps.Point.lf_tire_temp', index=28,
+      name='lf_tire_temp', full_name='exit_speed.Point.lf_tire_temp', index=28,
       number=29, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rf_tire_temp', full_name='gps.Point.rf_tire_temp', index=29,
+      name='rf_tire_temp', full_name='exit_speed.Point.rf_tire_temp', index=29,
       number=30, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lr_tire_temp', full_name='gps.Point.lr_tire_temp', index=30,
+      name='lr_tire_temp', full_name='exit_speed.Point.lr_tire_temp', index=30,
       number=31, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rr_tire_temp', full_name='gps.Point.rr_tire_temp', index=31,
+      name='rr_tire_temp', full_name='exit_speed.Point.rr_tire_temp', index=31,
       number=32, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -270,34 +270,34 @@ _POINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=84,
-  serialized_end=891,
+  serialized_start=91,
+  serialized_end=926,
 )
 
 
 _LAP = _descriptor.Descriptor(
   name='Lap',
-  full_name='gps.Lap',
+  full_name='exit_speed.Lap',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='points', full_name='gps.Lap.points', index=0,
+      name='points', full_name='exit_speed.Lap.points', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='duration', full_name='gps.Lap.duration', index=1,
+      name='duration', full_name='exit_speed.Lap.duration', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='number', full_name='gps.Lap.number', index=2,
+      name='number', full_name='exit_speed.Lap.number', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -315,34 +315,34 @@ _LAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=893,
-  serialized_end=987,
+  serialized_start=928,
+  serialized_end=1029,
 )
 
 
 _SESSION = _descriptor.Descriptor(
   name='Session',
-  full_name='gps.Session',
+  full_name='exit_speed.Session',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='laps', full_name='gps.Session.laps', index=0,
+      name='laps', full_name='exit_speed.Session.laps', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='track', full_name='gps.Session.track', index=1,
+      name='track', full_name='exit_speed.Session.track', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b''.decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='start_finish', full_name='gps.Session.start_finish', index=2,
+      name='start_finish', full_name='exit_speed.Session.start_finish', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -360,34 +360,34 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=989,
-  serialized_end=1071,
+  serialized_start=1031,
+  serialized_end=1127,
 )
 
 
 _TIREIRSENSOR = _descriptor.Descriptor(
   name='TireIrSensor',
-  full_name='gps.TireIrSensor',
+  full_name='exit_speed.TireIrSensor',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='inner', full_name='gps.TireIrSensor.inner', index=0,
+      name='inner', full_name='exit_speed.TireIrSensor.inner', index=0,
       number=1, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='middle', full_name='gps.TireIrSensor.middle', index=1,
+      name='middle', full_name='exit_speed.TireIrSensor.middle', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='outer', full_name='gps.TireIrSensor.outer', index=2,
+      name='outer', full_name='exit_speed.TireIrSensor.outer', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -405,8 +405,8 @@ _TIREIRSENSOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1073,
-  serialized_end=1133,
+  serialized_start=1129,
+  serialized_end=1189,
 )
 
 _POINT.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
@@ -427,28 +427,28 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), {
   'DESCRIPTOR' : _POINT,
   '__module__' : 'gps_pb2'
-  # @@protoc_insertion_point(class_scope:gps.Point)
+  # @@protoc_insertion_point(class_scope:exit_speed.Point)
   })
 _sym_db.RegisterMessage(Point)
 
 Lap = _reflection.GeneratedProtocolMessageType('Lap', (_message.Message,), {
   'DESCRIPTOR' : _LAP,
   '__module__' : 'gps_pb2'
-  # @@protoc_insertion_point(class_scope:gps.Lap)
+  # @@protoc_insertion_point(class_scope:exit_speed.Lap)
   })
 _sym_db.RegisterMessage(Lap)
 
 Session = _reflection.GeneratedProtocolMessageType('Session', (_message.Message,), {
   'DESCRIPTOR' : _SESSION,
   '__module__' : 'gps_pb2'
-  # @@protoc_insertion_point(class_scope:gps.Session)
+  # @@protoc_insertion_point(class_scope:exit_speed.Session)
   })
 _sym_db.RegisterMessage(Session)
 
 TireIrSensor = _reflection.GeneratedProtocolMessageType('TireIrSensor', (_message.Message,), {
   'DESCRIPTOR' : _TIREIRSENSOR,
   '__module__' : 'gps_pb2'
-  # @@protoc_insertion_point(class_scope:gps.TireIrSensor)
+  # @@protoc_insertion_point(class_scope:exit_speed.TireIrSensor)
   })
 _sym_db.RegisterMessage(TireIrSensor)
 

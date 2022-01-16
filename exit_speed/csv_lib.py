@@ -18,8 +18,8 @@ import csv
 import datetime
 import time
 
-import gps_pb2
-import main
+from exit_speed import gps_pb2
+from exit_speed import main
 
 
 def _ReadCsvFile(filepath):

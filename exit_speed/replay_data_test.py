@@ -22,9 +22,10 @@ import gps
 import mock
 import psycopg2
 import testing.postgresql
-import timescale
 from absl import flags
 from absl.testing import absltest
+
+from exit_speed import timescale
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
@@ -34,7 +35,7 @@ import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_dotstar
-  import replay_data
+  from exit_speed import replay_data
 # pylint: enable=wrong-import-position
 
 FLAGS = flags.FLAGS

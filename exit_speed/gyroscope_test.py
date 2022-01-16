@@ -30,7 +30,7 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
   import adafruit_fxas21002c
   import busio
-  import gyroscope
+  from exit_speed import gyroscope
 # pylint: enable=wrong-import-position
 
 

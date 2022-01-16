@@ -17,11 +17,13 @@ import multiprocessing
 import os
 import unittest
 
-import config_lib
-import labjack
 import mock
 import u3
 from absl.testing import absltest
+
+from exit_speed import config_lib
+from exit_speed import gps_pb2
+from exit_speed import labjack
 
 
 class TestLabjack(unittest.TestCase):
@@ -58,7 +60,7 @@ class TestLabjack(unittest.TestCase):
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
     self.labjack.ReadValues()
-    point = self.point_queue.get()
+    point = gps_pb2.Point().FromString(self.point_queue.get())
     self.assertEqual(78.061801842153101916, point.labjack_temp_f)
     self.assertEqual(1.5, point.fuel_level_voltage)
     self.assertEqual(2.7, point.water_temp_voltage)

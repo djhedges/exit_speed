@@ -19,7 +19,7 @@ syntax = "proto3";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
-package gps;
+package exit_speed;
 
 message Point {
   double lat = 1;

@@ -20,9 +20,10 @@ from typing import Tuple
 import adafruit_fxas21002c
 import board
 import busio
-import gps_pb2
-import sensor
 from absl import app
+
+from exit_speed import gps_pb2
+from exit_speed import sensor
 
 
 class Gyroscope(object):

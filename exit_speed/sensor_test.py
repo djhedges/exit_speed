@@ -17,8 +17,9 @@ import time
 import unittest
 
 import mock
-import sensor
 from absl.testing import absltest
+
+from exit_speed import sensor
 
 class TestAccelerometer(unittest.TestCase):
   """Accelerometer unittests."""

@@ -16,11 +16,12 @@
 import os
 import time
 
-import data_logger
-import main as exit_speed_main
 from absl import app
 from absl import flags
 from absl import logging
+
+from exit_speed import data_logger
+from exit_speed import main as exit_speed_main
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.

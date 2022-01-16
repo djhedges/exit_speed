@@ -19,10 +19,11 @@ import time
 import traceback
 from typing import Dict
 
-import gps_pb2
-import sensor
 import u3
 from absl import logging
+
+from exit_speed import gps_pb2
+from exit_speed import sensor
 
 
 class Labjack(sensor.SensorBase):

@@ -21,9 +21,10 @@ from typing import Tuple
 import adafruit_fxos8700
 import board
 import busio
-import gps_pb2
-import sensor
 from absl import app
+
+from exit_speed import gps_pb2
+from exit_speed import sensor
 
 
 class Accelerometer(object):

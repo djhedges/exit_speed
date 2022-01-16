@@ -15,9 +15,10 @@
 """GPS sensor."""
 import geohash
 import gps
-import gps_pb2
-import sensor
 from absl import app
+
+from exit_speed import gps_pb2
+from exit_speed import sensor
 
 REPORT_REQ_FIELDS = ('lat', 'lon', 'time', 'speed')
 

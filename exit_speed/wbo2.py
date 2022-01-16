@@ -22,12 +22,13 @@ from typing import Dict
 from typing import Generator
 from typing import Text
 
-import gps_pb2
-import sensor
 import serial
 from absl import app
 from absl import flags
 from absl import logging
+
+from exit_speed import gps_pb2
+from exit_speed import sensor
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('stoichiometric', 14.7,

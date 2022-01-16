@@ -16,12 +16,13 @@
 import os
 import unittest
 
-import gps_pb2
 import mock
 import psycopg2
 import testing.postgresql
-import timescale
 from absl.testing import absltest
+
+from exit_speed import gps_pb2
+from exit_speed import timescale
 
 Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
 
@@ -235,7 +236,7 @@ class TestTimescale(unittest.TestCase):
     point.accelerometer_x = 0.0
     point.accelerometer_y = 1.7
     point.accelerometer_z = 1.2
-    self.pusher.lap_queue.put(lap)
+    self.pusher.lap_queue.put(lap.SerializeToString())
     self.pusher.AddPointToQueue(point, 1)
     with self.subTest(name='Success'):
       self.pusher.Do()
@@ -268,7 +269,7 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
       self.assertEqual(0, len(self.pusher.point_queue))
     with self.subTest(name='Point Too Early'):
-      self.pusher.point_queue.append((point, 2))
+      self.pusher.point_queue.append((point.SerializeToString(), 2))
       self.pusher.Do()
       self.cursor.execute('SELECT count(*) FROM sessions')
       self.assertEqual(1, self.cursor.fetchone()[0])
@@ -283,7 +284,7 @@ class TestTimescale(unittest.TestCase):
     with self.subTest(name='Exception'):
       lap.number = 2
       lap.duration.FromMilliseconds(90 * 1000)
-      self.pusher.lap_queue.put(lap)
+      self.pusher.lap_queue.put(lap.SerializeToString())
       self.pusher.lap_duration_queue.put((1, lap.duration))
       self.pusher.AddPointToQueue(point, 1)
       with mock.patch.object(self.pusher, 'ExportPoint') as mock_export:

@@ -28,7 +28,7 @@ sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
 import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
-  import accelerometer
+  from exit_speed import accelerometer
   import busio
   import adafruit_fxos8700
 # pylint: enable=wrong-import-position

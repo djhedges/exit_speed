@@ -15,16 +15,16 @@
 """Track list and helper functions."""
 from typing import Tuple
 
-import common_lib
-import gps_pb2
-from tracks import area27
-from tracks import base
-from tracks import oregon_raceway_park
-from tracks import pacific_raceways
-from tracks import portland_internal_raceways
-from tracks import spokane_raceway
-from tracks import test_track
-from tracks import the_ridge
+from exit_speed import common_lib
+from exit_speed import gps_pb2
+from exit_speed.tracks import area27
+from exit_speed.tracks import base
+from exit_speed.tracks import oregon_raceway_park
+from exit_speed.tracks import pacific_raceways
+from exit_speed.tracks import portland_internal_raceways
+from exit_speed.tracks import spokane_raceway
+from exit_speed.tracks import test_track
+from exit_speed.tracks import the_ridge
 
 TRACK_LIST = (
     area27.Area27,
