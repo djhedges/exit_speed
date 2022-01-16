@@ -15,10 +15,10 @@
 """Unitests for tracks."""
 import unittest
 
-import tracks
 from absl.testing import absltest
 
 from exit_speed import gps_pb2
+from exit_speed import tracks
 
 class TestTracks(unittest.TestCase):
   """Gyroscope unittests."""
