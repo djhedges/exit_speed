@@ -21,7 +21,6 @@ import accelerometer
 import common_lib
 import config_lib
 import data_logger
-import geohash
 import gps_pb2
 import gps_sensor
 import gyroscope
@@ -220,7 +219,6 @@ class ExitSpeed(object):
 
   def PopulatePoint(self, point: gps_pb2.Point) -> None:
     """Populates the point protocol buffer."""
-    point.geohash = geohash.encode(point.lat, point.lon)
     self.ReadTireTemperatures(point)
     self.point = point
 

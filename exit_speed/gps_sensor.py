@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """GPS sensor."""
+import geohash
 import gps
 import gps_pb2
 import sensor
@@ -59,6 +60,7 @@ class GPSProcess(sensor.SensorBase):
         if report.get('alt'):
           point.alt = report.alt
         point.speed = report.speed
+        point.geohash = geohash.encode(point.lat, point.lon)
         self.AddPointToQueue(point)
 
 
