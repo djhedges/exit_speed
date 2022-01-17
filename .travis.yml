@@ -42,6 +42,3 @@ script:
   - python3 -m exit_speed.tire_temperature_test
   - python3 -m exit_speed.tracks_test
   - python3 -m exit_speed.wbo2_test
-  - python3 -m pip install --upgrade pip
-  - python3 -m pip install --upgrade build
-  - python3 -m build
