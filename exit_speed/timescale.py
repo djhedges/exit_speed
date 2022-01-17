@@ -265,7 +265,7 @@ class Timescale(object):
                                   stack_trace)
       # Repopulate queues on errors.
       if lap:
-        self.lap_queue.put(lap)
+        self.lap_queue.put(lap.SerializeToString())
       if lap_number_und_duration:
         self.lap_duration_queue.put(lap_number_und_duration)
       if point:
