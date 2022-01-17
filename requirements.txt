@@ -1,36 +1,36 @@
-absl-py==0.10.0
-adafruit-circuitpython-busdevice==4.3.1
-adafruit-circuitpython-dotstar==2.0.0
-adafruit-circuitpython-fxas21002c==2.1.5
-adafruit-circuitpython-fxos8700==2.1.4
-fake_rpi==0.7.1
-google-cloud-storage==1.43.0
-gps==3.19
-grpcio==1.18.0
-LabJackPython==2.0.0
-mlx9064x-driver==1.3.0
-mock==4.0.2
-protobuf==3.12.2
-psycopg2==2.7.7
-pygatt==4.0.5
-pylint==2.6.0
-python-geohash==0.8.5
-pytype==2020.8.28
-PyYAML==5.4
-RPi.GPIO==0.7.0
-seaborn==0.9.0
-sdnotify==0.3.2
-smbus2==0.4.1
-testing.postgresql==1.3.0
+absl-pyg
+adafruit-circuitpython-busdeviceg
+adafruit-circuitpython-dotstarg
+adafruit-circuitpython-fxas21002cg
+adafruit-circuitpython-fxos8700g
+fake_rpig
+google-cloud-storageg
+gpsg
+grpciog
+LabJackPythong
+mlx9064x-driverg
+mockg
+protobufg
+psycopg2g
+pygattg
+pylintg
+python-geohashg
+pytypeg
+PyYAMLg
+RPi.GPIOg
+seaborng
+sdnotifyg
+smbus2g
+testing.postgresqlg
 
 # scipy deps
-Cython==0.29.21  # For pandas
-matplotlib==3.0.2
-ipython==5.8.0
-pandas==0.23.3
+Cython
+matplotlib
+ipython
+pandas
 
 # sckkit-learn deps first.
-numpy==1.21.0
+numpy
 # Finally scipy & scikit.
-scipy==1.4.1
-scikit-learn==0.20.2
+scipy
+scikit-learn
