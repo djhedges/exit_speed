@@ -14,4 +14,4 @@
 # limitations under the License.
 """Race car telemetry with a Raspberry Pi."""
 
-__version__ = '2022.01.16'
+__version__ = '2022.01.17'
