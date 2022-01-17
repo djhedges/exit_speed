@@ -20,3 +20,6 @@ handlers:
   script: main.app
   login: required
   secure: always
+
+- url: /_ah.*
+  script: instance_manager.app

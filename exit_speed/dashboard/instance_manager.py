@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Library for starting/stopping SQL & VM instances."""
-import logging
-
+from flask import Flask
 from googleapiclient import discovery
 
 from exit_speed.dashboard import secret_manager
+
+app = Flask(__name__)
 
 # Obscuring the project id.  This is probably overkill but this code is public.
 SECRET_PROJECT_ID = (
@@ -24,24 +25,22 @@ SECRET_PROJECT_ID = (
 INSTANCE_NAME = 'exit-speed'
 
 
-def IsSQLInstanceUp() -> bool:
+def _SetActivationPolicy(policy):
   service = discovery.build('sqladmin', 'v1beta4')
   project = secret_manager.GetSecret(SECRET_PROJECT_ID)
   request = service.instances().get(project=project, instance=INSTANCE_NAME)
-  response = request.execute()
-  return response['settings']['activationPolicy'] == 'ALWAYS'
+  request.execute()
+  request = service.instances().patch(
+      project=project, instance=INSTANCE_NAME, body={
+          'settings': {'activationPolicy': policy}})
+  return request.execute()
 
 
+@app.route('/_ah/start')
 def StartInstance():
-  service = discovery.build('sqladmin', 'v1beta4')
-  project = secret_manager.GetSecret(SECRET_PROJECT_ID)
-  request = service.instances().get(project=project, instance=INSTANCE_NAME)
-  response = request.execute()
-  if IsSQLInstanceUp():
-    logging.info('SQL instance is already up')
-  else:
-    request = service.instances().patch(
-        project=project, instance=INSTANCE_NAME, body={
-            'settings': {'activationPolicy': 'ALWAYS'}})
-    response = request.execute()
-    logging.info('Start SQL instance response: %s', response)
+  return 'Start SQL instance response: %s' % _SetActivationPolicy('ALWAYS')
+
+
+@app.route('/_ah/stop')
+def StopInstance():
+  return 'Stop SQL instance response: %s' % _SetActivationPolicy('NEVER')

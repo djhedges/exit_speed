@@ -16,7 +16,6 @@ import os
 
 import sqlalchemy
 
-from exit_speed.dashboard import instance_manager
 from exit_speed.dashboard import secret_manager
 
 # Local args used when running a development instance.
@@ -31,7 +30,6 @@ SECRET_LOCAL_ID = (
 
 def InitPool() -> sqlalchemy.engine.base.Engine:
   if os.getenv('GOOGLE_CLOUD_PROJECT'):
-    instance_manager.StartInstance()
     local_args = secret_manager.GetSecret(SECRET_LOCAL_ID)
     return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(**local_args))
   return sqlalchemy.create_engine(sqlalchemy.engine.url.URL(
