@@ -36,7 +36,7 @@ from exit_speed.dashboard import queries
 
 FLAGS = flags.FLAGS
 flags.DEFINE_bool(
-    'debug', True,
+    'debug', False,
     'Set to true to enable auto reloading of Python code at the expense of '
     'high CPU load.')
 
