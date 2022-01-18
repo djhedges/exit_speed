@@ -18,7 +18,6 @@ from typing import List
 from typing import Text
 
 import psycopg2
-import tracks
 from absl import app
 from absl import flags
 from absl import logging
@@ -27,6 +26,7 @@ from exit_speed import cleanup_timescale
 from exit_speed import data_logger
 from exit_speed import replay_data
 from exit_speed import timescale
+from exit_speed import tracks
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on replay.
