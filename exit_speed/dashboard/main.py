@@ -42,56 +42,6 @@ flags.DEFINE_bool(
 
 app = dash.Dash(__name__)
 server = app.server
-SESSIONS = queries.GetSessions()
-POINTS_COLUMNS = queries.GetPointsColumns() + [
-    'front_brake_pressure_percentage',
-    'rear_brake_pressure_percentage',
-    'racing_line',
-    'gsum',
-    'time_delta'
-    ]
-TRACKS = queries.GetTracks()
-
-
-app.layout = html.Div(
-  style={'display': 'grid'},
-  children=[
-    dcc.Location(id='url', refresh=False),
-    dcc.Link('Home', href='/'),
-    dcc.Link('Clear', href='/track=None&points=None'),
-    dcc.Dropdown(
-      id='track-dropdown',
-      options=[{'label': i, 'value': i} for i in TRACKS],
-      searchable=False,
-      clearable=False,
-      style={'width': '50%'},
-    ),
-    dcc.Dropdown(
-      id='points-dropdown',
-      options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
-      clearable=False,
-      multi=True,
-    ),
-    dash_table.DataTable(
-        id='sessions-table',
-        columns=[
-            {'name': i, 'id': i} for i in SESSIONS.columns
-        ],
-        filter_action='native',
-        sort_action='native',
-        sort_mode='single',
-        sort_by=[{'column_id': 'lap_time',
-                  'direction': 'asc'},
-                 {'column_id': 'session_time',
-                  'direction': 'desc'}],
-        row_selectable='multi',
-        page_action='native',
-        page_current= 0,
-        page_size= 10,
-      ),
-    html.Div(id='graphs'),
-  ],
-)
 
 @app.callback(
   Output('url', 'href'),
@@ -127,7 +77,8 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
   if url_track:
     track = url_track[0]
   else:
-    track = TRACKS[0]
+    tracks = queries.GetTracks()
+    track = tracks[0]
   points = params.get(
               'points',
               ['racing_line',
@@ -145,7 +96,9 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
   Input('track-dropdown', 'value'),
 )
 def UpdateSessions(track: pd.DataFrame) -> pd.DataFrame:
-  filtered_df = SESSIONS[SESSIONS.track == track]
+  # TODO: Make this a more efficient query.
+  sessions = queries.GetSessions()
+  filtered_df = sessions[sessions.track == track]
   return filtered_df.to_dict('records')
 
 
@@ -229,6 +182,55 @@ def LinkedZoom(
 
 
 def main(unused_argv):
+  # TODO: Make this a more efficient query.
+  sessions = queries.GetSessions()
+  points_columns = queries.GetPointsColumns() + [
+      'front_brake_pressure_percentage',
+      'rear_brake_pressure_percentage',
+      'racing_line',
+      'gsum',
+      'time_delta'
+      ]
+  tracks = queries.GetTracks()
+  app.layout = html.Div(
+    style={'display': 'grid'},
+    children=[
+      dcc.Location(id='url', refresh=False),
+      dcc.Link('Home', href='/'),
+      dcc.Link('Clear', href='/track=None&points=None'),
+      dcc.Dropdown(
+        id='track-dropdown',
+        options=[{'label': i, 'value': i} for i in tracks],
+        searchable=False,
+        clearable=False,
+        style={'width': '50%'},
+      ),
+      dcc.Dropdown(
+        id='points-dropdown',
+        options=[{'label': i, 'value': i} for i in points_columns],
+        clearable=False,
+        multi=True,
+      ),
+      dash_table.DataTable(
+          id='sessions-table',
+          columns=[
+              {'name': i, 'id': i} for i in sessions.columns
+          ],
+          filter_action='native',
+          sort_action='native',
+          sort_mode='single',
+          sort_by=[{'column_id': 'lap_time',
+                    'direction': 'asc'},
+                   {'column_id': 'session_time',
+                    'direction': 'desc'}],
+          row_selectable='multi',
+          page_action='native',
+          page_current= 0,
+          page_size= 10,
+        ),
+      html.Div(id='graphs'),
+    ],
+  )
   app.run_server(debug=FLAGS.debug)
 
 

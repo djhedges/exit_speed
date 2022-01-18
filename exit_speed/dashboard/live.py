@@ -43,55 +43,6 @@ flags.DEFINE_bool(
 
 app = dash.Dash(__name__)
 server = app.server
-POINTS_COLUMNS = queries.GetPointsColumns()
-
-app.layout = html.Div(
-  style={'display': 'grid'},
-  children=[
-    dcc.Location(id='url', refresh=False),
-    dcc.Store(id='max-time'),
-    dcc.Interval(id='interval', interval=15 * 1000, n_intervals=-1),
-    dcc.Link('Home', href='/'),
-    dcc.Slider(
-      id='time-window',
-      min=1,
-      max=60,
-      step=5,
-      tooltip={'placement': 'bottom', 'always_visible': True},
-      marks={
-          1:  {'label': '1m'},
-          5:  {'label': '5m'},
-          10: {'label': '10m'},
-          15: {'label': '15m'},
-          30: {'label': '30m'},
-          60: {'label': '60m'},
-      },
-    ),
-    dcc.Slider(
-      id='refresh',
-      min=3,
-      max=60,
-      value=3,
-      step=5,
-      tooltip={'placement': 'bottom', 'always_visible': True},
-      marks={
-          3:  {'label': '3s'},
-          5:  {'label': '5s'},
-          10: {'label': '10s'},
-          15: {'label': '15s'},
-          30: {'label': '30s'},
-          60: {'label': '60s'},
-      },
-    ),
-    dcc.Dropdown(
-      id='points-dropdown',
-      options=[{'label': i, 'value': i} for i in POINTS_COLUMNS],
-      clearable=False,
-      multi=True,
-    ),
-    html.Div(id='graphs'),
-  ],
-)
 
 @app.callback(
   Output('url', 'href'),
@@ -213,6 +164,55 @@ def ExtendGraphData(
 
 
 def main(unused_argv):
+  points_columns = queries.GetPointsColumns()
+
+  app.layout = html.Div(
+    style={'display': 'grid'},
+    children=[
+      dcc.Location(id='url', refresh=False),
+      dcc.Store(id='max-time'),
+      dcc.Interval(id='interval', interval=15 * 1000, n_intervals=-1),
+      dcc.Link('Home', href='/'),
+      dcc.Slider(
+        id='time-window',
+        min=1,
+        max=60,
+        step=5,
+        tooltip={'placement': 'bottom', 'always_visible': True},
+        marks={
+            1:  {'label': '1m'},
+            5:  {'label': '5m'},
+            10: {'label': '10m'},
+            15: {'label': '15m'},
+            30: {'label': '30m'},
+            60: {'label': '60m'},
+        },
+      ),
+      dcc.Slider(
+        id='refresh',
+        min=3,
+        max=60,
+        value=3,
+        step=5,
+        tooltip={'placement': 'bottom', 'always_visible': True},
+        marks={
+            3:  {'label': '3s'},
+            5:  {'label': '5s'},
+            10: {'label': '10s'},
+            15: {'label': '15s'},
+            30: {'label': '30s'},
+            60: {'label': '60s'},
+        },
+      ),
+      dcc.Dropdown(
+        id='points-dropdown',
+        options=[{'label': i, 'value': i} for i in points_columns],
+        clearable=False,
+        multi=True,
+      ),
+      html.Div(id='graphs'),
+    ],
+  )
   app.run_server(debug=FLAGS.debug)
 
 

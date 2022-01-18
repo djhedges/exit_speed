@@ -20,7 +20,7 @@ from typing import Text
 import pandas as pd
 from psycopg2 import sql
 
-from exit_speed.dashboard import db_conn
+from exit_speed import timescale
 
 
 def GetTracks() -> pd.DataFrame:
@@ -28,8 +28,8 @@ def GetTracks() -> pd.DataFrame:
   SELECT DISTINCT track
   FROM sessions
   """)
-  conn = db_conn.POOL.connect()
-  return pd.io.sql.read_sql(select_statement, conn)['track']
+  with timescale.ConnectToDB() as conn:
+    return pd.io.sql.read_sql(select_statement, conn)['track']
 
 
 def GetSessions() -> pd.DataFrame:
@@ -47,8 +47,8 @@ def GetSessions() -> pd.DataFrame:
   WHERE duration_ms IS NOT null
   GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ms
   """)
-  conn = db_conn.POOL.connect()
-  return pd.io.sql.read_sql(select_statement, conn)
+  with timescale.ConnectToDB() as conn:
+    return pd.io.sql.read_sql(select_statement, conn)
 
 
 def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
@@ -77,14 +77,15 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
     """)
   lap_id_a = lap_ids[0]
   lap_dfs = []
-  for lap_id in lap_ids[1:]:
-    df = pd.io.sql.read_sql(
-        select_statement,
-        db_conn.POOL.connect(),
-        params={'lap_id_a': str(lap_id_a),
-                'lap_id_b': str(lap_id)})
-    df['lap_id'] = lap_id
-    lap_dfs.append(df)
+  with timescale.ConnectToDB() as conn:
+    for lap_id in lap_ids[1:]:
+      df = pd.io.sql.read_sql(
+          select_statement,
+          conn,
+          params={'lap_id_a': str(lap_id_a),
+                  'lap_id_b': str(lap_id)})
+      df['lap_id'] = lap_id
+      lap_dfs.append(df)
   combined_df = pd.concat(lap_dfs)
   combined_df.sort_values(by='elapsed_distance_m', inplace=True)
   return combined_df
@@ -96,9 +97,10 @@ def GetPointsColumns() -> List[Text]:
   FROM information_schema.columns
   WHERE table_name = 'points'
   """)
-  conn = db_conn.POOL.connect()
-  resp = conn.execute(select_statement)
-  columns = [row[0] for row in resp.fetchall()]
+  with timescale.ConnectToDB() as conn:
+    with conn.cursor() as cursor:
+      cursor.execute(select_statement)
+      columns = [row[0] for row in cursor.fetchall()]
   columns.remove('lat')
   columns.remove('lon')
   return columns
@@ -127,11 +129,12 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]))
-  raw_conn = db_conn.POOL.raw_connection()
-  df = pd.io.sql.read_sql(
-      query.as_string(raw_conn.cursor()),
-      db_conn.POOL.connect(),
-      params={'lap_ids': tuple(str(lap_id) for lap_id in lap_ids)})
+  with timescale.ConnectToDB() as conn:
+    with conn.cursor() as cursor:
+      df = pd.io.sql.read_sql(
+          query.as_string(cursor),
+          conn,
+          params={'lap_ids': tuple(str(lap_id) for lap_id in lap_ids)})
   df.sort_values(by='elapsed_distance_m', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
@@ -160,11 +163,12 @@ def GetLiveData(start_time: datetime.datetime, point_values: List[Text]):
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]))
-  raw_conn = db_conn.POOL.raw_connection()
-  df = pd.io.sql.read_sql(
-      query.as_string(raw_conn.cursor()),
-      db_conn.POOL.connect(),
-      params={'start_time': start_time})
+  with timescale.ConnectToDB() as conn:
+    with conn.cursor() as cursor:
+      df = pd.io.sql.read_sql(
+          query.as_string(cursor),
+          conn,
+          params={'start_time': start_time})
   df.sort_values(by='time', inplace=True)
   df.rename(columns={'number': 'lap_number'}, inplace=True)
   return df
