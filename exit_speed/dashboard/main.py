@@ -231,7 +231,7 @@ def main(unused_argv):
       html.Div(id='graphs'),
     ],
   )
-  app.run_server(debug=FLAGS.debug)
+  app.run_server(host='0.0.0.0', debug=FLAGS.debug)
 
 
 if __name__ == '__main__':
