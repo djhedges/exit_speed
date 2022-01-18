@@ -1,0 +1,11 @@
+absl-py
+dash
+dash-core-components
+dash-html-components
+google-api-python-client
+google-cloud-secret-manager
+gunicorn
+pandas
+plotly
+psycopg2
+sqlalchemy
