@@ -71,7 +71,7 @@ class SensorBase(object):
     self._process.join()
 
   def AddPointToQueue(self, point: gps_pb2.Point):
-    point.time.FromDatetime(datetime.datetime.now())
+    point.time.FromDatetime(datetime.datetime.utcnow())
     self._point_queue.put(point.SerializeToString())
 
   def Loop(self):
