@@ -14,12 +14,14 @@
 # limitations under the License.
 """Live data dashboard."""
 import datetime
+import json
 import urllib
 from typing import List
 from typing import Text
 from typing import Tuple
 
 import dash
+import pandas as pd
 import plotly.express as px
 from absl import app as absl_app
 from absl import flags
@@ -76,15 +78,22 @@ def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
               ['speed', 'rpm'])
   return time_window, points, refresh
 
+
+def _GetMaxTime(laps_data: pd.DataFrame) -> Text:
+  max_time = laps_data['time'].max().to_pydatetime()
+  return json.dumps(max_time.isoformat())
+
+
 @app.callback(
   Output('graphs', 'children'),
+  Output('max-time', 'data'),
   Input('interval', 'n_intervals'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
 )
 def UpdateGraph(
     unused_interval: int,
-    time_window: int, point_values: List[Text]) -> List[dcc.Graph]:
+    time_window: int, point_values: List[Text]) -> Tuple[List[dcc.Graph], str]:
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_window)
   if not isinstance(point_values, list):
@@ -107,7 +116,7 @@ def UpdateGraph(
                       figure=fig,
                       style={'display': 'inline-grid', 'width': '50%'})
     graphs.append(graph)
-  return graphs
+  return graphs, _GetMaxTime(laps_data)
 
 
 @app.callback(
@@ -125,6 +134,7 @@ def main(unused_argv):
     style={'display': 'grid'},
     children=[
       dcc.Location(id='url', refresh=False),
+      dcc.Store(id='max-time'),
       dcc.Interval(id='interval', interval=15 * 1000, n_intervals=-1),
       dcc.Link('Home', href='/'),
       dcc.Slider(
