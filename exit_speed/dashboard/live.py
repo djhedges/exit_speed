@@ -23,7 +23,6 @@ import dash
 import plotly.express as px
 from absl import app as absl_app
 from absl import flags
-from absl import logging
 from dash import dcc
 from dash import html
 from dash.dependencies import Input
@@ -45,41 +44,47 @@ server = app.server
   Input('url', 'href'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
+  Input('refresh', 'value'),
   prevent_initial_call=True,
 )
-def UpdateURL(href: Text, time_window: int, points: List[Text]):
+def UpdateURL(href: Text, time_window: int, points: List[Text], refresh: int):
   args = {'time_window': time_window,
-          'points': points}
+          'points': points,
+          'refresh': refresh}
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
 @app.callback(
   Output('time-window', 'value'),
   Output('points-dropdown', 'value'),
+  Output('refresh', 'value'),
   Input('url', 'pathname'),
 )
-def ParseURL(pathname: Text) -> Tuple[int, List[Text]]:
+def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
   # Strip a leading "/" with [1:]
   params = urllib.parse.parse_qs(pathname[1:])
   if params.get('time_window'):
     time_window = int(params.get('time_window')[0])
   else:
     time_window = 1
+  if params.get('refresh'):
+    refresh = int(params.get('refresh')[0])
+  else:
+    refresh = 15
   points = params.get(
               'points',
               ['speed', 'rpm'])
-  return time_window, points
+  return time_window, points, refresh
 
 @app.callback(
   Output('graphs', 'children'),
-  Output('interval', 'interval'),
-  Input('interval', 'interval'),
+  Input('interval', 'n_intervals'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
 )
 def UpdateGraph(
-    interval: int,
-    time_window: int, point_values: List[Text]) -> Tuple[List[dcc.Graph], int]:
+    unused_interval: int,
+    time_window: int, point_values: List[Text]) -> List[dcc.Graph]:
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_window)
   if not isinstance(point_values, list):
@@ -102,21 +107,15 @@ def UpdateGraph(
                       figure=fig,
                       style={'display': 'inline-grid', 'width': '50%'})
     graphs.append(graph)
-  update_delta = datetime.datetime.now() - now
-  if update_delta.seconds > interval / 1000:
-    interval += 1000
-  elif update_delta.seconds > 2:
-    interval -= 1000
-  logging.debug('Update graph duration %f', update_delta.seconds)
-  return graphs, interval
+  return graphs
 
 
 @app.callback(
-    Output('refresh', 'value'),
-    Input('interval', 'interval'),
+    Output('interval', 'interval'),
+    Input('refresh', 'value'),
 )
-def SetRefreshSlider(interval: int) -> float:
-  return interval / 1000
+def SetIntervalRefresh(refresh: int) -> int:
+  return refresh * 1000
 
 
 def main(unused_argv):
@@ -126,13 +125,13 @@ def main(unused_argv):
     style={'display': 'grid'},
     children=[
       dcc.Location(id='url', refresh=False),
-      dcc.Interval(id='interval', interval=5 * 1000, n_intervals=-1),
+      dcc.Interval(id='interval', interval=15 * 1000, n_intervals=-1),
       dcc.Link('Home', href='/'),
       dcc.Slider(
         id='time-window',
         min=1,
         max=60,
-        step=1,
+        step=5,
         tooltip={'placement': 'bottom', 'always_visible': True},
         marks={
             1:  {'label': '1m'},
@@ -145,11 +144,10 @@ def main(unused_argv):
       ),
       dcc.Slider(
         id='refresh',
-        disabled=True,  # Dynamically set by UpdateGraph().
-        min=0,
+        min=3,
         max=60,
-        value=10,
-        step=1,
+        value=3,
+        step=5,
         tooltip={'placement': 'bottom', 'always_visible': True},
         marks={
             3:  {'label': '3s'},
