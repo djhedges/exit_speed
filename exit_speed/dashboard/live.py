@@ -16,13 +16,11 @@
 import datetime
 import json
 import urllib
-from typing import Dict
 from typing import List
 from typing import Text
 from typing import Tuple
 
 import dash
-import dateutil
 import pandas as pd
 import plotly.express as px
 from absl import app as absl_app
@@ -30,7 +28,6 @@ from absl import flags
 from dash import dcc
 from dash import html
 from dash.dependencies import Input
-from dash.dependencies import MATCH
 from dash.dependencies import Output
 
 from exit_speed.dashboard import queries
@@ -71,11 +68,11 @@ def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
   if params.get('time_window'):
     time_window = int(params.get('time_window')[0])
   else:
-    time_window = 15
+    time_window = 1
   if params.get('refresh'):
     refresh = int(params.get('refresh')[0])
   else:
-    refresh = 3
+    refresh = 15
   points = params.get(
               'points',
               ['speed', 'rpm'])
@@ -90,10 +87,12 @@ def _GetMaxTime(laps_data: pd.DataFrame) -> Text:
 @app.callback(
   Output('graphs', 'children'),
   Output('max-time', 'data'),
+  Input('interval', 'n_intervals'),
   Input('time-window', 'value'),
   Input('points-dropdown', 'value'),
 )
 def UpdateGraph(
+    unused_interval: int,
     time_window: int, point_values: List[Text]) -> Tuple[List[dcc.Graph], str]:
   now = datetime.datetime.today()
   start_time = now - datetime.timedelta(minutes=time_window)
@@ -126,41 +125,6 @@ def UpdateGraph(
 )
 def SetIntervalRefresh(refresh: int) -> int:
   return refresh * 1000
-
-
-@app.callback(
-  Output({'type': 'graph', 'index': MATCH}, 'extendData'),
-  Input({'type': 'graph', 'index': MATCH}, 'id'),
-  Input('points-dropdown', 'value'),
-  Input('max-time', 'data'),
-  Input('interval', 'n_intervals'),
-  Input('refresh', 'value'),
-  prevent_initial_call=True,
-)
-def ExtendGraphData(
-    graph_id: Dict,
-    point_values: List[Text],
-    max_time: str,
-    n_interval: int,
-    refresh: int):
-  if n_interval:
-    if not isinstance(point_values, list):
-      point_values = [point_values]
-    max_time = dateutil.parser.parse(json.loads(max_time))
-    start_time = max_time + datetime.timedelta(
-        seconds=n_interval * refresh)
-    point_value = point_values[graph_id['index']]
-    lap_data = queries.GetLiveData(start_time, [point_value])
-    x_data = lap_data['time'].astype(str).values
-    y_data = lap_data[point_value].values
-    # Hover data.
-    customdata = lap_data[['lap_id', 'lap_number']].values
-    return {'updateData': {'x': [x_data],
-                           'y': [y_data],
-                           'customdata': [customdata]},
-            'traceIndices': [0],
-            # Makes the assumption data was logged at 10hz.
-            'maxPoints': 10 * 60 * refresh}
 
 
 def main(unused_argv):
