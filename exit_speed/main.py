@@ -208,7 +208,7 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     while True:
-      self.point = gps_pb2.FromString(self.point_queue.get())
+      self.point = gps_pb2.Point().FromString(self.point_queue.get())
       self.ProcessSession()
       logging.log_every_n_seconds(
           logging.INFO,
