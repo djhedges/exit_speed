@@ -55,7 +55,7 @@ class Generator(object):
                     WHERE
                       geohash != '' AND
                       $__timeFilter(time)
-                    ORDER BY 1
+                    ORDER BY time
                     """),
                     format=core.TABLE_TARGET_FORMAT,
                 ),
@@ -82,7 +82,7 @@ class Generator(object):
         JOIN laps ON laps.id=points.lap_id
         JOIN sessions ON laps.session_id=sessions.id
         WHERE  $__timeFilter(points.time)
-        ORDER BY 1
+        ORDER BY time
         """)
     query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
             [sql.Identifier(col) for col in point_values]))
