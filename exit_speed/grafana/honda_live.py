@@ -26,12 +26,12 @@ from grafanalib.core import YAxes
 from grafanalib.core import YAxis
 
 dashboard = Dashboard(
-    title='Test',
+    title='Honda Live',
     panels=[
         RowPanel(title='New row', gridPos=GridPos(h=1, w=24, x=0, y=8)),
         Graph(
-            title='Some SQL Queries',
-            dataSource='Your SQL Source',
+            title='Speed',
+            #dataSource='PostgreSQL',
             targets=[
                 SqlTarget(
                     rawSql=textwrap.dedent("""
