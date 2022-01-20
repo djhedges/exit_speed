@@ -15,6 +15,7 @@
 """Grafana dashboard for live Honda data dashboard."""
 import textwrap
 
+from grafanalib import core
 from grafanalib.core import Dashboard
 from grafanalib.core import Graph
 from grafanalib.core import GridPos
@@ -25,6 +26,30 @@ from grafanalib.core import YAxis
 dashboard = Dashboard(
     title='Honda Live',
     panels=[
+        core.Worldmap(
+            title='GPS Location',
+            targets=[
+                SqlTarget(
+                    rawSql=textwrap.dedent("""
+                    SELECT
+                      time,
+                      lat as latitude,
+                      lon as longitude,
+                      geohash,
+                      extract(second FROM (time + '2s' - NOW())) AS age
+                    FROM points
+                    WHERE
+                      $__timeFilter(time)
+                    ORDER BY 1
+                    """),
+                ),
+            ],
+            gridPos=GridPos(h=8, w=12, x=0, y=0),
+            locationData='table',
+            mapCenter='Last GeoHash',
+            aggregation='current',
+            metric='age',
+        ),
         Graph(
             title='Speed',
             targets=[
@@ -40,13 +65,12 @@ dashboard = Dashboard(
                     WHERE  $__timeFilter(points.time)
                     ORDER BY 1
                     """),
-                    refId='A',
                 ),
             ],
             yAxes=YAxes(
                 YAxis(format='mph'),
             ),
-            gridPos=GridPos(h=8, w=24, x=0, y=9),
+            gridPos=GridPos(h=8, w=12, x=0, y=9),
         ),
     ],
 ).auto_panel_ids()
