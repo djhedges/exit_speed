@@ -18,9 +18,6 @@ import textwrap
 from grafanalib.core import Dashboard
 from grafanalib.core import Graph
 from grafanalib.core import GridPos
-from grafanalib.core import OPS_FORMAT
-from grafanalib.core import RowPanel
-from grafanalib.core import SHORT_FORMAT
 from grafanalib.core import SqlTarget
 from grafanalib.core import YAxes
 from grafanalib.core import YAxis
@@ -28,10 +25,8 @@ from grafanalib.core import YAxis
 dashboard = Dashboard(
     title='Honda Live',
     panels=[
-        RowPanel(title='New row', gridPos=GridPos(h=1, w=24, x=0, y=8)),
         Graph(
             title='Speed',
-            #dataSource='PostgreSQL',
             targets=[
                 SqlTarget(
                     rawSql=textwrap.dedent("""
@@ -49,8 +44,7 @@ dashboard = Dashboard(
                 ),
             ],
             yAxes=YAxes(
-                YAxis(format=OPS_FORMAT),
-                YAxis(format=SHORT_FORMAT),
+                YAxis(format='mph'),
             ),
             gridPos=GridPos(h=8, w=24, x=0, y=9),
         ),
