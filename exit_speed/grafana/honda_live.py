@@ -16,44 +16,42 @@
 import textwrap
 
 from grafanalib import core
-from grafanalib.core import Dashboard
-from grafanalib.core import Graph
-from grafanalib.core import GridPos
-from grafanalib.core import SqlTarget
-from grafanalib.core import YAxes
-from grafanalib.core import YAxis
 
-dashboard = Dashboard(
+dashboard = core.Dashboard(
     title='Honda Live',
+    refresh=False,
+    time=core.Time('now-2m', 'now'),
     panels=[
         core.Worldmap(
             title='GPS Location',
             targets=[
-                SqlTarget(
+                core.SqlTarget(
                     rawSql=textwrap.dedent("""
                     SELECT
                       time,
-                      lat as latitude,
-                      lon as longitude,
-                      geohash,
-                      extract(second FROM (time + '2s' - NOW())) AS age
+                      extract(second FROM (time + '2s' - NOW())) AS metric,
+                      geohash
                     FROM points
                     WHERE
+                      geohash != '' AND
                       $__timeFilter(time)
                     ORDER BY 1
                     """),
                 ),
             ],
-            gridPos=GridPos(h=8, w=12, x=0, y=0),
+            circleMinSize=1,
+            circleMaxSize=1,
+            gridPos=core.GridPos(h=8, w=12, x=0, y=0),
             locationData='table',
             mapCenter='Last GeoHash',
             aggregation='current',
-            metric='age',
+            thresholds='1',
+            thresholdColors=['#5794F2', '#73BF69'],
         ),
-        Graph(
+        core.Graph(
             title='Speed',
             targets=[
-                SqlTarget(
+                core.SqlTarget(
                     rawSql=textwrap.dedent("""
                     SELECT
                       points.time,
@@ -67,10 +65,10 @@ dashboard = Dashboard(
                     """),
                 ),
             ],
-            yAxes=YAxes(
-                YAxis(format='mph'),
+            yAxes=core.YAxes(
+                core.YAxis(format='mph'),
             ),
-            gridPos=GridPos(h=8, w=12, x=0, y=9),
+            gridPos=core.GridPos(h=8, w=12, x=0, y=9),
         ),
     ],
 ).auto_panel_ids()
