@@ -32,7 +32,7 @@ class Generator(object):
     panel.gridPos=core.GridPos(
         h=8,
         w=12,
-        x=len(self.panels) * 12,
+        x=(len(self.panels) // 2) * 12,
         y=(len(self.panels) // 2) * 8,
     )
     self.panels.append(panel)

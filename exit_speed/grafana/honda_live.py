@@ -18,5 +18,5 @@ from exit_speed.grafana import dashboard_generator
 generator = dashboard_generator.Generator('Honda Live')
 generator.AddWorldMapPanel()
 generator.AddPointPanel('Speed', ('speed',), 'mph')
-generator.AddPointPanel('TPS', ('tps_voltage',), 'voltage')
+generator.AddPointPanel('TPS', ('tps_voltage',), 'v')
 dashboard = generator.GenerateDashboard()
