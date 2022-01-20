@@ -123,7 +123,23 @@ class Generator(object):
   def GenerateDashboard(self):
     return core.Dashboard(
         title=self.title,
-        refresh=False,
-        time=core.Time('now-2m', 'now'),
+        time=core.Time('now-5m', 'now'),
+        timePicker=core.TimePicker(
+            refreshIntervals=[
+                '1s',
+                '3s',
+                '10s',
+                '30s',
+            ],
+            timeOptions=[
+                '5m',
+                '15m',
+                '1h',
+                '6h',
+                '12h',
+                '24h',
+                '2d',
+            ]
+        ),
         panels=self.panels
     ).auto_panel_ids()
