@@ -29,7 +29,7 @@ dashboard = core.Dashboard(
                     rawSql=textwrap.dedent("""
                     SELECT
                       time,
-                      extract(second FROM (time + '2s' - NOW())) AS metric,
+                      extract(second FROM (time + '2s' - NOW())) AS Value,
                       geohash
                     FROM points
                     WHERE
@@ -37,13 +37,15 @@ dashboard = core.Dashboard(
                       $__timeFilter(time)
                     ORDER BY 1
                     """),
+                    format=core.TABLE_TARGET_FORMAT,
                 ),
             ],
             circleMinSize=1,
             circleMaxSize=1,
             gridPos=core.GridPos(h=8, w=12, x=0, y=0),
-            locationData='table',
+            locationData='geohash',
             mapCenter='Last GeoHash',
+            initialZoom=15,
             aggregation='current',
             thresholds='1',
             thresholdColors=['#5794F2', '#73BF69'],
@@ -63,6 +65,7 @@ dashboard = core.Dashboard(
                     WHERE  $__timeFilter(points.time)
                     ORDER BY 1
                     """),
+                    format=core.TABLE_TARGET_FORMAT,
                 ),
             ],
             yAxes=core.YAxes(
