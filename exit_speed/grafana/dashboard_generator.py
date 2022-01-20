@@ -71,29 +71,13 @@ class Generator(object):
         )
     )
 
-  def AddPointPanel(
-      self, title: Text, point_values: Tuple[Text], y_axis_title: Text):
-    select_statement = textwrap.dedent("""
-        SELECT
-          points.time,
-          {columns},
-          laps.number::text
-        FROM points
-        JOIN laps ON laps.id=points.lap_id
-        JOIN sessions ON laps.session_id=sessions.id
-        WHERE  $__timeFilter(points.time)
-        ORDER BY time
-        """)
-    query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
-            [sql.Identifier(col) for col in point_values]))
-    with timescale.ConnectToDB() as conn:
-      raw_string = query.as_string(conn)
+  def AddGraphPanel(self, title: Text, raw_sql: Text, y_axis_title: Text):
     self.AddPanel(
         core.Graph(
             title=title,
             targets=[
                 core.SqlTarget(
-                    rawSql=raw_string,
+                    rawSql=raw_sql,
                     format=core.TABLE_TARGET_FORMAT,
                 ),
             ],
@@ -102,6 +86,39 @@ class Generator(object):
             ),
         )
     )
+
+  def AddPointPanel(
+      self, title: Text, point_values: Tuple[Text], y_axis_title: Text):
+    select_statement = textwrap.dedent("""
+        SELECT
+          time,
+          {columns},
+          laps.number::text
+        FROM points
+        JOIN laps ON laps.id=points.lap_id
+        WHERE  $__timeFilter(time)
+        ORDER BY time
+        """)
+    query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
+            [sql.Identifier(col) for col in point_values]))
+    with timescale.ConnectToDB() as conn:
+      self.AddGraphPanel(title, query.as_string(conn), y_axis_title)
+
+  def AddPointsExportedPanel(self):
+    select_statement = textwrap.dedent("""
+        SELECT
+          $__timeGroupAlias(time, 1s),
+          count(*),
+          laps.number::text
+        FROM points
+        JOIN laps ON laps.id=points.lap_id
+        WHERE  $__timeFilter(time)
+        GROUP BY time, laps.number
+        ORDER BY time
+        """)
+    self.AddGraphPanel(
+        'Points Exported Per Second', select_statement, 'points/s')
+
 
   def GenerateDashboard(self):
     return core.Dashboard(

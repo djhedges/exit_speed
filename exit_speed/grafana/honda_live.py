@@ -21,6 +21,5 @@ def CreateDashboard():
   generator.AddWorldMapPanel()
   generator.AddPointPanel('Speed', ('speed',), 'mph')
   generator.AddPointPanel('TPS', ('tps_voltage',), 'v')
-  generator.AddPointPanel(
-      'Points Exported Per Second', ('COUNT(*)',), 'points/s')
+  generator.AddPointsExportedPanel()
   return generator.GenerateDashboard()
