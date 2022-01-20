@@ -33,9 +33,10 @@ flags.DEFINE_string('server', None, 'Grafana IP or hostname.')
 def main(unused_argv: List[Text]):
   flags.mark_flag_as_required('api_key')
   flags.mark_flag_as_required('server')
-  dash_json = json.dumps({'dashboard': honda_live.dashboard.to_json_data(),
-                          'overwrite': True},
-                         sort_keys=True, indent=2, cls=DashboardEncoder)
+  dash_json = json.dumps({
+      'dashboard': honda_live.CreateDashboard().to_json_data(),
+      'overwrite': True},
+      sort_keys=True, indent=2, cls=DashboardEncoder)
   headers = {'Authorization': 'Bearer %s' % FLAGS.api_key,
              'Content-Type': 'application/json'}
   response = requests.post(

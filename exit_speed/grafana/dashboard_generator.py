@@ -20,6 +20,8 @@ from typing import Tuple
 from grafanalib import core
 from psycopg2 import sql
 
+from exit_speed import timescale
+
 
 class Generator(object):
   """Generates Grafana dashboards for live Exit Speed data."""
@@ -71,24 +73,27 @@ class Generator(object):
 
   def AddPointPanel(
       self, title: Text, point_values: Tuple[Text], y_axis_title: Text):
-    query = sql.SQL(textwrap.dedent("""
+    select_statement = textwrap.dedent("""
         SELECT
-          {columns},
           points.time,
+          {columns},
           laps.number::text
         FROM points
         JOIN laps ON laps.id=points.lap_id
         JOIN sessions ON laps.session_id=sessions.id
         WHERE  $__timeFilter(points.time)
         ORDER BY 1
-        """).format(columns=sql.SQL(',').join(
-            [sql.Identifier(col) for col in point_values])))
+        """)
+    query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
+            [sql.Identifier(col) for col in point_values]))
+    with timescale.ConnectToDB() as conn:
+      raw_string = query.as_string(conn)
     self.AddPanel(
         core.Graph(
             title=title,
             targets=[
                 core.SqlTarget(
-                    rawSql=query.string,
+                    rawSql=raw_string,
                     format=core.TABLE_TARGET_FORMAT,
                 ),
             ],
