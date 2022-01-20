@@ -123,6 +123,7 @@ class Generator(object):
   def GenerateDashboard(self):
     return core.Dashboard(
         title=self.title,
+        refresh='1s',
         time=core.Time('now-5m', 'now'),
         timePicker=core.TimePicker(
             refreshIntervals=[
