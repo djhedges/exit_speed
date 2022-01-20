@@ -38,7 +38,7 @@ def main(unused_argv: List[Text]):
   headers = {'Authorization': 'Bearer %s' % FLAGS.api_key,
              'Content-Type': 'application/json'}
   response = requests.post(
-      'https://%s/api/dashboards/db' % FLAGS.server,
+      'http://%s/api/dashboards/db' % FLAGS.server,
       data=dash_json,
       headers=headers)
   print(response)
