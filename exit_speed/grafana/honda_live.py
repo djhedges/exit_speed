@@ -12,66 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Grafana dashboard for live Honda data dashboard."""
-import textwrap
+"""Grafana dashboard for live Honda data."""
+from exit_speed.grafana import dashboard_generator
 
-from grafanalib import core
-
-dashboard = core.Dashboard(
-    title='Honda Live',
-    refresh=False,
-    time=core.Time('now-2m', 'now'),
-    panels=[
-        core.Worldmap(
-            title='GPS Location',
-            targets=[
-                core.SqlTarget(
-                    rawSql=textwrap.dedent("""
-                    SELECT
-                      time,
-                      extract(second FROM (time + '2s' - NOW())) AS Value,
-                      geohash
-                    FROM points
-                    WHERE
-                      geohash != '' AND
-                      $__timeFilter(time)
-                    ORDER BY 1
-                    """),
-                    format=core.TABLE_TARGET_FORMAT,
-                ),
-            ],
-            circleMinSize=1,
-            circleMaxSize=1,
-            gridPos=core.GridPos(h=8, w=12, x=0, y=0),
-            locationData='geohash',
-            mapCenter='Last GeoHash',
-            initialZoom=15,
-            aggregation='current',
-            thresholds='1',
-            thresholdColors=['#5794F2', '#73BF69'],
-        ),
-        core.Graph(
-            title='Speed',
-            targets=[
-                core.SqlTarget(
-                    rawSql=textwrap.dedent("""
-                    SELECT
-                      points.time,
-                      speed,
-                      laps.number::text
-                    FROM points
-                    JOIN laps ON laps.id=points.lap_id
-                    JOIN sessions ON laps.session_id=sessions.id
-                    WHERE  $__timeFilter(points.time)
-                    ORDER BY 1
-                    """),
-                    format=core.TABLE_TARGET_FORMAT,
-                ),
-            ],
-            yAxes=core.YAxes(
-                core.YAxis(format='mph'),
-            ),
-            gridPos=core.GridPos(h=8, w=12, x=0, y=9),
-        ),
-    ],
-).auto_panel_ids()
+generator = dashboard_generator.Generator('Honda Live')
+generator.AddWorldMapPanel()
+generator.AddPointPanel('Speed', ('speed',), 'mph')
+generator.AddPointPanel('TPS', ('tps_voltage',), 'voltage')
+dashboard = generator.GenerateDashboard()
