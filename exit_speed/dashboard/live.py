@@ -71,11 +71,11 @@ def ParseURL(pathname: Text) -> Tuple[int, List[Text], int]:
   if params.get('time_window'):
     time_window = int(params.get('time_window')[0])
   else:
-    time_window = 15
+    time_window = 1
   if params.get('refresh'):
     refresh = int(params.get('refresh')[0])
   else:
-    refresh = 3
+    refresh = 15
   points = params.get(
               'points',
               ['speed', 'rpm'])
@@ -192,7 +192,6 @@ def main(unused_argv):
         id='refresh',
         min=3,
         max=60,
-        value=3,
         step=5,
         tooltip={'placement': 'bottom', 'always_visible': True},
         marks={
