@@ -46,13 +46,10 @@ The Adafruit DotStar LEDs can be trimmed to a desired length and provide ample
 brightness for use in a race car.
 https://www.adafruit.com/product/2241
 
-### ADXL345
+### FXOS8700 & FXAS21002
 
-A ADXL345 accelerometer is used to measure the g forces experienced by the car.
-Calibration was done following the Sparkfun guide to set the min/max values.
-I need to take the extra time to read the specsheets to see if there is a more
-accurate way to calibrate the ADXL345.  I read somewhere about a sine instead
-of linear.
+A FXOS8700 accelerometer is used to measure the g forces experienced by the car.
+Calibration was done following the Sparkfun guide to set the min/max values.  Historically a ADXL345 was used but the FXOS8700 was supposedly more accurate and also contained a FXAS21002 Gyroscope.  The Gyroscope data was nearly as interesting as I thought it would be.
 https://learn.sparkfun.com/tutorials/adxl345-hookup-guide#calibration
 
 ### UBlox 8
@@ -94,14 +91,12 @@ http://wbo2.com/2a0/default.htm
 
 ## Software Design Choices
 
-Python has suprisingly been able to keep up with the GPS 10hz output.  Ideally
-this should be rewritten in Go or C++.
+Python has suprisingly been able to keep up with the GPS 10hz output.  In testing Exit Speed has been able to log to disk and write to Postgres with the sensors collecting data at 60hz (~1400 data values per second).  At 80z the point queue starts to fall behind.  Maybe one day I'll rewrite this in Rust but for now it has been more than sufficent for my needs.
 
 I've always wanted to play with the multriprocessing module and it has proved
 useful.  For example the metrics which are uploaded to Timescale are done in a
 seperate process.  This isolates the main process from unexpected errors and
-delays on I/O operations.  The Labjack and WBO2 readings also take place in
-seperate processes as well.
+delays on I/O operations.  The Accelermeter, Gyroscope, Labjack and WBO2 readings also take place in seperate processes as well.
 
 ### Crossing Start/Finish
 
@@ -221,7 +216,7 @@ https://gpswebshop.com/blogs/tech-support-by-vendors-stoton/how-to-change-the-gn
 
 ```
 sudo apt-get install gfortran libatlas3-base libblas-dev libgfortran5 liblapack-dev python3 pip3
-pip3 install -r requirements.txt
+pip3 install exit-speed
 ```
 
 If you run into issues I would take a look at the travis config for pointers.
@@ -239,18 +234,31 @@ https://labjack.com/support/software/installers/exodriver
 
 ### Config
 
-My current config is checked in as corrado.yaml.  It provides mapping between
+My current config is checked in [etc/corrado.yaml](https://github.com/djhedges/exit_speed/blob/master/etc/corrado.yaml).  It provides mapping between
 inputs to point proto fields.  By removing `labjack:` or `wbo2:` from the config
 the corresponding subprocesses are disabled.
 
 ```
+car: Corrado
+gps: True
+accelerometer:
+  frequency_hz: 40
+gyroscope:
+  frequency_hz: 40
 leds: True
 timescale: True
 labjack:
-  ain0: fuel_level_voltage
-  ain1: water_temp_voltage
-  ain2: oil_pressure_voltage
+  frequency_hz: 40
+  ain0: water_temp_voltage
+  ain1: oil_pressure_voltage
+  ain2: front_brake_pressure_voltage
+  ain3: rear_brake_pressure_voltage
+  fio4: battery_voltage
+  fio5: fuel_level_voltage
+  tick_divider_10: [ fio4, fio5 ]
+  dac0_5v_out: True
 wbo2:
+  frequency_hz: 40
   lambda_16: afr
   rpm_count: rpm
   user_3: tps_voltage
@@ -308,17 +316,15 @@ wbo2:
 Starts Exit Speed and logs to stderr.
 
 ```
-./exit_speed.py --log_dir ~/lap_logs/ --config_path=./etc/corrado.yaml \
-  --alsologtostderr
+python3 -m exit_speed.main --log_dir ~/lap_logs/ \
+--config_path=./etc/corrado.yaml --alsologtostderr
 ```
 
-Quick and dirty way to start Exit Speed on boot is by adding the following to
-`/etc/rc.local`.  You can than connect to the screen session with `screen -rd`.
-
+Setup Exit Speed to start on boot.
 ```
-su - pi -c "screen -S exit_speed -dm /home/pi/git/exit_speed/exit_speed.py \
-  --log_dir ~/lap_logs/ --config_path=/home/pi/git/exit_speed/etc/corrado.yaml \
-  --alsologtostderr" &
+cd ~/.config/systemd/user
+wget https://github.com/djhedges/exit_speed/blob/master/etc/exit_speed.service
+systemctl --user enable exit_speed.service
 ```
 
 #### replay_data.py
@@ -328,7 +334,8 @@ Exit Speed logs points to `--log_dir` in files ending in `.data` such as
 into to Timescale.
 
 ```
-./replay_data.py ~/lap_logs/2020-09-24T12\:57\:12.500000_1.data \
+python3 -m exit_speed.replay_data \
+  ~/lap_logs/2020-09-24T12\:57\:12.500000_1.data \
   --include_sleep=False
 ```
 
@@ -341,5 +348,32 @@ the data as "replayed" instead of "live" and is removed by cleanup_timescale.py.
 cleanup_timescale.py is used to reduce the number of laps stored in Timescale.
 
 ```
-./cleanup_timescale.py --max_lap_duration_ms=180000 --min_lap_duration_ms=60000
+python3 -m cleanup_timescale --max_lap_duration_ms=180000 --min_lap_duration_ms=60000
+```
+
+### Dashboards
+
+#### Dash
+
+For comparing lap data there is now a Dashboard written in Dash.
+
+```
+python3 -m exit_speed.dashboard.main
+http://pi_ipaddr:8050/
+```
+
+Ensure the dashboard starts on boot with
+```
+cd ~/.config/systemd/user
+wget https://github.com/djhedges/exit_speed/blob/master/etc/exit_speed_dash.service
+systemctl --user enable exit_speed.service
+```
+
+#### Grafana
+
+I like using Grafana for viewing live data and Dash for the lap comparisons.
+
+This will create the live dashboards I use on Grafana.
+```
+python3 -m exit_speed.grafana.update_grafana --server host:port --api_key
 ```
