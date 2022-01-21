@@ -35,8 +35,7 @@ Water temperature data logged while on track and tethered to a phone.
 ![Water Temp](https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png)
 
 Lap comparison examples.  Total hack atm but a work in progress.
-![Speed](https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparison_speed.png)
-![TPS](https://github.com/djhedges/exit_speed/blob/master/docs/lap_comparison_tps_voltage.png)
+![Dash](https://github.com/djhedges/exit_speed/blob/master/docs/dash_lap_comparison.png)
 
 ## Hardware
 
