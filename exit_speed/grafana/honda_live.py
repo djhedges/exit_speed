@@ -20,6 +20,7 @@ def CreateDashboard():
   generator = dashboard_generator.Generator('Honda Live')
   generator.AddWorldMapPanel()
   generator.AddPointPanel('Speed', ('speed',), 'mph')
-  generator.AddPointPanel('TPS', ('tps_voltage',), 'v')
+  generator.AddPointPanel('TPS', ('tps_voltage',), 'V')
+  generator.AddPointPanel('Battery Voltage', ('battery_voltage',), 'V')
   generator.AddPointsExportedPanel()
   return generator.GenerateDashboard()
