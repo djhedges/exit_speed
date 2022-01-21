@@ -4,7 +4,5 @@
 
 ```
 cd /home/pi/git/exit_speed
-python3 -m exit_speed.dashboard.live
+python3 -m exit_speed.dashboard.main
 ```
-
-Or replace live with main
