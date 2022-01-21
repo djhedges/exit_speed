@@ -71,6 +71,32 @@ class Generator(object):
         )
     )
 
+  def AddLapTimesTable(self):
+    select_statement = textwrap.dedent("""
+        SELECT
+          track,
+          TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') AS session_time,
+          sessions.id AS session_id,
+          laps.number AS lap_number,
+          TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time
+        FROM laps
+        JOIN points ON laps.id=points.lap_id
+        JOIN sessions ON laps.session_id=sessions.id
+        WHERE
+          $__timeFilter(points.time)
+        GROUP BY sessions.id, session_time, track, laps.number, lap_time
+        ORDER BY sessions.id, session_time, track, laps.number, lap_time
+    """)
+    self.AddPanel(
+        core.Table(
+            title='Lap Times',
+            targets=[core.SqlTarget(
+                rawSql=select_statement,
+                format=core.TABLE_TARGET_FORMAT
+            )],
+        )
+    )
+
   def AddGraphPanel(self, title: Text, raw_sql: Text, y_axis_title: Text):
     self.AddPanel(
         core.Graph(
@@ -108,13 +134,12 @@ class Generator(object):
     select_statement = textwrap.dedent("""
         SELECT
           $__timeGroupAlias(time, 1s),
-          count(*),
-          laps.number::text
+          count(*)
         FROM points
-        JOIN laps ON laps.id=points.lap_id
-        WHERE  $__timeFilter(time)
-        GROUP BY time, laps.number
-        ORDER BY time
+        WHERE
+          $__timeFilter(time)
+        GROUP BY 1
+        ORDER BY 1
         """)
     self.AddGraphPanel(
         'Points Exported Per Second', select_statement, 'points/s')
