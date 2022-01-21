@@ -22,7 +22,7 @@ slower based on the car's position compared to the fastest lap of the session.
 Later a DAQ device was added for measuring and logging voltage from sensors such
 as the throttle position and water temperature.  In turn the data was exported
 to a Timescale database which allows for real time analysis of the data in
-Grafana.  Including lap comparison.
+Grafana.
 
 [![4K Demo](https://img.youtube.com/vi/07UoDFVGBuI/0.jpg)](https://youtu.be/07UoDFVGBuI)
 
@@ -34,7 +34,7 @@ Example of data logged at Portland International Raceway being replayed.
 Water temperature data logged while on track and tethered to a phone.
 ![Water Temp](https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png)
 
-Lap comparison examples.  Total hack atm but a work in progress.
+Lap comparison example written in [Dash](https://plotly.com/dash/).
 ![Dash](https://github.com/djhedges/exit_speed/blob/master/docs/dash_lap_comparison.png)
 
 ## Hardware
