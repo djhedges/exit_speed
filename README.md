@@ -35,7 +35,7 @@ Water temperature data logged while on track and tethered to a phone.
 ![Water Temp](https://github.com/djhedges/exit_speed/blob/master/docs/water_temp.png)
 
 Lap comparison example written in [Dash](https://plotly.com/dash/).
-![Dash](https://github.com/djhedges/exit_speed/blob/master/docs/dash_lap_comparison.png)
+![Dash](https://raw.githubusercontent.com/djhedges/exit_speed/master/docs/dash_lap_comparison.png)
 
 ## Hardware
 
