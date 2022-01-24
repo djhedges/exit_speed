@@ -7,7 +7,6 @@ language:
 cache: pip
 python:
   - "3.7.3"
-  - "3.9"
 install:
   # Needed for the libgfortran5 package.
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
