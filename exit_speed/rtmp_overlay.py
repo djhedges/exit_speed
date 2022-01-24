@@ -17,12 +17,19 @@ import multiprocessing
 import os
 import tempfile
 from typing import Dict
+from typing import Text
 
+from absl import app
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
 from exit_speed import gps_pb2
+
+def _FormatLapDuration(lap_duration_ms: float) -> Text:
+  minutes = lap_duration_ms // 60000
+  seconds = lap_duration_ms % 60000 / 1000
+  return '%d:%.03f' % (minutes, seconds)
 
 
 class RTMPOverlay(object):
@@ -31,8 +38,7 @@ class RTMPOverlay(object):
   def __init__(
       self,
       config: Dict,
-      point_queue:
-      multiprocessing.Queue,start_process: bool=True):
+      start_process: bool=True):
     self._config = config
     self._output_path = config.get('rtmp_overlay', {}).get('output')
     _, self._temp_output = tempfile.mkstemp(suffix='.png')
@@ -40,8 +46,12 @@ class RTMPOverlay(object):
     self._resolution = tuple(int(value) for value in config_resolution)
     self._font = ImageFont.truetype(
         '/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf', 40)
-    self._point_queue = point_queue
+    self._manager = multiprocessing.Manager()
+    # TODO: Make the point queue a LIFO.
+    self._point_queue = multiprocessing.Queue()
+    self._lap_duration_queue = self._manager.list()
     self.stop_process_signal = multiprocessing.Value('b', False)
+    self._last_speed = 0.0
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
@@ -51,18 +61,65 @@ class RTMPOverlay(object):
   def AddPointToQueue(self, point: gps_pb2.Point):
     self._point_queue.put(point.SerializeToString())
 
+  def AddLapDuration(self, lap_number: int, lap_duration_ms: float):
+    self._lap_duration_queue.append((lap_number, lap_duration_ms))
+
+  def DrawSpeed(self, drw: ImageDraw.Draw):
+    point = gps_pb2.Point().FromString(self._point_queue.get())
+    if point.speed:
+      self._last_speed = point.speed
+    drw.rectangle(((0, 0),
+                   (200, 50)),
+                  fill=(0, 0, 0, 255))
+    drw.text(
+        (0, 0),
+        'MPH: %s' % self._last_speed,
+        font=self._font,
+        fill=(0, 255, 0, 255))
+
+  def DrawLapDuration(self, drw: ImageDraw.Draw):
+    height = 125
+    width = 225
+    top = self._resolution[1] - height
+    drw.rectangle(((0, self._resolution[1] - height),
+                   (width, self._resolution[1])),
+                  fill=(0, 0, 0, 255))
+    index = 0
+    text_height = 40
+    for lap_number, lap_duration_ms in self._lap_duration_queue[-3:]:
+      drw.text(
+          (0, top + (text_height * index)),
+          '%s  %s' % (lap_number, _FormatLapDuration(lap_duration_ms)),
+          font=self._font,
+          fill=(0, 255, 0, 255))
+      index += 1
+
+  def Do(self):
+    img = Image.new('RGBA', self._resolution, (255, 255, 255, 0))
+    drw = ImageDraw.Draw(img)
+    self.DrawSpeed(drw)
+    self.DrawLapDuration(drw)
+    img.save(self._temp_output, 'PNG')
+    # TODO: Move the writes to ramdisk.
+    # Atomic rename to ensure FFmpeg does not read an incomplete file.
+    os.replace(self._temp_output, self._output_path)
+
   def Loop(self):
     while not self.stop_process_signal.value:
-      img = Image.new('RGBA', self._resolution, (255, 255, 255, 0))
-      drw = ImageDraw.Draw(img)
+      self.Do()
 
-      point = gps_pb2.Point().FromString(self._point_queue.get())
-      if point.speed:
-        drw.text(
-            (10, 10),
-            'MPH: %s' % point.speed,
-            font=self._font,
-            fill=(0, 255, 0, 255))
-        img.save(self._temp_output, 'PNG')
-        # Atomic rename to ensure FFmpeg does not read an incomplete file.
-        os.replace(self._temp_output, self._output_path)
+
+def main(unused_argv):
+  config = {'rtmp_overlay': {'output': '/home/pi/overlay/overlay.png',
+                             'resolution': [1280, 720]}}
+  ro = RTMPOverlay(config, start_process=False)
+  ro.AddPointToQueue(gps_pb2.Point(speed=130))
+  ro.AddLapDuration(1, 90123.456)
+  ro.AddLapDuration(2, 91123.456)
+  ro.AddLapDuration(3, 92123.456)
+  ro.AddLapDuration(4, 94123.456)
+  ro.Do()
+
+
+if __name__ == '__main__':
+  app.run(main)

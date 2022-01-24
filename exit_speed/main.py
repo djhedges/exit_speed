@@ -105,8 +105,7 @@ class ExitSpeed(object):
       logging.info('Logging for car: %s', car)
       self.timescale = timescale.Timescale(car, live_data=self.live_data)
     if self.config.get('rtmp_overlay'):
-      self.rtmp_overlay = rtmp_overlay.RTMPOverlay(
-          self.config, self.point_queue)
+      self.rtmp_overlay = rtmp_overlay.RTMPOverlay(self.config)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -172,6 +171,9 @@ class ExitSpeed(object):
     self.lap.duration.FromNanoseconds(delta)
     self.leds.SetBestLap(self.lap)
     self.timescale.lap_duration_queue.put((self.lap.number, self.lap.duration))
+    if self.config.get('rtmp_overlay'):
+      self.rtmp_overlay.AddLapDuration(
+          self.lap.number, self.lap.duration.ToMilliseconds())
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
