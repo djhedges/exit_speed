@@ -33,6 +33,7 @@ from exit_speed import gyroscope
 from exit_speed import labjack
 from exit_speed import lap_lib
 from exit_speed import leds
+from exit_speed import rtmp_overlay
 from exit_speed import timescale
 from exit_speed import tire_temperature
 from exit_speed import tracks
@@ -103,6 +104,9 @@ class ExitSpeed(object):
       car = self.config['car']
       logging.info('Logging for car: %s', car)
       self.timescale = timescale.Timescale(car, live_data=self.live_data)
+    if self.config.get('rtmp_overlay'):
+      self.rtmp_overlay = rtmp_overlay.RTMPOverlay(
+          self.config, self.point_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -159,6 +163,8 @@ class ExitSpeed(object):
     self.CalculateElapsedValues()
     self.LogPoint()
     self.timescale.AddPointToQueue(point, self.lap.number)
+    if self.config.get('rtmp_overlay'):
+      self.rtmp_overlay.AddPointToQueue(point)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
