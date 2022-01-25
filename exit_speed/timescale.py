@@ -276,6 +276,11 @@ class Timescale(object):
     """Tries to export point data to the timescale backend."""
     while not self.stop_process_signal.value:
       self.Do()
+      logging.log_every_n_seconds(
+          logging.INFO,
+          'Timescale: Point queue size currently at %d.',
+          10,
+          len(self.point_queue))
     if self.timescale_conn:
       self.timescale_conn.commit()
 

@@ -220,7 +220,7 @@ class ExitSpeed(object):
       self.ProcessSession()
       logging.log_every_n_seconds(
           logging.INFO,
-          'Point queue size currently at %d.',
+          'Main: Point queue size currently at %d.',
           10,
           self.point_queue.qsize())
       self.sdnotify.notify(
