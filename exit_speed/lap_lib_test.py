@@ -52,10 +52,10 @@ class TestLapLib(unittest.TestCase):
 
   def testCalcAcceleration(self):
     point_b = gps_pb2.Point()
-    point_b.speed = 70
+    point_b.speed_ms = 70
     point_b.time.FromMilliseconds(1)
     point_c = gps_pb2.Point()
-    point_c.speed = 72
+    point_c.speed_ms = 72
     point_c.time.FromMilliseconds(2)
     self.assertEqual(1999.9999999999998,
                      lap_lib.CalcAcceleration(point_b, point_c))
@@ -70,7 +70,7 @@ class TestLapLib(unittest.TestCase):
 
   def testSolveTimeToCrossFinish(self):
     point_b = gps_pb2.Point()
-    point_b.speed = 70
+    point_b.speed_ms = 70
     acceleration = 2
     perp_dist_b = 1
     self.assertEqual(0.014282800023195819,
@@ -100,8 +100,8 @@ class TestLapLib(unittest.TestCase):
     point_c.lon = -122.694638
     point_b.start_finish_distance = common_lib.PointDelta(start_finish, point_b)
     point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
-    point_b.speed = 70
-    point_c.speed = 70.2
+    point_b.speed_ms = 70
+    point_c.speed_ms = 70.2
     self.assertEqual(1000000.0548742702, lap_lib.CalcTimeAfterFinish(lap))
 
   def testCalcLastLapDuration(self):
@@ -120,8 +120,8 @@ class TestLapLib(unittest.TestCase):
     point_z.lon = -122.694638
     point_y.start_finish_distance = common_lib.PointDelta(start_finish, point_y)
     point_z.start_finish_distance = common_lib.PointDelta(start_finish, point_z)
-    point_y.speed = 70
-    point_z.speed = 70.2
+    point_y.speed_ms = 70
+    point_z.speed_ms = 70.2
     self.assertEqual(1.0 * 1e6, lap_lib.CalcLastLapDuration(session))
 
     lap = session.laps.add()
@@ -137,8 +137,8 @@ class TestLapLib(unittest.TestCase):
     point_c.lon = -122.694638
     point_b.start_finish_distance = common_lib.PointDelta(start_finish, point_b)
     point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
-    point_b.speed = 70
-    point_c.speed = 70.2
+    point_b.speed_ms = 70
+    point_c.speed_ms = 70.2
     self.assertEqual(2000000, lap_lib.CalcLastLapDuration(session))
 
 if __name__ == '__main__':

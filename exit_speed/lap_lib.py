@@ -68,7 +68,7 @@ def SolvePointBAngle(point_b, point_c) -> float:
 
 def CalcAcceleration(point_b: gps_pb2.Point, point_c: gps_pb2.Point) -> float:
   """a = Δv/Δt"""
-  return (((point_b.speed - point_c.speed) /
+  return (((point_b.speed_ms - point_c.speed_ms) /
            (point_b.time.ToNanoseconds() - point_c.time.ToNanoseconds())) /
            1e-09)  # Nanoseconds > Seconds.
 
@@ -89,8 +89,8 @@ def SolveTimeToCrossFinish(point_b: gps_pb2.Point,
   """
   https://physics.stackexchange.com/questions/134771/deriving-time-from-acceleration-displacement-and-initial-velocity
   """
-  sqrt = math.sqrt(point_b.speed ** 2 + 2 * accelration * perp_dist_b)
-  return (point_b.speed * -1 + sqrt) / accelration
+  sqrt = math.sqrt(point_b.speed_ms ** 2 + 2 * accelration * perp_dist_b)
+  return (point_b.speed_ms * -1 + sqrt) / accelration
 
 
 def GetTimeDelta(first_point, last_point) -> float:
