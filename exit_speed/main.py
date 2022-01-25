@@ -158,6 +158,8 @@ class ExitSpeed(object):
     point = self.point
     point.start_finish_distance = common_lib.PointDelta(
         point, self.session.start_finish)
+    point.speed_mph = point.speed_ms * 2.23694
+    point.speed_kmh = point.speed_ms * 3.6
     self.leds.UpdateLeds(point)
     self.CalculateElapsedValues()
     self.LogPoint()

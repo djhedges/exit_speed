@@ -97,7 +97,7 @@ class TestTimescale(unittest.TestCase):
 
     point = lap.points.add()
     point.alt = 1
-    point.speed = 1
+    point.speed_ms = 1
     point.lat = 45.69545832462609
     point.lon = -121.52551179751754
     point.tps_voltage = 2
@@ -224,7 +224,7 @@ class TestTimescale(unittest.TestCase):
     lap.number = 1
     point = lap.points.add()
     point.alt = 1
-    point.speed = 1
+    point.speed_ms = 1
     point.lat = 45.69545832462609
     point.lon = -121.52551179751754
     point.tps_voltage = 2
@@ -298,7 +298,7 @@ class TestTimescale(unittest.TestCase):
     """Ensures points aren't dropped if errrors arrive between commits."""
     point = gps_pb2.Point()
     point.alt = 1
-    point.speed = 1
+    point.speed_ms = 1
     point.lat = 45.69545832462609
     point.lon = -121.52551179751754
     point.tps_voltage = 2

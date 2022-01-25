@@ -101,8 +101,8 @@ class RTMPOverlay(object):
     """
     for _ in range(self._point_queue.qsize()):
       point = gps_pb2.Point().FromString(self._point_queue.get())
-      if point.speed:
-        self._last_speed = point.speed
+      if point.speed_mph:
+        self._last_speed = point.speed_mph
 
   def Do(self):
     self.ProcessPointQueue()

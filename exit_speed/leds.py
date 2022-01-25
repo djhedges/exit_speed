@@ -109,7 +109,7 @@ class LEDs(object):
   def UpdateSpeedDeltas(self,
                         point: gps_pb2.Point,
                         best_point: gps_pb2.Point) -> float:
-    speed_delta = best_point.speed - point.speed
+    speed_delta = best_point.speed_ms - point.speed_ms
     self.speed_deltas.append(speed_delta)
     return statistics.median(self.speed_deltas)
 

@@ -165,7 +165,7 @@ class Timescale(object):
               point.lat,
               point.lon,
               point.alt,
-              point.speed * 2.23694,  # m/s to mph,
+              point.speed_mph,
               point.geohash,
               point.elapsed_duration_ms,
               point.elapsed_distance_m,

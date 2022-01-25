@@ -85,7 +85,7 @@ class TestGPSSensor(unittest.TestCase):
       self.assertEqual(point.lat, TEST_REPORT_VALUES['lat'])
       self.assertEqual(point.lon, TEST_REPORT_VALUES['lon'])
       self.assertEqual(point.alt, TEST_REPORT_VALUES['alt'])
-      self.assertEqual(point.speed, TEST_REPORT_VALUES['speed'])
+      self.assertEqual(point.speed_ms, TEST_REPORT_VALUES['speed'])
 
 if __name__ == '__main__':
   absltest.main()

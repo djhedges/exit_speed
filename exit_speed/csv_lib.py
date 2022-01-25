@@ -70,7 +70,7 @@ def ConvertTraqmateToProto(filepath):
     point.lon = lon
     point.lat = lat
     point.alt = alt
-    point.speed = speed
+    point.speed_ms = speed
     es.ProcessReport(point)
     now = time.time()
     elapsed_time = float(elapsed_time)
@@ -122,7 +122,7 @@ def ConvertProtoToTraqmate(session, filepath):
       for point in lap.points:
         elapsed_time = (point.time.ToNanoseconds() -
                         first_point.time.ToNanoseconds())
-        speed = point.speed / 0.44704
+        speed = point.speed_ms / 0.44704
         csv_writer.writerow([
             elapsed_time / 1000000000.0,
             point.lat,

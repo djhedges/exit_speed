@@ -108,9 +108,9 @@ class TestLEDs(unittest.TestCase):
 
   def testUpdateSpeedDeltas(self):
     point = gps_pb2.Point()
-    point.speed = 88  # mph
+    point.speed_ms = 88  # m/s
     best_point = gps_pb2.Point()
-    best_point.speed = 87
+    best_point.speed_ms = 87
     self.leds.UpdateSpeedDeltas(point, best_point)
     deltas = collections.deque(maxlen=FLAGS.speed_deltas)
     deltas.append(-1.0)
@@ -120,7 +120,7 @@ class TestLEDs(unittest.TestCase):
   def testUpdateLeds(self, mock_fill):
     lap = gps_pb2.Lap()
     point = lap.points.add()
-    point.speed = 88  # mph
+    point.speed_ms = 88  # m/s
     self.leds.UpdateLeds(point)
     self.assertFalse(mock_fill.mock_calls)  # No BallTree yet.
 
@@ -136,7 +136,7 @@ class TestLEDs(unittest.TestCase):
     lap = gps_pb2.Lap()
     lap.duration.FromSeconds(100)
     point = lap.points.add()
-    point.speed = 88  # mph
+    point.speed_ms = 88  # m/s
 
     self.leds.SetBestLap(lap)
     first_tree = self.leds.tree
@@ -144,7 +144,7 @@ class TestLEDs(unittest.TestCase):
     lap = gps_pb2.Lap()
     lap.duration.FromSeconds(99)
     point = lap.points.add()
-    point.speed = 88  # mph
+    point.speed_ms = 88  # m/s
     self.leds.SetBestLap(lap)
     self.assertNotEqual(first_tree, self.leds.tree)
 

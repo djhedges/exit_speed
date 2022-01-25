@@ -25,7 +25,7 @@ message Point {
   double lat = 1;
   double lon = 2;
   double alt = 3;
-  double speed = 4;  // meters/second
+  double speed_ms = 4;  // meters/second
   google.protobuf.Timestamp time = 5;
   double start_finish_distance = 6;  // Distance to the start/finish.
   double tps_voltage = 7;  // Throttle position sensor voltage.
@@ -54,6 +54,8 @@ message Point {
   TireIrSensor rf_tire_temp = 30;  // Right Front
   TireIrSensor lr_tire_temp = 31;  // Left Rear
   TireIrSensor rr_tire_temp = 32;  // Right Rear
+  double speed_mph = 33;
+  double speed_kmh = 34;
 }
 
 message Lap {

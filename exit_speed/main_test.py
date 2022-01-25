@@ -161,7 +161,7 @@ class TestExitSpeed(unittest.TestCase):
 
   def testProcessSession(self):
     point = gps_pb2.Point()
-    point.speed = 21
+    point.speed_ms = 21
     lap = gps_pb2.Lap()
     session = gps_pb2.Session()
     es = main.ExitSpeed()
@@ -174,7 +174,7 @@ class TestExitSpeed(unittest.TestCase):
         self.assertEqual(point, lap_point)
 
     point = gps_pb2.Point()
-    point.speed = 1
+    point.speed_ms = 1
     es.point = point
     es.ProcessSession()
 

@@ -31,7 +31,7 @@ class TestDataLogger(unittest.TestCase):
     _, self.file_path = tempfile.mkstemp(suffix='_1.data')
     self.point = gps_pb2.Point()
     self.point.alt = 1
-    self.point.speed = 1
+    self.point.speed_ms = 1
     self.point.lat = 45.69545832462609
     self.point.lon = -121.52551179751754
     self.point.tps_voltage = 2

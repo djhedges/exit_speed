@@ -60,7 +60,7 @@ class GPSProcess(sensor.SensorBase):
         point.lon = report.lon
         if report.get('alt'):
           point.alt = report.alt
-        point.speed = report.speed
+        point.speed_ms = report.speed
         point.geohash = geohash.encode(point.lat, point.lon)
         self.AddPointToQueue(point)
 
