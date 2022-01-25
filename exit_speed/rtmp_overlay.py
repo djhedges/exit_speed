@@ -66,9 +66,6 @@ class RTMPOverlay(object):
     self._lap_duration_queue.append((lap_number, lap_duration_ms))
 
   def DrawSpeed(self, drw: ImageDraw.Draw):
-    point = gps_pb2.Point().FromString(self._point_queue.get())
-    if point.speed:
-      self._last_speed = point.speed
     drw.rectangle(((0, 0),
                    (200, 50)),
                   fill=(0, 0, 0, 255))
@@ -95,7 +92,20 @@ class RTMPOverlay(object):
           fill=(0, 255, 0, 255))
       index += 1
 
+  def ProcessPointQueue(self):
+    """Updates instance variables with point values.
+
+    Image generation takes ~0.3 seconds and most of that time is spent
+    rendering the PNG file.  This method ensures we overlaying the most recent
+    data values and emptying the queue.
+    """
+    for _ in range(self._point_queue.qsize()):
+      point = gps_pb2.Point().FromString(self._point_queue.get())
+      if point.speed:
+        self._last_speed = point.speed
+
   def Do(self):
+    self.ProcessPointQueue()
     img = Image.new('RGBA', self._resolution, (255, 255, 255, 0))
     drw = ImageDraw.Draw(img)
     self.DrawSpeed(drw)
