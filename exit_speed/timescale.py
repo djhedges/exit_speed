@@ -31,7 +31,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
                     'postgres://exit_speed:faster@localhost:/exit_speed',
                     'Postgres URI connection string.')
-flags.DEFINE_integer('commit_cycle', 3,
+flags.DEFINE_integer('commit_cycle', 30,
                      'Number of points to commit at a time.')
 
 
