@@ -98,6 +98,7 @@ class TestTimescale(unittest.TestCase):
     point = lap.points.add()
     point.alt = 1
     point.speed_ms = 1
+    point.speed_mph = 2.23694
     point.lat = 45.69545832462609
     point.lon = -121.52551179751754
     point.tps_voltage = 2
