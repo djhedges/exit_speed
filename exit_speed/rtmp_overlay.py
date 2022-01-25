@@ -41,7 +41,8 @@ class RTMPOverlay(object):
       start_process: bool=True):
     self._config = config
     self._output_path = config.get('rtmp_overlay', {}).get('output')
-    _, self._temp_output = tempfile.mkstemp(suffix='.png')
+    _, self._temp_output = tempfile.mkstemp(
+        prefix='/tmp/ramdisk/', suffix='.png')
     config_resolution = config.get('rtmp_overlay', {}).get('resolution')
     self._resolution = tuple(int(value) for value in config_resolution)
     self._font = ImageFont.truetype(
@@ -110,7 +111,7 @@ class RTMPOverlay(object):
 
 
 def main(unused_argv):
-  config = {'rtmp_overlay': {'output': '/home/pi/overlay/overlay.png',
+  config = {'rtmp_overlay': {'output': '/tmp/ramdisk/overlay.png',
                              'resolution': [1280, 720]}}
   ro = RTMPOverlay(config, start_process=False)
   ro.AddPointToQueue(gps_pb2.Point(speed=130))
