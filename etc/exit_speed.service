@@ -9,7 +9,7 @@ Description=ExitSpeed
 
 [Service]
 Type=notify
-ExecStart=cd/home/pi/git/exit_speed && python3 -m exit_speed.main --config_path /home/pi/git/exit_speed/etc/corrado.yaml
+ExecStart=/bin/bash -c 'cd /home/pi/git/exit_speed && /usr/bin/python3 -m exit_speed.main --config_path /home/pi/git/exit_speed/etc/corrado.yaml'
 Restart=always
 RestartSec=3
 WatchdogSec=30
