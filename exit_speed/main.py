@@ -104,7 +104,7 @@ class ExitSpeed(object):
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config, self.point_queue)
     if self.config.get('timescale'):
-      self.timescale = timescale.TimescaleMultiProcess(
+      self.timescale = timescale.Timescale(
           timescale.CreateSession(self.session))
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay = rtmp_overlay.RTMPOverlay(self.config)

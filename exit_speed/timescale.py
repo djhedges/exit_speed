@@ -30,10 +30,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('timescale_db_spec',
                     'postgres://exit_speed:faster@localhost:/exit_speed',
                     'Postgres URI connection string.')
-flags.DEFINE_integer('commit_cycle', 4,
+flags.DEFINE_integer('commit_cycle', 30,
                      'Number of points to commit at a time.')
-flags.DEFINE_integer('timescale_procs', 4,
-                     'Number of timescale process to create.')
 
 
 SESSION_INSERT = textwrap.dedent("""
@@ -311,39 +309,3 @@ class Timescale(object):
           len(self.point_queue))
     if self.timescale_conn:
       self.timescale_conn.commit()
-
-
-class TimescaleMultiProcess(object):
-  """Experimental."""
-
-  def __init__(self, session_id: int, start_process: bool = True):
-    """Initializer.
-
-    Args:
-      session_id: An integer of the session id from the sessions table to
-                  relate laps and points to.
-      start_process: If True starts the subprocess.
-    """
-    self._processes = []
-    self._point_count = 0
-    for _ in range(FLAGS.timescale_procs):
-      self._processes.append(Timescale(session_id, start_process=start_process))
-
-  def _GetPointProcessIndex(self) -> int:
-    """Returns an index to self._processes in a round robin fashion."""
-    self._point_count += 1
-    if FLAGS.timescale_procs == 1:
-      return 0
-    return self._point_count % FLAGS.timescale_procs
-
-  def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
-    process = self._processes[self._GetPointProcessIndex()]
-    process.AddPointToQueue(point, lap_number)
-
-  def AddLapToQueue(self, lap: gps_pb2.Lap):
-    for process in self._processes:
-      process.AddLapToQueue(lap)
-
-  def AddLapDurationToQueue(self, lap_number: int, lap_duration_ms: float):
-    for process in self._processes:
-      process.AddLapDurationToQueue(lap_number, lap_duration_ms)
