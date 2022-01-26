@@ -133,9 +133,6 @@ class Timescale(object):
       start_process: If True starts the subprocess.
     """
     self._session_id = session_id
-    if start_process:
-      self._process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self._process.start()
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.manager = multiprocessing.Manager()
     self.timescale_conn = None
@@ -146,6 +143,9 @@ class Timescale(object):
     self.point_queue = self.manager.list()  # Used as LifoQueue.
     self.retry_point_queue = []
     self.commit_cycle = 0
+    if start_process:
+      self._process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self._process.start()
 
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
     self.point_queue.append((point.SerializeToString(), lap_number))
