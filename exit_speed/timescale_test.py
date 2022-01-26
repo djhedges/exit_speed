@@ -32,6 +32,7 @@ def tearDownModule():
   Postgresql.clear_cache()
 
 
+# pylint: disable=protected-access
 class TestTimescale(unittest.TestCase):
   """Timescale unittest."""
 
@@ -83,7 +84,7 @@ class TestTimescale(unittest.TestCase):
     lap = gps_pb2.Lap()
     lap.number = 1
     self.pusher.ExportLap(lap, self.cursor)
-    self.assertDictEqual({1: 1}, self.pusher.lap_number_ids)
+    self.assertDictEqual({1: 1}, self.pusher._lap_number_ids)
 
   def testUpdateLapDuration(self):
     lap = gps_pb2.Lap()
@@ -248,7 +249,7 @@ class TestTimescale(unittest.TestCase):
     point.accelerometer_x = 0.0
     point.accelerometer_y = 1.7
     point.accelerometer_z = 1.2
-    self.pusher.lap_queue.put(lap.SerializeToString())
+    self.pusher._lap_queue.put(lap.SerializeToString())
     self.pusher.AddPointToQueue(point, 1)
     with self.subTest(name='Success'):
       self.pusher.Do()
@@ -258,8 +259,8 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(1, self.cursor.fetchone()[0])
       self.cursor.execute('SELECT count(*) FROM points')
       self.assertEqual(1, self.cursor.fetchone()[0])
-      self.assertEqual(0, self.pusher.lap_queue.qsize())
-      self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_duration_queue.qsize())
       self.assertEqual(0, len(self.pusher.point_queue))
     with self.subTest(name='Second Point'):
       self.pusher.AddPointToQueue(point, 1)
@@ -270,15 +271,15 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(1, self.cursor.fetchone()[0])
       self.cursor.execute('SELECT count(*) FROM points')
       self.assertEqual(2, self.cursor.fetchone()[0])
-      self.assertEqual(0, self.pusher.lap_queue.qsize())
-      self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_duration_queue.qsize())
       self.assertEqual(0, len(self.pusher.point_queue))
     with self.subTest(name='Lap Duration'):
-      self.pusher.lap_duration_queue.put((1, lap.duration))
+      self.pusher._lap_duration_queue.put((1, lap.duration))
       self.pusher.AddPointToQueue(point, 1)
       self.pusher.Do()
-      self.assertEqual(0, self.pusher.lap_queue.qsize())
-      self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_duration_queue.qsize())
       self.assertEqual(0, len(self.pusher.point_queue))
     with self.subTest(name='Point Too Early'):
       self.pusher.point_queue.append((point.SerializeToString(), 2))
@@ -290,20 +291,20 @@ class TestTimescale(unittest.TestCase):
       self.cursor.execute('SELECT count(*) FROM points')
       self.assertEqual(3, self.cursor.fetchone()[0])
       self.assertEqual(1, len(self.pusher.retry_point_queue))
-      self.assertEqual(0, self.pusher.lap_queue.qsize())
-      self.assertEqual(0, self.pusher.lap_duration_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_queue.qsize())
+      self.assertEqual(0, self.pusher._lap_duration_queue.qsize())
       self.assertEqual(1, len(self.pusher.retry_point_queue))
     with self.subTest(name='Exception'):
       lap.number = 2
       lap.duration.FromMilliseconds(90 * 1000)
-      self.pusher.lap_queue.put(lap.SerializeToString())
-      self.pusher.lap_duration_queue.put((1, lap.duration))
+      self.pusher._lap_queue.put(lap.SerializeToString())
+      self.pusher._lap_duration_queue.put((1, lap.duration))
       self.pusher.AddPointToQueue(point, 1)
       with mock.patch.object(self.pusher, 'ExportPoint') as mock_export:
         mock_export.side_effect = psycopg2.Error
         self.pusher.Do()
-        self.assertEqual(1, self.pusher.lap_queue.qsize())
-        self.assertEqual(1, self.pusher.lap_duration_queue.qsize())
+        self.assertEqual(1, self.pusher._lap_queue.qsize())
+        self.assertEqual(1, self.pusher._lap_duration_queue.qsize())
         self.assertEqual(1, len(self.pusher.retry_point_queue))
 
   def testDoCommitCycle(self):

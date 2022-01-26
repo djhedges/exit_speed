@@ -134,13 +134,12 @@ class Timescale(object):
     """
     self._session_id = session_id
     self.stop_process_signal = multiprocessing.Value('b', False)
-    self.manager = multiprocessing.Manager()
+    self._manager = multiprocessing.Manager()
     self.timescale_conn = None
-    self.session_time = None
-    self.lap_number_ids = {}
-    self.lap_queue = multiprocessing.Queue()
-    self.lap_duration_queue = multiprocessing.Queue()
-    self.point_queue = self.manager.list()  # Used as LifoQueue.
+    self._lap_number_ids = {}
+    self._lap_queue = multiprocessing.Queue()
+    self._lap_duration_queue = multiprocessing.Queue()
+    self.point_queue = self._manager.list()  # Used as LifoQueue.
     self.retry_point_queue = []
     self.commit_cycle = 0
     if start_process:
@@ -150,19 +149,31 @@ class Timescale(object):
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
     self.point_queue.append((point.SerializeToString(), lap_number))
 
+  def AddLapToQueue(self, lap: gps_pb2.Lap):
+    self._lap_queue.put(lap.SerializeToString())
+
+  def AddLapDurationToQueue(self, lap_number: int, lap_duration_ms: float):
+    self._lap_duration_queue.put((lap_number, lap_duration_ms))
+
   def ExportLap(self, lap: gps_pb2.Lap, cursor: psycopg2.extensions.cursor):
     """Export the lap data to timescale."""
     args = (self._session_id, lap.number)
     cursor.execute(LAP_INSERT, args)
-    self.lap_number_ids[lap.number] = cursor.fetchone()[0]
+    self._lap_number_ids[lap.number] = cursor.fetchone()[0]
     self.timescale_conn.commit()
 
   def UpdateLapDuration(self,
                         lap_number: int,
-                        duration: gps_pb2.Lap.duration,
+                        lap_duration_ms: float,
                         cursor: psycopg2.extensions.cursor):
-    """Exports lap duration to the Timescale backend."""
-    args = (duration.ToMilliseconds(), self.lap_number_ids[lap_number])
+    """Exports lap duration to the Timescale backend.
+
+    Args:
+      lap_number: The lap number to export.
+      duration: The elapsed lap duration in nanoseconds.
+      cursor: A cursor from the timescale connection.
+    """
+    args = (lap_duration_ms, self._lap_number_ids[lap_number])
     cursor.execute(LAP_DURATION_UPDATE, args)
     self.timescale_conn.commit()
 
@@ -171,7 +182,7 @@ class Timescale(object):
                   lap_number: int,
                   cursor: psycopg2.extensions.cursor):
     """Exports point data to timescale."""
-    lap_id = self.lap_number_ids.get(lap_number)
+    lap_id = self._lap_number_ids.get(lap_number)
     if lap_id:
       args = (point.time.ToJsonString(),
               self._session_id,
@@ -220,12 +231,14 @@ class Timescale(object):
       self.retry_point_queue.append((point, lap_number))
 
   def GetLapFromQueue(self) -> Optional[gps_pb2.Lap]:
-    if self.lap_queue.qsize() > 0:
-      return gps_pb2.Lap().FromString(self.lap_queue.get())
+    if self._lap_queue.qsize() > 0:
+      return gps_pb2.Lap().FromString(self._lap_queue.get())
 
-  def GetLapDurationFromQueue(self) -> Optional[Tuple[int, int]]:
-    if self.lap_duration_queue.qsize() > 0:
-      return self.lap_duration_queue.get()
+  def GetLapDurationFromQueue(
+      self) -> Optional[Tuple[int, float]]:
+    """Returns the lap number and lap duration in nanoseconds."""
+    if self._lap_duration_queue.qsize() > 0:
+      return self._lap_duration_queue.get()
 
   def GetPointFromQueue(self) -> Optional[Tuple[gps_pb2.Point, int]]:
     """Blocks until a point is ready to export."""
@@ -278,9 +291,9 @@ class Timescale(object):
                                   stack_trace)
       # Repopulate queues on errors.
       if lap:
-        self.lap_queue.put(lap.SerializeToString())
+        self._lap_queue.put(lap.SerializeToString())
       if lap_number_und_duration:
-        self.lap_duration_queue.put(lap_number_und_duration)
+        self._lap_duration_queue.put(lap_number_und_duration)
       if point:
         self.retry_point_queue.append(point_und_lap_number)
       self.timescale_conn = None  # Reset connection

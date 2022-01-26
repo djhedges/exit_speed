@@ -116,7 +116,7 @@ class ExitSpeed(object):
     self.lap = lap
     self.lap.number = len(session.laps)
     if self.config.get('timescale'):
-      self.timescale.lap_queue.put(lap.SerializeToString())
+      self.timescale.AddLapToQueue(lap)
 
   def GetLogFilePrefix(self, point: gps_pb2.Point, tz=None):
     utc_dt = point.time.ToDatetime()
@@ -177,8 +177,8 @@ class ExitSpeed(object):
     self.lap.duration.FromNanoseconds(delta)
     self.leds.SetBestLap(self.lap)
     if self.config.get('timescale'):
-      self.timescale.lap_duration_queue.put(
-          (self.lap.number, self.lap.duration))
+      self.timescale.AddLapDurationToQueue(
+          self.lap.number, self.lap.ToMilliseconds())
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay.AddLapDuration(
           self.lap.number, self.lap.duration.ToMilliseconds())

@@ -113,7 +113,7 @@ def CalcTimeAfterFinish(lap: gps_pb2.Point) -> float:
 
 
 def CalcLastLapDuration(session: gps_pb2.Session) -> float:
-  """Calculates the last lap duration for the given session."""
+  """Calculates the last lap duration (nanoseconds) for the given session."""
   if len(session.laps) == 1:
     first_point = session.laps[0].points[0]
     last_point = session.laps[0].points[-1]
