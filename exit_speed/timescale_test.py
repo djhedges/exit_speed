@@ -91,7 +91,8 @@ class TestTimescale(unittest.TestCase):
     lap.duration.FromMilliseconds(90 * 1000)
     lap.number = 1
     self.pusher.ExportLap(lap, self.cursor)
-    self.pusher.UpdateLapDuration(lap.number, lap.duration, self.cursor)
+    self.pusher.UpdateLapDuration(
+        lap.number, lap.duration.ToMilliseconds(), self.cursor)
     self.cursor.execute('SELECT * FROM laps')
     self.conn.commit()
     lap_id, session_id, number, duration_ms = self.cursor.fetchone()
@@ -105,7 +106,8 @@ class TestTimescale(unittest.TestCase):
     lap.duration.FromMilliseconds(90 * 1000)
     lap.number = 1
     self.pusher.ExportLap(lap, self.cursor)
-    self.pusher.UpdateLapDuration(lap.number, lap.duration, self.cursor)
+    self.pusher.UpdateLapDuration(
+        lap.number, lap.duration.ToMilliseconds(), self.cursor)
 
     point = lap.points.add()
     point.alt = 1
@@ -275,7 +277,8 @@ class TestTimescale(unittest.TestCase):
       self.assertEqual(0, self.pusher._lap_duration_queue.qsize())
       self.assertEqual(0, len(self.pusher.point_queue))
     with self.subTest(name='Lap Duration'):
-      self.pusher._lap_duration_queue.put((1, lap.duration))
+      self.pusher._lap_duration_queue.put(
+          (1, lap.duration.ToMilliseconds()))
       self.pusher.AddPointToQueue(point, 1)
       self.pusher.Do()
       self.assertEqual(0, self.pusher._lap_queue.qsize())
@@ -298,7 +301,8 @@ class TestTimescale(unittest.TestCase):
       lap.number = 2
       lap.duration.FromMilliseconds(90 * 1000)
       self.pusher._lap_queue.put(lap.SerializeToString())
-      self.pusher._lap_duration_queue.put((1, lap.duration))
+      self.pusher._lap_duration_queue.put(
+          (1, lap.duration.ToMilliseconds()))
       self.pusher.AddPointToQueue(point, 1)
       with mock.patch.object(self.pusher, 'ExportPoint') as mock_export:
         mock_export.side_effect = psycopg2.Error
