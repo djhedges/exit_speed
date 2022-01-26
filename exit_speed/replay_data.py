@@ -53,7 +53,11 @@ def ReplayLog(filepath, include_sleep=False):
   else:
     FLAGS.set_default('commit_cycle', 10000)
   es = exit_speed_main.ExitSpeed(live_data=not include_sleep)
+  es.point = points[0]
+  es.point_queue.put(points[0].SerializeToString())
   es.config['car'] = os.path.split(os.path.dirname(filepath))[1]
+  es.InitializeSubProcesses()
+  es.AddNewLap()
   for point in points:
     if include_sleep:
       point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
@@ -61,7 +65,7 @@ def ReplayLog(filepath, include_sleep=False):
         session_start = point.time.ToMilliseconds() / 1000
 
     es.point = point
-    es.ProcessSession()
+    es.ProcessLap()
     if include_sleep:
       run_delta = time.time() - replay_start
       point_delta = point.time.ToMilliseconds() / 1000 - session_start

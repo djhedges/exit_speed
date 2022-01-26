@@ -178,7 +178,7 @@ class ExitSpeed(object):
     self.leds.SetBestLap(self.lap)
     if self.config.get('timescale'):
       self.timescale.AddLapDurationToQueue(
-          self.lap.number, self.lap.ToMilliseconds())
+          self.lap.number, self.lap.duration.ToMilliseconds())
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay.AddLapDuration(
           self.lap.number, self.lap.duration.ToMilliseconds())
@@ -212,7 +212,7 @@ class ExitSpeed(object):
     self.CrossStartFinish()
 
   def ProcessSession(self) -> None:
-    """Start/ends the logging of data to log files."""
+    """Populates the session proto."""
     _, track, start_finish = tracks.FindClosestTrack(self.point)
     logging.info('Closest track: %s', track.name)
     self.session.track = track.name

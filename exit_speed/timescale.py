@@ -143,8 +143,8 @@ class Timescale(object):
     self.retry_point_queue = []
     self.commit_cycle = 0
     if start_process:
-      self._process = multiprocessing.Process(target=self.Loop, daemon=True)
-      self._process.start()
+      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self.process.start()
 
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
     self.point_queue.append((point.SerializeToString(), lap_number))
