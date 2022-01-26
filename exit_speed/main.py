@@ -68,26 +68,29 @@ class ExitSpeed(object):
     self.min_points_per_session = min_points_per_session
     self.point_queue = multiprocessing.Queue()
 
-    self.InitializeSubProcesses()
+    self.config = config_lib.LoadConfig()
     self.leds = leds.LEDs()
     self.data_logger = None
-    self.session = gps_pb2.Session()
-    self.AddNewLap()
+    self.timescale = None
+    self.rtmp_overlay = None
     self.point = None
+    self.session = gps_pb2.Session()
     self.sdnotify = sdnotify.SystemdNotifier()
     self.sdnotify.notify('READY=1')
 
   def InitializeSubProcesses(self):
     """Initialize subprocess modules based on config.yaml."""
-    self.config = config_lib.LoadConfig()
     if self.config.get('gps'):
       self.gps = gps_sensor.GPSProcess(self.config, self.point_queue)
       while self.point_queue.empty():
+        self.point = gps_pb2.Point().FromString(self.point_queue.get())
         logging.log_every_n_seconds(
             logging.INFO,
             'Waiting for GPS fix to determine track before starting other '
             'sensor subprocesses',
             10)
+        break
+    self.ProcessSession()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.AccelerometerProcess(
           self.config, self.point_queue)
@@ -101,9 +104,8 @@ class ExitSpeed(object):
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(self.config, self.point_queue)
     if self.config.get('timescale'):
-      car = self.config['car']
-      logging.info('Logging for car: %s', car)
-      self.timescale = timescale.Timescale(car, live_data=self.live_data)
+      self.timescale = timescale.Timescale(
+          timescale.CreateSession(self.session))
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay = rtmp_overlay.RTMPOverlay(self.config)
 
@@ -113,7 +115,8 @@ class ExitSpeed(object):
     lap = session.laps.add()
     self.lap = lap
     self.lap.number = len(session.laps)
-    self.timescale.lap_queue.put(lap.SerializeToString())
+    if self.config.get('timescale'):
+      self.timescale.lap_queue.put(lap.SerializeToString())
 
   def GetLogFilePrefix(self, point: gps_pb2.Point, tz=None):
     utc_dt = point.time.ToDatetime()
@@ -163,7 +166,8 @@ class ExitSpeed(object):
     self.leds.UpdateLeds(point)
     self.CalculateElapsedValues()
     self.LogPoint()
-    self.timescale.AddPointToQueue(point, self.lap.number)
+    if self.config.get('timescale'):
+      self.timescale.AddPointToQueue(point, self.lap.number)
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay.AddPointToQueue(point)
 
@@ -172,7 +176,9 @@ class ExitSpeed(object):
     delta = lap_lib.CalcLastLapDuration(self.session)
     self.lap.duration.FromNanoseconds(delta)
     self.leds.SetBestLap(self.lap)
-    self.timescale.lap_duration_queue.put((self.lap.number, self.lap.duration))
+    if self.config.get('timescale'):
+      self.timescale.lap_duration_queue.put(
+          (self.lap.number, self.lap.duration))
     if self.config.get('rtmp_overlay'):
       self.rtmp_overlay.AddLapDuration(
           self.lap.number, self.lap.duration.ToMilliseconds())
@@ -193,7 +199,8 @@ class ExitSpeed(object):
         self.AddNewLap()
         # Start and end laps on the same point just past start/finish.
         self.lap.points.append(prior_point)
-        self.timescale.AddPointToQueue(prior_point, self.lap.number)
+        if self.config.get('timescale'):
+          self.timescale.AddPointToQueue(prior_point, self.lap.number)
         # Reset elapsed values for first point of the lap.
         self.point.elapsed_duration_ms = 0
         self.point.elapsed_distance_m = 0
@@ -206,20 +213,21 @@ class ExitSpeed(object):
 
   def ProcessSession(self) -> None:
     """Start/ends the logging of data to log files."""
-    if not self.session.track:
-      _, track, start_finish = tracks.FindClosestTrack(self.point)
-      logging.info('Closest track: %s', track.name)
-      self.session.track = track.name
-      self.session.start_finish.lat = start_finish.lat
-      self.session.start_finish.lon = start_finish.lon
-      self.timescale.Start(self.point.time, track.name)
-    self.ProcessLap()
+    _, track, start_finish = tracks.FindClosestTrack(self.point)
+    logging.info('Closest track: %s', track.name)
+    self.session.track = track.name
+    self.session.start_finish.lat = start_finish.lat
+    self.session.start_finish.lon = start_finish.lon
+    self.session.car = self.config['car']
+    self.session.time.FromNanoseconds(self.point.time.ToNanoseconds())
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""
+    self.InitializeSubProcesses()
+    self.AddNewLap()
     while True:
       self.point = gps_pb2.Point().FromString(self.point_queue.get())
-      self.ProcessSession()
+      self.ProcessLap()
       logging.log_every_n_seconds(
           logging.INFO,
           'Main: Point queue size currently at %d.',

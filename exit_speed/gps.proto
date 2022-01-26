@@ -68,6 +68,8 @@ message Session {
   repeated Lap laps = 1;
   string track = 2;
   Point start_finish = 3;  // Location of start/finish.
+  string car = 4;
+  google.protobuf.Timestamp time = 5;
 }
 
 message TireIrSensor {

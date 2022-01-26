@@ -18,7 +18,6 @@ import sys
 import textwrap
 import traceback
 from typing import Optional
-from typing import Text
 from typing import Tuple
 
 import psycopg2
@@ -101,23 +100,46 @@ def GetConnWithPointPrepare(conn: psycopg2.extensions.connection =  None):
   return conn
 
 
+def CreateSession(session: gps_pb2.Session, live_data: bool=True) -> int:
+  """Creates a new session in the session table.
+
+  Args:
+    session: A Session proto which contains the start time, track and car.
+    live_data: If True indicates the data is for a live session.
+               This is usually set to false when replaying data
+               during development.
+  """
+  with ConnectToDB() as conn:
+    with conn.cursor() as cursor:
+      args = (session.time.ToJsonString(),
+              session.track,
+              session.car,
+              live_data)
+      cursor.execute(SESSION_INSERT, args)
+      session_id = cursor.fetchone()[0]
+      conn.commit()
+      return session_id
+
+
 class Timescale(object):
   """Interface for publishing data to timescale."""
 
-  def __init__(self,
-      car: Text,
-      live_data: bool = True,
-      start_process: bool = True):
-    self.car = car
-    self.live_data = live_data
+  def __init__(self, session_id: int, start_process: bool = True):
+    """Initializer.
+
+    Args:
+      session_id: An integer of the session id from the sessions table to
+                  relate laps and points to.
+      start_process: If True starts the subprocess.
+    """
+    self._session_id = session_id
     if start_process:
-      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self._process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self._process.start()
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.manager = multiprocessing.Manager()
     self.timescale_conn = None
     self.session_time = None
-    self.track = None
-    self.session_id = None
     self.lap_number_ids = {}
     self.lap_queue = multiprocessing.Queue()
     self.lap_duration_queue = multiprocessing.Queue()
@@ -128,17 +150,9 @@ class Timescale(object):
   def AddPointToQueue(self, point: gps_pb2.Point, lap_number: int):
     self.point_queue.append((point.SerializeToString(), lap_number))
 
-  def ExportSession(self, cursor: psycopg2.extensions.cursor):
-    if not self.session_id:
-      args = (self.session_time.ToJsonString(), self.track, self.car,
-              self.live_data)
-      cursor.execute(SESSION_INSERT, args)
-      self.session_id = cursor.fetchone()[0]
-      self.timescale_conn.commit()
-
   def ExportLap(self, lap: gps_pb2.Lap, cursor: psycopg2.extensions.cursor):
     """Export the lap data to timescale."""
-    args = (self.session_id, lap.number)
+    args = (self._session_id, lap.number)
     cursor.execute(LAP_INSERT, args)
     self.lap_number_ids[lap.number] = cursor.fetchone()[0]
     self.timescale_conn.commit()
@@ -160,7 +174,7 @@ class Timescale(object):
     lap_id = self.lap_number_ids.get(lap_number)
     if lap_id:
       args = (point.time.ToJsonString(),
-              self.session_id,
+              self._session_id,
               lap_id,
               point.lat,
               point.lon,
@@ -246,7 +260,6 @@ class Timescale(object):
       point_und_lap_number = self.GetPointFromQueue()
       if point_und_lap_number:
         with self.timescale_conn.cursor() as cursor:
-          self.ExportSession(cursor)
           if lap:
             self.ExportLap(lap, cursor)
           if lap_number_und_duration:
@@ -283,8 +296,3 @@ class Timescale(object):
           len(self.point_queue))
     if self.timescale_conn:
       self.timescale_conn.commit()
-
-  def Start(self, session_time, track):
-    self.session_time = session_time
-    self.track = track
-    self.process.start()

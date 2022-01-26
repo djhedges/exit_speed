@@ -23,6 +23,7 @@ from absl.testing import absltest
 
 from exit_speed import gps_pb2
 from exit_speed import timescale
+from exit_speed.tracks import portland_internal_raceways
 
 Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
 
@@ -47,10 +48,18 @@ class TestTimescale(unittest.TestCase):
     conn.commit()
     self.conn = timescale.GetConnWithPointPrepare(conn)
     self.cursor = self.conn.cursor()
+    json_time = '2020-09-13T01:36:38.600Z'
     point = gps_pb2.Point()
-    point.time.FromJsonString('2020-09-13T01:36:38.600Z')
+    point.time.FromJsonString(json_time)
+    self.session = gps_pb2.Session(
+        car='Corrado',
+        track=portland_internal_raceways.PortlandInternationalRaceway.name)
+    self.session.time.FromJsonString(json_time)
+    with mock.patch.object(timescale, 'ConnectToDB') as mock_conn:
+      mock_conn.return_value = conn
+      session_id = timescale.CreateSession(self.session)
     self.pusher = timescale.Timescale(
-        'Corrado',
+        session_id,
         start_process=False,
         )
     self.pusher.timescale_conn = self.conn
@@ -62,9 +71,13 @@ class TestTimescale(unittest.TestCase):
     self.conn.close()
     self.postgresql.stop()
 
-  def testExportSession(self):
-    self.pusher.ExportSession(self.cursor)
-    self.assertEqual(1, self.pusher.session_id)
+  @mock.patch.object(timescale, 'ConnectToDB')
+  def testCreateSession(self, mock_conn):
+    mock_conn.return_value = self.conn
+    self.cursor.execute('SELECT id FROM sessions')
+    latest_session_id = self.cursor.fetchone()[0]
+    session_id = timescale.CreateSession(self.session)
+    self.assertEqual(latest_session_id + 1, session_id)
 
   def testExportLap(self):
     lap = gps_pb2.Lap()
@@ -76,7 +89,6 @@ class TestTimescale(unittest.TestCase):
     lap = gps_pb2.Lap()
     lap.duration.FromMilliseconds(90 * 1000)
     lap.number = 1
-    self.pusher.ExportSession(self.cursor)
     self.pusher.ExportLap(lap, self.cursor)
     self.pusher.UpdateLapDuration(lap.number, lap.duration, self.cursor)
     self.cursor.execute('SELECT * FROM laps')
@@ -91,7 +103,6 @@ class TestTimescale(unittest.TestCase):
     lap = gps_pb2.Lap()
     lap.duration.FromMilliseconds(90 * 1000)
     lap.number = 1
-    self.pusher.ExportSession(self.cursor)
     self.pusher.ExportLap(lap, self.cursor)
     self.pusher.UpdateLapDuration(lap.number, lap.duration, self.cursor)
 

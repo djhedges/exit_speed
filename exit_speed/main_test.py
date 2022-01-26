@@ -155,6 +155,7 @@ class TestExitSpeed(unittest.TestCase):
 
   def testProcessLap(self):
     es = main.ExitSpeed()
+    es.AddNewLap()
     es.point = es.lap.points.add()
     es.ProcessLap()
     self.assertTrue(es.lap.points)
