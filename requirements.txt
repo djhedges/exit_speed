@@ -36,7 +36,7 @@ ipython==7.16.3
 pandas==0.23.3
 
 # sckkit-learn deps first.
-numpy==1.21.0
+numpy==1.22.0
 # Finally scipy & scikit.
 scipy==1.4.1
 scikit-learn==0.20.2
