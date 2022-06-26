@@ -80,10 +80,28 @@ class TestReplayData(unittest.TestCase):
     return patch.start()
 
   @parameterized.expand([
-      'testdata/test_parking_lot_20hz_2020-06-11T22_1.data',
-      'testdata/2021-03-28T10:29:1.200000_1.data',
+      ('testdata/test_parking_lot_20hz_2020-06-11T22_1.data',
+          {1: 71500,
+           2: 76647,
+           }),
+      ('testdata/2021-03-28T10:29:1.200000_1.data', 
+          {1: 314100,
+           2: 93378,
+           3: 91618,
+           4: 90801,
+           5: 90414,
+           6: 91246,
+           7: 89882,
+           8: 89939,
+           9: 89803,
+           10: 91969,
+           11: 90225,
+           12: 89700,
+           13: 89959,
+           14: 90045,
+           }),
   ])
-  def testEndToEnd(self, test_data_path):
+  def testEndToEnd(self, test_data_path, expected_lap_duration):
     test_data_file = os.path.join(
             os.path.join(os.path.dirname(os.path.abspath(__file__)),
             test_data_path))
@@ -93,6 +111,15 @@ class TestReplayData(unittest.TestCase):
       point_count += len(lap.points)
     self.cursor.execute('SELECT count(*) FROM points')
     self.assertEqual(point_count, self.cursor.fetchone()[0])
+    self.cursor.execute('SELECT number, duration_ms FROM laps')
+    for lap_number, lap_duration in self.cursor.fetchall():
+      if lap_duration:
+        expected_duration = expected_lap_duration.get(lap_number, 0)
+        self.assertEqual(
+            lap_duration, expected_duration,
+            msg=f'Lap {lap_number} duration: {lap_duration} != '
+                f'expected duration of {expected_duration}')
+
 
 
 if __name__ == '__main__':
