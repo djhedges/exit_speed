@@ -24,6 +24,7 @@ pygatt==4.0.5
 pylint==2.6.0
 python-geohash==0.8.5
 pytype
+pytz=2022.1
 PyYAML==5.4
 RPi.GPIO==0.7.0
 sdnotify==0.3.2
