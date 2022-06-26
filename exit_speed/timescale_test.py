@@ -113,8 +113,8 @@ class TestTimescale(unittest.TestCase):
     point.alt = 1
     point.speed_ms = 1
     point.speed_mph = 2.23694
-    point.lat = 45.69545832462609
-    point.lon = -121.52551179751754
+    point.lat = 45.69
+    point.lon = -121.52
     point.tps_voltage = 2
     point.water_temp_voltage = 3
     point.oil_pressure_voltage = 4
@@ -156,8 +156,8 @@ class TestTimescale(unittest.TestCase):
      lr_tire_temp_inner, lr_tire_temp_middle, lr_tire_temp_outer,
      rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer
      ) = self.cursor.fetchone()
-    self.assertEqual(lat, 45.6954583246261)
-    self.assertEqual(lon, -121.525511797518)
+    self.assertEqual(lat, 45.69)
+    self.assertEqual(lon, -121.52)
     self.assertEqual(alt, 1.0)
     self.assertEqual(speed, 2.23694)
     self.assertEqual(geohash, 'c21efweg66fd')
