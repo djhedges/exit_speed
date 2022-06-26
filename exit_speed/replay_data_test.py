@@ -24,6 +24,7 @@ import psycopg2
 import testing.postgresql
 from absl import flags
 from absl.testing import absltest
+from parameterized import parameterized
 
 from exit_speed import timescale
 # pylint: disable=wrong-import-position
@@ -78,18 +79,20 @@ class TestReplayData(unittest.TestCase):
     self.addCleanup(patch.stop)
     return patch.start()
 
-  def testEndToEnd(self):
+  @parameterized.expand([
+      'testdata/test_parking_lot_20hz_2020-06-11T22_1.data',
+      'testdata/2021-03-28T10:29:1.200000_1.data',
+  ])
+  def testEndToEnd(self, test_data_path):
     test_data_file = os.path.join(
             os.path.join(os.path.dirname(os.path.abspath(__file__)),
-            'testdata/test_parking_lot_20hz_2020-06-11T22_1.data'))
-    if test_data_file.endswith('.data'):
-      with self.subTest(name=test_data_file):
-        es = replay_data.ReplayLog(test_data_file)
-        point_count = 0
-        for lap in es.session.laps:
-          point_count += len(lap.points)
-        self.cursor.execute('SELECT count(*) FROM points')
-        self.assertEqual(point_count, self.cursor.fetchone()[0])
+            test_data_path))
+    es = replay_data.ReplayLog(test_data_file)
+    point_count = 0
+    for lap in es.session.laps:
+      point_count += len(lap.points)
+    self.cursor.execute('SELECT count(*) FROM points')
+    self.assertEqual(point_count, self.cursor.fetchone()[0])
 
 
 if __name__ == '__main__':
