@@ -1,4 +1,4 @@
-absl-py==0.10.0
+absl-py==1.1.0
 adafruit-circuitpython-busdevice==4.3.1
 adafruit-circuitpython-dotstar==2.0.0
 adafruit-circuitpython-fxas21002c==2.1.5
@@ -11,6 +11,7 @@ fake_rpi==0.7.1
 google-cloud-storage==1.43.0
 gps==3.19
 grafanalib==0.6.1
+grpcio==1.18.0
 LabJackPython==2.0.0
 libcst==0.3.23  # For pytype, new version relies on rust which doesn't compile.
 mlx9064x-driver==1.3.0
