@@ -27,26 +27,26 @@ from exit_speed import lap_lib
 class TestLapLib(unittest.TestCase):
   """Lap time unittests."""
 
-  #def testGetPriorUniquePoint(self):
-  #  point_c = gps_pb2.Point()
-  #  point_c.time.FromMilliseconds(10)
-  #  point_c.lat = 1
-  #  point_c.lon = -1
-  #  lap = gps_pb2.Lap()
-  #  point = lap.points.add()
-  #  point.time.FromMilliseconds(7)
-  #  point = lap.points.add()
-  #  point.time.FromMilliseconds(8)
-  #  point.lat = 8
-  #  point.lon = -8
-  #  point = lap.points.add()
-  #  point.time.FromMilliseconds(9)
-  #  point = lap.points.add()
-  #  point.time.FromMilliseconds(10)  # second point at 10.
-  #  point.lat = 10
-  #  point.lon = -10
-  #  returned = lap_lib.GetPriorUniquePoint(lap, point_c)
-  #  self.assertEqual(8, returned.time.ToMilliseconds())
+  def testGetPriorUniquePoint(self):
+    point_c = gps_pb2.Point()
+    point_c.time.FromMilliseconds(10)
+    point_c.lat = 1
+    point_c.lon = -1
+    lap = gps_pb2.Lap()
+    point = lap.points.add()
+    point.time.FromMilliseconds(7)
+    point = lap.points.add()
+    point.time.FromMilliseconds(8)
+    point.lat = 8
+    point.lon = -8
+    point = lap.points.add()
+    point.time.FromMilliseconds(9)
+    point = lap.points.add()
+    point.time.FromMilliseconds(10)  # second point at 10.
+    point.lat = 10
+    point.lon = -10
+    returned = lap_lib.GetPriorUniquePoint(lap, point_c)
+    self.assertEqual(8, returned.time.ToMilliseconds())
 
   def testSolvePointBAngle(self):
     point_b = gps_pb2.Point()
