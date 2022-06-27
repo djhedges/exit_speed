@@ -47,12 +47,13 @@ def GetPriorUniquePoint(lap: gps_pb2.Lap,
   """Avoids a division by zero if the two points have the same time.
 
   Older logged data had multiple points at the same time.
+  Only consider's points with GPS location.
   """
-  index = -2  # Last point is point_c, so skip it.
+  index = -1  
   point = lap.points[index]
   while abs(index) < len(lap.points):
     point = lap.points[index]
-    if (point.time.ToNanoseconds() != point_c.time.ToNanoseconds() and 
+    if (point.time.ToNanoseconds() < point_c.time.ToNanoseconds() and 
         point.lat and point.lon):
       return point
     index -= 1
