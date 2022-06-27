@@ -68,6 +68,7 @@ class TestExitSpeed(unittest.TestCase):
     self.assertEqual(expected, es.GetLogFilePrefix(point, tz=pytz.UTC))
 
   def testCalculateElapsedValues(self):
+    before_point = gps_pb2.Point()
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000
     prior_point.lon = 23.000000
@@ -78,7 +79,7 @@ class TestExitSpeed(unittest.TestCase):
     point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
     es = main.ExitSpeed()
     es.lap = gps_pb2.Lap()
-    es.lap.points.extend([prior_point, point])
+    es.lap.points.extend([before_point, prior_point, point])
     es.point = point
     es.ProcessPoint()
     self.assertEqual(prior_point.elapsed_duration_ms, 0)
