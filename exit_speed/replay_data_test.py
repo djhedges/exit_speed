@@ -110,7 +110,7 @@ class TestReplayData(unittest.TestCase):
     self.assertEqual(point_count, self.cursor.fetchone()[0])
     self.cursor.execute('SELECT number, duration_ms FROM laps')
     for lap_number, lap_duration in self.cursor.fetchall():
-      if lap_duration:
+      if lap_duration and expected_lap_duration.get(lap_number):
         expected_duration = expected_lap_duration.get(lap_number, 0)
         self.assertEqual(
             lap_duration, expected_duration,
