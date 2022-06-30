@@ -6,9 +6,8 @@ language:
   - python
 cache: pip
 python:
-  - "3.9"
+  - "3.7.2"
 install:
-  - sudo apt install python3-grpcio
   - sudo apt install python3-numpy
   - sudo apt install python3-pandas 
   - sudo apt install python-mock
