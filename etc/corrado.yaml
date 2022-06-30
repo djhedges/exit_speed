@@ -26,6 +26,6 @@ wbo2:
   lambda_16: afr
   rpm_count: rpm
   user_3: tps_voltage
-rtmp_overlay:
-  output: /tmp/ramdisk/overlay.png
-  resolution: [1280, 720]
+#rtmp_overlay:
+#  output: /tmp/ramdisk/overlay.png
+#  resolution: [1280, 720]
