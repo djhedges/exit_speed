@@ -62,7 +62,8 @@ INSERT INTO points (
     lf_tire_temp_inner, lf_tire_temp_middle, lf_tire_temp_outer,
     rf_tire_temp_inner, rf_tire_temp_middle, rf_tire_temp_outer,
     lr_tire_temp_inner, lr_tire_temp_middle, lr_tire_temp_outer,
-    rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer
+    rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer,
+    fuel_pressure_voltage
     )
 VALUES ($1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
@@ -73,7 +74,8 @@ VALUES ($1, $2, $3, $4, $5,
         $30, $31, $32,
         $33, $34, $35,
         $36, $37, $38,
-        $39, $40, $41)
+        $39, $40, $41,
+        $42)
 """)
 POINT_INSERT = textwrap.dedent("""
 EXECUTE point_insert (%s, %s, %s, %s, %s,
@@ -85,7 +87,8 @@ EXECUTE point_insert (%s, %s, %s, %s, %s,
                       %s, %s, %s,
                       %s, %s, %s,
                       %s, %s, %s,
-                      %s, %s, %s)
+                      %s, %s, %s,
+                      %s)
 """)
 
 
@@ -225,6 +228,7 @@ class Timescale(object):
               point.rr_tire_temp.inner,
               point.rr_tire_temp.middle,
               point.rr_tire_temp.outer,
+              point.fuel_pressure_voltage,
               )
       cursor.execute(POINT_INSERT, args)
     else:

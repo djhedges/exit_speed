@@ -56,6 +56,7 @@ message Point {
   TireIrSensor rr_tire_temp = 32;  // Right Rear
   double speed_mph = 33;
   double speed_kmh = 34;
+  double fuel_pressure_voltage = 35;
 }
 
 message Lap {

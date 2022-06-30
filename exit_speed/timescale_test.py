@@ -143,6 +143,7 @@ class TestTimescale(unittest.TestCase):
     point.rf_tire_temp.inner = 190.0
     point.rf_tire_temp.middle = 190.0
     point.rf_tire_temp.outer = 190.0
+    point.fuel_pressure_voltage = 6
     self.pusher.ExportPoint(point, 1, self.cursor)
     self.cursor.execute('SELECT * FROM points')
     (_, _, _, lat, lon, alt, speed, geohash, elapsed_duration_ms,
@@ -154,7 +155,8 @@ class TestTimescale(unittest.TestCase):
      lf_tire_temp_inner, lf_tire_temp_middle, lf_tire_temp_outer,
      rf_tire_temp_inner, rf_tire_temp_middle, rf_tire_temp_outer,
      lr_tire_temp_inner, lr_tire_temp_middle, lr_tire_temp_outer,
-     rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer
+     rr_tire_temp_inner, rr_tire_temp_middle, rr_tire_temp_outer,
+     fuel_pressure_voltage
      ) = self.cursor.fetchone()
     self.assertEqual(lat, 45.69)
     self.assertEqual(lon, -121.52)
@@ -194,6 +196,7 @@ class TestTimescale(unittest.TestCase):
     self.assertEqual(rr_tire_temp_inner, 0.0)
     self.assertEqual(rr_tire_temp_middle, 0.0)
     self.assertEqual(rr_tire_temp_outer, 0.0)
+    self.assertEqual(fuel_pressure_voltage, 6.0)
 
   def testExportPointArrivesBeforeLap(self):
     point = gps_pb2.Point()
