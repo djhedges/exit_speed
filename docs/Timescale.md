@@ -79,7 +79,8 @@ CREATE TABLE points (
   lr_tire_temp_outer           FLOAT,
   rr_tire_temp_inner           FLOAT,
   rr_tire_temp_middle          FLOAT,
-  rr_tire_temp_outer           FLOAT
+  rr_tire_temp_outer           FLOAT,
+  fuel_pressure_voltage        FLOAT
 );
 EXIT;
 ```
