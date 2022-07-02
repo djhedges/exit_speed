@@ -6,7 +6,7 @@ language:
   - python
 cache: pip
 python:
-  - "3.7.3"
+  - "3.7.2"
 install:
   - sudo apt install python3-numpy
   - sudo apt install python3-pandas 
