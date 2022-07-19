@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,68 +13,65 @@
 // limitations under the License.
 //
 // sudo apt install python3-protobuf
-// Compile with protoc -I ./ --python_out ./ gps.proto
+// Compile with protoc -I ./ --python_out ./ exit_speed.proto
 syntax = "proto3";
 
-import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
 package exit_speed;
 
-message Point {
-  double lat = 1;
-  double lon = 2;
-  double alt = 3;
-  double speed_ms = 4;  // meters/second
-  google.protobuf.Timestamp time = 5;
-  double start_finish_distance = 6;  // Distance to the start/finish.
-  double tps_voltage = 7;  // Throttle position sensor voltage.
-  double water_temp_voltage = 8;
-  double oil_pressure_voltage = 9;
-  double rpm = 10;
-  double afr = 11;  // Air fuel ratio.
-  double fuel_level_voltage = 12;  // Air fuel ratio.
-  double accelerometer_x = 13; // G forces.
-  double accelerometer_y = 14; // G forces.
-  double accelerometer_z = 15; // G forces.
-  double pitch = 16;  // Degrees
-  double roll = 17;   // Degrees
-  double gyro_x = 18; // Degrees/second
-  double gyro_y = 19; // Degrees/second
-  double gyro_z = 20; // Degrees/second
-  string geohash = 21;
-  double front_brake_pressure_voltage = 22;
-  double rear_brake_pressure_voltage = 23;
-  double battery_voltage = 24;
-  double oil_temp_voltage= 25;
-  double elapsed_duration_ms = 26; // Milliseconds thus far this lap.
-  double elapsed_distance_m = 27;  // Meters thus far this lap.
-  double labjack_temp_f = 28;  // Labjack ambient temperature in Fahrenheit.
-  TireIrSensor lf_tire_temp = 29;  // Left Front
-  TireIrSensor rf_tire_temp = 30;  // Right Front
-  TireIrSensor lr_tire_temp = 31;  // Left Rear
-  TireIrSensor rr_tire_temp = 32;  // Right Rear
-  double speed_mph = 33;
-  double speed_kmh = 34;
-  double fuel_pressure_voltage = 35;
+message Gps {
+  google.protobuf.Timestamp time = 1;
+  double lat = 2;
+  double lon = 3;
+  double alt = 4;
+  double speed_ms = 5;  // meters/second
 }
 
-message Lap {
-  repeated Point points = 1;
-  google.protobuf.Duration duration = 2;  // Time it took to finish the lap.
-  int32 number = 3;
+message Accelerometer {
+  google.protobuf.Timestamp time = 1;
+  double accelerometer_x = 2; // G forces.
+  double accelerometer_y = 3; // G forces.
+  double accelerometer_z = 4; // G forces.
 }
 
-message Session {
-  repeated Lap laps = 1;
-  string track = 2;
-  Point start_finish = 3;  // Location of start/finish.
-  string car = 4;
-  google.protobuf.Timestamp time = 5;
+message Gyroscope {
+  google.protobuf.Timestamp time = 1;
+  double gyro_x = 2; // Degrees/second
+  double gyro_y = 3; // Degrees/second
+  double gyro_z = 4; // Degrees/second
+}
+
+message Labjack {
+  google.protobuf.Timestamp time = 1;
+  double labjack_temp_f = 2;  // Labjack ambient temperature in Fahrenheit.
+  double fuel_level_voltage = 3;
+  double tps_voltage = 4;  // Throttle position sensor voltage.
+  double water_temp_voltage = 5;
+  double oil_pressure_voltage = 6;
+  double front_brake_pressure_voltage = 7;
+  double rear_brake_pressure_voltage = 8;
+  double battery_voltage = 9;
+  double oil_temp_voltage= 10;
+  double fuel_pressure_voltage = 11;
+}
+
+message WBO2 {
+  google.protobuf.Timestamp time = 1;
+  double rpm = 2;
+  double afr = 3;  // Air fuel ratio.
+}
+
+message TireIrSensors {
+  TireIrSensor lf_tire_temp = 1;  // Left Front
+  TireIrSensor rf_tire_temp = 2;  // Right Front
+  TireIrSensor lr_tire_temp = 3;  // Left Rear
+  TireIrSensor rr_tire_temp = 4;  // Right Rear
 }
 
 message TireIrSensor {
-  double inner = 1;
-  double middle = 2;
-  double outer = 3;
+  google.protobuf.Timestamp time = 1;
+  double inner = 2;
+  double middle = 3;
+  double outer = 4;
 }
