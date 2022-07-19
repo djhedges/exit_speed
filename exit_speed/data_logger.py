@@ -24,6 +24,7 @@ from typing import Generator
 from typing import Text
 
 from absl import logging
+from google.protobuf import any_pb2
 from google.protobuf import message
 
 from exit_speed import gps_pb2
@@ -41,13 +42,14 @@ class UnableToDetermineProtoLength(Error):
 class Logger(object):
   """Interface for writing and reading protos to disk."""
 
-  def __init__(self, file_prefix_or_name: Text):
+  def __init__(self, file_prefix_or_name: Text, proto_class: any_pb2.Any=gps_pb2.Point):
     """Initializer.
 
     Args:
       file_prefix: File prefix with out the .data extension.
                    Ex: testdata/PIR_race_10hz_gps_only_2020-06-21
                    Or the a file's complete name including the _#.data suffix.
+      proto_class: A protobuf message used to serialize and deserialize to and form disk.
     """
     super().__init__()
     if file_prefix_or_name.endswith('.data'):
@@ -56,6 +58,7 @@ class Logger(object):
     else:
       self.file_prefix = file_prefix_or_name
     self.file_path = None
+    self.proto_class = proto_class
     self.current_file = None
     self.current_proto_len = 1
     self._SetFilePath()
@@ -85,14 +88,16 @@ class Logger(object):
       self._SetCurrentFile()
     return self.current_file
 
-  def WriteProto(self, proto: gps_pb2.Point):
+  def WriteProto(self, proto: any_pb2.Any):
+    """Appends the serialized version of the proto to the data_file."""
     proto_bytes = proto.SerializePartialToString()
     proto_len = len(proto_bytes)
     data_file = self.GetFile(proto_len)
     data_file.write(proto_len.to_bytes(
       self.current_proto_len, BYTE_ORDER) + proto_bytes)
 
-  def ReadProtos(self) -> Generator[gps_pb2.Point, None, None]:
+  def ReadProtos(self) -> Generator[any_pb2.Any, None, None]:
+    """Deserializes the proto messages from disk."""
     files_to_read = glob.glob(self.file_prefix + '*.data')
     logging.info('Data files to read: %s', ','.join(files_to_read))
     for file_path in files_to_read:
@@ -111,7 +116,7 @@ class Logger(object):
           proto_bytes = data_file.read(proto_len)
           if proto_len and proto_bytes:
             try:
-              point = gps_pb2.Point.FromString(proto_bytes)
+              point = self.proto_class.FromString(proto_bytes)
               yield point
             except message.DecodeError:
               logging.info('Decode error.  Likely the file writes were '
