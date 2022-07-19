@@ -20,13 +20,11 @@ import os
 import sdnotify
 import u3
 from absl import app
-from absl import flags
 from absl import logging
 
 from exit_speed import accelerometer
 from exit_speed import common_lib
 from exit_speed import config_lib
-from exit_speed import data_logger
 from exit_speed import gps_pb2
 from exit_speed import gps_sensor
 from exit_speed import gyroscope
@@ -38,10 +36,6 @@ from exit_speed import timescale
 from exit_speed import tire_temperature
 from exit_speed import tracks
 from exit_speed import wbo2
-
-FLAGS = flags.FLAGS
-flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
-                    'The directory to save data and logs.')
 
 
 class ExitSpeed(object):
@@ -70,7 +64,6 @@ class ExitSpeed(object):
 
     self.config = config_lib.LoadConfig()
     self.leds = leds.LEDs()
-    self.data_logger = None
     self.timescale = None
     self.rtmp_overlay = None
     self.point = None
@@ -118,27 +111,9 @@ class ExitSpeed(object):
     if self.config.get('timescale'):
       self.timescale.AddLapToQueue(lap)
 
-  def GetLogFilePrefix(self, point: gps_pb2.Point, tz=None):
-    utc_dt = point.time.ToDatetime()
-    current_dt = utc_dt.replace(
-        tzinfo=datetime.timezone.utc).astimezone(tz=tz)
-    current_seconds = current_dt.second + current_dt.microsecond / 1e6
-    return os.path.join(
-        FLAGS.data_log_path,
-        '%s/' % self.config.get('car', 'unknown_car'),
-        '%s:%03f' % (current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
-
-  def _InitializeDataLogger(self, point: gps_pb2.Point):
-    file_prefix = self.GetLogFilePrefix(point)
-    logging.info('Logging data to %s', file_prefix)
-    self.data_logger = data_logger.Logger(file_prefix)
-
   def LogPoint(self) -> None:
     """Writes the current point to the data log."""
     point = self.point
-    if not self.data_logger:
-      self._InitializeDataLogger(point)
-    self.data_logger.WriteProto(point)
 
   def CalculateElapsedValues(self):
     """Populates the elapsed_duration_ms and elapsed_distance_m point values."""

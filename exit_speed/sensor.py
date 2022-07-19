@@ -19,10 +19,20 @@ https://developers.google.com/protocol-buffers/docs/techniques
 """
 import datetime
 import multiprocessing
+import os
 import time
+from absl import flags
+from absl import logging
+from google.protobuf import any_pb2
 from typing import Dict
 
+from exit_speed import data_logger
 from exit_speed import gps_pb2
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
+                    'The directory to save data and logs.')
+
 
 def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
   """Calculates how to sleep to maintain the expected cycle reading.
@@ -44,6 +54,7 @@ def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
     return 0
   return sleep
 
+
 class SensorBase(object):
   """Base class for sensor processes."""
 
@@ -60,6 +71,12 @@ class SensorBase(object):
           target=self.Loop,
           daemon=True)
       self._process.start()
+    self.data_logger = None # pytype: Optional[data_logger.Logger]
+
+  def _InitializeDataLogger(self, proto: any_pb2.Any):
+    file_prefix = GetLogFilePrefix(self, proto)
+    logging.info('Logging data to %s', file_prefix)
+    self.data_logger = data_logger.Logger(file_prefix, proto_class=proto)
 
   def StopProcess(self):
     """Sets the stop process signal."""
@@ -72,7 +89,26 @@ class SensorBase(object):
 
   def AddPointToQueue(self, point: gps_pb2.Point):
     point.time.FromDatetime(datetime.datetime.utcnow())
+    self.LogMessage(point)
     self._point_queue.put(point.SerializeToString())
+
+  def LogMessage(self, proto: any_pb2.Any):
+    if not self.data_logger:
+      self._InitializeDataLogger(proto)
+    self.data_logger.WriteProto(proto)
 
   def Loop(self):
     raise NotImplementedError('Subclasses should override this method.')
+
+
+def GetLogFilePrefix(sensor_instance: SensorBase, proto: any_pb2.Any, tz=None):
+  """Formats the logging path based on sensor and the given proto."""
+  utc_dt = proto.time.ToDatetime()
+  current_dt = utc_dt.replace(
+      tzinfo=datetime.timezone.utc).astimezone(tz=tz)
+  current_seconds = current_dt.second + current_dt.microsecond / 1e6
+  return os.path.join(
+      FLAGS.data_log_path,
+      '%s/' % sensor_instance.config.get('car', 'unknown_car'),
+      '%s/' % sensor_instance.__class__.__name__,
+      '%s:%03f' % (current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))

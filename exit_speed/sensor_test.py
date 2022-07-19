@@ -13,13 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for sensor.py"""
+import multiprocessing
+import pytz
 import time
 import unittest
 
 import mock
+from absl import flags
 from absl.testing import absltest
 
+from exit_speed import data_logger
+from exit_speed import gps_pb2
 from exit_speed import sensor
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
+
+
+class SensorTest(sensor.SensorBase):
+    pass
+
 
 class TestAccelerometer(unittest.TestCase):
   """Accelerometer unittests."""
@@ -36,8 +49,23 @@ class TestAccelerometer(unittest.TestCase):
       self.assertEqual(0.99,
           round(sensor.SleepBasedOnHertz(cycle_time, 1), 2))
 
+  def testGetLogFilePrefix(self):
+    point = gps_pb2.Point()
+    point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    queue = multiprocessing.Queue()
+    sensor_instance = SensorTest({'car': 'Corrado'}, queue, start_process=False)
+    expected = '/tmp/Corrado/SensorTest/2020-05-23T17:47:44.100000'
+    self.assertEqual(expected, sensor.GetLogFilePrefix(sensor_instance, point, tz=pytz.UTC))
 
-
+  def testLogMessage(self):
+    point = gps_pb2.Point()
+    point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    queue = multiprocessing.Queue()
+    sensor_instance = SensorTest({'car': 'Corrado'}, queue, start_process=False)
+    sensor_instance.LogMessage(point)
+    reader = data_logger.Logger(sensor_instance.data_logger.file_prefix)
+    for proto in reader.ReadProtos():
+      self.assertEqual(point, read_point)
 
 
 if __name__ == '__main__':

@@ -75,7 +75,7 @@ class Logger(object):
       self.current_file.flush()
     parent_dir = os.path.dirname(self.file_path)
     if not os.path.exists(parent_dir):
-      os.mkdir(parent_dir)
+      os.makedirs(parent_dir, exist_ok=True)
     self.current_file = open(self.file_path, 'wb')
 
   def GetFile(self, proto_len):

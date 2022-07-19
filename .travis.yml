@@ -9,7 +9,7 @@ python:
   - "3.7.3"
 install:
   - sudo apt install python3-numpy
-  - sudo apt install python3-pandas 
+  - sudo apt install python3-pandas
   - sudo apt install python-mock
   - sudo apt install python-serial
   # Needed for the libgfortran5 package.
@@ -44,6 +44,7 @@ script:
   - python3 -m exit_speed.lap_lib_test
   - python3 -m exit_speed.leds_test
   - python3 -m exit_speed.replay_data_test
+  - python3 -m exit_speed.sensor_test
   - python3 -m exit_speed.timescale_test
   - python3 -m exit_speed.tire_temperature_test
   - python3 -m exit_speed.tracks_test

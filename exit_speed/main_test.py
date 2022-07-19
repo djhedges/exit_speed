@@ -20,7 +20,6 @@ import unittest
 import fake_rpi
 import mock
 import psycopg2
-import pytz
 from absl import flags
 from absl.testing import absltest
 
@@ -42,7 +41,6 @@ FLAGS = flags.FLAGS
 FLAGS.set_default('config_path',
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'testdata/test_config.yaml'))
-FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestExitSpeed(unittest.TestCase):
@@ -59,13 +57,6 @@ class TestExitSpeed(unittest.TestCase):
     patch = mock.patch.object(module, name)
     self.addCleanup(patch.stop)
     return patch.start()
-
-  def testGetLogFilePrefix(self):
-    point = gps_pb2.Point()
-    point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    es = main.ExitSpeed()
-    expected = '/tmp/Corrado/2020-05-23T17:47:44.100000'
-    self.assertEqual(expected, es.GetLogFilePrefix(point, tz=pytz.UTC))
 
   def testCalculateElapsedValues(self):
     before_point = gps_pb2.Point()
