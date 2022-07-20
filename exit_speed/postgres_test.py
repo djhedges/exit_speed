@@ -134,6 +134,24 @@ class TestPostgres(unittest.TestCase):
     self.assertEqual(2.0, gyro_y)
     self.assertEqual(3.0, gyro_z)
 
+  def testExportWBO2(self):
+    proto = exit_speed_pb2.WBO2(
+      afr=13.0,
+      rpm=3250,
+      tps_voltage=4.5)
+    proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    interface = postgres.Postgres(exit_speed_pb2.WBO2, start_process=False)
+    interface.AddProtoToQueue(proto)
+    interface.ExportProto()
+    self.cursor.execute('SELECT * FROM wbo2')
+    time, afr, rpm, tps_voltage = self.cursor.fetchone()
+    self.assertEqual(
+            datetime.datetime(2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC),
+            time)
+    self.assertEqual(13.0, afr)
+    self.assertEqual(3250, rpm)
+    self.assertEqual(4.5, tps_voltage)
+
 
 if __name__ == '__main__':
   absltest.main()
