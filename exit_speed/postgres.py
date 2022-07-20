@@ -15,9 +15,11 @@
 """Postgres interface."""
 
 from typing import Text
+import multiprocessing
 import textwrap
 import psycopg2
 from absl import flags
+from absl import logging
 from google.protobuf import any_pb2
 from exit_speed import exit_speed_pb2
 
@@ -26,14 +28,14 @@ flags.DEFINE_string('postgres_db_spec',
                     'postgres://exit_speed:faster@localhost:/exit_speed',
                     'Postgres URI connection string.')
 
-ARGS_GPS = ('time', 'lat', 'lon', 'alt', 'speed')
+ARGS_GPS = ('time', 'lat', 'lon', 'alt', 'speed_ms')
 PREPARE_GPS = textwrap.dedent("""
   PREPARE gps_insert AS
-  INSERT INTO gps (time, lat, lon, alt, speed)
+  INSERT INTO gps (time, lat, lon, alt, speed_ms)
   VALUES ($1, $2, $3, $4, $5)
 """)
 INSERT_GPS = textwrap.dedent("""
-  EXECUTE gps_insert ($1, $2, $3, $4, $5)
+  EXECUTE gps_insert (%s, %s, %s, %s, %s)
 """)
 ARGS_MAP = {
   exit_speed_pb2.Gps: ARGS_GPS,
@@ -59,25 +61,34 @@ def GetConnWithPointPrepare(
 
 
 class Postgres(object):
+  """Interface for publishing data to Postgres."""
 
   def __init__(self, proto_class: any_pb2.Any, start_process: bool = True):
     """Initializer."""
     self.proto_class = proto_class
     self._postgres_conn = GetConnWithPointPrepare(
-            INSERT_MAP[proto_class.__class__.__name__])
-    self._proto_queue = self._manager.list()  # Used as LifoQueue.
+            PREPARE_MAP[proto_class])
+    self._proto_queue = multiprocessing.Queue()  # Used as LifoQueue.
     self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
+    self.conn = GetConnWithPointPrepare(PREPARE_MAP[self.proto_class])
 
   def AddProtoToQueue(self, proto: any_pb2.Any):
-    self.point_queue.append(proto)
+    self._proto_queue.put(proto.SerializeToString())
 
   def ExportProto(self):
-    proto = self.proto_class().FromString(self._proto_queue.pop())
-    args = (getattr(proto, value) for value in ARGS_MAP[self.proto_class])
-    cursor.execute(INSERT_MAP[self.proto_class])
+    proto = self.proto_class().FromString(self._proto_queue.get())
+    args = []
+    for value in ARGS_MAP[self.proto_class]:
+      if value == 'time':
+        args.append(proto.time.ToJsonString())
+      else:
+        args.append(getattr(proto, value))
+    with self.conn.cursor() as cursor:
+      cursor.execute(INSERT_MAP[self.proto_class], args)
+      self.conn.commit()
 
   def Loop(self):
     """Tries to export data to the postgres backend."""

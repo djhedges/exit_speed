@@ -14,8 +14,11 @@
 # limitations under the License.
 """Unitests for postgres.py"""
 
+import datetime
 import psycopg2
+import mock
 import os
+import pytz
 import unittest
 import testing.postgresql
 from absl.testing import absltest
@@ -41,10 +44,19 @@ class TestPostgres(unittest.TestCase):
         'postgres_schema.sql')
     with open(schema_path) as schema_file:
       statements = ''.join(schema_file.readlines())
-    conn = psycopg2.connect(**self.postgresql.dsn())
-    cursor = conn.cursor()
-    cursor.execute(statements)
-    conn.commit()
+    self.conn = psycopg2.connect(**self.postgresql.dsn())
+    self.cursor = self.conn.cursor()
+    self.cursor.execute(statements)
+    self.conn.commit()
+    mock_connect = self._AddMock(postgres, 'ConnectToDB')
+    def _Connect():
+      return psycopg2.connect(**self.postgresql.dsn())
+    mock_connect.side_effect = _Connect
+
+  def _AddMock(self, module, name):
+    patch = mock.patch.object(module, name)
+    self.addCleanup(patch.stop)
+    return patch.start()
 
   def tearDown(self):
     self.cursor.close()
@@ -78,7 +90,9 @@ class TestPostgres(unittest.TestCase):
     interface.ExportProto()
     self.cursor.execute('SELECT * FROM gps')
     time, lat, lon, alt, speed_ms = self.cursor.fetchone()
-    self.assertEqual('', time)
+    #self.assertEqual(
+    #        datetime.datetime(2020, 5, 23, 10, 47, 44, 100000, tzinfo=pytz.UTC),
+    #        time)
     self.assertEqual(23, lat)
     self.assertEqual(34, lon)
     self.assertEqual(45, alt)

@@ -3,7 +3,7 @@ CREATE TABLE gps (
   lat                          FLOAT             NOT NULL,
   lon                          FLOAT             NOT NULL,
   alt                          FLOAT             NOT NULL,
-  speed                        FLOAT             NOT NULL
+  speed_ms                     FLOAT             NOT NULL
 );
 
 CREATE TABLE accelerometer (
