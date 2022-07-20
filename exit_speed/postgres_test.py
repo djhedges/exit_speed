@@ -116,6 +116,24 @@ class TestPostgres(unittest.TestCase):
     self.assertEqual(2.0, accelerometer_y)
     self.assertEqual(3.0, accelerometer_z)
 
+  def testExportGyroscope(self):
+    proto = exit_speed_pb2.Gyroscope(
+      gyro_x = 1.0,
+      gyro_y = 2.0,
+      gyro_z = 3.0)
+    proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    interface = postgres.Postgres(exit_speed_pb2.Gyroscope, start_process=False)
+    interface.AddProtoToQueue(proto)
+    interface.ExportProto()
+    self.cursor.execute('SELECT * FROM gyroscope')
+    time, gyro_x, gyro_y, gyro_z = self.cursor.fetchone()
+    self.assertEqual(
+            datetime.datetime(2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC),
+            time)
+    self.assertEqual(1.0, gyro_x)
+    self.assertEqual(2.0, gyro_y)
+    self.assertEqual(3.0, gyro_z)
+
 
 if __name__ == '__main__':
   absltest.main()

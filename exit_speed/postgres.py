@@ -37,6 +37,7 @@ PREPARE_GPS = textwrap.dedent("""
 INSERT_GPS = textwrap.dedent("""
   EXECUTE gps_insert (%s, %s, %s, %s, %s)
 """)
+
 ARGS_ACCELEROMETER = (
   'time', 'accelerometer_x', 'accelerometer_y', 'accelerometer_z')
 PREPARE_ACCELEROMETER = textwrap.dedent("""
@@ -48,17 +49,33 @@ PREPARE_ACCELEROMETER = textwrap.dedent("""
 INSERT_ACCELEROMETER = textwrap.dedent("""
   EXECUTE accelerometer_insert (%s, %s, %s, %s)
 """)
+
+ARGS_GYROSCOPE = (
+  'time', 'gyro_x', 'gyro_y', 'gyro_z')
+PREPARE_GYROSCOPE = textwrap.dedent("""
+  PREPARE gyroscope_insert AS
+  INSERT INTO gyroscope (
+    time, gyro_x, gyro_y, gyro_z)
+  VALUES ($1, $2, $3, $4)
+""")
+INSERT_GYROSCOPE = textwrap.dedent("""
+  EXECUTE gyroscope_insert (%s, %s, %s, %s)
+""")
+
 ARGS_MAP = {
   exit_speed_pb2.Gps: ARGS_GPS,
   exit_speed_pb2.Accelerometer: ARGS_ACCELEROMETER,
+  exit_speed_pb2.Gyroscope: ARGS_GYROSCOPE,
 }
 PREPARE_MAP = {
   exit_speed_pb2.Gps: PREPARE_GPS,
   exit_speed_pb2.Accelerometer: PREPARE_ACCELEROMETER,
+  exit_speed_pb2.Gyroscope: PREPARE_GYROSCOPE,
 }
 INSERT_MAP = {
   exit_speed_pb2.Gps: INSERT_GPS,
   exit_speed_pb2.Accelerometer: INSERT_ACCELEROMETER,
+  exit_speed_pb2.Gyroscope: INSERT_GYROSCOPE,
 }
 
 
