@@ -19,6 +19,7 @@ import unittest
 
 import fake_rpi
 import mock
+from absl import flags
 from absl.testing import absltest
 # pylint: disable=wrong-import-position
 # Fixes dotstar import on Travis.
@@ -32,6 +33,9 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   import busio
   from exit_speed import gyroscope
 # pylint: enable=wrong-import-position
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestGyroscope(unittest.TestCase):

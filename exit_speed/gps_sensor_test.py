@@ -18,10 +18,14 @@ import unittest
 
 import gps
 import mock
+from absl import flags
 from absl.testing import absltest
 
 from exit_speed import gps_pb2
 from exit_speed import gps_sensor
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
 
 
 TEST_REPORT_VALUES = {

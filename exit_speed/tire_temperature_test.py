@@ -18,11 +18,15 @@ import time
 import unittest
 
 import mock
+from absl import flags
 from absl.testing import absltest
 from mlx import mlx90640
 
 from exit_speed import gps_pb2
 from exit_speed import tire_temperature
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
 
 def _CreateRawFrame():
   frame = []

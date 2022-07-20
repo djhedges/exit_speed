@@ -19,11 +19,15 @@ import unittest
 
 import mock
 import u3
+from absl import flags
 from absl.testing import absltest
 
 from exit_speed import config_lib
 from exit_speed import gps_pb2
 from exit_speed import labjack
+
+FLAGS = flags.FLAGS
+FLAGS.set_default('data_log_path', '/tmp')
 
 
 class TestLabjack(unittest.TestCase):
