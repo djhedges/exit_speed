@@ -134,6 +134,47 @@ class TestPostgres(unittest.TestCase):
     self.assertEqual(2.0, gyro_y)
     self.assertEqual(3.0, gyro_z)
 
+  def testExportLabjack(self):
+    proto = exit_speed_pb2.Labjack(
+      labjack_temp_f=120,
+      battery_voltage=13.5,
+      front_brake_pressure_voltage=4.5,
+      fuel_level_voltage=8.0,
+      fuel_pressure_voltage=3.5,
+      oil_pressure_voltage=2.5,
+      oil_temp_voltage=3.0,
+      rear_brake_pressure_voltage=3.7,
+      water_temp_voltage=3.3,
+    )
+    proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    interface = postgres.Postgres(exit_speed_pb2.Labjack, start_process=False)
+    interface.AddProtoToQueue(proto)
+    interface.ExportProto()
+    self.cursor.execute('SELECT * FROM labjack')
+    (
+      time,
+      labjack_temp_f,
+      battery_voltage,
+      front_brake_pressure_voltage,
+      fuel_level_voltage,
+      fuel_pressure_voltage,
+      oil_pressure_voltage,
+      oil_temp_voltage,
+      rear_brake_pressure_voltage,
+      water_temp_voltage) = self.cursor.fetchone()
+    self.assertEqual(
+            datetime.datetime(2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC),
+            time)
+    self.assertEqual(120, labjack_temp_f)
+    self.assertEqual(13.5, battery_voltage)
+    self.assertEqual(4.5, front_brake_pressure_voltage)
+    self.assertEqual(8.0, fuel_level_voltage)
+    self.assertEqual(3.5, fuel_pressure_voltage)
+    self.assertEqual(2.5, oil_pressure_voltage)
+    self.assertEqual(3.0, oil_temp_voltage)
+    self.assertEqual(3.7, rear_brake_pressure_voltage)
+    self.assertEqual(3.3, water_temp_voltage)
+
   def testExportWBO2(self):
     proto = exit_speed_pb2.WBO2(
       afr=13.0,

@@ -61,6 +61,37 @@ INSERT_GYROSCOPE = textwrap.dedent("""
   EXECUTE gyroscope_insert (%s, %s, %s, %s)
 """)
 
+ARGS_LABJACK = (
+  'time',
+  'labjack_temp_f',
+  'battery_voltage',
+  'front_brake_pressure_voltage',
+  'fuel_level_voltage',
+  'fuel_pressure_voltage',
+  'oil_pressure_voltage',
+  'oil_temp_voltage',
+  'rear_brake_pressure_voltage',
+  'water_temp_voltage',
+)
+PREPARE_LABJACK = textwrap.dedent("""
+  PREPARE labjack_insert AS
+  INSERT INTO labjack (
+    time,
+    labjack_temp_f,
+    battery_voltage,
+    front_brake_pressure_voltage,
+    fuel_level_voltage,
+    fuel_pressure_voltage,
+    oil_pressure_voltage,
+    oil_temp_voltage,
+    rear_brake_pressure_voltage,
+    water_temp_voltage)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+""")
+INSERT_LABJACK = textwrap.dedent("""
+  EXECUTE labjack_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+""")
+
 ARGS_WBO2 = (
   'time', 'afr', 'rpm', 'tps_voltage')
 PREPARE_WBO2 = textwrap.dedent("""
@@ -76,18 +107,21 @@ ARGS_MAP = {
   exit_speed_pb2.Gps: ARGS_GPS,
   exit_speed_pb2.Accelerometer: ARGS_ACCELEROMETER,
   exit_speed_pb2.Gyroscope: ARGS_GYROSCOPE,
+  exit_speed_pb2.Labjack: ARGS_LABJACK,
   exit_speed_pb2.WBO2: ARGS_WBO2,
 }
 PREPARE_MAP = {
   exit_speed_pb2.Gps: PREPARE_GPS,
   exit_speed_pb2.Accelerometer: PREPARE_ACCELEROMETER,
   exit_speed_pb2.Gyroscope: PREPARE_GYROSCOPE,
+  exit_speed_pb2.Labjack: PREPARE_LABJACK,
   exit_speed_pb2.WBO2: PREPARE_WBO2,
 }
 INSERT_MAP = {
   exit_speed_pb2.Gps: INSERT_GPS,
   exit_speed_pb2.Accelerometer: INSERT_ACCELEROMETER,
   exit_speed_pb2.Gyroscope: INSERT_GYROSCOPE,
+  exit_speed_pb2.Labjack: INSERT_LABJACK,
   exit_speed_pb2.WBO2: INSERT_WBO2,
 }
 

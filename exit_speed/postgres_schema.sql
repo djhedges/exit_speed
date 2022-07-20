@@ -29,9 +29,7 @@ CREATE TABLE labjack (
   fuel_pressure_voltage        FLOAT,
   oil_pressure_voltage         FLOAT,
   oil_temp_voltage             FLOAT,
-  pitch                        FLOAT,
   rear_brake_pressure_voltage  FLOAT,
-  roll                         FLOAT,
   water_temp_voltage           FLOAT
 );
 
