@@ -46,6 +46,11 @@ class TestPostgres(unittest.TestCase):
     cursor.execute(statements)
     conn.commit()
 
+  def tearDown(self):
+    self.cursor.close()
+    self.conn.close()
+    self.postgresql.stop()
+
   def testArgsMapLookup(self):
     self.assertTupleEqual(
             postgres.ARGS_GPS,
@@ -60,6 +65,25 @@ class TestPostgres(unittest.TestCase):
     self.assertEqual(
             postgres.INSERT_GPS,
             postgres.INSERT_MAP[exit_speed_pb2.Gps])
+
+  def testExportProto(self):
+    proto = exit_speed_pb2.Gps(
+      lat=23,
+      lon=34,
+      alt=45,
+      speed_ms=86)
+    proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    interface = postgres.Postgres(exit_speed_pb2.Gps, start_process=False)
+    interface.AddProtoToQueue(proto)
+    interface.ExportProto()
+    self.cursor.execute('SELECT * FROM gps')
+    time, lat, lon, alt, speed_ms = self.cursor.fetchone()
+    self.assertEqual('', time)
+    self.assertEqual(23, lat)
+    self.assertEqual(34, lon)
+    self.assertEqual(45, alt)
+    self.assertEqual(86, speed_ms)
+
 
 if __name__ == '__main__':
   absltest.main()

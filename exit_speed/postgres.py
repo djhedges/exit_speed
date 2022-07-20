@@ -60,7 +60,7 @@ def GetConnWithPointPrepare(
 
 class Postgres(object):
 
-  def __init__(self, proto_class: any_pb2.Any):
+  def __init__(self, proto_class: any_pb2.Any, start_process: bool = True):
     """Initializer."""
     self.proto_class = proto_class
     self._postgres_conn = GetConnWithPointPrepare(
@@ -70,6 +70,9 @@ class Postgres(object):
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
+
+  def AddProtoToQueue(self, proto: any_pb2.Any):
+    self.point_queue.append(proto)
 
   def ExportProto(self):
     proto = self.proto_class().FromString(self._proto_queue.pop())
