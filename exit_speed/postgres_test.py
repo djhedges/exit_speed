@@ -14,15 +14,37 @@
 # limitations under the License.
 """Unitests for postgres.py"""
 
+import psycopg2
+import os
 import unittest
+import testing.postgresql
 from absl.testing import absltest
 
 from exit_speed import exit_speed_pb2
 from exit_speed import postgres
 
 
+Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
+
+
+def tearDownModule():
+  Postgresql.clear_cache()
+
+
 class TestPostgres(unittest.TestCase):
   """Postgres unittests."""
+
+  def setUp(self):
+    self.postgresql = Postgresql()
+    schema_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'postgres_schema.sql')
+    with open(schema_path) as schema_file:
+      statements = ''.join(schema_file.readlines())
+    conn = psycopg2.connect(**self.postgresql.dsn())
+    cursor = conn.cursor()
+    cursor.execute(statements)
+    conn.commit()
 
   def testArgsMapLookup(self):
     self.assertTupleEqual(

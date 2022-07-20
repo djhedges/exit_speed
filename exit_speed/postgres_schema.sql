@@ -26,7 +26,7 @@ CREATE TABLE labjack (
   battery_voltage              FLOAT,
   front_brake_pressure_voltage FLOAT,
   fuel_level_voltage           FLOAT,
-  fuel_pressure_voltage        FLOAT
+  fuel_pressure_voltage        FLOAT,
   oil_pressure_voltage         FLOAT,
   oil_temp_voltage             FLOAT,
   pitch                        FLOAT,
