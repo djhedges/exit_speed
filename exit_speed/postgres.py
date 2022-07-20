@@ -37,14 +37,28 @@ PREPARE_GPS = textwrap.dedent("""
 INSERT_GPS = textwrap.dedent("""
   EXECUTE gps_insert (%s, %s, %s, %s, %s)
 """)
+ARGS_ACCELEROMETER = (
+  'time', 'accelerometer_x', 'accelerometer_y', 'accelerometer_z')
+PREPARE_ACCELEROMETER = textwrap.dedent("""
+  PREPARE accelerometer_insert AS
+  INSERT INTO accelerometer (
+    time, accelerometer_x, accelerometer_y, accelerometer_z)
+  VALUES ($1, $2, $3, $4)
+""")
+INSERT_ACCELEROMETER = textwrap.dedent("""
+  EXECUTE accelerometer_insert (%s, %s, %s, %s)
+""")
 ARGS_MAP = {
   exit_speed_pb2.Gps: ARGS_GPS,
+  exit_speed_pb2.Accelerometer: ARGS_ACCELEROMETER,
 }
 PREPARE_MAP = {
   exit_speed_pb2.Gps: PREPARE_GPS,
+  exit_speed_pb2.Accelerometer: PREPARE_ACCELEROMETER,
 }
 INSERT_MAP = {
   exit_speed_pb2.Gps: INSERT_GPS,
+  exit_speed_pb2.Accelerometer: INSERT_ACCELEROMETER,
 }
 
 
