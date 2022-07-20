@@ -17,7 +17,7 @@ CREATE TABLE gyroscope (
   time                         TIMESTAMPTZ       NOT NULL,
   gyro_x                       FLOAT             NOT NULL,
   gyro_y                       FLOAT             NOT NULL,
-  gyro_z                       FLOAT             NOT NULL,
+  gyro_z                       FLOAT             NOT NULL
 );
 
 CREATE TABLE labjack (
