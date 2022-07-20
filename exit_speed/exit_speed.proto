@@ -45,21 +45,21 @@ message Gyroscope {
 message Labjack {
   google.protobuf.Timestamp time = 1;
   double labjack_temp_f = 2;  // Labjack ambient temperature in Fahrenheit.
-  double fuel_level_voltage = 3;
-  double tps_voltage = 4;  // Throttle position sensor voltage.
-  double water_temp_voltage = 5;
-  double oil_pressure_voltage = 6;
-  double front_brake_pressure_voltage = 7;
-  double rear_brake_pressure_voltage = 8;
-  double battery_voltage = 9;
-  double oil_temp_voltage= 10;
-  double fuel_pressure_voltage = 11;
+  double battery_voltage = 3;
+  double front_brake_pressure_voltage = 4;
+  double fuel_level_voltage = 5;
+  double fuel_pressure_voltage = 6;
+  double oil_pressure_voltage = 7;
+  double oil_temp_voltage =  8;
+  double rear_brake_pressure_voltage = 9;
+  double water_temp_voltage = 10;
 }
 
 message WBO2 {
   google.protobuf.Timestamp time = 1;
-  double rpm = 2;
-  double afr = 3;  // Air fuel ratio.
+  double afr = 2;  // Air fuel ratio.
+  double rpm = 3;
+  double tps_voltage = 4;  // Throttle position sensor voltage.
 }
 
 message TireIrSensors {
