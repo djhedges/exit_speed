@@ -90,9 +90,9 @@ class TestPostgres(unittest.TestCase):
     interface.ExportProto()
     self.cursor.execute('SELECT * FROM gps')
     time, lat, lon, alt, speed_ms = self.cursor.fetchone()
-    #self.assertEqual(
-    #        datetime.datetime(2020, 5, 23, 10, 47, 44, 100000, tzinfo=pytz.UTC),
-    #        time)
+    self.assertEqual(
+            datetime.datetime(2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC),
+            time)
     self.assertEqual(23, lat)
     self.assertEqual(34, lon)
     self.assertEqual(45, alt)
