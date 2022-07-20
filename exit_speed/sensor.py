@@ -66,12 +66,12 @@ class SensorBase(object):
     self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
+    self.data_logger = None # pytype: Optional[data_logger.Logger]
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
           daemon=True)
       self._process.start()
-    self.data_logger = None # pytype: Optional[data_logger.Logger]
 
   def _InitializeDataLogger(self, proto: any_pb2.Any):
     file_prefix = GetLogFilePrefix(self, proto)
