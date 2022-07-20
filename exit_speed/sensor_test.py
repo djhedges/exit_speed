@@ -53,8 +53,8 @@ class TestAccelerometer(unittest.TestCase):
     point = gps_pb2.Point()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
-    sensor_instance = SensorTest({'car': 'Corrado'}, queue, start_process=False)
-    expected = '/tmp/Corrado/SensorTest/2020-05-23T17:47:44.100000'
+    sensor_instance = SensorTest({}, queue, start_process=False)
+    expected = '/tmp/unknown_car/SensorTest/2020-05-23T17:47:44.100000'
     self.assertEqual(expected, sensor.GetLogFilePrefix(sensor_instance, point, tz=pytz.UTC))
 
   def testLogMessage(self):
