@@ -77,19 +77,6 @@ class TestAccelerometer(unittest.TestCase):
     expected = (46.19, 2.49)
     self.assertEqual(expected, (round(pitch, 2), round(roll, 2)))
 
-  def testAccelerometerProcessLoop(self):
-    self.accel.accelerometer.accelerometer = (
-        0.3924229, -0.5072783912, 10.29870)
-    with mock.patch.object(accelerometer, 'Accelerometer') as mock_accel:
-      mock_accel.return_value = self.accel
-      config = {'accelerometer': {'frequency_hz': 10}}
-      point_queue = multiprocessing.Queue()
-      proc = accelerometer.AccelerometerProcess(config, point_queue)
-      while point_queue.empty():
-        pass
-      proc.Join()
-      self.assertGreaterEqual(point_queue.qsize(), 0)
-
 
 if __name__ == '__main__':
   absltest.main()
