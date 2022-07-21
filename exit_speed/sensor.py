@@ -58,6 +58,7 @@ def SleepBasedOnHertz(cycle_time: float, frequency_hz: float) -> float:
 
 class SensorBase(object):
   """Base class for sensor processes."""
+  PROTO_CLASS = None
 
   def __init__(
       self,
@@ -68,7 +69,8 @@ class SensorBase(object):
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
-    self.postgres = None # pytype: Optional[postgres.Postgres]
+    if self.PROTO_CLASS:
+      self.postgres = postgres.Postgres(self.PROTO_CLASS)
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
@@ -103,8 +105,6 @@ class SensorBase(object):
   def LogAndExportProto(self, proto: any_pb2.Any):
     proto.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(proto)
-    if not self.postgres:
-      self.postgres = postgres.Postgres(proto.__class__)
     self.postgres.AddProtoToQueue(proto)
 
   def Loop(self):

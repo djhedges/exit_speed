@@ -75,7 +75,8 @@ class Accelerometer(object):
 
 
 class AccelerometerProcess(sensor.SensorBase):
-  """Populates the SensorBase.point_queue with accelerometer values per loop."""
+  """Logs and exports accelerometer values per loop."""
+  PROTO_CLASS = exit_speed_pb2.Accelerometer
 
   def Loop(self):
     """Adds point data with accelerometer values to point queue."""
