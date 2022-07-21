@@ -101,7 +101,7 @@ class SensorBase(object):
     self.data_logger.WriteProto(proto)
 
   def LogAndExportProto(self, proto: any_pb2.Any):
-    point.time.FromDatetime(datetime.datetime.utcnow())
+    proto.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(proto)
     if not self.postgres:
       self.postgres = postgres.Postgres(proto.__class__)
