@@ -5,7 +5,7 @@ accelerometer:
 gyroscope:
   frequency_hz: 40
 leds: True
-timescale: True
+#timescale: True
 #tire_temps:
 #  lf:
 #    ip_addr: 192.168.4.3
