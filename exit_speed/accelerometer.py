@@ -23,7 +23,7 @@ import board
 import busio
 from absl import app
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 
@@ -85,14 +85,11 @@ class AccelerometerProcess(sensor.SensorBase):
     while not self.stop_process_signal.value:
       cycle_time = time.time()
       x, y, z = accel.GetGForces()
-      point = gps_pb2.Point()
-      point.accelerometer_x = x
-      point.accelerometer_y = y
-      point.accelerometer_z = z
-      pitch, roll = accel.CalcPitchAndRoll(x, y, z)
-      point.pitch = pitch
-      point.roll = roll
-      self.AddPointToQueue(point)
+      proto = exit_speed_pb2.Accelerometer(
+				accelerometer_x=x,
+				accelerometer_y=y,
+				accelerometer_z=z)
+      self.LogAndExportProto(proto)
       time.sleep(sensor.SleepBasedOnHertz(cycle_time, frequency_hz))
 
 

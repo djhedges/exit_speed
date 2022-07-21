@@ -28,6 +28,7 @@ from typing import Dict
 
 from exit_speed import data_logger
 from exit_speed import gps_pb2
+from exit_speed import postgres
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_log_path', '/home/pi/lap_logs',
@@ -67,6 +68,7 @@ class SensorBase(object):
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
+    self.postgres = None # pytype: Optional[postgres.Postgres]
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
@@ -87,6 +89,7 @@ class SensorBase(object):
     self.StopProcess()
     self._process.join()
 
+  # TODO(djhedges): Deprecate this in favor of AddProtoToQueue().
   def AddPointToQueue(self, point: gps_pb2.Point):
     point.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(point)
@@ -96,6 +99,13 @@ class SensorBase(object):
     if not self.data_logger:
       self._InitializeDataLogger(proto)
     self.data_logger.WriteProto(proto)
+
+  def LogAndExportProto(self, proto: any_pb2.Any):
+    point.time.FromDatetime(datetime.datetime.utcnow())
+    self.LogMessage(proto)
+    if not self.postgres:
+      self.postgres = postgres.Postgres(proto.__class__)
+    self.postgres.AddProtoToQueue(proto)
 
   def Loop(self):
     raise NotImplementedError('Subclasses should override this method.')

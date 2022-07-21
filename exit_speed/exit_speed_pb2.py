@@ -18,10 +18,10 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='exit_speed.proto',
-  package='exit_speed',
+  package='exit_speed_refactor',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x10\x65xit_speed.proto\x12\nexit_speed\x1a\x1fgoogle/protobuf/timestamp.proto\"h\n\x03Gps\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0b\n\x03lat\x18\x02 \x01(\x01\x12\x0b\n\x03lon\x18\x03 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x04 \x01(\x01\x12\x10\n\x08speed_ms\x18\x05 \x01(\x01\"\x84\x01\n\rAccelerometer\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\x02 \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x03 \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x04 \x01(\x01\"e\n\tGyroscope\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06gyro_x\x18\x02 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x03 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x04 \x01(\x01\"\xbe\x02\n\x07Labjack\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x16\n\x0elabjack_temp_f\x18\x02 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x03 \x01(\x01\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x04 \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x05 \x01(\x01\x12\x1d\n\x15\x66uel_pressure_voltage\x18\x06 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\x07 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x08 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\t \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\n \x01(\x01\"_\n\x04WBO2\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0b\n\x03\x61\x66r\x18\x02 \x01(\x01\x12\x0b\n\x03rpm\x18\x03 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x04 \x01(\x01\"\xcf\x01\n\rTireIrSensors\x12.\n\x0clf_tire_temp\x18\x01 \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0crf_tire_temp\x18\x02 \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0clr_tire_temp\x18\x03 \x01(\x0b\x32\x18.exit_speed.TireIrSensor\x12.\n\x0crr_tire_temp\x18\x04 \x01(\x0b\x32\x18.exit_speed.TireIrSensor\"f\n\x0cTireIrSensor\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05inner\x18\x02 \x01(\x01\x12\x0e\n\x06middle\x18\x03 \x01(\x01\x12\r\n\x05outer\x18\x04 \x01(\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x10\x65xit_speed.proto\x12\x13\x65xit_speed_refactor\x1a\x1fgoogle/protobuf/timestamp.proto\"h\n\x03Gps\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0b\n\x03lat\x18\x02 \x01(\x01\x12\x0b\n\x03lon\x18\x03 \x01(\x01\x12\x0b\n\x03\x61lt\x18\x04 \x01(\x01\x12\x10\n\x08speed_ms\x18\x05 \x01(\x01\"\x84\x01\n\rAccelerometer\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0f\x61\x63\x63\x65lerometer_x\x18\x02 \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_y\x18\x03 \x01(\x01\x12\x17\n\x0f\x61\x63\x63\x65lerometer_z\x18\x04 \x01(\x01\"e\n\tGyroscope\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06gyro_x\x18\x02 \x01(\x01\x12\x0e\n\x06gyro_y\x18\x03 \x01(\x01\x12\x0e\n\x06gyro_z\x18\x04 \x01(\x01\"\xbe\x02\n\x07Labjack\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x16\n\x0elabjack_temp_f\x18\x02 \x01(\x01\x12\x17\n\x0f\x62\x61ttery_voltage\x18\x03 \x01(\x01\x12$\n\x1c\x66ront_brake_pressure_voltage\x18\x04 \x01(\x01\x12\x1a\n\x12\x66uel_level_voltage\x18\x05 \x01(\x01\x12\x1d\n\x15\x66uel_pressure_voltage\x18\x06 \x01(\x01\x12\x1c\n\x14oil_pressure_voltage\x18\x07 \x01(\x01\x12\x18\n\x10oil_temp_voltage\x18\x08 \x01(\x01\x12#\n\x1brear_brake_pressure_voltage\x18\t \x01(\x01\x12\x1a\n\x12water_temp_voltage\x18\n \x01(\x01\"_\n\x04WBO2\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0b\n\x03\x61\x66r\x18\x02 \x01(\x01\x12\x0b\n\x03rpm\x18\x03 \x01(\x01\x12\x13\n\x0btps_voltage\x18\x04 \x01(\x01\"\xf3\x01\n\rTireIrSensors\x12\x37\n\x0clf_tire_temp\x18\x01 \x01(\x0b\x32!.exit_speed_refactor.TireIrSensor\x12\x37\n\x0crf_tire_temp\x18\x02 \x01(\x0b\x32!.exit_speed_refactor.TireIrSensor\x12\x37\n\x0clr_tire_temp\x18\x03 \x01(\x0b\x32!.exit_speed_refactor.TireIrSensor\x12\x37\n\x0crr_tire_temp\x18\x04 \x01(\x0b\x32!.exit_speed_refactor.TireIrSensor\"f\n\x0cTireIrSensor\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05inner\x18\x02 \x01(\x01\x12\x0e\n\x06middle\x18\x03 \x01(\x01\x12\r\n\x05outer\x18\x04 \x01(\x01\x62\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -30,41 +30,41 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _GPS = _descriptor.Descriptor(
   name='Gps',
-  full_name='exit_speed.Gps',
+  full_name='exit_speed_refactor.Gps',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.Gps.time', index=0,
+      name='time', full_name='exit_speed_refactor.Gps.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lat', full_name='exit_speed.Gps.lat', index=1,
+      name='lat', full_name='exit_speed_refactor.Gps.lat', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lon', full_name='exit_speed.Gps.lon', index=2,
+      name='lon', full_name='exit_speed_refactor.Gps.lon', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='alt', full_name='exit_speed.Gps.alt', index=3,
+      name='alt', full_name='exit_speed_refactor.Gps.alt', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='speed_ms', full_name='exit_speed.Gps.speed_ms', index=4,
+      name='speed_ms', full_name='exit_speed_refactor.Gps.speed_ms', index=4,
       number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -82,41 +82,41 @@ _GPS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=65,
-  serialized_end=169,
+  serialized_start=74,
+  serialized_end=178,
 )
 
 
 _ACCELEROMETER = _descriptor.Descriptor(
   name='Accelerometer',
-  full_name='exit_speed.Accelerometer',
+  full_name='exit_speed_refactor.Accelerometer',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.Accelerometer.time', index=0,
+      name='time', full_name='exit_speed_refactor.Accelerometer.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_x', full_name='exit_speed.Accelerometer.accelerometer_x', index=1,
+      name='accelerometer_x', full_name='exit_speed_refactor.Accelerometer.accelerometer_x', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_y', full_name='exit_speed.Accelerometer.accelerometer_y', index=2,
+      name='accelerometer_y', full_name='exit_speed_refactor.Accelerometer.accelerometer_y', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='accelerometer_z', full_name='exit_speed.Accelerometer.accelerometer_z', index=3,
+      name='accelerometer_z', full_name='exit_speed_refactor.Accelerometer.accelerometer_z', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -134,41 +134,41 @@ _ACCELEROMETER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=172,
-  serialized_end=304,
+  serialized_start=181,
+  serialized_end=313,
 )
 
 
 _GYROSCOPE = _descriptor.Descriptor(
   name='Gyroscope',
-  full_name='exit_speed.Gyroscope',
+  full_name='exit_speed_refactor.Gyroscope',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.Gyroscope.time', index=0,
+      name='time', full_name='exit_speed_refactor.Gyroscope.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_x', full_name='exit_speed.Gyroscope.gyro_x', index=1,
+      name='gyro_x', full_name='exit_speed_refactor.Gyroscope.gyro_x', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_y', full_name='exit_speed.Gyroscope.gyro_y', index=2,
+      name='gyro_y', full_name='exit_speed_refactor.Gyroscope.gyro_y', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gyro_z', full_name='exit_speed.Gyroscope.gyro_z', index=3,
+      name='gyro_z', full_name='exit_speed_refactor.Gyroscope.gyro_z', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -186,83 +186,83 @@ _GYROSCOPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=306,
-  serialized_end=407,
+  serialized_start=315,
+  serialized_end=416,
 )
 
 
 _LABJACK = _descriptor.Descriptor(
   name='Labjack',
-  full_name='exit_speed.Labjack',
+  full_name='exit_speed_refactor.Labjack',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.Labjack.time', index=0,
+      name='time', full_name='exit_speed_refactor.Labjack.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='labjack_temp_f', full_name='exit_speed.Labjack.labjack_temp_f', index=1,
+      name='labjack_temp_f', full_name='exit_speed_refactor.Labjack.labjack_temp_f', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='battery_voltage', full_name='exit_speed.Labjack.battery_voltage', index=2,
+      name='battery_voltage', full_name='exit_speed_refactor.Labjack.battery_voltage', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='front_brake_pressure_voltage', full_name='exit_speed.Labjack.front_brake_pressure_voltage', index=3,
+      name='front_brake_pressure_voltage', full_name='exit_speed_refactor.Labjack.front_brake_pressure_voltage', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fuel_level_voltage', full_name='exit_speed.Labjack.fuel_level_voltage', index=4,
+      name='fuel_level_voltage', full_name='exit_speed_refactor.Labjack.fuel_level_voltage', index=4,
       number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fuel_pressure_voltage', full_name='exit_speed.Labjack.fuel_pressure_voltage', index=5,
+      name='fuel_pressure_voltage', full_name='exit_speed_refactor.Labjack.fuel_pressure_voltage', index=5,
       number=6, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='oil_pressure_voltage', full_name='exit_speed.Labjack.oil_pressure_voltage', index=6,
+      name='oil_pressure_voltage', full_name='exit_speed_refactor.Labjack.oil_pressure_voltage', index=6,
       number=7, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='oil_temp_voltage', full_name='exit_speed.Labjack.oil_temp_voltage', index=7,
+      name='oil_temp_voltage', full_name='exit_speed_refactor.Labjack.oil_temp_voltage', index=7,
       number=8, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rear_brake_pressure_voltage', full_name='exit_speed.Labjack.rear_brake_pressure_voltage', index=8,
+      name='rear_brake_pressure_voltage', full_name='exit_speed_refactor.Labjack.rear_brake_pressure_voltage', index=8,
       number=9, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='water_temp_voltage', full_name='exit_speed.Labjack.water_temp_voltage', index=9,
+      name='water_temp_voltage', full_name='exit_speed_refactor.Labjack.water_temp_voltage', index=9,
       number=10, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -280,41 +280,41 @@ _LABJACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=410,
-  serialized_end=728,
+  serialized_start=419,
+  serialized_end=737,
 )
 
 
 _WBO2 = _descriptor.Descriptor(
   name='WBO2',
-  full_name='exit_speed.WBO2',
+  full_name='exit_speed_refactor.WBO2',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.WBO2.time', index=0,
+      name='time', full_name='exit_speed_refactor.WBO2.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='afr', full_name='exit_speed.WBO2.afr', index=1,
+      name='afr', full_name='exit_speed_refactor.WBO2.afr', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rpm', full_name='exit_speed.WBO2.rpm', index=2,
+      name='rpm', full_name='exit_speed_refactor.WBO2.rpm', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='tps_voltage', full_name='exit_speed.WBO2.tps_voltage', index=3,
+      name='tps_voltage', full_name='exit_speed_refactor.WBO2.tps_voltage', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -332,41 +332,41 @@ _WBO2 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=730,
-  serialized_end=825,
+  serialized_start=739,
+  serialized_end=834,
 )
 
 
 _TIREIRSENSORS = _descriptor.Descriptor(
   name='TireIrSensors',
-  full_name='exit_speed.TireIrSensors',
+  full_name='exit_speed_refactor.TireIrSensors',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='lf_tire_temp', full_name='exit_speed.TireIrSensors.lf_tire_temp', index=0,
+      name='lf_tire_temp', full_name='exit_speed_refactor.TireIrSensors.lf_tire_temp', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rf_tire_temp', full_name='exit_speed.TireIrSensors.rf_tire_temp', index=1,
+      name='rf_tire_temp', full_name='exit_speed_refactor.TireIrSensors.rf_tire_temp', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lr_tire_temp', full_name='exit_speed.TireIrSensors.lr_tire_temp', index=2,
+      name='lr_tire_temp', full_name='exit_speed_refactor.TireIrSensors.lr_tire_temp', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rr_tire_temp', full_name='exit_speed.TireIrSensors.rr_tire_temp', index=3,
+      name='rr_tire_temp', full_name='exit_speed_refactor.TireIrSensors.rr_tire_temp', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -384,41 +384,41 @@ _TIREIRSENSORS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=828,
-  serialized_end=1035,
+  serialized_start=837,
+  serialized_end=1080,
 )
 
 
 _TIREIRSENSOR = _descriptor.Descriptor(
   name='TireIrSensor',
-  full_name='exit_speed.TireIrSensor',
+  full_name='exit_speed_refactor.TireIrSensor',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='time', full_name='exit_speed.TireIrSensor.time', index=0,
+      name='time', full_name='exit_speed_refactor.TireIrSensor.time', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='inner', full_name='exit_speed.TireIrSensor.inner', index=1,
+      name='inner', full_name='exit_speed_refactor.TireIrSensor.inner', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='middle', full_name='exit_speed.TireIrSensor.middle', index=2,
+      name='middle', full_name='exit_speed_refactor.TireIrSensor.middle', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='outer', full_name='exit_speed.TireIrSensor.outer', index=3,
+      name='outer', full_name='exit_speed_refactor.TireIrSensor.outer', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -436,8 +436,8 @@ _TIREIRSENSOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1037,
-  serialized_end=1139,
+  serialized_start=1082,
+  serialized_end=1184,
 )
 
 _GPS.fields_by_name['time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
@@ -462,49 +462,49 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 Gps = _reflection.GeneratedProtocolMessageType('Gps', (_message.Message,), dict(
   DESCRIPTOR = _GPS,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.Gps)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.Gps)
   ))
 _sym_db.RegisterMessage(Gps)
 
 Accelerometer = _reflection.GeneratedProtocolMessageType('Accelerometer', (_message.Message,), dict(
   DESCRIPTOR = _ACCELEROMETER,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.Accelerometer)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.Accelerometer)
   ))
 _sym_db.RegisterMessage(Accelerometer)
 
 Gyroscope = _reflection.GeneratedProtocolMessageType('Gyroscope', (_message.Message,), dict(
   DESCRIPTOR = _GYROSCOPE,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.Gyroscope)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.Gyroscope)
   ))
 _sym_db.RegisterMessage(Gyroscope)
 
 Labjack = _reflection.GeneratedProtocolMessageType('Labjack', (_message.Message,), dict(
   DESCRIPTOR = _LABJACK,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.Labjack)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.Labjack)
   ))
 _sym_db.RegisterMessage(Labjack)
 
 WBO2 = _reflection.GeneratedProtocolMessageType('WBO2', (_message.Message,), dict(
   DESCRIPTOR = _WBO2,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.WBO2)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.WBO2)
   ))
 _sym_db.RegisterMessage(WBO2)
 
 TireIrSensors = _reflection.GeneratedProtocolMessageType('TireIrSensors', (_message.Message,), dict(
   DESCRIPTOR = _TIREIRSENSORS,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.TireIrSensors)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.TireIrSensors)
   ))
 _sym_db.RegisterMessage(TireIrSensors)
 
 TireIrSensor = _reflection.GeneratedProtocolMessageType('TireIrSensor', (_message.Message,), dict(
   DESCRIPTOR = _TIREIRSENSOR,
   __module__ = 'exit_speed_pb2'
-  # @@protoc_insertion_point(class_scope:exit_speed.TireIrSensor)
+  # @@protoc_insertion_point(class_scope:exit_speed_refactor.TireIrSensor)
   ))
 _sym_db.RegisterMessage(TireIrSensor)
 

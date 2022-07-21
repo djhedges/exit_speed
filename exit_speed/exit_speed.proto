@@ -18,7 +18,9 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package exit_speed;
+// TODO(djhedges): Rename this package back to exit_speed after
+// gps.proto is removed.
+package exit_speed_refactor;
 
 message Gps {
   google.protobuf.Timestamp time = 1;
