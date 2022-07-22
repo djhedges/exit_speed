@@ -1,4 +1,6 @@
 absl-py==1.1.0
+Adafruit-Blinka==8.1.0
+Adafruit-PlatformDetect==3.26.0
 adafruit-circuitpython-busdevice==4.3.1
 adafruit-circuitpython-dotstar==2.0.0
 adafruit-circuitpython-fxas21002c==2.1.5
