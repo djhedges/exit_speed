@@ -53,19 +53,6 @@ class TestGyroscope(unittest.TestCase):
     expected = (1.421875, -15.5, -54.2421875)
     self.assertTupleEqual(expected, self.gyroscope.GetRotationalValues())
 
-  def testGryoscopeProcessLoop(self):
-    self.gyroscope.sensor.gyroscope = (
-        0.024816400301794373, -0.27052603405912107, -0.9467047653591117)
-    with mock.patch.object(gyroscope, 'Gyroscope') as mock_gyro:
-      mock_gyro.return_value = self.gyroscope
-      config = {'gyroscope': {'frequency_hz': 10}}
-      point_queue = multiprocessing.Queue()
-      proc = gyroscope.GyroscopeProcess(config, point_queue)
-      while point_queue.empty():
-        pass
-      proc.Join()
-      self.assertGreaterEqual(point_queue.qsize(), 0)
-
 
 if __name__ == '__main__':
   absltest.main()
