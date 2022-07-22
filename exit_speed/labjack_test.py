@@ -23,7 +23,7 @@ from absl import flags
 from absl.testing import absltest
 
 from exit_speed import config_lib
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import labjack
 
 FLAGS = flags.FLAGS
@@ -63,13 +63,16 @@ class TestLabjack(unittest.TestCase):
     self.mock_u3.getFeedback.side_effect = [[32816], [35696], [32827], [39968]]
     self.mock_u3.binaryToCalibratedAnalogVoltage.side_effect = (
         _binaryToCalibratedAnalogVoltage)
-    self.labjack.ReadValues()
-    point = gps_pb2.Point().FromString(self.point_queue.get())
-    self.assertEqual(78.061801842153101916, point.labjack_temp_f)
-    self.assertEqual(1.5, point.fuel_level_voltage)
-    self.assertEqual(2.7, point.water_temp_voltage)
-    self.assertEqual(3.9, point.oil_pressure_voltage)
-    self.assertEqual(14.0, point.battery_voltage)
+    with mock.patch.object(
+        self.labjack, 'LogAndExportProto') as mock_log_and_export:
+        self.labjack.ReadValues()
+    mock_log_and_export.assert_called_once_with(
+      exit_speed_pb2.Labjack(
+        labjack_temp_f=78.061801842153101916,
+        fuel_level_voltage=1.5,
+        water_temp_voltage=2.7,
+        oil_pressure_voltage=3.9,
+        battery_voltage=14.0))
 
 
 if __name__ == '__main__':

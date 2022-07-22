@@ -22,12 +22,13 @@ from typing import Dict
 import u3
 from absl import logging
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 
 class Labjack(sensor.SensorBase):
   """Interface for the labjack DAQ."""
+  PROTO_CLASS = exit_speed_pb2.Labjack
   HIGH_VOLTAGE_CHANNELS = (0, 1, 2, 3)
 
   def __init__(
@@ -53,8 +54,8 @@ class Labjack(sensor.SensorBase):
     """Reads the labjack voltages."""
     try:
       if self.config.get('labjack'):
-        point = gps_pb2.Point()
-        point.labjack_temp_f = (
+        proto = exit_speed_pb2.Labjack()
+        proto.labjack_temp_f = (
             self.u3.getTemperature() * 9.0/5.0 - 459.67)
         for input_name, proto_field in self.config['labjack'].items():
           if input_name.startswith('ain') or input_name.startswith('fio'):
@@ -70,8 +71,8 @@ class Labjack(sensor.SensorBase):
                 channelNumber=channel)
             if input_name in self.config['labjack'].get('tick_divider_10'):
               voltage = voltage * 10
-            setattr(point, proto_field, voltage)
-        self.AddPointToQueue(point)
+            setattr(proto, proto_field, voltage)
+        self.LogAndExportProto(proto)
     except u3.LabJackException:
       stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
       logging.log_every_n_seconds(logging.ERROR,
