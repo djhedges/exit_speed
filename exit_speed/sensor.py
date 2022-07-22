@@ -70,7 +70,8 @@ class SensorBase(object):
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
     if self.PROTO_CLASS:
-      self.postgres = postgres.Postgres(self.PROTO_CLASS)
+      self.postgres = postgres.Postgres(self.PROTO_CLASS,
+																				start_process=start_process)
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,

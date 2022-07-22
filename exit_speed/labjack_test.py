@@ -25,12 +25,13 @@ from absl.testing import absltest
 from exit_speed import config_lib
 from exit_speed import exit_speed_pb2
 from exit_speed import labjack
+from exit_speed import postgres_test_lib
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')
 
 
-class TestLabjack(unittest.TestCase):
+class TestLabjack(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """Unitests for Labjack."""
 
   def setUp(self):
