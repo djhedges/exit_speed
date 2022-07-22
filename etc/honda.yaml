@@ -12,6 +12,3 @@ labjack:
   ain1: tps_voltage
   fio4: battery_voltage
   tick_divider_10: [ fio4, fio5 ]
-rtmp_overlay:
-  output: /tmp/ramdisk/overlay.png
-  resolution: [1280, 720]

@@ -31,7 +31,6 @@ from exit_speed import gyroscope
 from exit_speed import labjack
 from exit_speed import lap_lib
 from exit_speed import leds
-from exit_speed import rtmp_overlay
 from exit_speed import timescale
 from exit_speed import tire_temperature
 from exit_speed import tracks
@@ -65,7 +64,6 @@ class ExitSpeed(object):
     self.config = config_lib.LoadConfig()
     self.leds = leds.LEDs()
     self.timescale = None
-    self.rtmp_overlay = None
     self.point = None
     self.session = gps_pb2.Session()
     self.sdnotify = sdnotify.SystemdNotifier()
@@ -99,8 +97,6 @@ class ExitSpeed(object):
     if self.config.get('timescale'):
       self.timescale = timescale.Timescale(
           timescale.CreateSession(self.session))
-    if self.config.get('rtmp_overlay'):
-      self.rtmp_overlay = rtmp_overlay.RTMPOverlay(self.config)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -143,8 +139,6 @@ class ExitSpeed(object):
     self.LogPoint()
     if self.config.get('timescale'):
       self.timescale.AddPointToQueue(point, self.lap.number)
-    if self.config.get('rtmp_overlay'):
-      self.rtmp_overlay.AddPointToQueue(point)
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
@@ -153,9 +147,6 @@ class ExitSpeed(object):
     self.leds.SetBestLap(self.lap)
     if self.config.get('timescale'):
       self.timescale.AddLapDurationToQueue(
-          self.lap.number, self.lap.duration.ToMilliseconds())
-    if self.config.get('rtmp_overlay'):
-      self.rtmp_overlay.AddLapDuration(
           self.lap.number, self.lap.duration.ToMilliseconds())
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
