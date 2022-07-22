@@ -173,6 +173,7 @@ class Postgres(object):
       self.ExportProto()
       logging.log_every_n_seconds(
         logging.INFO,
-        'Postgres: Point queue size currently at %d.',
+        'Postgres: %s point queue size currently at %d.',
         10,
+        self.proto_class,
         self._proto_queue.qsize())
