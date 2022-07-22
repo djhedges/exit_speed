@@ -27,7 +27,7 @@ from absl import app
 from absl import flags
 from absl import logging
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 FLAGS = flags.FLAGS
@@ -126,6 +126,7 @@ def RPMCountToRPM(rpm_count: float, cylinders: int) -> float:
 
 class WBO2(sensor.SensorBase):
   """Interface for the WBO2 wideband lambda/AFR controller."""
+  PROTO_CLASS = exit_speed_pb2.WBO2
 
   def __init__(self, config: Dict, point_queue: multiprocessing.Queue):
     self._next_cycle = 0
@@ -142,11 +143,11 @@ class WBO2(sensor.SensorBase):
           now = time.time()
           if now > self._next_cycle:
             self._next_cycle = now + 1.0 / frequency_hz
-            point = gps_pb2.Point()
+            proto = exit_speed_pb2.WBO2()
             for frame_key, point_value in self.config['wbo2'].items():
               if frame_key in FRAME_FORMAT:
-                setattr(point, point_value, GetBytes(frame, frame_key))
-            self.AddPointToQueue(point)
+                setattr(proto, point_value, GetBytes(frame, frame_key))
+            self.LogAndExportProto(proto)
 
 
 def main(unused_argv):
