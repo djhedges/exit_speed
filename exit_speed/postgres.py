@@ -151,7 +151,6 @@ class Postgres(object):
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
-    self.conn = GetConnWithPointPrepare(PREPARE_MAP[self.proto_class])
 
   def AddProtoToQueue(self, proto: any_pb2.Any):
     self._proto_queue.put(proto.SerializeToString())
@@ -164,9 +163,9 @@ class Postgres(object):
         args.append(proto.time.ToJsonString())
       else:
         args.append(getattr(proto, value))
-    with self.conn.cursor() as cursor:
+    with self._postgres_conn.cursor() as cursor:
       cursor.execute(INSERT_MAP[self.proto_class], args)
-      self.conn.commit()
+      self._postgres_conn.commit()
 
   def Loop(self):
     """Tries to export data to the postgres backend."""
@@ -176,4 +175,4 @@ class Postgres(object):
         logging.INFO,
         'Postgres: Point queue size currently at %d.',
         10,
-        len(self._proto_queue))
+        self._proto_queue.qsize())

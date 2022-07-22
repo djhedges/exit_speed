@@ -39,6 +39,7 @@ class GPS(object):
 
   def GetReport(self) -> gps.client.dictwrapper:
     report = self.gpsd.next()
+    # TPV(time-position-velocity report)
     if (report.get('class') == 'TPV' and self.CheckReportFields(report)):
       if (not self._last_gps_report_time or
           self._last_gps_report_time != report.time):
