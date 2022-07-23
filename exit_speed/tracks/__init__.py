@@ -14,9 +14,10 @@
 # limitations under the License.
 """Track list and helper functions."""
 from typing import Tuple
+import gps
 
 from exit_speed import common_lib
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed.tracks import area27
 from exit_speed.tracks import base
 from exit_speed.tracks import oregon_raceway_park
@@ -37,15 +38,14 @@ TRACK_LIST = (
     )
 
 
-def FindClosestTrack(
-    point: gps_pb2.Point) -> Tuple[float, base.Track, gps_pb2.Point]:
+def FindClosestTrack(report: gps.client.dictwrapper) -> base.Track:
   """Returns the distance, track and start/finish of the closest track."""
   distance_track = []
   for track in TRACK_LIST:
     lat, lon = track.start_finish
-    track_point = gps_pb2.Point()
-    track_point.lat = lat
-    track_point.lon = lon
-    distance = common_lib.PointDelta(point, track_point)
-    distance_track.append((distance, track, track_point))
-  return sorted(distance_track)[0]
+    track_point = exit_speed_pb2.Gps(lat=lat, lon=lon)
+    report_point = exit_speed_pb2.Gps(lat=report['lat'],
+																			lon=report['lon'])
+    distance = common_lib.PointDelta(report_point, track_point)
+    distance_track.append((distance, track))
+  return sorted(distance_track)[0][1]

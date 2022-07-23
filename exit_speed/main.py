@@ -82,33 +82,25 @@ class ExitSpeed(object):
     """Initialize subprocess modules based on config.yaml."""
     if self.config.get('postgres'):
       self.postgres = postgres.PostgresWithoutPrepare()
-    if self.config.get('gps'):
-      self.gps = gps_sensor.GPSProcess(
-          self.session.time, self.config, self.point_queue)
-      while self.point_queue.empty():
-        self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
-        logging.log_every_n_seconds(
-            logging.INFO,
-            'Waiting for GPS fix to determine track before starting other '
-            'sensor subprocesses',
-            10)
-        break
     self.ProcessSession()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.AccelerometerProcess(
-          self.session.time, self.config, self.point_queue)
+          self.session, self.config, self.point_queue)
+    if self.config.get('gps'):
+      self.gps = gps_sensor.GPSProcess(
+          self.session, self.config, self.point_queue)
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.GyroscopeProcess(
-          self.session.time, self.config, self.point_queue)
+          self.session, self.config, self.point_queue)
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(
-          self.session.time, self.config, self.point_queue)
+          self.session, self.config, self.point_queue)
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(
-          self.session.time, self.config, self.point_queue)
+          self.session, self.config, self.point_queue)
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(
-          self.session.time, self.config, self.point_queue)
+          self.session, self.config, self.point_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -157,7 +149,11 @@ class ExitSpeed(object):
 
   def ProcessSession(self) -> None:
     """Populates the session proto."""
-    _, track, start_finish = tracks.FindClosestTrack(self.point)
+    gps = gps_sensor.GPS()
+    report = None
+    while not report:
+      report = gps.GetReport()
+    track = tracks.FindClosestTrack(report)
     session_time = pytz.timezone(FLAGS.timezone).localize(
         datetime.datetime.today())
     self.session = common_lib.Session(

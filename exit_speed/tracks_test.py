@@ -13,25 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tracks."""
+import gps
 import unittest
 
 from absl.testing import absltest
 
-from exit_speed import gps_pb2
 from exit_speed import tracks
 
 class TestTracks(unittest.TestCase):
   """Gyroscope unittests."""
 
   def testFindClosestTrack(self):
-    point = gps_pb2.Point()
-    point.lat = 45.595412
-    point.lon = -122.693901
-    distance, track, _ = tracks.FindClosestTrack(point)
-    self.assertEqual(65.64651548636733, distance)
-    self.assertEqual(track.name, 'Portland International Raceway')
-    self.assertEqual(point.lat, 45.595412)
-    self.assertEqual(point.lon, -122.693901)
+    report = gps.client.dictwrapper({
+      'lat': 45.595412,
+      'lon': -122.693901})
+    track = tracks.FindClosestTrack(report)
+    self.assertEqual(
+        track, tracks.portland_internal_raceways.PortlandInternationalRaceway)
 
 
 if __name__ == '__main__':
