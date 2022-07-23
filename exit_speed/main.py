@@ -31,6 +31,7 @@ from exit_speed import gyroscope
 from exit_speed import labjack
 from exit_speed import lap_lib
 from exit_speed import leds
+from exit_speed import postgres
 from exit_speed import tire_temperature
 from exit_speed import tracks
 from exit_speed import wbo2
@@ -62,13 +63,19 @@ class ExitSpeed(object):
 
     self.config = config_lib.LoadConfig()
     self.leds = leds.LEDs()
+    self.postgres = None
+    self.track = None
+    self.lap_number = 0
+    self.laps = {}
+    self.current_lap = []
     self.point = None
-    self.session = gps_pb2.Session()
     self.sdnotify = sdnotify.SystemdNotifier()
     self.sdnotify.notify('READY=1')
 
   def InitializeSubProcesses(self):
     """Initialize subprocess modules based on config.yaml."""
+    if self.config.get('postgres'):
+      self.postgres = postgres.PostgresWithoutPrepare()
     if self.config.get('gps'):
       self.gps = gps_sensor.GPSProcess(self.config, self.point_queue)
       while self.point_queue.empty():
@@ -95,16 +102,19 @@ class ExitSpeed(object):
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
-    session = self.session
-    lap = session.laps.add()
-    self.lap = lap
-    self.lap.number = len(session.laps)
+    self.lap_number += 1
+    self.current_lap = []
+    self.laps[self.lap_number] = self.current_lap
+    if self.config.get('postgres'):
+      self.postgres.AddToQueue(
+          postgres.LapStart(number=self.lap_number,
+														start_time=self.point.time))
 
   def CalculateElapsedValues(self):
     """Populates the elapsed_duration_ms and elapsed_distance_m point values."""
     point = self.point
-    if len(self.lap.points) > 1:
-      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
+    if len(self.current_lap) > 1:
+      prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
       point.elapsed_duration_ms = (
           point.time.ToMilliseconds() -
           prior_point.time.ToMilliseconds() +
@@ -120,7 +130,7 @@ class ExitSpeed(object):
     """Updates LEDs, logs point and writes data to PostgresSQL."""
     point = self.point
     point.start_finish_distance = common_lib.PointDelta(
-        point, self.session.start_finish)
+        point, self.track.start_finish)
     point.speed_mph = point.speed_ms * 2.23694
     point.speed_kmh = point.speed_ms * 3.6
     self.leds.UpdateLeds(point)
@@ -134,6 +144,8 @@ class ExitSpeed(object):
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
+    if self.config.get('postgres'):
+      self.postgres.AddToQueue(postgres.LapEnd(end_time=self.point.time))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
@@ -161,12 +173,13 @@ class ExitSpeed(object):
   def ProcessSession(self) -> None:
     """Populates the session proto."""
     _, track, start_finish = tracks.FindClosestTrack(self.point)
+    self.track = track
     logging.info('Closest track: %s', track.name)
-    self.session.track = track.name
-    self.session.start_finish.lat = start_finish.lat
-    self.session.start_finish.lon = start_finish.lon
-    self.session.car = self.config['car']
-    self.session.time.FromNanoseconds(self.point.time.ToNanoseconds())
+    if self.config.get('postgres'):
+      self.postgres.AddToQueue(postgres.Session(
+        track=track,
+        car=self.config['car'],
+        live_data=self.live_data))
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""

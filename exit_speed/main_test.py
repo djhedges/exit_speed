@@ -23,6 +23,7 @@ from absl import flags
 from absl.testing import absltest
 
 from exit_speed import gps_pb2
+from exit_speed import tracks
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
@@ -120,25 +121,22 @@ class TestExitSpeed(unittest.TestCase):
     point_b.lon = -122.694587
     point_c.lat = 45.595000
     point_c.lon = -122.694638
-    session = gps_pb2.Session()
-    session.track = 'Portland International Raceway'
-    session.start_finish.lat = 45.595015
-    session.start_finish.lon = -122.694526
     lap = session.laps.add()
     lap.points.extend([point_a, point_b])
     es = main.ExitSpeed(min_points_per_session=0)
+    es.track = tracks.portland_internal_raceways
     es.point = point_c
-    es.lap = lap
-    es.session = session
     es.CrossStartFinish()
-    self.assertEqual(2, len(es.session.laps))
-    self.assertEqual(2, len(es.session.laps[0].points))
-    self.assertEqual(2, len(es.session.laps[1].points))
-    self.assertIn(point_a, es.session.laps[0].points)
-    self.assertIn(point_b, es.session.laps[0].points)
-    self.assertIn(point_b, es.session.laps[1].points)
-    self.assertIn(point_c, es.session.laps[1].points)
-    self.assertNotIn(point_c, es.session.laps[0].points)
+    self.assertEqual(2, es.lap_number)
+    self.assertEqual(2, len(es.laps))
+    self.assertEqual(2, len(es.laps[0].points))
+    self.assertEqual(2, len(es.laps[1].points))
+    self.assertIn(point_a, es.laps[0].points)
+    self.assertIn(point_b, es.laps[0].points)
+    self.assertIn(point_b, es.laps[1].points)
+    self.assertIn(point_c, es.laps[1].points)
+    self.assertNotIn(point_c, es.laps[0].points)
+
 
   def testProcessLap(self):
     es = main.ExitSpeed()
