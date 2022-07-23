@@ -117,7 +117,7 @@ class ExitSpeed(object):
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    delta = lap_lib.CalcLastLapDuration(self.session)
+    delta = lap_lib.CalcLastLapDuration(self.track, self.session)
     self.lap.duration.FromNanoseconds(delta)
     self.leds.SetBestLap(self.lap)
     minutes = self.lap.duration.ToSeconds() // 60
@@ -132,7 +132,7 @@ class ExitSpeed(object):
       prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
       if (self.point.start_finish_distance < self.start_finish_range and
           # First point past start/finish has an obtuse angle.
-          lap_lib.SolvePointBAngle(prior_point, self.point) > 90):
+          lap_lib.SolvePointBAngle(self.track, prior_point, self.point) > 90):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish()
         self.SetLapTime()
