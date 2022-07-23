@@ -105,7 +105,7 @@ def NukeHangingLaps(conn):
 
 
 def NukeHangingSessions(conn):
-  """Based on prior deletes these cleans up any sessions without laps."""
+  """Based on prior deletes this cleans up any sessions without laps."""
   with conn.cursor() as cursor:
     select_statement = """
     SELECT DISTINCT(session_id) FROM laps
