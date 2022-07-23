@@ -62,7 +62,7 @@ class ExitSpeed(object):
                  tagged as live.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
     """
-    self.start_time = pytz.timezone(FLAGS.timezone).localize(
+    self.session_time = pytz.timezone(FLAGS.timezone).localize(
         datetime.datetime.today())
     self.start_finish_range = start_finish_range
     self.live_data = live_data
@@ -86,7 +86,7 @@ class ExitSpeed(object):
       self.postgres = postgres.PostgresWithoutPrepare()
     if self.config.get('gps'):
       self.gps = gps_sensor.GPSProcess(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
       while self.point_queue.empty():
         self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
         logging.log_every_n_seconds(
@@ -98,19 +98,19 @@ class ExitSpeed(object):
     self.ProcessSession()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.AccelerometerProcess(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.GyroscopeProcess(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(
-          self.start_time, self.config, self.point_queue)
+          self.session_time, self.config, self.point_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
