@@ -21,6 +21,7 @@ from absl import flags
 from absl import logging
 
 from exit_speed import data_logger
+from exit_speed import exit_speed_pb2
 from exit_speed import main as exit_speed_main
 
 FLAGS = flags.FLAGS
@@ -29,6 +30,25 @@ FLAGS.set_default('led_brightness', 0.05)
 flags.DEFINE_string('filepath', None, 'Path to the data file to replay')
 flags.DEFINE_boolean('include_sleep', True,
                      'Adds delays to mimic real time replay of data.')
+
+
+PREFIX_PROTO_MAP = {
+    'GpsSensor': exit_speed_pb2.Gps,
+}
+SUBPROCESS_MAP = {
+    'GpsSensor': 'gps',
+}
+
+
+def ReadProtos(filepath):
+  protos = {}
+  for file_name in os.listdir(filepath):
+    for prefix, proto_class in PREFIX_PROTO_MAP.items():
+      if file_name.startswith(prefix):
+        logger = data_logger.Logger(os.path.join(filepath, file_name),
+                                    proto_class=PREFIX_PROTO_MAP[prefix])
+        protos.setdefault(prefix, []).extend(logger.ReadProtos())
+  return protos
 
 
 def ReplayLog(filepath, include_sleep=False):
@@ -43,43 +63,47 @@ def ReplayLog(filepath, include_sleep=False):
     A exit_speed_main.ExitSpeed instance that has replayed the given data.
   """
   logging.info('Replaying %s', filepath)
-  logger = data_logger.Logger(filepath)
-  points = list(logger.ReadProtos())
-  logging.info('Number of points %d', len(points))
+  prefix_protos = ReadProtos(filepath)
+  for protos in prefix_protos.values():
+    logging.info('Number of protos %d', len(protos))
+  first_gps_point = prefix_protos['GpsSensor'][0]
   if include_sleep:
     replay_start = time.time()
-    time_shift = int(replay_start * 1e9 - points[0].time.ToNanoseconds())
+    time_shift = int(replay_start * 1e9 - first_gps_point.time.ToNanoseconds())
     session_start = None
   es = exit_speed_main.ExitSpeed(live_data=not include_sleep)
-  es.point = points[0]
-  es.point_queue.put(points[0].SerializeToString())
-  es.config['car'] = os.path.split(os.path.dirname(filepath))[1]
+  es.point = first_gps_point
+  es.point_queue.put(first_gps_point.SerializeToString())
   es.InitializeSubProcesses()
   es.AddNewLap()
-  for point in points:
-    if include_sleep:
-      point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
-      if not session_start:
-        session_start = point.time.ToMilliseconds() / 1000
-
-    es.point = point
-    es.ProcessLap()
-    if include_sleep:
-      run_delta = time.time() - replay_start
-      point_delta = point.time.ToMilliseconds() / 1000 - session_start
-      if run_delta < point_delta:
-        time.sleep(point_delta - run_delta)
+  for prefix, subprocess_attr in SUBPROCESS_MAP.items():
+    subprocess = getattr(es, subprocess_attr)
+    points = prefix_protos[prefix]
+    for point in points:
+      subprocess.LogAndExportProto(point)
+      if include_sleep:
+        point.time.FromNanoseconds(point.time.ToNanoseconds() + time_shift)
+        if not session_start:
+          session_start = point.time.ToMilliseconds() / 1000
+      if prefix == 'GpsSensor':
+        es.point = point
+        es.ProcessLap()
+      if include_sleep:
+        run_delta = time.time() - replay_start
+        point_delta = point.time.ToMilliseconds() / 1000 - session_start
+        if run_delta < point_delta:
+          time.sleep(point_delta - run_delta)
 
   if not include_sleep:
     time.sleep(1)
-    qsize = len(es.timescale.point_queue)
-    while qsize > 0:
-      qsize = len(es.timescale.point_queue)
-      logging.log_every_n_seconds(logging.INFO, 'Queue size %s', 2, qsize)
-    es.timescale.stop_process_signal.value = True
-    print(time.time())
-    es.timescale.process.join(10)
-    print(time.time())
+  qsize = es.postgres._queue.qsize()
+  while qsize > 0:
+    qsize = es.postgres._queue.qsize()
+    logging.log_every_n_seconds(logging.INFO, 'Queue size %s', 2, qsize)
+  es.postgres.stop_process_signal.value = True
+  print(time.time())
+  es.postgres.process.join(10)
+  print(time.time())
   return es
 
 

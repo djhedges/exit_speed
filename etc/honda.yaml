@@ -5,7 +5,7 @@ accelerometer:
 gyroscope:
   frequency_hz: 40
 leds: True
-#timescale: True
+postgres: True
 labjack:
   frequency_hz: 40
   ain0: fuel_level_voltage
