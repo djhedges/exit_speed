@@ -65,15 +65,15 @@ message WBO2 {
 }
 
 message TireIrSensors {
-  TireIrSensor lf_tire_temp = 1;  // Left Front
-  TireIrSensor rf_tire_temp = 2;  // Right Front
-  TireIrSensor lr_tire_temp = 3;  // Left Rear
-  TireIrSensor rr_tire_temp = 4;  // Right Rear
+  google.protobuf.Timestamp time = 1;
+  TireIrSensor lf_tire_temp = 2;  // Left Front
+  TireIrSensor rf_tire_temp = 3;  // Right Front
+  TireIrSensor lr_tire_temp = 4;  // Left Rear
+  TireIrSensor rr_tire_temp = 5;  // Right Rear
 }
 
 message TireIrSensor {
-  google.protobuf.Timestamp time = 1;
-  double inner = 2;
-  double middle = 3;
-  double outer = 4;
+  double inner = 1;
+  double middle = 2;
+  double outer = 3;
 }

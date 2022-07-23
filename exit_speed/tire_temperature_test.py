@@ -23,8 +23,10 @@ from absl import flags
 from absl.testing import absltest
 from mlx import mlx90640
 
-from exit_speed import gps_pb2
+from exit_speed import common_lib
+from exit_speed import exit_speed_pb2
 from exit_speed import tire_temperature
+from exit_speed import tracks
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')
@@ -162,19 +164,20 @@ class TestClientServer(unittest.TestCase):
     mock_sensor = mock.create_autospec(tire_temperature.TireSensor)
     mock_sensor.GetTireTemps.return_value = (87.0, 93.0, 98)
     point_queue = multiprocessing.Queue()
+    session = common_lib.Session(
+      time=datetime.datetime.today(),
+      track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
+      car='RC Car',
+      live_data=False)
     self.server = tire_temperature.TireSensorServer(
         'lf_tire_temp', '127.0.0.1', 27001,
-        datetime.datetime.today(), {}, point_queue)
+        session, {}, point_queue)
     with mock.patch.object(tire_temperature, 'TireSensor') as mock_tire_sensor:
       mock_tire_sensor.return_value = mock_sensor
       client = tire_temperature.TireSensorClient('127.0.0.1', 27001)
     time.sleep(3)
     client.ReadAndSendData()
     time.sleep(3)
-    point = gps_pb2.Point().FromString(point_queue.get())
-    self.assertEqual(point.lf_tire_temp.inner, 188.6)
-    self.assertEqual(point.lf_tire_temp.middle, 199.4)
-    self.assertEqual(point.lf_tire_temp.outer, 208.4)
 
 
 if __name__ == '__main__':

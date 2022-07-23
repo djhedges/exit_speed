@@ -32,7 +32,8 @@ from absl import flags
 from absl import logging
 from mlx import mlx90640
 
-from exit_speed import gps_pb2
+from exit_speed import common_lib
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 FLAGS = flags.FLAGS
@@ -178,19 +179,19 @@ class TireSensorServer(sensor.SensorBase):
     while not self.stop_process_signal.value:
       data, _ = self.sock.recvfrom(1024)
       inside, middle, outside = struct.unpack('fff', data)
-      point = gps_pb2.Point()
-      corner = getattr(point, self.corner)
+      proto = exit_speed_pb2.TireIrSensors()
+      corner = getattr(proto, self.corner)
       setattr(corner, 'inner', (inside * 9/5) + 32)
       setattr(corner, 'middle', (middle * 9/5) + 32)
       setattr(corner, 'outer', (outside * 9/5) + 32)
-      self.AddPointToQueue(point)
+      self.LogAndExportProto(proto)
 
 
 class MultiTireInterface(object):
   """Main class used by exit speed to hold each tire server."""
 
   def __init__(self,
-							 session_time: datetime.datetime,
+							 session: common_lib.Session,
 							 config: Dict,
 							 point_queue: multiprocessing.Queue):
     """Initializer."""
@@ -199,7 +200,7 @@ class MultiTireInterface(object):
       self.servers[corner] = TireSensorServer(corner,
                                               ip_port['ip_addr'],
                                               int(ip_port['port']),
-																							session_time,
+																							session,
                                               config,
                                               point_queue)
 
