@@ -26,6 +26,7 @@ from absl import logging
 from google.protobuf import any_pb2
 from typing import Dict
 
+from exit_speed import common_lib
 from exit_speed import data_logger
 from exit_speed import exit_speed_pb2
 from exit_speed import postgres
@@ -62,12 +63,11 @@ class SensorBase(object):
 
   def __init__(
       self,
-      session_time: datetime.datetime,
+      session: common_lib.Session,
       config: Dict,
       point_queue: multiprocessing.Queue,
       start_process: bool=True):
-    self.session_time = session_time
-    self.config = config
+    self.session = session
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
@@ -81,7 +81,7 @@ class SensorBase(object):
       self._process.start()
 
   def _InitializeDataLogger(self, proto: any_pb2.Any):
-    file_prefix = GetLogFilePrefix(self.session_time, self, proto)
+    file_prefix = GetLogFilePrefix(self.session, self, proto)
     logging.info('Logging data to %s', file_prefix)
     self.data_logger = data_logger.Logger(file_prefix, proto_class=proto)
 
@@ -113,13 +113,14 @@ class SensorBase(object):
     raise NotImplementedError('Subclasses should override this method.')
 
 
-def GetLogFilePrefix(session_time: datetime.datetime,
+def GetLogFilePrefix(session: common_lib.Session,
                      sensor_instance: SensorBase,
 										 proto: any_pb2.Any):
   """Formats the logging path based on sensor and the given proto."""
-  current_seconds = session_time.second + session_time.microsecond / 1e6
+  current_seconds = session.time.second + session.time.microsecond / 1e6
   return os.path.join(
       FLAGS.data_log_path,
-      '%s/' % sensor_instance.config.get('car', 'unknown_car'),
-      '%s:%03f/' % (session_time.strftime('%Y-%m-%dT%H:%M'), current_seconds),
+      session.car,
+      session.track.name,
+      '%s:%03f' % (session.time.strftime('%Y-%m-%dT%H:%M'), current_seconds),
       '%s' % sensor_instance.__class__.__name__)

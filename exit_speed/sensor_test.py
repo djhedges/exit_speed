@@ -22,9 +22,11 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
+from exit_speed import common_lib
 from exit_speed import data_logger
 from exit_speed import exit_speed_pb2
 from exit_speed import sensor
+from exit_speed import tracks
 
 FLAGS = flags.FLAGS
 FLAGS.set_default('data_log_path', '/tmp')
@@ -53,18 +55,28 @@ class TestAccelerometer(unittest.TestCase):
     point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
+    session = common_lib.Session(
+      time=point.time.ToDatetime(),
+      track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
+      car='RC Car',
+      live_data=False)
     sensor_instance = SensorTest(
        point.time.ToDatetime(), {}, queue, start_process=False)
-    expected = '/tmp/unknown_car/2020-05-23T17:47:44.100000/SensorTest'
+    expected = '/tmp/RC Car/Portland International Raceway/2020-05-23T17:47:44.100000/SensorTest'
     self.assertEqual(expected, sensor.GetLogFilePrefix(
-       point.time.ToDatetime(), sensor_instance, point))
+       session, sensor_instance, point))
 
   def testLogMessage(self):
     point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
+    session = common_lib.Session(
+      time=point.time.ToDatetime(),
+      track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
+      car='RC Car',
+      live_data=False)
     sensor_instance = SensorTest(
-        point.time.ToDatetime(), {'car': 'Corrado'}, queue, start_process=False)
+        session, {}, queue, start_process=False)
     sensor_instance.LogMessage(point)
     reader = data_logger.Logger(sensor_instance.data_logger.file_prefix)
     for proto in reader.ReadProtos():
