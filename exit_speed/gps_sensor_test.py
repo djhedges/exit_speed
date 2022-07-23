@@ -21,7 +21,7 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import gps_sensor
 
 FLAGS = flags.FLAGS
@@ -76,20 +76,6 @@ class TestGPSSensor(unittest.TestCase):
       mock_gpsd.next.return_value = report
       self.assertFalse(sensor.GetReport())
 
-  def testGPSProcessLoop(self):
-    point_queue = multiprocessing.Queue()
-    with mock.patch.object(gps.gps, 'next') as mock_get:
-      mock_get.return_value = TEST_REPORT
-      proc = gps_sensor.GPSProcess({}, point_queue)
-      while point_queue.empty():
-        pass
-      proc.Join()
-      self.assertEqual(point_queue.qsize(), 1)
-      point = gps_pb2.Point().FromString(point_queue.get())
-      self.assertEqual(point.lat, TEST_REPORT_VALUES['lat'])
-      self.assertEqual(point.lon, TEST_REPORT_VALUES['lon'])
-      self.assertEqual(point.alt, TEST_REPORT_VALUES['alt'])
-      self.assertEqual(point.speed_ms, TEST_REPORT_VALUES['speed'])
 
 if __name__ == '__main__':
   absltest.main()

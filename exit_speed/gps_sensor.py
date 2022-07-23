@@ -17,7 +17,7 @@ import geohash
 import gps
 from absl import app
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 REPORT_REQ_FIELDS = ('lat', 'lon', 'time', 'speed')
@@ -49,6 +49,7 @@ class GPS(object):
 
 class GPSProcess(sensor.SensorBase):
   """Populates the SensorBase.point_queue with GPS values per loop."""
+  PROTO_CLASS = exit_speed_pb2.Gyroscope
 
   def Loop(self):
     """Adds point data with GPS values to point queue."""
@@ -57,13 +58,14 @@ class GPSProcess(sensor.SensorBase):
       report = gps_sensor.GetReport()
       if report:
         point = gps_pb2.Point()
-        point.lat = report.lat
-        point.lon = report.lon
+        proto = exit_speed_pb2.Gps(
+          lat=report.lat,
+          lon=report.lon,
+          speed_ms=report.speed)
         if report.get('alt'):
-          point.alt = report.alt
-        point.speed_ms = report.speed
-        point.geohash = geohash.encode(point.lat, point.lon)
-        self.AddPointToQueue(point)
+          proto.alt = report.alt
+        self.AddPointToQueue(proto)
+        self.LogAndExportProto(proto)
 
 
 def main(unused_argv):
