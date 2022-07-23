@@ -40,7 +40,7 @@ from exit_speed import wbo2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('timezone', 'America/Los_Angeles',
-										'Timezone to set in datetime objects.')
+                    'Timezone to set in datetime objects.')
 
 
 class ExitSpeed(object):
@@ -110,7 +110,7 @@ class ExitSpeed(object):
     if self.config.get('postgres'):
       self.postgres.AddToQueue(
           postgres.LapStart(number=self.lap_number,
-														start_time=self.point.time))
+                            start_time=self.point.time.ToDatetime()))
 
   def ProcessPoint(self) -> None:
     """Updates LEDs, logs point and writes data to PostgresSQL."""
@@ -125,7 +125,8 @@ class ExitSpeed(object):
     seconds = (duration_ns / 1e6 % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
     if self.config.get('postgres'):
-      self.postgres.AddToQueue(postgres.LapEnd(end_time=self.point.time))
+      self.postgres.AddToQueue(postgres.LapEnd(
+          end_time=self.point.time.ToDatetime()))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
