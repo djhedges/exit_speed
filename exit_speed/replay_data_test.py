@@ -20,13 +20,11 @@ import unittest
 import fake_rpi
 import gps
 import mock
-import psycopg2
-import testing.postgresql
 from absl import flags
 from absl.testing import absltest
 from parameterized import parameterized
 
-from exit_speed import timescale
+from exit_speed import postgres_test_lib
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
@@ -46,33 +44,14 @@ FLAGS.set_default('config_path',
 FLAGS.set_default('data_log_path', '/tmp')
 FLAGS.set_default('filepath', '/dev/null')
 
-Postgresql = testing.postgresql.PostgresqlFactory(cache_initialized_db=True)
 
-
-def tearDownModule():
-  Postgresql.clear_cache()
-
-
-class TestReplayData(unittest.TestCase):
+class TestReplayData(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """More of a end-to-end test for data in testdata/."""
 
   def setUp(self):
     super().setUp()
     self._AddMock(adafruit_dotstar, 'DotStar')
     self._AddMock(gps, 'gps')
-    self.postgresql = Postgresql()
-    with open(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)),
-        'testdata/timescale_schema')) as schema_file:
-      statements = ''.join(schema_file.readlines())
-    self.conn = psycopg2.connect(**self.postgresql.dsn())
-    self.cursor = self.conn.cursor()
-    self.cursor.execute(statements)
-    self.conn.commit()
-    mock_connect = self._AddMock(timescale, 'ConnectToDB')
-    def _Connect():
-      return psycopg2.connect(**self.postgresql.dsn())
-    mock_connect.side_effect = _Connect
 
   def _AddMock(self, module, name):
     patch = mock.patch.object(module, name)
