@@ -34,7 +34,7 @@ def tearDownModule():
   Postgresql.clear_cache()
 
 
-class PostgresTestBase(object):
+class PostgresTestBase(unittest.TestCase):
   """Loads the exit_speed schema and mocks out database connections."""
 
   def setUp(self):
