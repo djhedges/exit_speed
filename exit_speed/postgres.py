@@ -15,6 +15,7 @@
 """Postgres interface."""
 
 from typing import NamedTuple
+from typing import Optional
 from typing import Text
 from typing import Union
 import datetime
@@ -133,12 +134,13 @@ def ConnectToDB() -> psycopg2.extensions.connection:
 
 
 def GetConnWithPointPrepare(
-  prepare_statement: Text, conn: psycopg2.extensions.connection =  None):
+  prepare_statement: Text,
+  conn: Optional[psycopg2.extensions.connection] =  None) ->
+    psycopg2.extensions.connection:
   conn = conn or ConnectToDB()
   with conn.cursor() as cursor:
     cursor.execute(prepare_statement)
   return conn
-
 
 
 class Postgres(object):
