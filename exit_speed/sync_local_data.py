@@ -22,7 +22,7 @@ from absl import app
 from absl import flags
 from absl import logging
 
-from exit_speed import cleanup_timescale
+from exit_speed import cleanup_postgres
 from exit_speed import data_logger
 from exit_speed import postgres
 from exit_speed import replay_data
@@ -81,7 +81,7 @@ def SyncLocalData():
 
 def main(unused_argv):
   SyncLocalData()
-  cleanup_timescale.CleanupTimescale()
+  cleanup_postgres.CleanupTimescale()
 
 
 if __name__ == '__main__':
