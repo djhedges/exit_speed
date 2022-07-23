@@ -98,21 +98,16 @@ class TestLapLib(unittest.TestCase):
     start_finish.lat = 45.595015
     start_finish.lon = -122.694526
     lap = gps_pb2.Lap()
-    point_a = lap.points.add()
     point_b = lap.points.add()
     point_c = lap.points.add()
-    point_a.time.FromMilliseconds(1)
-    point_b.time.FromMilliseconds(2)
-    point_c.time.FromMilliseconds(3)
-    point_a.lat = 45.593988
-    point_a.lon = -122.693587
+    point_b.time.FromMilliseconds(1)
+    point_c.time.FromMilliseconds(2)
     point_b.lat = 45.594988
     point_b.lon = -122.694587
     point_c.lat = 45.595000
     point_c.lon = -122.694638
     point_b.start_finish_distance = common_lib.PointDelta(start_finish, point_b)
     point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
-    point_a.speed_ms = 68.2
     point_b.speed_ms = 70
     point_c.speed_ms = 70.2
     self.assertEqual(1000000.0548742702, lap_lib.CalcTimeAfterFinish(lap))
@@ -123,24 +118,19 @@ class TestLapLib(unittest.TestCase):
     start_finish.lon = -122.694526
     session = gps_pb2.Session()
     lap = session.laps.add()
-    point_x = lap.points.add()
     point_y = lap.points.add()
     point_z = lap.points.add()
-    point_x.time.FromMilliseconds(1)
-    point_y.time.FromMilliseconds(2)
-    point_z.time.FromMilliseconds(3)
-    point_x.lat = 45.593988
-    point_x.lon = -122.693587
+    point_y.time.FromMilliseconds(1)
+    point_z.time.FromMilliseconds(2)
     point_y.lat = 45.594988
     point_y.lon = -122.694587
     point_z.lat = 45.595000
     point_z.lon = -122.694638
     point_y.start_finish_distance = common_lib.PointDelta(start_finish, point_y)
     point_z.start_finish_distance = common_lib.PointDelta(start_finish, point_z)
-    point_y.speed_ms = 69.8 
     point_y.speed_ms = 70
     point_z.speed_ms = 70.2
-    self.assertEqual(2.0 * 1e6, lap_lib.CalcLastLapDuration(session))
+    self.assertEqual(1.0 * 1e6, lap_lib.CalcLastLapDuration(session))
 
     lap = session.laps.add()
     point_a = point_z
@@ -157,7 +147,7 @@ class TestLapLib(unittest.TestCase):
     point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
     point_b.speed_ms = 70
     point_c.speed_ms = 70.2
-    self.assertEqual(1000000, lap_lib.CalcLastLapDuration(session))
+    self.assertEqual(2000000, lap_lib.CalcLastLapDuration(session))
 
 if __name__ == '__main__':
   absltest.main()
