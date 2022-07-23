@@ -13,10 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common libaries."""
+from typing import NamedTuple
+from typing import Text
+import datetime
 import gps
 
 from exit_speed import exit_speed_pb2
 from exit_speed.tracks import base
+
+
+class Session(NamedTuple):
+  track: base.Track
+  time: datetime.datetime
+  car: Text
+  live_data: bool
 
 
 def PointDelta(point_a: exit_speed_pb2.Gps, point_b: exit_speed_pb2.Gps) -> float:

@@ -25,6 +25,7 @@ import psycopg2
 from absl import flags
 from absl import logging
 from google.protobuf import any_pb2
+from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
 from exit_speed.tracks import base
 
@@ -200,12 +201,6 @@ SET end_time = %s
 WHERE id = %s
 """)
 
-class Session(NamedTuple):
-  track: base.Track
-  time: datetime.datetime
-  car: Text
-  live_data: bool
-
 
 class LapStart(NamedTuple):
   number: int
@@ -235,10 +230,10 @@ class PostgresWithoutPrepare(object):
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
       self.process.start()
 
-  def AddToQueue(self, data: Union[Session, LapStart, LapEnd]):
+  def AddToQueue(self, data: Union[common_lib.Session, LapStart, LapEnd]):
     self._queue.put(data)
 
-  def ExportSession(self, session: Session):
+  def ExportSession(self, session: common_lib.Session):
     with self._postgres_conn.cursor() as cursor:
       args = (session.time, session.track.name, session.car, session.live_data)
       cursor.execute(SESSION_INSERT, args)
@@ -260,7 +255,7 @@ class PostgresWithoutPrepare(object):
 
   def ExportData(self):
     data = self._queue.get()
-    if isinstance(data, Session):
+    if isinstance(data, common_lib.Session):
       self.ExportSession(data)
     elif isinstance(data, LapStart):
       self.ExportLapStart(data)

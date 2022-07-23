@@ -19,6 +19,7 @@ import pytz
 import unittest
 from absl.testing import absltest
 
+from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
 from exit_speed import postgres
 from exit_speed import postgres_test_lib
@@ -162,7 +163,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     interface = postgres.PostgresWithoutPrepare(start_process=False)
     start_time = datetime.datetime(
         2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC)
-    session = postgres.Session(
+    session = common_lib.Session(
         time=start_time,
         track=test_track.TestTrack,
         car='RC Car',

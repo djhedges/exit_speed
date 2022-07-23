@@ -62,8 +62,6 @@ class ExitSpeed(object):
                  tagged as live.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
     """
-    self.session_time = pytz.timezone(FLAGS.timezone).localize(
-        datetime.datetime.today())
     self.start_finish_range = start_finish_range
     self.live_data = live_data
     self.min_points_per_session = min_points_per_session
@@ -72,7 +70,7 @@ class ExitSpeed(object):
     self.config = config_lib.LoadConfig()
     self.leds = leds.LEDs()
     self.postgres = None
-    self.track = None
+    self.session = None
     self.lap_number = 0
     self.laps = {}
     self.current_lap = []
@@ -86,7 +84,7 @@ class ExitSpeed(object):
       self.postgres = postgres.PostgresWithoutPrepare()
     if self.config.get('gps'):
       self.gps = gps_sensor.GPSProcess(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
       while self.point_queue.empty():
         self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
         logging.log_every_n_seconds(
@@ -98,19 +96,19 @@ class ExitSpeed(object):
     self.ProcessSession()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.AccelerometerProcess(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
     if self.config.get('gyroscope'):
       self.gyro = gyroscope.GyroscopeProcess(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
     if self.config.get('labjack'):
       self.labjack = labjack.Labjack(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(
-          self.session_time, self.config, self.point_queue)
+          self.session.time, self.config, self.point_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""
@@ -129,7 +127,7 @@ class ExitSpeed(object):
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    duration_ns = lap_lib.CalcLastLapDuration(self.track, self.laps)
+    duration_ns = lap_lib.CalcLastLapDuration(self.session.track, self.laps)
     self.leds.SetBestLap(self.current_lap, duration_ns)
     minutes = duration_ns / 1e9 // 60
     seconds = (duration_ns / 1e6 % 60000) / 1000.0
@@ -141,9 +139,9 @@ class ExitSpeed(object):
     """Checks and handles when the car crosses the start/finish."""
     if len(self.current_lap) >= self.min_points_per_session:
       prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
-      if (common_lib.PointDeltaFromTrack(self.track, self.point) and
+      if (common_lib.PointDeltaFromTrack(self.session.track, self.point) and
           # First point past start/finish has an obtuse angle.
-          lap_lib.SolvePointBAngle(self.track, prior_point, self.point) > 90):
+          lap_lib.SolvePointBAngle(self.session.track, prior_point, self.point) > 90):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish()
         self.SetLapTime()
@@ -160,14 +158,16 @@ class ExitSpeed(object):
   def ProcessSession(self) -> None:
     """Populates the session proto."""
     _, track, start_finish = tracks.FindClosestTrack(self.point)
-    self.track = track
+    session_time = pytz.timezone(FLAGS.timezone).localize(
+        datetime.datetime.today())
+    self.session = common_lib.Session(
+      time=session_time,
+      track=track,
+      car=self.config['car'],
+      live_data=self.live_data)
     logging.info('Closest track: %s', track.name)
     if self.config.get('postgres'):
-      self.postgres.AddToQueue(postgres.Session(
-        time=self.session_time,
-        track=track,
-        car=self.config['car'],
-        live_data=self.live_data))
+      self.postgres.AddToQueue(self.session)
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""

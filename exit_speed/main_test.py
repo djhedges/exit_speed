@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ExitSpeed unittest."""
+import datetime
 import os
 import sys
 import unittest
@@ -22,6 +23,7 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
+from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
 from exit_speed import tracks
 # pylint: disable=wrong-import-position
@@ -74,6 +76,11 @@ class TestExitSpeed(unittest.TestCase):
     lap.append(last_point)
     es.current_lap = lap
     es.laps = {1: lap}
+    es.session = common_lib.Session(
+      time=datetime.datetime.today(),
+      track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
+      car='RC Car',
+      live_data=False)
     es.SetLapTime()
     self.assertEqual(76 * 1e9, es.leds.best_lap_duration_ns)
     self.assertEqual(es.leds.best_lap, lap)
@@ -99,6 +106,11 @@ class TestExitSpeed(unittest.TestCase):
     es.laps = {1: lap}
     es.track = tracks.portland_internal_raceways.PortlandInternationalRaceway
     es.point = point_c
+    es.session = common_lib.Session(
+      time=datetime.datetime.today(),
+      track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
+      car='RC Car',
+      live_data=False)
     es.CrossStartFinish()
     self.assertEqual(2, es.lap_number)
     self.assertEqual(2, len(es.laps))
