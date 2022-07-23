@@ -16,6 +16,7 @@
 
 https://github.com/melexis-fir/mlx9064x-driver-py
 """
+import datetime
 import multiprocessing
 import socket
 import statistics
@@ -161,6 +162,7 @@ class TireSensorServer(sensor.SensorBase):
       corner: Text,
       ip_addr: Text,
       port: int,
+      session_time: datetime.datetime,
       config: Dict,
       point_queue: multiprocessing.Queue,
       start_process: bool=True):
@@ -168,7 +170,8 @@ class TireSensorServer(sensor.SensorBase):
     self.ip_addr = ip_addr
     self.port = port
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    super().__init__(config, point_queue, start_process=start_process)
+    super().__init__(
+        session_time, config, point_queue, start_process=start_process)
 
   def Loop(self):
     self.sock.bind((self.ip_addr, self.port))
@@ -186,17 +189,17 @@ class TireSensorServer(sensor.SensorBase):
 class MultiTireInterface(object):
   """Main class used by exit speed to hold each tire server."""
 
-  def __init__(self, config: Dict, point_queue: multiprocessing.Queue):
-    """Initializer.
-
-    Args:
-      config: A dict created from parsing the exit speed yaml config.
-    """
+  def __init__(self,
+							 session_time: datetime.datetime,
+							 config: Dict,
+							 point_queue: multiprocessing.Queue):
+    """Initializer."""
     self.servers = {}
     for corner, ip_port in config['tire_temps'].items():
       self.servers[corner] = TireSensorServer(corner,
                                               ip_port['ip_addr'],
                                               int(ip_port['port']),
+																							session_time,
                                               config,
                                               point_queue)
 

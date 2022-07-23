@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tire_temperature.py"""
+import datetime
 import multiprocessing
 import time
 import unittest
@@ -162,7 +163,8 @@ class TestClientServer(unittest.TestCase):
     mock_sensor.GetTireTemps.return_value = (87.0, 93.0, 98)
     point_queue = multiprocessing.Queue()
     self.server = tire_temperature.TireSensorServer(
-        'lf_tire_temp', '127.0.0.1', 27001, {}, point_queue)
+        'lf_tire_temp', '127.0.0.1', 27001,
+        datetime.datetime.today(), {}, point_queue)
     with mock.patch.object(tire_temperature, 'TireSensor') as mock_tire_sensor:
       mock_tire_sensor.return_value = mock_sensor
       client = tire_temperature.TireSensorClient('127.0.0.1', 27001)
