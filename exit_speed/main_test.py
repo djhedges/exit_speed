@@ -14,11 +14,11 @@
 # limitations under the License.
 """ExitSpeed unittest."""
 import datetime
+import gps
 import os
 import sys
 import unittest
 
-import gps
 import fake_rpi
 import mock
 from absl import flags
@@ -131,16 +131,6 @@ class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     es.point = exit_speed_pb2.Gps()
     es.ProcessLap()
     self.assertTrue(es.current_lap)
-
-  def testProcessSession(self):
-    point = exit_speed_pb2.Gps(
-        lat = 45.594961,
-        lon = -122.694508,
-        speed_ms=21)
-    lap = []
-    es = main.ExitSpeed()
-    es.point = point
-    es.ProcessSession()
 
 
 if __name__ == '__main__':
