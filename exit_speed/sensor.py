@@ -68,6 +68,7 @@ class SensorBase(object):
       point_queue: multiprocessing.Queue,
       start_process: bool=True):
     self.session = session
+    self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
