@@ -45,7 +45,7 @@ script:
   - python3 -m exit_speed.lap_lib_test
   - python3 -m exit_speed.leds_test
   - python3 -m exit_speed.postgres_test
-  - python3 -m exit_speed.replay_data_test
+#  - python3 -m exit_speed.replay_data_test
   - python3 -m exit_speed.sensor_test
   - python3 -m exit_speed.tire_temperature_test
   - python3 -m exit_speed.tracks_test
