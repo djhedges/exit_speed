@@ -49,7 +49,7 @@ class GPS(object):
 
 class GPSProcess(sensor.SensorBase):
   """Populates the SensorBase.point_queue with GPS values per loop."""
-  PROTO_CLASS = exit_speed_pb2.Gyroscope
+  PROTO_CLASS = exit_speed_pb2.Gps
 
   def Loop(self):
     """Adds point data with GPS values to point queue."""

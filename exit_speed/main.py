@@ -71,9 +71,9 @@ class ExitSpeed(object):
     self.leds = leds.LEDs()
     self.postgres = None
     self.session = None
-    self.lap_number = 0
-    self.laps = {}
+    self.lap_number = 1
     self.current_lap = []
+    self.laps = {self.lap_number: self.current_lap}
     self.point = None
     self.sdnotify = sdnotify.SystemdNotifier()
     self.sdnotify.notify('READY=1')
@@ -168,7 +168,6 @@ class ExitSpeed(object):
   def Run(self) -> None:
     """Runs exit speed in a loop."""
     self.InitializeSubProcesses()
-    self.AddNewLap()
     while True:
       self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
       self.ProcessLap()
