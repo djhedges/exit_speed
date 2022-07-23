@@ -25,7 +25,6 @@ from absl import logging
 from exit_speed import accelerometer
 from exit_speed import common_lib
 from exit_speed import config_lib
-from exit_speed import gps_pb2
 from exit_speed import gps_sensor
 from exit_speed import gyroscope
 from exit_speed import labjack

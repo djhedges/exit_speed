@@ -18,21 +18,21 @@ import unittest
 from absl.testing import absltest
 
 from exit_speed import common_lib
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 
 
 class TestExitSpeed(unittest.TestCase):
   """Common library unittest."""
 
   def testPointDelta(self):
-    point_a = gps_pb2.Point()
-    point_b = gps_pb2.Point()
-    point_a.lat = 1.1
-    point_b.lat = 2.2
-    point_a.lon = -1.1
-    point_b.lon = -2.2
+    proto_a = exit_speed_pb2.Gps()
+    proto_b = exit_speed_pb2.Gps()
+    proto_a.lat = 1.1
+    proto_b.lat = 2.2
+    proto_a.lon = -1.1
+    proto_b.lon = -2.2
     self.assertEqual(171979.02735070087,
-                     common_lib.PointDelta(point_a, point_b))
+                     common_lib.PointDelta(proto_a, proto_b))
 
 
 if __name__ == '__main__':

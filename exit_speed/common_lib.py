@@ -15,10 +15,10 @@
 """Common libaries."""
 import gps
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 
 
-def PointDelta(point_a: gps_pb2.Point, point_b: gps_pb2.Point) -> float:
-  """Returns the distance in meters between two points."""
-  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
-                                (point_b.lat, point_b.lon))
+def PointDelta(proto_a: exit_speed_pb2.Gps, proto_b: exit_speed_pb2.Gps) -> float:
+  """Returns the distance in meters between two protos."""
+  return gps.EarthDistanceSmall((proto_a.lat, proto_a.lon),
+                                (proto_b.lat, proto_b.lon))

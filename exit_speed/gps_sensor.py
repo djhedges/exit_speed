@@ -57,7 +57,6 @@ class GPSProcess(sensor.SensorBase):
     while not self.stop_process_signal.value:
       report = gps_sensor.GetReport()
       if report:
-        point = gps_pb2.Point()
         proto = exit_speed_pb2.Gps(
           lat=report.lat,
           lon=report.lon,
