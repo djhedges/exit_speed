@@ -67,9 +67,6 @@ def SolvePointBAngle(track: base.Track,
   a = common_lib.PointDeltaFromTrack(track, point_b)
   b = common_lib.PointDeltaFromTrack(track, point_c)
   c = common_lib.PointDelta(point_b, point_c)
-  print('~' * 80)
-  print(a, b, c)
-  print('~' * 80)
   return math.degrees(math.acos((c**2 + a**2 - b**2)/(2*c*a)))
 
 
