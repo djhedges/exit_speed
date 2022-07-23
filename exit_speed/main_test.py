@@ -19,12 +19,10 @@ import unittest
 
 import fake_rpi
 import mock
-import psycopg2
 from absl import flags
 from absl.testing import absltest
 
 from exit_speed import gps_pb2
-from exit_speed import timescale
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
@@ -49,9 +47,6 @@ class TestExitSpeed(unittest.TestCase):
   def setUp(self):
     super().setUp()
     self._AddMock(adafruit_dotstar, 'DotStar')
-    mock_conn = mock.create_autospec(psycopg2.extensions.connection)
-    mock_connect = self._AddMock(timescale, 'ConnectToDB')
-    mock_connect.return_value = mock_conn
 
   def _AddMock(self, module, name):
     patch = mock.patch.object(module, name)
