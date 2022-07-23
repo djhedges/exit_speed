@@ -26,6 +26,7 @@ from absl import flags
 from absl import logging
 from google.protobuf import any_pb2
 from exit_speed import exit_speed_pb2
+from exit_speed.tracks import base
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('postgres_db_spec',
@@ -135,8 +136,7 @@ def ConnectToDB() -> psycopg2.extensions.connection:
 
 def GetConnWithPointPrepare(
   prepare_statement: Text,
-  conn: Optional[psycopg2.extensions.connection] =  None) ->
-    psycopg2.extensions.connection:
+  conn: Optional[psycopg2.extensions.connection] =  None) -> psycopg2.extensions.connection:
   conn = conn or ConnectToDB()
   with conn.cursor() as cursor:
     cursor.execute(prepare_statement)
@@ -201,7 +201,7 @@ WHERE id = %s
 """)
 
 class Session(NamedTuple):
-  track: Text
+  track: base.Track
   car: Text
   live_data: bool
 
@@ -239,7 +239,7 @@ class PostgresWithoutPrepare(object):
 
   def ExportSession(self, session: Session):
     with self._postgres_conn.cursor() as cursor:
-      args = (session.track, session.car, session.live_data)
+      args = (session.track.name, session.car, session.live_data)
       cursor.execute(SESSION_INSERT, args)
       self.session_id = cursor.fetchone()[0]
       self._postgres_conn.commit()

@@ -117,11 +117,10 @@ class ExitSpeed(object):
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    delta = lap_lib.CalcLastLapDuration(self.track, self.session)
-    self.lap.duration.FromNanoseconds(delta)
+    duration_ns = lap_lib.CalcLastLapDuration(self.track, self.session)
     self.leds.SetBestLap(self.lap, delta)
-    minutes = self.lap.duration.ToSeconds() // 60
-    seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
+    minutes = duration_ns / 1e9 // 60
+    seconds = (duration_ns / 1e6 % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(postgres.LapEnd(end_time=self.point.time))
@@ -138,10 +137,7 @@ class ExitSpeed(object):
         self.SetLapTime()
         self.AddNewLap()
         # Start and end laps on the same point just past start/finish.
-        self.lap.points.append(prior_point)
-        # Reset elapsed values for first point of the lap.
-        self.point.elapsed_duration_ms = 0
-        self.point.elapsed_distance_m = 0
+        self.lap.append(prior_point)
     self.current_lap.append(self.point)
 
   def ProcessLap(self) -> None:
