@@ -117,8 +117,8 @@ class ExitSpeed(object):
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
-    duration_ns = lap_lib.CalcLastLapDuration(self.track, self.session)
-    self.leds.SetBestLap(self.lap, delta)
+    duration_ns = lap_lib.CalcLastLapDuration(self.track, self.laps)
+    self.leds.SetBestLap(self.current_lap, duration_ns)
     minutes = duration_ns / 1e9 // 60
     seconds = (duration_ns / 1e6 % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)
@@ -128,8 +128,8 @@ class ExitSpeed(object):
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
     if len(self.current_lap) >= self.min_points_per_session:
-      prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
-      if (self.point.start_finish_distance < self.start_finish_range and
+      prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
+      if (common_lib.PointDeltaFromTrack(self.track, self.point) and
           # First point past start/finish has an obtuse angle.
           lap_lib.SolvePointBAngle(self.track, prior_point, self.point) > 90):
         logging.info('Start/Finish')
@@ -137,7 +137,7 @@ class ExitSpeed(object):
         self.SetLapTime()
         self.AddNewLap()
         # Start and end laps on the same point just past start/finish.
-        self.lap.append(prior_point)
+        self.current_lap.append(prior_point)
     self.current_lap.append(self.point)
 
   def ProcessLap(self) -> None:

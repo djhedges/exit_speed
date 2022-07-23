@@ -22,7 +22,7 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import tracks
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
@@ -55,43 +55,33 @@ class TestExitSpeed(unittest.TestCase):
     return patch.start()
 
   def testProcessPoint(self):
-    prior_point = gps_pb2.Point()
-    prior_point.lat = 12.000000
-    prior_point.lon = 23.000000
-    prior_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    point = gps_pb2.Point()
+    es = main.ExitSpeed()
+    point = exit_speed_pb2.Gps()
     point.lat = 12.000001
     point.lon = 23.000002
     point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
-    es = main.ExitSpeed()
-    es.lap = gps_pb2.Lap()
-    es.lap.points.extend([prior_point, point])
     es.point = point
     es.ProcessPoint()
-    self.assertEqual(2856514.6203466402, point.start_finish_distance)
 
   def testSetLapTime(self):
     es = main.ExitSpeed()
-    first_point = gps_pb2.Point()
+    first_point = exit_speed_pb2.Gps()
     first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    last_point = gps_pb2.Point()
+    last_point = exit_speed_pb2.Gps()
     last_point.time.FromJsonString(u'2020-05-23T17:49:00.100Z')
-    session = gps_pb2.Session()
-    lap = session.laps.add()
-    lap.points.append(first_point)
-    lap.points.append(last_point)
-    es.lap = lap
-    es.session = session
+    lap = []
+    lap.append(first_point)
+    lap.append(last_point)
+    es.current_lap = lap
+    es.laps = {1: lap}
     es.SetLapTime()
-    self.assertEqual(76, lap.duration.ToSeconds())
+    self.assertEqual(76 * 1e9, es.leds.best_lap_duration_ns)
     self.assertEqual(es.leds.best_lap, lap)
 
   def testCrossStartFinish(self):
-    point_a = gps_pb2.Point()
-    point_b = gps_pb2.Point()
-    point_c = gps_pb2.Point()
-    point_b.start_finish_distance = 5.613414540798601
-    point_c.start_finish_distance = 8.86833983566463
+    point_a = exit_speed_pb2.Gps()
+    point_b = exit_speed_pb2.Gps()
+    point_c = exit_speed_pb2.Gps()
     point_a.time.FromMilliseconds(1000)
     point_b.time.FromMilliseconds(2000)
     point_c.time.FromMilliseconds(3000)
@@ -101,46 +91,39 @@ class TestExitSpeed(unittest.TestCase):
     point_b.lon = -122.694587
     point_c.lat = 45.595000
     point_c.lon = -122.694638
-    lap = session.laps.add()
-    lap.points.extend([point_a, point_b])
+    lap = []
+    lap.extend([point_a, point_b])
     es = main.ExitSpeed(min_points_per_session=0)
-    es.track = tracks.portland_internal_raceways
+    es.current_lap = lap
+    es.lap_number = 1
+    es.laps = {1: lap}
+    es.track = tracks.portland_internal_raceways.PortlandInternationalRaceway
     es.point = point_c
     es.CrossStartFinish()
     self.assertEqual(2, es.lap_number)
     self.assertEqual(2, len(es.laps))
-    self.assertEqual(2, len(es.laps[0].points))
-    self.assertEqual(2, len(es.laps[1].points))
-    self.assertIn(point_a, es.laps[0].points)
-    self.assertIn(point_b, es.laps[0].points)
-    self.assertIn(point_b, es.laps[1].points)
-    self.assertIn(point_c, es.laps[1].points)
-    self.assertNotIn(point_c, es.laps[0].points)
-
+    self.assertEqual(2, len(es.laps[1]))
+    self.assertEqual(2, len(es.laps[2]))
+    self.assertIn(point_a, es.laps[1])
+    self.assertIn(point_b, es.laps[1])
+    self.assertIn(point_b, es.laps[2])
+    self.assertIn(point_c, es.laps[2])
+    self.assertNotIn(point_c, es.laps[1])
 
   def testProcessLap(self):
     es = main.ExitSpeed()
     es.AddNewLap()
-    es.point = es.lap.points.add()
+    es.point = exit_speed_pb2.Gps()
     es.ProcessLap()
-    self.assertTrue(es.lap.points)
+    self.assertTrue(es.current_lap)
 
   def testProcessSession(self):
-    point = gps_pb2.Point()
-    point.speed_ms = 21
-    lap = gps_pb2.Lap()
-    session = gps_pb2.Session()
+    point = exit_speed_pb2.Gps(
+        lat = 45.594961,
+        lon = -122.694508,
+        speed_ms=21)
+    lap = []
     es = main.ExitSpeed()
-    es.point = point
-    es.session = session
-    es.ProcessSession()
-
-    for _ in session.laps:
-      for lap_point in lap.points:
-        self.assertEqual(point, lap_point)
-
-    point = gps_pb2.Point()
-    point.speed_ms = 1
     es.point = point
     es.ProcessSession()
 
