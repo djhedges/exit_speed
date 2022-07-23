@@ -54,26 +54,6 @@ class TestExitSpeed(unittest.TestCase):
     self.addCleanup(patch.stop)
     return patch.start()
 
-  def testCalculateElapsedValues(self):
-    before_point = gps_pb2.Point()
-    prior_point = gps_pb2.Point()
-    prior_point.lat = 12.000000
-    prior_point.lon = 23.000000
-    prior_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    point = gps_pb2.Point()
-    point.lat = 12.000001
-    point.lon = 23.000002
-    point.time.FromJsonString(u'2020-05-23T17:47:44.200Z')
-    es = main.ExitSpeed()
-    es.lap = gps_pb2.Lap()
-    es.lap.points.extend([before_point, prior_point, point])
-    es.point = point
-    es.ProcessPoint()
-    self.assertEqual(prior_point.elapsed_duration_ms, 0)
-    self.assertEqual(prior_point.elapsed_distance_m, 0)
-    self.assertEqual(point.elapsed_duration_ms, 100)
-    self.assertEqual(point.elapsed_distance_m, 0.2430443280901163)
-
   def testProcessPoint(self):
     prior_point = gps_pb2.Point()
     prior_point.lat = 12.000000

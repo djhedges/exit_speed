@@ -25,6 +25,7 @@ from absl import logging
 from exit_speed import accelerometer
 from exit_speed import common_lib
 from exit_speed import config_lib
+from exit_speed import exit_speed_pb2
 from exit_speed import gps_sensor
 from exit_speed import gyroscope
 from exit_speed import labjack
@@ -78,7 +79,7 @@ class ExitSpeed(object):
     if self.config.get('gps'):
       self.gps = gps_sensor.GPSProcess(self.config, self.point_queue)
       while self.point_queue.empty():
-        self.point = gps_pb2.Point().FromString(self.point_queue.get())
+        self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
         logging.log_every_n_seconds(
             logging.INFO,
             'Waiting for GPS fix to determine track before starting other '
@@ -109,31 +110,10 @@ class ExitSpeed(object):
           postgres.LapStart(number=self.lap_number,
 														start_time=self.point.time))
 
-  def CalculateElapsedValues(self):
-    """Populates the elapsed_duration_ms and elapsed_distance_m point values."""
-    point = self.point
-    if len(self.current_lap) > 1:
-      prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
-      point.elapsed_duration_ms = (
-          point.time.ToMilliseconds() -
-          prior_point.time.ToMilliseconds() +
-          prior_point.elapsed_duration_ms)
-      point.elapsed_distance_m = (
-          common_lib.PointDelta(point, prior_point) +
-          prior_point.elapsed_distance_m)
-    else:
-      point.elapsed_duration_ms = 0
-      point.elapsed_distance_m = 0
-
   def ProcessPoint(self) -> None:
     """Updates LEDs, logs point and writes data to PostgresSQL."""
     point = self.point
-    point.start_finish_distance = common_lib.PointDelta(
-        point, self.track.start_finish)
-    point.speed_mph = point.speed_ms * 2.23694
-    point.speed_kmh = point.speed_ms * 3.6
     self.leds.UpdateLeds(point)
-    self.CalculateElapsedValues()
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
@@ -148,7 +128,7 @@ class ExitSpeed(object):
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
-    if len(self.lap.points) >= self.min_points_per_session:
+    if len(self.current_lap) >= self.min_points_per_session:
       prior_point = lap_lib.GetPriorUniquePoint(self.lap, self.point)
       if (self.point.start_finish_distance < self.start_finish_range and
           # First point past start/finish has an obtuse angle.
@@ -162,7 +142,7 @@ class ExitSpeed(object):
         # Reset elapsed values for first point of the lap.
         self.point.elapsed_duration_ms = 0
         self.point.elapsed_distance_m = 0
-    self.lap.points.append(self.point)
+    self.current_lap.append(self.point)
 
   def ProcessLap(self) -> None:
     """Adds the point to the lap and checks if we crossed start/finish."""
@@ -185,7 +165,7 @@ class ExitSpeed(object):
     self.InitializeSubProcesses()
     self.AddNewLap()
     while True:
-      self.point = gps_pb2.Point().FromString(self.point_queue.get())
+      self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
       self.ProcessLap()
       logging.log_every_n_seconds(
           logging.INFO,
