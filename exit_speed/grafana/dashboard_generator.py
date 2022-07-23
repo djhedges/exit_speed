@@ -20,7 +20,7 @@ from typing import Tuple
 from grafanalib import core
 from psycopg2 import sql
 
-from exit_speed import timescale
+from exit_speed import postgres
 
 
 class Generator(object):
@@ -127,7 +127,7 @@ class Generator(object):
         """)
     query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
             [sql.Identifier(col) for col in point_values]))
-    with timescale.ConnectToDB() as conn:
+    with postgres.ConnectToDB() as conn:
       self.AddGraphPanel(title, query.as_string(conn), y_axis_title)
 
   def AddPointsExportedPanel(self):

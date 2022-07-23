@@ -20,7 +20,7 @@ from typing import Text
 import pandas as pd
 from psycopg2 import sql
 
-from exit_speed import timescale
+from exit_speed import postgres
 
 
 def GetTracks() -> pd.DataFrame:
@@ -28,7 +28,7 @@ def GetTracks() -> pd.DataFrame:
   SELECT DISTINCT track
   FROM sessions
   """)
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     return pd.io.sql.read_sql(select_statement, conn)['track']
 
 
@@ -47,7 +47,7 @@ def GetSessions() -> pd.DataFrame:
   WHERE duration_ms IS NOT null
   GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ms
   """)
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     return pd.io.sql.read_sql(select_statement, conn)
 
 
@@ -77,7 +77,7 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
     """)
   lap_id_a = lap_ids[0]
   lap_dfs = []
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     for lap_id in lap_ids[1:]:
       df = pd.io.sql.read_sql(
           select_statement,
@@ -97,7 +97,7 @@ def GetPointsColumns() -> List[Text]:
   FROM information_schema.columns
   WHERE table_name = 'points'
   """)
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
       cursor.execute(select_statement)
       columns = [row[0] for row in cursor.fetchall()]
@@ -129,7 +129,7 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]))
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
       df = pd.io.sql.read_sql(
           query.as_string(cursor),
@@ -163,7 +163,7 @@ def GetLiveData(start_time: datetime.datetime, point_values: List[Text]):
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]))
-  with timescale.ConnectToDB() as conn:
+  with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
       df = pd.io.sql.read_sql(
           query.as_string(cursor),
