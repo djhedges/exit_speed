@@ -100,10 +100,6 @@ class ExitSpeed(object):
     self.lap = lap
     self.lap.number = len(session.laps)
 
-  def LogPoint(self) -> None:
-    """Writes the current point to the data log."""
-    point = self.point
-
   def CalculateElapsedValues(self):
     """Populates the elapsed_duration_ms and elapsed_distance_m point values."""
     point = self.point
@@ -129,7 +125,6 @@ class ExitSpeed(object):
     point.speed_kmh = point.speed_ms * 3.6
     self.leds.UpdateLeds(point)
     self.CalculateElapsedValues()
-    self.LogPoint()
 
   def SetLapTime(self) -> None:
     """Sets the lap duration based on the first and last point time delta."""
