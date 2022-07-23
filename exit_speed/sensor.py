@@ -27,7 +27,7 @@ from google.protobuf import any_pb2
 from typing import Dict
 
 from exit_speed import data_logger
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import postgres
 
 FLAGS = flags.FLAGS
@@ -92,8 +92,7 @@ class SensorBase(object):
     self.StopProcess()
     self._process.join()
 
-  # TODO(djhedges): Deprecate this in favor of AddProtoToQueue().
-  def AddPointToQueue(self, point: gps_pb2.Point):
+  def AddPointToQueue(self, point: exit_speed_pb2.Gps):
     point.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(point)
     self._point_queue.put(point.SerializeToString())

@@ -23,7 +23,7 @@ from absl import flags
 from absl.testing import absltest
 
 from exit_speed import data_logger
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 FLAGS = flags.FLAGS
@@ -50,7 +50,7 @@ class TestAccelerometer(unittest.TestCase):
           round(sensor.SleepBasedOnHertz(cycle_time, 1), 2))
 
   def testGetLogFilePrefix(self):
-    point = gps_pb2.Point()
+    point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
     sensor_instance = SensorTest({}, queue, start_process=False)
@@ -58,7 +58,7 @@ class TestAccelerometer(unittest.TestCase):
     self.assertEqual(expected, sensor.GetLogFilePrefix(sensor_instance, point, tz=pytz.UTC))
 
   def testLogMessage(self):
-    point = gps_pb2.Point()
+    point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
     sensor_instance = SensorTest({'car': 'Corrado'}, queue, start_process=False)
