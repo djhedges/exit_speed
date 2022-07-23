@@ -48,15 +48,12 @@ def GetPriorUniquePoint(lap: gps_pb2.Lap,
 
   Older logged data had multiple points at the same time.
   """
-  index = -2  # Last point is point_c, so skip it.
-  point = lap.points[index]
-  while abs(index) < len(lap.points):
-    point = lap.points[index]
-    if (point.time.ToNanoseconds() != point_c.time.ToNanoseconds() and 
-        point.lat and point.lon):
-      return point
+  index = -1
+  point = lap.points[-1]
+  while point.time.ToNanoseconds() == point_c.time.ToNanoseconds():
     index -= 1
-  return point  # Returns the first point in the lap.
+    point = lap.points[index]
+  return point
 
 
 def SolvePointBAngle(point_b, point_c) -> float:
