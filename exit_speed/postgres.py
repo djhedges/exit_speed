@@ -14,7 +14,10 @@
 # limitations under the License.
 """Postgres interface."""
 
+from typing import NamedTuple
 from typing import Text
+from typing import Union
+import datetime
 import multiprocessing
 import textwrap
 import psycopg2
@@ -125,7 +128,6 @@ INSERT_MAP = {
   exit_speed_pb2.WBO2: INSERT_WBO2,
 }
 
-
 def ConnectToDB() -> psycopg2.extensions.connection:
   return psycopg2.connect(FLAGS.postgres_db_spec)
 
@@ -138,15 +140,16 @@ def GetConnWithPointPrepare(
   return conn
 
 
+
 class Postgres(object):
-  """Interface for publishing data to Postgres."""
+  """Interface for publishing sensor data to Postgres."""
 
   def __init__(self, proto_class: any_pb2.Any, start_process: bool = True):
     """Initializer."""
     self.proto_class = proto_class
     self._postgres_conn = GetConnWithPointPrepare(
             PREPARE_MAP[proto_class])
-    self._proto_queue = multiprocessing.Queue()  # Used as LifoQueue.
+    self._proto_queue = multiprocessing.Queue()
     self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
       self.process = multiprocessing.Process(target=self.Loop, daemon=True)
@@ -177,3 +180,99 @@ class Postgres(object):
         10,
         self.proto_class,
         self._proto_queue.qsize())
+
+
+SESSION_INSERT = textwrap.dedent("""
+INSERT INTO sessions (track, car, live_data)
+VALUES (%s, %s, %s)
+RETURNING id
+""")
+LAP_INSERT = textwrap.dedent("""
+INSERT INTO laps (session_id, number, start_time)
+VALUES (%s, %s, %s)
+RETURNING id
+""")
+LAP_END_TIME_UPDATE = textwrap.dedent("""
+UPDATE laps
+SET end_time = %s
+WHERE id = %s
+""")
+
+class Session(NamedTuple):
+  track: Text
+  car: Text
+  live_data: bool
+
+
+class LapStart(NamedTuple):
+  number: int
+  start_time: datetime.datetime
+
+
+class LapEnd(NamedTuple):
+  end_time: datetime.datetime
+
+MAIN_ARG_MAP = {
+  LapStart: ('session_id', 'number', 'start_time'),
+  LapEnd: ('end_time',),
+}
+
+
+class PostgresWithoutPrepare(object):
+  """Interface for publishing session and lap data to Postgres."""
+
+  def __init__(self, start_process: bool = True):
+    """Initializer."""
+    self.session_id = None
+    self.current_lap_id = None
+    self._postgres_conn = ConnectToDB()
+    self._queue = multiprocessing.Queue()
+    self.stop_process_signal = multiprocessing.Value('b', False)
+    if start_process:
+      self.process = multiprocessing.Process(target=self.Loop, daemon=True)
+      self.process.start()
+
+  def AddToQueue(self, data: Union[Session, LapStart, LapEnd]):
+    self._queue.put(data)
+
+  def ExportSession(self, session: Session):
+    with self._postgres_conn.cursor() as cursor:
+      args = (session.track, session.car, session.live_data)
+      cursor.execute(SESSION_INSERT, args)
+      self.session_id = cursor.fetchone()[0]
+      self._postgres_conn.commit()
+
+  def ExportLapStart(self, lap: LapStart):
+    with self._postgres_conn.cursor() as cursor:
+      args = (self.session_id, lap.number, lap.start_time)
+      cursor.execute(LAP_INSERT, args)
+      self.current_lap_id = cursor.fetchone()[0]
+      self._postgres_conn.commit()
+
+  def ExportLapEnd(self, lap: LapEnd):
+    with self._postgres_conn.cursor() as cursor:
+      args = (lap.end_time, self.current_lap_id)
+      cursor.execute(LAP_END_TIME_UPDATE, args)
+      self._postgres_conn.commit()
+
+  def ExportData(self):
+    data = self._queue.get()
+    if isinstance(data, Session):
+      self.ExportSession(data)
+    elif isinstance(data, LapStart):
+      self.ExportLapStart(data)
+    elif isinstance(data, LapEnd):
+      self.ExportLapEnd(data)
+    else:
+      logging.error(
+         'Queue has an unknown data type and will be discarded: %s', data)
+
+  def Loop(self):
+    """Tries to export data to the postgres backend."""
+    while not self.stop_process_signal.value:
+      self.ExportData()
+      logging.log_every_n_seconds(
+        logging.INFO,
+        'Postgres: main data queue size currently at %d.',
+        10,
+        self._queue.qsize())

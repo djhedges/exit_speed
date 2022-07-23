@@ -157,6 +157,41 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(3250, rpm)
     self.assertEqual(4.5, tps_voltage)
 
+  def testExportData(self):
+    interface = postgres.PostgresWithoutPrepare(start_process=False)
+    start_time = datetime.datetime(
+        2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC)
+    session = postgres.Session(
+        track='Test Track',
+        car='RC Car',
+        live_data=False)
+    interface.AddToQueue(session)
+    interface.ExportData()
+    self.cursor.execute('SELECT * FROM sessions')
+    db_id, db_track, db_car, db_live_data = self.cursor.fetchone()
+    self.assertEqual(db_id, interface.session_id)
+    self.assertEqual(db_track, 'Test Track')
+    self.assertEqual(db_car, 'RC Car')
+    self.assertEqual(db_live_data, False)
+
+    lap_start = postgres.LapStart(number=1, start_time=start_time)
+    interface.AddToQueue(lap_start)
+    interface.ExportData()
+    self.cursor.execute('SELECT * FROM laps')
+    lap_id, db_session_id, db_number, db_start_time, db_end_time  = self.cursor.fetchone()
+    self.assertEqual(db_session_id, interface.session_id)
+    self.assertEqual(db_number, 1)
+    self.assertEqual(db_start_time, start_time)
+    self.assertEqual(db_end_time, None)
+
+    end_time = start_time + datetime.timedelta(seconds=90)
+    lap_end = postgres.LapEnd(end_time=end_time)
+    interface.AddToQueue(lap_end)
+    interface.ExportData()
+    self.cursor.execute('SELECT end_time FROM laps')
+    db_end_time  = self.cursor.fetchone()[0]
+    self.assertEqual(db_end_time, db_end_time)
+
 
 if __name__ == '__main__':
   absltest.main()

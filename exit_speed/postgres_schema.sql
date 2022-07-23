@@ -41,7 +41,6 @@ CREATE TABLE wbo2 (
 );
 CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
-  time             TIMESTAMPTZ       NOT NULL,
   track            TEXT              NOT NULL,
   car              TEXT              NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
@@ -51,5 +50,5 @@ CREATE TABLE laps(
   session_id       INT               REFERENCES sessions (id),
   number           INT               NOT NULL,
   start_time                         TIMESTAMPTZ       NOT NULL,
-  end_time                           TIMESTAMPTZ       NOT NULL
+  end_time                           TIMESTAMPTZ
 );
