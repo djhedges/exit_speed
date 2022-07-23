@@ -119,7 +119,7 @@ class ExitSpeed(object):
     """Sets the lap duration based on the first and last point time delta."""
     delta = lap_lib.CalcLastLapDuration(self.track, self.session)
     self.lap.duration.FromNanoseconds(delta)
-    self.leds.SetBestLap(self.lap)
+    self.leds.SetBestLap(self.lap, delta)
     minutes = self.lap.duration.ToSeconds() // 60
     seconds = (self.lap.duration.ToMilliseconds() % 60000) / 1000.0
     logging.info('New Lap %d:%.03f', minutes, seconds)

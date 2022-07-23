@@ -16,6 +16,7 @@
 import collections
 import statistics
 import time
+from typing import List
 from typing import Tuple
 
 import adafruit_dotstar
@@ -26,7 +27,7 @@ from absl import logging
 from gps import EarthDistanceSmall
 from sklearn.neighbors import BallTree
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('led_brightness', 0.5,
@@ -52,6 +53,7 @@ class LEDs(object):
     self.tree = None
     self.speed_deltas = collections.deque(maxlen=FLAGS.speed_deltas)
     self.best_lap = None
+    self.best_lap_duration_ns = None
 
   def LedInterval(self,
                   additional_delay: float = 0) -> bool:
@@ -79,14 +81,14 @@ class LEDs(object):
     if ignore_update_interval or update:
       self.dots.fill(color)
 
-  def FindNearestBestLapPoint(self, point: gps_pb2.Point) -> gps_pb2.Point:
+  def FindNearestBestLapPoint(self, point: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
     """Returns the nearest point on the best lap to the given point."""
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
                                 return_distance=False)
     for neighbor in neighbors[0]:
       x = self.tree.data[:, 0][neighbor]
       y = self.tree.data[:, 1][neighbor]
-      for point_b in self.best_lap.points:
+      for point_b in self.best_lap:
         if point_b.lat == x and point_b.lon == y:
           return point_b
 
@@ -107,13 +109,13 @@ class LEDs(object):
     return statistics.median(self.speed_deltas)
 
   def UpdateSpeedDeltas(self,
-                        point: gps_pb2.Point,
-                        best_point: gps_pb2.Point) -> float:
+                        point: exit_speed_pb2.Gps,
+                        best_point: exit_speed_pb2.Gps) -> float:
     speed_delta = best_point.speed_ms - point.speed_ms
     self.speed_deltas.append(speed_delta)
     return statistics.median(self.speed_deltas)
 
-  def UpdateLeds(self, point: gps_pb2.Point) -> None:
+  def UpdateLeds(self, point: exit_speed_pb2.Gps) -> None:
     """Update LEDs based on speed difference to the best lap."""
     if self.tree:
       best_point = self.FindNearestBestLapPoint(point)
@@ -121,16 +123,18 @@ class LEDs(object):
       led_color = self.GetLedColor()
       self.Fill(led_color)
 
-  def SetBestLap(self, lap: gps_pb2.Lap) -> None:
+  def SetBestLap(self,
+								 lap: List[exit_speed_pb2.Gps],
+								 duration_ns: float) -> None:
     """Sets best lap and builds a KDTree for finding closest points."""
-    if (not self.best_lap or
-        lap.duration.ToNanoseconds() < self.best_lap.duration.ToNanoseconds()):
-      minutes = lap.duration.ToSeconds() // 60
-      seconds = (lap.duration.ToMilliseconds() % 60000) / 1000.0
+    if not self.best_lap or duration_ns < self.best_lap_duration_ns:
+      minutes = duration_ns / 1e9 // 60
+      seconds = (duration_ns / 1e6 % 60000) / 1000.0
       logging.info('New Best Lap %d:%.03f', minutes, seconds)
       self.best_lap = lap
+      self.best_lap_duration_ns = duration_ns
       x_y_points = []
-      for point in lap.points:
+      for point in lap:
         x_y_points.append([point.lat, point.lon])
       self.tree = BallTree(np.array(x_y_points), leaf_size=30,
                            metric='pyfunc', func=EarthDistanceSmall)

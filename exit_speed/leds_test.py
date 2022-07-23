@@ -23,7 +23,7 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
 sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
 sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
@@ -75,21 +75,13 @@ class TestLEDs(unittest.TestCase):
     self.mock_dots.fill.assert_called_once_with(color)
 
   def testFindNearestBestLapPoint(self):
-    lap = gps_pb2.Lap()
-    point = lap.points.add()
-    point.lat = 1
-    point.lon = 1
-    point = lap.points.add()
-    point.lat = 5
-    point.lon = 5
-    point = lap.points.add()
-    point.lat = 20
-    point.lon = 20
+    lap = []
+    lap.append(exit_speed_pb2.Gps(lat=1, lon=1))
+    lap.append(exit_speed_pb2.Gps(lat=5, lon=5))
+    lap.append(exit_speed_pb2.Gps(lat=20, lon=20))
 
-    self.leds.SetBestLap(lap)  # Build the tree.
-    point = gps_pb2.Point()
-    point.lat = 4
-    point.lon = 4
+    self.leds.SetBestLap(lap, 90 * 1e9)  # Build the tree.
+    point = exit_speed_pb2.Gps(lat=4, lon=4)
     nearest = self.leds.FindNearestBestLapPoint(point)
     self.assertEqual(nearest.lat, 5)
     self.assertEqual(nearest.lon, 5)
@@ -107,9 +99,9 @@ class TestLEDs(unittest.TestCase):
     self.assertEqual(5, self.leds.GetMovingSpeedDelta())
 
   def testUpdateSpeedDeltas(self):
-    point = gps_pb2.Point()
+    point = exit_speed_pb2.Gps()
     point.speed_ms = 88  # m/s
-    best_point = gps_pb2.Point()
+    best_point = exit_speed_pb2.Gps()
     best_point.speed_ms = 87
     self.leds.UpdateSpeedDeltas(point, best_point)
     deltas = collections.deque(maxlen=FLAGS.speed_deltas)
@@ -118,13 +110,13 @@ class TestLEDs(unittest.TestCase):
 
   @mock.patch.object(leds.LEDs, 'Fill')
   def testUpdateLeds(self, mock_fill):
-    lap = gps_pb2.Lap()
-    point = lap.points.add()
-    point.speed_ms = 88  # m/s
+    lap = []
+    point = exit_speed_pb2.Gps(speed_ms=88)
+    lap.append(point)
     self.leds.UpdateLeds(point)
     self.assertFalse(mock_fill.mock_calls)  # No BallTree yet.
 
-    self.leds.SetBestLap(lap)  # Used to build the BallTree.
+    self.leds.SetBestLap(lap, 90 * 1e9)  # Used to build the BallTree.
     self.leds.UpdateLeds(point)
     color = (0, 255, 0)  # Green
     mock_fill.assert_called_once_with(color)
@@ -133,19 +125,15 @@ class TestLEDs(unittest.TestCase):
     self.assertSequenceEqual(deltas, self.leds.speed_deltas)
 
   def testSetBestLap(self):
-    lap = gps_pb2.Lap()
-    lap.duration.FromSeconds(100)
-    point = lap.points.add()
-    point.speed_ms = 88  # m/s
+    lap = []
+    lap.append(exit_speed_pb2.Gps(speed_ms=88))
 
-    self.leds.SetBestLap(lap)
+    self.leds.SetBestLap(lap, 100 * 1e9)
     first_tree = self.leds.tree
 
-    lap = gps_pb2.Lap()
-    lap.duration.FromSeconds(99)
-    point = lap.points.add()
-    point.speed_ms = 88  # m/s
-    self.leds.SetBestLap(lap)
+    lap = []
+    lap.append(exit_speed_pb2.Gps(speed_ms=88))
+    self.leds.SetBestLap(lap, 99 * 1e9)
     self.assertNotEqual(first_tree, self.leds.tree)
 
   @mock.patch.object(leds.LEDs, 'Fill')
