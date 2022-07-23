@@ -19,8 +19,9 @@ import mock
 from absl.testing import absltest
 
 from exit_speed import common_lib
-from exit_speed import gps_pb2
+from exit_speed import exit_speed_pb2
 from exit_speed import lap_lib
+from exit_speed import tracks
 
 
 
@@ -28,56 +29,55 @@ class TestLapLib(unittest.TestCase):
   """Lap time unittests."""
 
   def testGetPriorUniquePoint(self):
-    point_c = gps_pb2.Point()
+    point_c = exit_speed_pb2.Gps()
     point_c.time.FromMilliseconds(10)
-    point_c.lat = 1
-    point_c.lon = -1
-    lap = gps_pb2.Lap()
-    point = lap.points.add()
-    point.time.FromMilliseconds(7)
-    point = lap.points.add()
-    point.time.FromMilliseconds(8)
-    point.lat = 8
-    point.lon = -8
-    point = lap.points.add()
+    lap = []
+    point = exit_speed_pb2.Gps()
+    lap.append(point)
     point.time.FromMilliseconds(9)
-    point = lap.points.add()
-    point.time.FromMilliseconds(10)  # second point at 10.
-    point.lat = 10
-    point.lon = -10
+    point = exit_speed_pb2.Gps()
+    lap.append(point)
+    point.time.FromMilliseconds(9)
+    point = exit_speed_pb2.Gps()
+    lap.append(point)
+    point.time.FromMilliseconds(8)
     returned = lap_lib.GetPriorUniquePoint(lap, point_c)
     self.assertEqual(8, returned.time.ToMilliseconds())
 
   def testSolvePointBAngle(self):
-    point_b = gps_pb2.Point()
-    point_b.start_finish_distance = 8
-    point_c = gps_pb2.Point()
-    point_c.start_finish_distance = 6
-    with mock.patch.object(common_lib, 'PointDelta') as mock_delta:
-      mock_delta.return_value = 7
-      self.assertEqual(46.56746344221023,
-                       lap_lib.SolvePointBAngle(point_b, point_c))
+    track = tracks.portland_internal_raceways.PortlandInternationalRaceway
+    point_b = exit_speed_pb2.Gps(
+      lat=45.594980,
+      lon=-122.694389)
+    point_c = exit_speed_pb2.Gps(
+      lat=45.595064,
+      lon=-122.694638)
+    self.assertEqual(5.682068147351827,
+                     lap_lib.SolvePointBAngle(track, point_b, point_c))
 
   def testCalcAcceleration(self):
-    point_b = gps_pb2.Point()
+    point_b = exit_speed_pb2.Gps()
     point_b.speed_ms = 70
     point_b.time.FromMilliseconds(1)
-    point_c = gps_pb2.Point()
+    point_c = exit_speed_pb2.Gps()
     point_c.speed_ms = 72
     point_c.time.FromMilliseconds(2)
     self.assertEqual(1999.9999999999998,
                      lap_lib.CalcAcceleration(point_b, point_c))
 
   def testPerpendicularDistanceToFinish(self):
+    track = tracks.portland_internal_raceways.PortlandInternationalRaceway
     point_b_angle = 60
-    point_b = gps_pb2.Point()
-    point_b.start_finish_distance = 1000
-    self.assertEqual(500.0000000000001,
-                     lap_lib.PerpendicularDistanceToFinish(point_b_angle,
+    point_b = exit_speed_pb2.Gps(
+      lat=45.594980,
+      lon=-122.694389)
+    self.assertEqual(5.6712016865347605,
+                     lap_lib.PerpendicularDistanceToFinish(track,
+                                                           point_b_angle,
                                                            point_b))
 
   def testSolveTimeToCrossFinish(self):
-    point_b = gps_pb2.Point()
+    point_b = exit_speed_pb2.Gps()
     point_b.speed_ms = 70
     acceleration = 2
     perp_dist_b = 1
@@ -87,67 +87,71 @@ class TestLapLib(unittest.TestCase):
                                                     acceleration))
 
   def testGetTimeDelta(self):
-    point_b = gps_pb2.Point()
+    point_b = exit_speed_pb2.Gps()
     point_b.time.FromMilliseconds(1)
-    point_c = gps_pb2.Point()
+    point_c = exit_speed_pb2.Gps()
     point_c.time.FromMilliseconds(2)
     self.assertEqual(1 * 1e6, lap_lib.GetTimeDelta(point_b, point_c))
 
   def testCalcTimeAfterFinish(self):
-    start_finish = gps_pb2.Point()
+    track = tracks.portland_internal_raceways.PortlandInternationalRaceway
+    start_finish = exit_speed_pb2.Gps()
     start_finish.lat = 45.595015
     start_finish.lon = -122.694526
-    lap = gps_pb2.Lap()
-    point_b = lap.points.add()
-    point_c = lap.points.add()
+    lap = []
+    point_b = exit_speed_pb2.Gps()
+    point_c = exit_speed_pb2.Gps()
+    lap.append(point_b)
+    lap.append(point_c)
     point_b.time.FromMilliseconds(1)
     point_c.time.FromMilliseconds(2)
     point_b.lat = 45.594988
     point_b.lon = -122.694587
     point_c.lat = 45.595000
     point_c.lon = -122.694638
-    point_b.start_finish_distance = common_lib.PointDelta(start_finish, point_b)
-    point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
     point_b.speed_ms = 70
     point_c.speed_ms = 70.2
-    self.assertEqual(1000000.0548742702, lap_lib.CalcTimeAfterFinish(lap))
+    self.assertEqual(1000000.0548742702,
+										 lap_lib.CalcTimeAfterFinish(track, lap))
 
   def testCalcLastLapDuration(self):
-    start_finish = gps_pb2.Point()
+    track = tracks.portland_internal_raceways.PortlandInternationalRaceway
+    lap = []
+    laps = {1: lap}
+    start_finish = exit_speed_pb2.Gps()
     start_finish.lat = 45.595015
     start_finish.lon = -122.694526
-    session = gps_pb2.Session()
-    lap = session.laps.add()
-    point_y = lap.points.add()
-    point_z = lap.points.add()
+    point_y = exit_speed_pb2.Gps()
+    point_z = exit_speed_pb2.Gps()
+    lap.append(point_y)
+    lap.append(point_z)
     point_y.time.FromMilliseconds(1)
     point_z.time.FromMilliseconds(2)
     point_y.lat = 45.594988
     point_y.lon = -122.694587
     point_z.lat = 45.595000
     point_z.lon = -122.694638
-    point_y.start_finish_distance = common_lib.PointDelta(start_finish, point_y)
-    point_z.start_finish_distance = common_lib.PointDelta(start_finish, point_z)
     point_y.speed_ms = 70
     point_z.speed_ms = 70.2
-    self.assertEqual(1.0 * 1e6, lap_lib.CalcLastLapDuration(session))
+    self.assertEqual(1.0 * 1e6, lap_lib.CalcLastLapDuration(track, laps))
 
-    lap = session.laps.add()
+    lap = []
+    laps[2] = lap
     point_a = point_z
-    lap.points.append(point_a)
-    point_b = lap.points.add()
-    point_c = lap.points.add()
+    lap.append(point_a)
+    point_b = exit_speed_pb2.Gps()
+    point_c = exit_speed_pb2.Gps()
+    lap.append(point_b)
+    lap.append(point_c)
     point_b.time.FromMilliseconds(3)
     point_c.time.FromMilliseconds(4)
     point_b.lat = 45.594988
     point_b.lon = -122.694587
     point_c.lat = 45.595000
     point_c.lon = -122.694638
-    point_b.start_finish_distance = common_lib.PointDelta(start_finish, point_b)
-    point_c.start_finish_distance = common_lib.PointDelta(start_finish, point_c)
     point_b.speed_ms = 70
     point_c.speed_ms = 70.2
-    self.assertEqual(2000000, lap_lib.CalcLastLapDuration(session))
+    self.assertEqual(2000000, lap_lib.CalcLastLapDuration(track, laps))
 
 if __name__ == '__main__':
   absltest.main()

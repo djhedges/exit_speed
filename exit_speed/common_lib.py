@@ -16,9 +16,16 @@
 import gps
 
 from exit_speed import exit_speed_pb2
+from exit_speed.tracks import base
 
 
-def PointDelta(proto_a: exit_speed_pb2.Gps, proto_b: exit_speed_pb2.Gps) -> float:
-  """Returns the distance in meters between two protos."""
-  return gps.EarthDistanceSmall((proto_a.lat, proto_a.lon),
-                                (proto_b.lat, proto_b.lon))
+def PointDelta(point_a: exit_speed_pb2.Gps, point_b: exit_speed_pb2.Gps) -> float:
+  """Returns the distance in meters between two points."""
+  return gps.EarthDistanceSmall((point_a.lat, point_a.lon),
+                                (point_b.lat, point_b.lon))
+
+def PointDeltaFromTrack(track: base.Track, point: exit_speed_pb2.Gps) -> float:
+  """Returns the distance in meters between two points."""
+  return gps.EarthDistanceSmall((track.start_finish[0],
+																 track.start_finish[1]),
+                                (point.lat, point.lon))

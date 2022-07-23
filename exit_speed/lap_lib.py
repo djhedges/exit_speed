@@ -42,6 +42,7 @@ import math
 
 from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
+from exit_speed.tracks import base
 
 
 def GetPriorUniquePoint(lap: List[exit_speed_pb2.Gps],
@@ -54,17 +55,21 @@ def GetPriorUniquePoint(lap: List[exit_speed_pb2.Gps],
   point = lap[-1]
   while point.time.ToNanoseconds() == point_c.time.ToNanoseconds():
     index -= 1
-    point = lap.points[index]
+    point = lap[index]
   return point
 
 
-def SolvePointBAngle(point_b, point_c) -> float:
+def SolvePointBAngle(track: base.Track,
+										 point_b: exit_speed_pb2.Gps,
+										 point_c:exit_speed_pb2.Gps) -> float:
   """Returns the angle of B."""
-  dist_b_c = common_lib.PointDelta(point_b, point_c)
   # cos(B) = (c² + a² - b²)/2ca  https://rb.gy/pgi7zm
-  a = point_b.start_finish_distance
-  b = point_c.start_finish_distance
-  c = dist_b_c
+  a = common_lib.PointDeltaFromTrack(track, point_b)
+  b = common_lib.PointDeltaFromTrack(track, point_c)
+  c = common_lib.PointDelta(point_b, point_c)
+  print('~' * 80)
+  print(a, b, c)
+  print('~' * 80)
   return math.degrees(math.acos((c**2 + a**2 - b**2)/(2*c*a)))
 
 
@@ -75,14 +80,16 @@ def CalcAcceleration(point_b: exit_speed_pb2.Gps, point_c: exit_speed_pb2.Gps) -
            1e-09)  # Nanoseconds > Seconds.
 
 
-def PerpendicularDistanceToFinish(point_b_angle: float,
+def PerpendicularDistanceToFinish(track: base.Track,
+																	point_b_angle: float,
                                   point_b: exit_speed_pb2.Gps) -> float:
   """
 
   cos(B) = Adjacent / Hypotenuse
   https://www.mathsisfun.com/algebra/trig-finding-side-right-triangle.html
   """
-  return math.cos(math.radians(point_b_angle)) * point_b.start_finish_distance
+  start_finish_distance = common_lib.PointDeltaFromTrack(track, point_b)
+  return math.cos(math.radians(point_b_angle)) * start_finish_distance
 
 
 def SolveTimeToCrossFinish(point_b: exit_speed_pb2.Gps,
@@ -99,32 +106,34 @@ def GetTimeDelta(first_point, last_point) -> float:
   return last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
 
 
-def CalcTimeAfterFinish(lap: exit_speed_pb2.Gps) -> float:
+def CalcTimeAfterFinish(track: base.Track,
+												lap: List[exit_speed_pb2.Gps]) -> float:
   """Returns how many seconds between crossing start/finish and the last point.
 
   This assumes the first/last points of a lap are just past start/finish.
   """
-  point_c = lap.points[-1]
+  point_c = lap[-1]
   point_b = GetPriorUniquePoint(lap, point_c)
-  point_b_angle = SolvePointBAngle(point_b, point_c)
+  point_b_angle = SolvePointBAngle(track, point_b, point_c)
   accelration = CalcAcceleration(point_b, point_c)
-  perp_dist_b = PerpendicularDistanceToFinish(point_b_angle, point_b)
+  perp_dist_b = PerpendicularDistanceToFinish(track, point_b_angle, point_b)
   time_to_fin = SolveTimeToCrossFinish(point_b, perp_dist_b, accelration)
   delta = GetTimeDelta(point_b, point_c)
   return delta - time_to_fin
 
 
-def CalcLastLapDuration(laps: Dict[int, List[exit_speed_pb2.Gps]]) -> float:
+def CalcLastLapDuration(track: base.Track,
+												laps: Dict[int, List[exit_speed_pb2.Gps]]) -> float:
   """Calculates the last lap duration (nanoseconds) for the given session."""
   if len(laps) == 1:
-    first_point = laps[1].points[0]
-    last_point = laps[1].points[-1]
+    first_point = laps[1][0]
+    last_point = laps[1][-1]
     return GetTimeDelta(first_point, last_point)
-  prior_lap = laps[-2]
-  current_lap = laps[-1]
-  first_point = current_lap.points[0]
-  last_point = current_lap.points[-1]
+  prior_lap = laps[len(laps) - 1]
+  current_lap = laps[len(laps)]
+  first_point = current_lap[0]
+  last_point = current_lap[-1]
   delta = GetTimeDelta(first_point, last_point)
-  prior_after = CalcTimeAfterFinish(prior_lap)
-  current_after = CalcTimeAfterFinish(current_lap)
+  prior_after = CalcTimeAfterFinish(track, prior_lap)
+  current_after = CalcTimeAfterFinish(track, current_lap)
   return int(delta - current_after * 1e9 + prior_after * 1e9)
