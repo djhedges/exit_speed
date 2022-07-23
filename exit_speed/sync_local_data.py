@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Syncs local data to timescale."""
+"""Syncs local data to Postgres."""
 import os
 from typing import List
 from typing import Text
@@ -24,8 +24,8 @@ from absl import logging
 
 from exit_speed import cleanup_timescale
 from exit_speed import data_logger
+from exit_speed import postgres
 from exit_speed import replay_data
-from exit_speed import timescale
 from exit_speed import tracks
 
 FLAGS = flags.FLAGS
@@ -46,7 +46,7 @@ def GetLocalFiles() -> List:
   return data_files
 
 
-def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
+def IsFileAlreadySynced(postgres_conn: psycopg2.extensions.connection,
                         filepath: Text) -> bool:
   logger = data_logger.Logger(filepath)
   first_point = None
@@ -57,7 +57,7 @@ def IsFileAlreadySynced(timescale_conn: psycopg2.extensions.connection,
   else:
     return True  # Data file has no points.
   session_time = first_point.time.ToJsonString()
-  cursor = timescale_conn.cursor()
+  cursor = postgres_conn.cursor()
   if cursor.execute(SELECT_SESSION, (session_time,)):
     return True
   if first_point:
@@ -72,10 +72,10 @@ def SyncFile(filepath):
 
 
 def SyncLocalData():
-  timescale_conn = timescale.ConnectToDB()
+  postgres_conn = postgres.ConnectToDB()
   for filepath in GetLocalFiles():
     logging.info('Syncing %s', filepath)
-    if not IsFileAlreadySynced(timescale_conn, filepath):
+    if not IsFileAlreadySynced(postgres_conn, filepath):
       SyncFile(os.path.join(LAP_LOG_PATH, filepath))
 
 
