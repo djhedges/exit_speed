@@ -16,6 +16,7 @@
 
 https://www.wbo2.com/sw/logger.htm Frame and byte info.
 """
+import datetime
 import multiprocessing
 import time
 from typing import Dict
@@ -128,9 +129,12 @@ class WBO2(sensor.SensorBase):
   """Interface for the WBO2 wideband lambda/AFR controller."""
   PROTO_CLASS = exit_speed_pb2.WBO2
 
-  def __init__(self, config: Dict, point_queue: multiprocessing.Queue):
+  def __init__(self,
+							 start_time: datetime.datetime,
+							 config: Dict,
+							 point_queue: multiprocessing.Queue):
     self._next_cycle = 0
-    super().__init__(config, point_queue)
+    super().__init__(start_time, config, point_queue)
 
   def Loop(self):
     frequency_hz = int(

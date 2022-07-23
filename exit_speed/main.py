@@ -16,10 +16,12 @@
 import datetime
 import multiprocessing
 import os
+import pytz
 
 import sdnotify
 import u3
 from absl import app
+from absl import flags
 from absl import logging
 
 from exit_speed import accelerometer
@@ -35,6 +37,10 @@ from exit_speed import postgres
 from exit_speed import tire_temperature
 from exit_speed import tracks
 from exit_speed import wbo2
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string('timezone', 'America/Los_Angeles',
+										'Timezone to set in datetime objects.')
 
 
 class ExitSpeed(object):
@@ -56,6 +62,8 @@ class ExitSpeed(object):
                  tagged as live.
       min_points_per_session:  Used to prevent sessions from prematurely ending.
     """
+    self.start_time = pytz.timezone(FLAGS.timezone).localize(
+        datetime.datetime.today())
     self.start_finish_range = start_finish_range
     self.live_data = live_data
     self.min_points_per_session = min_points_per_session
@@ -77,7 +85,8 @@ class ExitSpeed(object):
     if self.config.get('postgres'):
       self.postgres = postgres.PostgresWithoutPrepare()
     if self.config.get('gps'):
-      self.gps = gps_sensor.GPSProcess(self.config, self.point_queue)
+      self.gps = gps_sensor.GPSProcess(
+          self.start_time, self.config, self.point_queue)
       while self.point_queue.empty():
         self.point = exit_speed_pb2.Gps().FromString(self.point_queue.get())
         logging.log_every_n_seconds(
@@ -89,16 +98,19 @@ class ExitSpeed(object):
     self.ProcessSession()
     if self.config.get('accelerometer'):
       self.accel = accelerometer.AccelerometerProcess(
-          self.config, self.point_queue)
+          self.start_time, self.config, self.point_queue)
     if self.config.get('gyroscope'):
-      self.gyro = gyroscope.GyroscopeProcess(self.config, self.point_queue)
+      self.gyro = gyroscope.GyroscopeProcess(
+          self.start_time, self.config, self.point_queue)
     if self.config.get('labjack'):
-      self.labjack = labjack.Labjack(self.config, self.point_queue)
+      self.labjack = labjack.Labjack(
+          self.start_time, self.config, self.point_queue)
     if self.config.get('tire_temps'):
       self.tire_temps = tire_temperature.MultiTireInterface(
-          self.config, self.point_queue)
+          self.start_time, self.config, self.point_queue)
     if self.config.get('wbo2'):
-      self.wbo2 = wbo2.WBO2(self.config, self.point_queue)
+      self.wbo2 = wbo2.WBO2(
+          self.start_time, self.config, self.point_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""

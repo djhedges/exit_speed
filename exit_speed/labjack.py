@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Library for reading values from labjack."""
+import datetime
 import multiprocessing
 import sys
 import time
@@ -33,11 +34,13 @@ class Labjack(sensor.SensorBase):
 
   def __init__(
       self,
+      start_time: datetime.datetime,
       config: Dict,
       point_queue: multiprocessing.Queue,
       start_process:bool=True):
     self.u3 = None
-    super().__init__(config, point_queue, start_process=start_process)
+    super().__init__(
+        start_time, config, point_queue, start_process=start_process)
 
   def Set5vOutput(self):
     """In our case sets DAC0 to output 5v.

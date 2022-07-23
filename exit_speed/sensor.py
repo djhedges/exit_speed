@@ -62,16 +62,18 @@ class SensorBase(object):
 
   def __init__(
       self,
+      start_time: datetime.datetime,
       config: Dict,
       point_queue: multiprocessing.Queue,
       start_process: bool=True):
+    self.start_time = start_time
     self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
     self.data_logger = None # pytype: Optional[data_logger.Logger]
     if self.PROTO_CLASS:
       self.postgres = postgres.Postgres(self.PROTO_CLASS,
-																				start_process=start_process)
+                                        start_process=start_process)
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
@@ -79,7 +81,7 @@ class SensorBase(object):
       self._process.start()
 
   def _InitializeDataLogger(self, proto: any_pb2.Any):
-    file_prefix = GetLogFilePrefix(self, proto)
+    file_prefix = GetLogFilePrefix(self.start_time, self, proto)
     logging.info('Logging data to %s', file_prefix)
     self.data_logger = data_logger.Logger(file_prefix, proto_class=proto)
 
@@ -111,14 +113,13 @@ class SensorBase(object):
     raise NotImplementedError('Subclasses should override this method.')
 
 
-def GetLogFilePrefix(sensor_instance: SensorBase, proto: any_pb2.Any, tz=None):
+def GetLogFilePrefix(start_time: datetime.datetime,
+                     sensor_instance: SensorBase,
+										 proto: any_pb2.Any):
   """Formats the logging path based on sensor and the given proto."""
-  utc_dt = proto.time.ToDatetime()
-  current_dt = utc_dt.replace(
-      tzinfo=datetime.timezone.utc).astimezone(tz=tz)
-  current_seconds = current_dt.second + current_dt.microsecond / 1e6
+  current_seconds = start_time.second + start_time.microsecond / 1e6
   return os.path.join(
       FLAGS.data_log_path,
       '%s/' % sensor_instance.config.get('car', 'unknown_car'),
-      '%s/' % sensor_instance.__class__.__name__,
-      '%s:%03f' % (current_dt.strftime('%Y-%m-%dT%H:%M'), current_seconds))
+      '%s:%03f/' % (start_time.strftime('%Y-%m-%dT%H:%M'), current_seconds),
+      '%s' % sensor_instance.__class__.__name__)

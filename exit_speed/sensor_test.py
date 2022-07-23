@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for sensor.py"""
+import datetime
 import multiprocessing
-import pytz
 import time
 import unittest
 
@@ -53,15 +53,18 @@ class TestAccelerometer(unittest.TestCase):
     point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
-    sensor_instance = SensorTest({}, queue, start_process=False)
-    expected = '/tmp/unknown_car/SensorTest/2020-05-23T17:47:44.100000'
-    self.assertEqual(expected, sensor.GetLogFilePrefix(sensor_instance, point, tz=pytz.UTC))
+    sensor_instance = SensorTest(
+       point.time.ToDatetime(), {}, queue, start_process=False)
+    expected = '/tmp/unknown_car/2020-05-23T17:47:44.100000/SensorTest'
+    self.assertEqual(expected, sensor.GetLogFilePrefix(
+       point.time.ToDatetime(), sensor_instance, point))
 
   def testLogMessage(self):
     point = exit_speed_pb2.Gps()
     point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     queue = multiprocessing.Queue()
-    sensor_instance = SensorTest({'car': 'Corrado'}, queue, start_process=False)
+    sensor_instance = SensorTest(
+        point.time.ToDatetime(), {'car': 'Corrado'}, queue, start_process=False)
     sensor_instance.LogMessage(point)
     reader = data_logger.Logger(sensor_instance.data_logger.file_prefix)
     for proto in reader.ReadProtos():
