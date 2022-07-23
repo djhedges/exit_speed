@@ -25,6 +25,7 @@ from absl.testing import absltest
 
 from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
+from exit_speed import postgres_test_lib
 from exit_speed import tracks
 # pylint: disable=wrong-import-position
 sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
@@ -44,7 +45,7 @@ FLAGS.set_default('config_path',
         'testdata/test_config.yaml'))
 
 
-class TestExitSpeed(unittest.TestCase):
+class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """ExitSpeed unittest."""
 
   def setUp(self):

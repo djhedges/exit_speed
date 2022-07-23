@@ -20,6 +20,7 @@ import serial
 from absl import flags
 from absl.testing import absltest
 
+from exit_speed import postgres_test_lib
 from exit_speed import wbo2
 
 FLAGS = flags.FLAGS
@@ -29,7 +30,7 @@ TEST_FRAME = (b'Z\xa5\x08\x0c\xf8\x0f\xff \x00\x020\x01`\x03\xd0\x00\x15\x00'
               b'\x1a\x00 \x01\xa4\x00\x00\x03\x00i')
 
 
-class TestWBO2(unittest.TestCase):
+class TestWBO2(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """WBO2 unittests."""
 
   def setUp(self):
