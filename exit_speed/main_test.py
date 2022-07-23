@@ -18,6 +18,7 @@ import os
 import sys
 import unittest
 
+import gps
 import fake_rpi
 import mock
 from absl import flags
@@ -51,6 +52,7 @@ class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   def setUp(self):
     super().setUp()
     self._AddMock(adafruit_dotstar, 'DotStar')
+    self._AddMock(gps, 'gps')
 
   def _AddMock(self, module, name):
     patch = mock.patch.object(module, name)
