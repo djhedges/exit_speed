@@ -185,8 +185,8 @@ class Postgres(object):
 
 
 SESSION_INSERT = textwrap.dedent("""
-INSERT INTO sessions (track, car, live_data)
-VALUES (%s, %s, %s)
+INSERT INTO sessions (time, track, car, live_data)
+VALUES (%s, %s, %s, %s)
 RETURNING id
 """)
 LAP_INSERT = textwrap.dedent("""
@@ -202,6 +202,7 @@ WHERE id = %s
 
 class Session(NamedTuple):
   track: base.Track
+  time: datetime.datetime
   car: Text
   live_data: bool
 
@@ -239,7 +240,7 @@ class PostgresWithoutPrepare(object):
 
   def ExportSession(self, session: Session):
     with self._postgres_conn.cursor() as cursor:
-      args = (session.track.name, session.car, session.live_data)
+      args = (session.time, session.track.name, session.car, session.live_data)
       cursor.execute(SESSION_INSERT, args)
       self.session_id = cursor.fetchone()[0]
       self._postgres_conn.commit()

@@ -163,14 +163,16 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     start_time = datetime.datetime(
         2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC)
     session = postgres.Session(
+        time=start_time,
         track=test_track.TestTrack,
         car='RC Car',
         live_data=False)
     interface.AddToQueue(session)
     interface.ExportData()
     self.cursor.execute('SELECT * FROM sessions')
-    db_id, db_track, db_car, db_live_data = self.cursor.fetchone()
+    db_id, db_time, db_track, db_car, db_live_data = self.cursor.fetchone()
     self.assertEqual(db_id, interface.session_id)
+    self.assertEqual(db_time, start_time)
     self.assertEqual(db_track, test_track.TestTrack.name)
     self.assertEqual(db_car, 'RC Car')
     self.assertEqual(db_live_data, False)

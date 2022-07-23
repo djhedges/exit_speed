@@ -164,6 +164,7 @@ class ExitSpeed(object):
     logging.info('Closest track: %s', track.name)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(postgres.Session(
+        time=self.session_time,
         track=track,
         car=self.config['car'],
         live_data=self.live_data))
