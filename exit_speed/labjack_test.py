@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for Labjack."""
+import datetime
 import multiprocessing
 import os
 import unittest
@@ -41,6 +42,7 @@ class TestLabjack(postgres_test_lib.PostgresTestBase, unittest.TestCase):
             'testdata/test_labjack_config.yaml'))
     self.point_queue = multiprocessing.Queue()
     self.labjack = labjack.Labjack(
+        datetime.datetime.today(),
         config, self.point_queue, start_process=False)
     self.mock_u3 = mock.create_autospec(u3.U3)
     self.labjack.u3 = self.mock_u3
