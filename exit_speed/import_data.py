@@ -31,12 +31,12 @@ PREFIX_PROTO_MAP = {
   'GpsSensor': exit_speed_pb2.Gps,
 }
 
-def LoadProtos():
+def LoadProtos(data_dir):
   prefix_protos = {}
-  for file_name in os.listdir(FLAGS.data_dir):
+  for file_name in os.listdir(data_dir):
     for prefix, proto_class in PREFIX_PROTO_MAP.items():
       if file_name.startswith(prefix):
-        logger = data_logger.Logger(os.path.join(FLAGS.data_dir, file_name),
+        logger = data_logger.Logger(os.path.join(data_dir, file_name),
                                     proto_class=proto_class)
         prefix_protos.setdefault(prefix, []).extend(logger.ReadProtos())
   return prefix_protos
@@ -55,7 +55,7 @@ def CopyProtosToPostgres(prefix_protos):
 
 
 def main(unused_argv):
-  prefix_protos = LoadProtos()
+  prefix_protos = LoadProtos(FLAGS.data_dir)
   CopyProtosToPostgres(prefix_protos)
 
 
