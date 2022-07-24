@@ -50,6 +50,7 @@ CREATE TABLE laps(
   id               SERIAL            PRIMARY KEY,
   session_id       INT               REFERENCES sessions (id),
   number           INT               NOT NULL,
-  start_time                         TIMESTAMPTZ       NOT NULL,
-  end_time                           TIMESTAMPTZ
+  start_time       TIMESTAMPTZ       NOT NULL,
+  end_time         TIMESTAMPTZ,
+  duration_ns      BIGINT
 );

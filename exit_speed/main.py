@@ -71,7 +71,7 @@ class ExitSpeed(object):
     self.leds = leds.LEDs()
     self.postgres = None
     self.session = None
-    self.lap_number = 1
+    self.lap_number = 0
     self.current_lap = []
     self.laps = {self.lap_number: self.current_lap}
     self.point = None
@@ -126,7 +126,8 @@ class ExitSpeed(object):
     logging.info('New Lap %d:%.03f', minutes, seconds)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(postgres.LapEnd(
-          end_time=self.point.time.ToDatetime()))
+          end_time=self.point.time.ToDatetime(),
+          duration_ns=duration_ns))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""

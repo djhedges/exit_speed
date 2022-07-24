@@ -197,7 +197,7 @@ RETURNING id
 """)
 LAP_END_TIME_UPDATE = textwrap.dedent("""
 UPDATE laps
-SET end_time = %s
+SET end_time = %s, duration_ns = %s
 WHERE id = %s
 """)
 
@@ -209,6 +209,7 @@ class LapStart(NamedTuple):
 
 class LapEnd(NamedTuple):
   end_time: datetime.datetime
+  duration_ns: int
 
 MAIN_ARG_MAP = {
   LapStart: ('session_id', 'number', 'start_time'),
@@ -249,7 +250,7 @@ class PostgresWithoutPrepare(object):
 
   def ExportLapEnd(self, lap: LapEnd):
     with self._postgres_conn.cursor() as cursor:
-      args = (lap.end_time, self.current_lap_id)
+      args = (lap.end_time, lap.duration_ns, self.current_lap_id)
       cursor.execute(LAP_END_TIME_UPDATE, args)
       self._postgres_conn.commit()
 

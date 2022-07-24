@@ -182,19 +182,23 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     interface.AddToQueue(lap_start)
     interface.ExportData()
     self.cursor.execute('SELECT * FROM laps')
-    lap_id, db_session_id, db_number, db_start_time, db_end_time  = self.cursor.fetchone()
+    (lap_id, db_session_id, db_number, db_start_time,
+		 db_end_time, db_duration_ns) = self.cursor.fetchone()
     self.assertEqual(db_session_id, interface.session_id)
     self.assertEqual(db_number, 1)
     self.assertEqual(db_start_time, start_time)
-    self.assertEqual(db_end_time, None)
+    self.assertFalse(db_end_time)
+    self.assertFalse(db_duration_ns)
 
     end_time = start_time + datetime.timedelta(seconds=90)
-    lap_end = postgres.LapEnd(end_time=end_time)
+    duration_ns = 71500000000
+    lap_end = postgres.LapEnd(end_time=end_time, duration_ns=duration_ns)
     interface.AddToQueue(lap_end)
     interface.ExportData()
-    self.cursor.execute('SELECT end_time FROM laps')
-    db_end_time  = self.cursor.fetchone()[0]
-    self.assertEqual(db_end_time, db_end_time)
+    self.cursor.execute('SELECT end_time, duration_ns FROM laps')
+    db_end_time, db_duration_ns  = self.cursor.fetchone()
+    self.assertEqual(db_end_time, end_time)
+    self.assertEqual(db_duration_ns, duration_ns)
 
 
 if __name__ == '__main__':
