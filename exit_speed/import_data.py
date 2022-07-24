@@ -71,6 +71,8 @@ def ReRunMain(data_dir, protos):
   for proto in protos:
     es.point = proto
     es.ProcessLap()
+  es.stop_process_signal = True
+  time.sleep(2)
 
 
 def main(unused_argv):
