@@ -45,13 +45,10 @@ def LoadProtos(data_dir):
 def CopyProtosToPostgres(prefix_protos):
   for prefix, protos in prefix_protos.items():
     logging.info('Prefix: %s, proto count: %d', prefix, len(protos))
-    db_writer = postgres.Postgres(protos[0].__class__, start_process=True)
+    db_writer = postgres.Postgres(protos[0].__class__, start_process=False)
     for proto in protos:
       db_writer.AddProtoToQueue(proto)
-    while db_writer._proto_queue.qsize() > 0:
-      time.sleep(1)
-    db_writer.stop_process_signal = True
-    db_writer.process.join(1)
+      db_writer.ExportProto()
 
 
 def main(unused_argv):
