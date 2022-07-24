@@ -53,19 +53,23 @@ def CopyProtosToPostgres(prefix_protos):
       db_writer.ExportProto()
 
 
-#def ReRunMain(protos):
-#  es = exit_speed.ExitSpeed(live_data=False)
-#  es.postgres = postgres.PostgresWithoutPrepare()
-#  import pdb; pdb.set_trace()
-#  for proto in protos:
-#    es.point = proto
-#    es.ProcessLap()
+def ReRunMain(data_dir, protos):
+  es = exit_speed.ExitSpeed(live_data=False)
+  es.postgres = postgres.PostgresWithoutPrepare()
+  es.session = common_lib.Session(
+    time=time,
+    track=track,
+    car=car,
+    live_data=False)
+  for proto in protos:
+    es.point = proto
+    es.ProcessLap()
 
 
 def main(unused_argv):
   prefix_protos = LoadProtos(FLAGS.data_dir)
   CopyProtosToPostgres(prefix_protos)
-#  ReRunMain(prefix_protos['GpsSensor'])
+  ReRunMain(FLAGS.data_dir, prefix_protos['GpsSensor'])
 
 
 if __name__ == '__main__':
