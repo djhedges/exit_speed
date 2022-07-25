@@ -28,6 +28,15 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('old_data_path', None, 'Path to an old data file.')
 
 
+SENSOR_PROTO = {
+  'GpsSensor': exit_speed_pb2.Gps,
+  'AccelerometerSensor': exit_speed_pb2.Accelerometer,
+  'GyroscopeSensor': exit_speed_pb2.Gyroscope,
+  'LabjackSensor': exit_speed_pb2.Labjack,
+  'WBO2Sensor': exit_speed_pb2.WBO2,
+}
+
+
 def new_prefix(old_data_path, track, sensor_name):
   base_dir = old_data_path.strip('_1.data')
   return os.path.join(
@@ -39,12 +48,14 @@ def new_prefix(old_data_path, track, sensor_name):
 def main(unused_argv):
   flags.mark_flag_as_required('old_data_path')
   old_logger = data_logger.Logger(FLAGS.old_data_path)
-  old_protos = old_logger.ReadProtos()
+  old_protos = list(old_logger.ReadProtos())
   track = tracks.FindClosestTrack({'lat': old_protos[0].lat,
                                    'lon': old_protos[0].lon})
-  gps_logger = data_logger.Logger(
-    new_prefix(FLAGS.old_data_path, track, 'GpsSensor'),
-    proto_class=exit_speed_pb2.Gps)
+  new_loggers = {}
+  for sensor_name, proto_class in SENSOR_PROTO.items():
+    new_loggers[sensor_name] = data_logger.Logger(
+        new_prefix(FLAGS.old_data_path, track, sensor_name),
+        proto_class=proto_class)
   count = 0
   for old_point in old_protos:
     count += 1
@@ -53,9 +64,52 @@ def main(unused_argv):
                                    lon=old_point.lon,
                                    alt=old_point.alt,
                                    speed_ms=old_point.speed_ms)
+    gps_logger = new_loggers['GpsSensor']
     gps_logger.WriteProto(gps_proto)
-    logging.log_every_n_seconds(logging.INFO, 'Written %d protos', 10, count)
     logging.log_every_n_seconds(logging.INFO, gps_proto, 30)
+    if old_point.accelerometer_x:
+      accel_proto = exit_speed_pb2.Accelerometer(
+          time=old_point.time,
+          accelerometer_x=old_point.accelerometer_x,
+          accelerometer_y=old_point.accelerometer_y,
+          accelerometer_z=old_point.accelerometer_z)
+      accel_logger = new_loggers['AccelerometerSensor']
+      accel_logger.WriteProto(accel_proto)
+      logging.log_every_n_seconds(logging.INFO, accel_proto, 30)
+    if old_point.gyro_x:
+      gyro_proto = exit_speed_pb2.Gyroscope(
+          time=old_point.time,
+          gyro_x=old_point.gyro_x,
+          gyro_y=old_point.gyro_y,
+          gyro_z=old_point.gyro_z)
+      gyro_logger = new_loggers['GyroscopeSensor']
+      gyro_logger.WriteProto(gyro_proto)
+      logging.log_every_n_seconds(logging.INFO, gyro_proto, 30)
+    if old_point.water_temp_voltage:
+      labjack_proto = exit_speed_pb2.Labjack(
+          time=old_point.time,
+          labjack_temp_f=old_point.labjack_temp_f,
+          battery_voltage=old_point.battery_voltage,
+          front_brake_pressure_voltage=old_point.front_brake_pressure_voltage,
+          fuel_level_voltage=old_point.fuel_level_voltage,
+          fuel_pressure_voltage=old_point.fuel_pressure_voltage,
+          oil_pressure_voltage=old_point.oil_pressure_voltage,
+          oil_temp_voltage=old_point.oil_temp_voltage,
+          rear_brake_pressure_voltage=old_point.rear_brake_pressure_voltage,
+          water_temp_voltage=old_point.water_temp_voltage)
+      labjack_logger = new_loggers['LabjackSensor']
+      labjack_logger.WriteProto(labjack_proto)
+      logging.log_every_n_seconds(logging.INFO, labjack_proto, 30)
+    if old_point.afr:
+      wbo2_proto = exit_speed_pb2.WBO2(
+          time=old_point.time,
+          afr=old_point.afr,
+          rpm=old_point.rpm,
+          tps_voltage=old_point.tps_voltage)
+      wbo2_logger = new_loggers['WBO2Sensor']
+      wbo2_logger.WriteProto(wbo2_proto)
+      logging.log_every_n_seconds(logging.INFO, wbo2_proto, 30)
+    logging.log_every_n_seconds(logging.INFO, 'Written %d protos', 10, count)
   logging.info('Final proto count %d', count)
 
 
