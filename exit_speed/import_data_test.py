@@ -24,7 +24,11 @@ from absl.testing import absltest
 from exit_speed import postgres_test_lib
 from exit_speed import tracks
 
-# Fixes adafruit_adxl34x import on Travis.
+# pylint: disable=wrong-import-position
+sys.modules['RPi'] = fake_rpi.RPi     # Fake RPi
+sys.modules['RPi.GPIO'] = fake_rpi.RPi.GPIO # Fake GPIO
+sys.modules['smbus'] = fake_rpi.smbus # Fake smbus (I2C)
+# Fixes dotstar import on Travis. import fake_rpi
 import adafruit_platformdetect
 with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
   mock_detector.chip.id.return_value = 'BCM2XXX'
