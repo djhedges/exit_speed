@@ -20,9 +20,16 @@ import pytz
 import unittest
 from absl.testing import absltest
 
-from exit_speed import import_data
 from exit_speed import postgres_test_lib
 from exit_speed import tracks
+
+# Fixes adafruit_adxl34x import on Travis.
+import adafruit_platformdetect
+with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
+  mock_detector.chip.id.return_value = 'BCM2XXX'
+  import adafruit_dotstar
+  from exit_speed import import_data
+# pylint: enable=wrong-import-position
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
