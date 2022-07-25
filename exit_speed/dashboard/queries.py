@@ -130,7 +130,7 @@ def GetColumnsToQuery(point_values: List[Text]) -> List[Text]:
     columns.update(['front_brake_pressure_voltage',
                     'rear_brake_pressure_voltage'])
   if 'gsum' in point_values:
-    columns.update(['accelerometer_x', 'accelerometer_y', 'accelerometer_z'])
+    columns.update(['accelerometer_x', 'accelerometer_y'])
   if 'racing_line' in point_values:
     columns.update(['lat', 'lon'])
   return columns
@@ -189,16 +189,19 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   lap_dfs = []
   for lap_id in lap_ids:
     start_time, end_time = GetLapStartEndTimes(lap_id)
-    lap_dfs.append(GetLapData(columns, start_time, end_time))
+    lap_df = GetLapData(columns, start_time, end_time)
+    lap_df['lap_id'] = lap_id
+    lap_dfs.append(lap_df)
   df = pd.concat(lap_dfs)
-  #df.sort_values(by='elapsed_distance_m', inplace=True)
+  df.sort_values(by='time', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
     df['front_brake_pressure_voltage'].max())
   df['rear_brake_pressure_percentage'] = (
     df['rear_brake_pressure_voltage'] /
     df['rear_brake_pressure_voltage'].max())
-  df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
+  if 'gsum' in point_values:
+    df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   #df.rename(columns={'number': 'lap_number'}, inplace=True)
   df['elapsed_duration_ms'] = df['time'] - min(df['time'])
   return df
