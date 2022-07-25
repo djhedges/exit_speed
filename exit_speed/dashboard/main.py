@@ -184,7 +184,7 @@ def LinkedZoom(
 def main(unused_argv):
   # TODO: Make this a more efficient query.
   sessions = queries.GetSessions()
-  points_columns = queries.GetPointsColumns() + [
+  points_columns = list(queries.GetPointsColumns()) + [
       'front_brake_pressure_percentage',
       'rear_brake_pressure_percentage',
       'racing_line',

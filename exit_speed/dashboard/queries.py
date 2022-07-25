@@ -16,12 +16,16 @@ import datetime
 import textwrap
 from typing import List
 from typing import Text
+from typing import Set
 
 import pandas as pd
 from psycopg2 import sql
 
 from exit_speed import postgres
 from exit_speed import tracks
+
+
+TABLES = ('accelerometer', 'gps', 'gyroscope', 'labjack', 'wbo2')
 
 
 def GetTracks() -> List[Text]:
@@ -31,17 +35,17 @@ def GetTracks() -> List[Text]:
 def GetSessions() -> pd.DataFrame:
   select_statement = textwrap.dedent("""
   SELECT
-    TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
+    TO_CHAR((duration_ns / 1e6 || 'millisecond')::interval, 'MI:SS:MS') AS lap_time,
     TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') as session_time,
     laps.id,
     laps.number AS lap_number,
-    track,
-    (count(points.time)::float / (duration_ms::float / 1000.0)) as points_per_second
+    track
   FROM laps
-  JOIN points ON laps.id=points.lap_id
   JOIN sessions ON laps.session_id=sessions.id
-  WHERE duration_ms IS NOT null
-  GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ms
+  WHERE
+    duration_ns IS NOT null AND
+    duration_ns < 8.64e+13
+  GROUP BY sessions.id, track, sessions.time, laps.id, laps.number, lap_time, laps.duration_ns
   """)
   with postgres.ConnectToDB() as conn:
     return pd.io.sql.read_sql(select_statement, conn)
@@ -51,18 +55,18 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
     SELECT
       a.elapsed_distance_m,
-      b.elapsed_duration_ms - a.elapsed_duration_ms AS time_delta,
+      b.elapsed_duration_ns - a.elapsed_duration_ns AS time_delta,
       b.number AS lap_number
     FROM (
       SELECT
-        elapsed_duration_ms,
+        elapsed_duration_ns,
         ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m
       FROM points
       JOIN laps ON laps.id=points.lap_id
       WHERE lap_id = %(lap_id_a)s
     ) AS a INNER JOIN (
       SELECT
-        elapsed_duration_ms,
+        elapsed_duration_ns,
         ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m,
         number
       FROM points
@@ -87,18 +91,21 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
   return combined_df
 
 
-def GetPointsColumns() -> List[Text]:
-  select_statement = textwrap.dedent("""
-  SELECT column_name
-  FROM information_schema.columns
-  WHERE table_name = 'points'
-  """)
-  with postgres.ConnectToDB() as conn:
-    with conn.cursor() as cursor:
-      cursor.execute(select_statement)
-      columns = [row[0] for row in cursor.fetchall()]
+def GetPointsColumns() -> Set[Text]:
+  columns = set()
+  for table in TABLES:
+    select_statement = textwrap.dedent("""
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name = %s
+    """)
+    with postgres.ConnectToDB() as conn:
+      with conn.cursor() as cursor:
+        cursor.execute(select_statement, (table,))
+        columns.update([row[0] for row in cursor.fetchall()])
   columns.remove('lat')
   columns.remove('lon')
+  columns.remove('time')
   return columns
 
 
