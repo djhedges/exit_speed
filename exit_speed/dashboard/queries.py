@@ -14,8 +14,10 @@
 """Dashboard queries."""
 import datetime
 import textwrap
+from typing import Dict
 from typing import List
 from typing import Text
+from typing import Tuple
 from typing import Set
 
 import pandas as pd
@@ -63,7 +65,7 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
         ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m
       FROM points
       JOIN laps ON laps.id=points.lap_id
-      WHERE lap_id = %(lap_id_a)s
+      WHERE id = %(lap_id_a)s
     ) AS a INNER JOIN (
       SELECT
         elapsed_duration_ns,
@@ -71,7 +73,7 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
         number
       FROM points
       JOIN laps ON laps.id=points.lap_id
-      WHERE lap_id = %(lap_id_b)s
+      WHERE id = %(lap_id_b)s
       ) as b
     ON a.elapsed_distance_m = b.elapsed_distance_m
     """)
@@ -91,8 +93,8 @@ def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
   return combined_df
 
 
-def GetPointsColumns() -> Set[Text]:
-  columns = set()
+def GetTableColumns() -> Dict[Text, List[Text]]:
+  table_columns = {}
   for table in TABLES:
     select_statement = textwrap.dedent("""
     SELECT column_name
@@ -102,14 +104,22 @@ def GetPointsColumns() -> Set[Text]:
     with postgres.ConnectToDB() as conn:
       with conn.cursor() as cursor:
         cursor.execute(select_statement, (table,))
-        columns.update([row[0] for row in cursor.fetchall()])
+        table_columns[table] = [row[0] for row in cursor.fetchall()]
+  return table_columns
+
+
+def GetPointsColumns() -> Set[Text]:
+  columns = set()
+  table_columns = GetTableColumns()
+  for tc in table_columns.values():
+    columns.update(tc)
   columns.remove('lat')
   columns.remove('lon')
   columns.remove('time')
   return columns
 
 
-def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
+def GetColumnsToQuery(point_values: List[Text]) -> List[Text]:
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
   columns = set(point_values).intersection(set(all_columns))
@@ -123,21 +133,60 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
     columns.update(['accelerometer_x', 'accelerometer_y', 'accelerometer_z'])
   if 'racing_line' in point_values:
     columns.update(['lat', 'lon'])
+  return columns
+
+
+def GetTableData(table_name: Text,
+								 columns: List[Text],
+								 start_time: datetime.datetime,
+								 end_time: datetime.datetime) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
     SELECT {columns}
-    FROM points
-    JOIN laps ON points.lap_id = laps.id
-    WHERE lap_id IN %(lap_ids)s
+    FROM {table}
+    WHERE time >= %(start_time)s and time <= %(end_time)s
     """)
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
-          [sql.Identifier(col) for col in columns]))
+          [sql.Identifier(col) for col in columns]),
+      table=sql.SQL(table_name))
+  import pdb; pdb.set_trace()
   with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
-      df = pd.io.sql.read_sql(
+      return pd.io.sql.read_sql(
           query.as_string(cursor),
           conn,
-          params={'lap_ids': tuple(str(lap_id) for lap_id in lap_ids)})
+          params={'start_time': start_time,
+									'end_time': end_time})
+
+
+def GetLapData(columns: List[Text],
+							 start_time: datetime.datetime,
+							 end_time: datetime.datetime) -> pd.DataFrame:
+  for table_name, table_columns in GetTableColumns().items():
+    # Only select columns that the table contains.
+    columns_to_query = set(columns).intersection(set(table_columns))
+    columns_to_query.add('time')
+    table_df = GetTableData(table_name, columns_to_query, start_time, end_time)
+
+
+def GetLapStartEndTimes(
+    lap_id: int) -> Tuple[datetime.datetime, datetime.datetime]:
+  select_statement = textwrap.dedent("""
+  SELECT start_time, end_time
+  FROM laps
+  WHERE id = %s
+  """)
+  with postgres.ConnectToDB() as conn:
+    with conn.cursor() as cursor:
+      cursor.execute(select_statement, (lap_id,))
+      return cursor.fetchone()
+
+
+def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
+  columns = GetColumnsToQuery(point_values)
+  for lap_id in lap_ids:
+    start_time, end_time = GetLapStartEndTimes(lap_id)
+    lap_df = GetLapData(columns, start_time, end_time)
   df.sort_values(by='elapsed_distance_m', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
