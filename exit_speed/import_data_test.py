@@ -15,11 +15,13 @@
 """Unitests for import_data.py"""
 
 import datetime
+import gps
 import mock
 import os
 import pytz
 import sys
 import unittest
+from absl import flags
 from absl.testing import absltest
 import fake_rpi
 
@@ -39,6 +41,12 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
 # pylint: enable=wrong-import-position
 
 
+FLAGS = flags.FLAGS
+FLAGS.set_default('config_path',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        'testdata/test_config.yaml'))
+
+
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         'testdata/Bug/Test Parking Lot/2020-06-11T22:00:00/')
 
@@ -49,6 +57,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   def setUp(self):
     super().setUp()
     self._AddMock(adafruit_dotstar, 'DotStar')
+    self._AddMock(gps, 'gps')
 
   def testLoadProtos(self):
     prefix_protos = import_data.LoadProtos(DATA_DIR)
