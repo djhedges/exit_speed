@@ -132,7 +132,9 @@ class ExitSpeed(object):
     """Checks and handles when the car crosses the start/finish."""
     if len(self.current_lap) >= self.min_points_per_session:
       prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
-      if (common_lib.PointDeltaFromTrack(self.session.track, self.point) and
+      start_finish_distance = common_lib.PointDeltaFromTrack(
+          self.session.track, self.point)
+      if (start_finish_distance < self.start_finish_range and
           # First point past start/finish has an obtuse angle.
           lap_lib.SolvePointBAngle(
               self.session.track, prior_point, self.point) > 90):
