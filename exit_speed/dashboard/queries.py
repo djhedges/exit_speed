@@ -21,15 +21,11 @@ import pandas as pd
 from psycopg2 import sql
 
 from exit_speed import postgres
+from exit_speed import tracks
 
 
-def GetTracks() -> pd.DataFrame:
-  select_statement = textwrap.dedent("""
-  SELECT DISTINCT track
-  FROM sessions
-  """)
-  with postgres.ConnectToDB() as conn:
-    return pd.io.sql.read_sql(select_statement, conn)['track']
+def GetTracks() -> List[Text]:
+  return [track.name for track in tracks.TRACK_LIST]
 
 
 def GetSessions() -> pd.DataFrame:
