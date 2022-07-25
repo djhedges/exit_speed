@@ -46,6 +46,10 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """Postgres unittests."""
 
+  def setUp(self):
+    super().setUp()
+    self._AddMock(adafruit_dotstar, 'DotStar')
+
   def testLoadProtos(self):
     prefix_protos = import_data.LoadProtos(DATA_DIR)
     self.assertEqual(1962, len(prefix_protos['GpsSensor']))
