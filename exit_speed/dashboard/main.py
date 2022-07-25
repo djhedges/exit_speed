@@ -83,7 +83,7 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
               'points',
               ['racing_line',
                'time_delta',
-               'speed',
+               'speed_mph',
                'tps_voltage',
                'front_brake_pressure_percentage',
                'gsum'])
