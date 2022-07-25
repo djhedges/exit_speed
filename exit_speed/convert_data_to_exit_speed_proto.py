@@ -105,7 +105,7 @@ def main(unused_argv):
       labjack_logger = new_loggers['LabjackSensor']
       labjack_logger.WriteProto(labjack_proto)
       logging.log_every_n_seconds(logging.INFO, labjack_proto, 30)
-    if old_point.rpm:
+    if old_point.rpm or old_point.tps_voltage:
       wbo2_proto = exit_speed_pb2.WBO2(
           time=old_point.time,
           afr=old_point.afr,
