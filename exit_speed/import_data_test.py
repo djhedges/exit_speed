@@ -15,6 +15,7 @@
 """Unitests for import_data.py"""
 
 import datetime
+import mock
 import os
 import pytz
 import unittest
