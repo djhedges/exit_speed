@@ -62,6 +62,7 @@ def main(unused_argv):
         proto_class=proto_class)
   count = 0
   for old_point in old_protos:
+    logging.log_every_n_seconds(logging.INFO, old_point, 30)
     count += 1
     gps_proto = exit_speed_pb2.Gps(time=old_point.time,
                                    lat=old_point.lat,
@@ -104,7 +105,7 @@ def main(unused_argv):
       labjack_logger = new_loggers['LabjackSensor']
       labjack_logger.WriteProto(labjack_proto)
       logging.log_every_n_seconds(logging.INFO, labjack_proto, 30)
-    if old_point.afr:
+    if old_point.rpm:
       wbo2_proto = exit_speed_pb2.WBO2(
           time=old_point.time,
           afr=old_point.afr,
