@@ -20,6 +20,7 @@ import os
 import pytz
 import unittest
 from absl.testing import absltest
+import fake_rpi
 
 from exit_speed import postgres_test_lib
 from exit_speed import tracks
