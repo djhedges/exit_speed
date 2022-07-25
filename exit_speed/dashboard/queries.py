@@ -161,14 +161,19 @@ def GetTableData(table_name: Text,
 def GetLapData(columns: List[Text],
 							 start_time: datetime.datetime,
 							 end_time: datetime.datetime) -> pd.DataFrame:
-  table_dfs = []
+  df = None
   for table_name, table_columns in GetTableColumns().items():
     # Only select columns that the table contains.
     columns_to_query = set(columns).intersection(set(table_columns))
-    columns_to_query.add('time')
-    table_dfs.append(
-        GetTableData(table_name, columns_to_query, start_time, end_time))
-  return pd.concat(table_dfs)
+    if columns_to_query:
+      columns_to_query.add('time')
+      table_df = GetTableData(table_name, columns_to_query,
+		  												start_time, end_time)
+      if df is not None:
+        df = pd.merge_asof(df, table_df, on='time')
+      else:
+        df = table_df
+  return df
 
 
 def GetLapStartEndTimes(
