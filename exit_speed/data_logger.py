@@ -42,14 +42,17 @@ class UnableToDetermineProtoLength(Error):
 class Logger(object):
   """Interface for writing and reading protos to disk."""
 
-  def __init__(self, file_prefix_or_name: Text, proto_class: any_pb2.Any=gps_pb2.Point):
+  def __init__(self,
+               file_prefix_or_name: Text,
+               proto_class: any_pb2.Any=gps_pb2.Point):
     """Initializer.
 
     Args:
       file_prefix: File prefix with out the .data extension.
                    Ex: testdata/PIR_race_10hz_gps_only_2020-06-21
                    Or the a file's complete name including the _#.data suffix.
-      proto_class: A protobuf message used to serialize and deserialize to and form disk.
+      proto_class: A protobuf message used to serialize and deserialize
+                   to and form disk.
     """
     super().__init__()
     if file_prefix_or_name.endswith('.data'):

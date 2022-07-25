@@ -13,21 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Postgres interface."""
-
+import datetime
+import multiprocessing
+import textwrap
 from typing import NamedTuple
 from typing import Optional
 from typing import Text
 from typing import Union
-import datetime
-import multiprocessing
-import textwrap
+
 import psycopg2
 from absl import flags
 from absl import logging
 from google.protobuf import any_pb2
+
 from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
-from exit_speed.tracks import base
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('postgres_db_spec',
@@ -137,7 +137,8 @@ def ConnectToDB() -> psycopg2.extensions.connection:
 
 def GetConnWithPointPrepare(
   prepare_statement: Text,
-  conn: Optional[psycopg2.extensions.connection] =  None) -> psycopg2.extensions.connection:
+  conn: Optional[psycopg2.extensions.connection] =  None,
+    ) -> psycopg2.extensions.connection:
   conn = conn or ConnectToDB()
   with conn.cursor() as cursor:
     cursor.execute(prepare_statement)
@@ -255,7 +256,7 @@ class PostgresWithoutPrepare(object):
       self._postgres_conn.commit()
 
   def ExportData(self):
-    data = self._queue.get(1)
+    data = self._queue.get(timeout=1)
     if isinstance(data, common_lib.Session):
       self.ExportSession(data)
     elif isinstance(data, LapStart):

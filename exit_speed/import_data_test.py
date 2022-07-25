@@ -13,17 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for import_data.py"""
-
-import datetime
-import gps
-import mock
 import os
-import pytz
 import sys
 import unittest
+
+import fake_rpi
+import gps
+import mock
 from absl import flags
 from absl.testing import absltest
-import fake_rpi
 
 from exit_speed import postgres_test_lib
 from exit_speed import tracks
@@ -73,9 +71,8 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     prefix_protos = import_data.LoadProtos(DATA_DIR)
     import_data.ReRunMain(DATA_DIR, prefix_protos['GpsSensor'])
     self.cursor.execute('SELECT * from sessions')
-    db_id, time, track, car, live_data = self.cursor.fetchone()
+    db_id, _, track, car, live_data = self.cursor.fetchone()
     self.assertEqual(db_id, 1)
-    #self.assertEqual(time, datetime.datetime(2020, 6, 11, 22))
     self.assertEqual(track, tracks.test_track.TestTrack.name)
     self.assertEqual(car, 'Bug')
     self.assertFalse(live_data)

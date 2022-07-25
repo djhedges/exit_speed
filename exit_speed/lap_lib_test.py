@@ -15,10 +15,8 @@
 """Unitests for lab_lib.py"""
 import unittest
 
-import mock
 from absl.testing import absltest
 
-from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
 from exit_speed import lap_lib
 from exit_speed import tracks

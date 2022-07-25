@@ -14,6 +14,7 @@
 # limitations under the License.
 """Track list and helper functions."""
 from typing import Tuple
+
 import gps
 
 from exit_speed import common_lib

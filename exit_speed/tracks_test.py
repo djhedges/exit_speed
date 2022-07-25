@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for tracks."""
-import gps
 import unittest
 
+import gps
 from absl.testing import absltest
 
 from exit_speed import tracks

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for gps_sensor.py"""
-import multiprocessing
 import unittest
 
 import gps
@@ -21,7 +20,6 @@ import mock
 from absl import flags
 from absl.testing import absltest
 
-from exit_speed import exit_speed_pb2
 from exit_speed import gps_sensor
 
 FLAGS = flags.FLAGS

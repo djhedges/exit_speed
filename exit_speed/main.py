@@ -15,9 +15,8 @@
 """The main script for starting exit speed."""
 import datetime
 import multiprocessing
-import os
-import pytz
 
+import pytz
 import sdnotify
 import u3
 from absl import app
@@ -127,7 +126,7 @@ class ExitSpeed(object):
     if self.config.get('postgres'):
       self.postgres.AddToQueue(postgres.LapEnd(
           end_time=self.point.time.ToDatetime(),
-          duration_ns=duration_ns))
+          duration_ns=int(duration_ns)))
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
@@ -135,7 +134,8 @@ class ExitSpeed(object):
       prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
       if (common_lib.PointDeltaFromTrack(self.session.track, self.point) and
           # First point past start/finish has an obtuse angle.
-          lap_lib.SolvePointBAngle(self.session.track, prior_point, self.point) > 90):
+          lap_lib.SolvePointBAngle(
+              self.session.track, prior_point, self.point) > 90):
         logging.info('Start/Finish')
         self.leds.CrossStartFinish()
         self.SetLapTime()

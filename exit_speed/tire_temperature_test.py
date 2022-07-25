@@ -24,7 +24,6 @@ from absl.testing import absltest
 from mlx import mlx90640
 
 from exit_speed import common_lib
-from exit_speed import exit_speed_pb2
 from exit_speed import tire_temperature
 from exit_speed import tracks
 

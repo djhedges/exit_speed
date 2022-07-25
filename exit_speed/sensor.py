@@ -21,10 +21,11 @@ import datetime
 import multiprocessing
 import os
 import time
+from typing import Dict
+
 from absl import flags
 from absl import logging
 from google.protobuf import any_pb2
-from typing import Dict
 
 from exit_speed import common_lib
 from exit_speed import data_logger
@@ -71,7 +72,7 @@ class SensorBase(object):
     self.config = config
     self._point_queue = point_queue
     self.stop_process_signal = multiprocessing.Value('b', False)
-    self.data_logger = None # pytype: Optional[data_logger.Logger]
+    self.data_logger = None
     if self.PROTO_CLASS:
       self.postgres = postgres.Postgres(self.PROTO_CLASS,
                                         start_process=start_process)
@@ -82,7 +83,7 @@ class SensorBase(object):
       self._process.start()
 
   def _InitializeDataLogger(self, proto: any_pb2.Any):
-    file_prefix = GetLogFilePrefix(self.session, self, proto)
+    file_prefix = GetLogFilePrefix(self.session, self)
     logging.info('Logging data to %s', file_prefix)
     self.data_logger = data_logger.Logger(file_prefix, proto_class=proto)
 
@@ -115,8 +116,7 @@ class SensorBase(object):
 
 
 def GetLogFilePrefix(session: common_lib.Session,
-                     sensor_instance: SensorBase,
-										 proto: any_pb2.Any):
+                     sensor_instance: SensorBase):
   """Formats the logging path based on sensor and the given proto."""
   current_seconds = session.time.second + session.time.microsecond / 1e6
   return os.path.join(

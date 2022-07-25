@@ -16,9 +16,9 @@ import datetime
 import textwrap
 from typing import Dict
 from typing import List
+from typing import Set
 from typing import Text
 from typing import Tuple
-from typing import Set
 
 import pandas as pd
 from psycopg2 import sql
@@ -119,7 +119,7 @@ def GetPointsColumns() -> Set[Text]:
   return columns
 
 
-def GetColumnsToQuery(point_values: List[Text]) -> List[Text]:
+def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
   columns = set(point_values).intersection(set(all_columns))
@@ -139,7 +139,7 @@ def GetColumnsToQuery(point_values: List[Text]) -> List[Text]:
 
 
 def GetTableData(table_name: Text,
-								 columns: List[Text],
+								 columns: Set[Text],
 								 start_time: datetime.datetime,
 								 end_time: datetime.datetime) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
@@ -160,7 +160,7 @@ def GetTableData(table_name: Text,
 									'end_time': end_time})
 
 
-def GetLapData(columns: List[Text],
+def GetLapData(columns: Set[Text],
 							 start_time: datetime.datetime,
 							 end_time: datetime.datetime) -> pd.DataFrame:
   df = None

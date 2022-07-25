@@ -68,7 +68,7 @@ class TestLabjack(postgres_test_lib.PostgresTestBase, unittest.TestCase):
         _binaryToCalibratedAnalogVoltage)
     with mock.patch.object(
         self.labjack, 'LogAndExportProto') as mock_log_and_export:
-        self.labjack.ReadValues()
+      self.labjack.ReadValues()
     mock_log_and_export.assert_called_once_with(
       exit_speed_pb2.Labjack(
         labjack_temp_f=78.061801842153101916,

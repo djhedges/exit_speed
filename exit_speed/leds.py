@@ -81,7 +81,8 @@ class LEDs(object):
     if ignore_update_interval or update:
       self.dots.fill(color)
 
-  def FindNearestBestLapPoint(self, point: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
+  def FindNearestBestLapPoint(self,
+															point: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
     """Returns the nearest point on the best lap to the given point."""
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
                                 return_distance=False)

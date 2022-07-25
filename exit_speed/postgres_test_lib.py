@@ -13,17 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test instance of the Postgres database."""
-
-import datetime
-import psycopg2
-import mock
 import os
-import pytz
 import unittest
-import testing.postgresql
-from absl.testing import absltest
 
-from exit_speed import exit_speed_pb2
+import mock
+import psycopg2
+import testing.postgresql
+
 from exit_speed import postgres
 
 

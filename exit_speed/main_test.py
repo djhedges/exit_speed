@@ -14,12 +14,12 @@
 # limitations under the License.
 """ExitSpeed unittest."""
 import datetime
-import gps
 import os
 import sys
 import unittest
 
 import fake_rpi
+import gps
 import mock
 from absl import flags
 from absl.testing import absltest

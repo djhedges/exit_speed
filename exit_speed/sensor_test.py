@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Unitests for sensor.py"""
-import datetime
 import multiprocessing
 import time
 import unittest
@@ -33,7 +32,7 @@ FLAGS.set_default('data_log_path', '/tmp')
 
 
 class SensorTest(sensor.SensorBase):
-    pass
+  pass
 
 
 class TestAccelerometer(unittest.TestCase):
@@ -62,9 +61,10 @@ class TestAccelerometer(unittest.TestCase):
       live_data=False)
     sensor_instance = SensorTest(
        point.time.ToDatetime(), {}, queue, start_process=False)
-    expected = '/tmp/RC Car/Portland International Raceway/2020-05-23T17:47:44.100000/SensorTest'
+    expected = ('/tmp/RC Car/Portland International Raceway/'
+								'2020-05-23T17:47:44.100000/SensorTest')
     self.assertEqual(expected, sensor.GetLogFilePrefix(
-       session, sensor_instance, point))
+       session, sensor_instance))
 
   def testLogMessage(self):
     point = exit_speed_pb2.Gps()
@@ -79,7 +79,7 @@ class TestAccelerometer(unittest.TestCase):
         session, {}, queue, start_process=False)
     sensor_instance.LogMessage(point)
     reader = data_logger.Logger(sensor_instance.data_logger.file_prefix)
-    for proto in reader.ReadProtos():
+    for read_point in reader.ReadProtos():
       self.assertEqual(point, read_point)
 
 

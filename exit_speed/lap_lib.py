@@ -36,9 +36,9 @@ point_b |/
 point_a |
 """
 # pylint: enable=anomalous-backslash-in-string
+import math
 from typing import Dict
 from typing import List
-import math
 
 from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
@@ -70,7 +70,8 @@ def SolvePointBAngle(track: base.Track,
   return math.degrees(math.acos((c**2 + a**2 - b**2)/(2*c*a)))
 
 
-def CalcAcceleration(point_b: exit_speed_pb2.Gps, point_c: exit_speed_pb2.Gps) -> float:
+def CalcAcceleration(point_b: exit_speed_pb2.Gps,
+										 point_c: exit_speed_pb2.Gps) -> float:
   """a = Δv/Δt"""
   return (((point_b.speed_ms - point_c.speed_ms) /
            (point_b.time.ToNanoseconds() - point_c.time.ToNanoseconds())) /
