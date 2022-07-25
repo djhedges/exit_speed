@@ -67,6 +67,8 @@ def ReRunMain(data_dir, protos):
     car=path.parts[-3],
     live_data=False)
   es.postgres.AddToQueue(es.session)
+  es.postgres.AddToQueue(postgres.LapStart(number=es.lap_number,
+                         start_time=es.session.time))
   logging.info(es.session)
   for proto in protos:
     es.point = proto

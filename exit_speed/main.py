@@ -71,7 +71,7 @@ class ExitSpeed(object):
     self.leds = leds.LEDs()
     self.postgres = None
     self.session = None
-    self.lap_number = 0
+    self.lap_number = 1
     self.current_lap = []
     self.laps = {self.lap_number: self.current_lap}
     self.point = None
@@ -166,6 +166,9 @@ class ExitSpeed(object):
     logging.info('Closest track: %s', track.name)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(self.session)
+      self.postgres.AddToQueue(
+          postgres.LapStart(number=self.lap_number,
+                            start_time=self.session.time))
 
   def Run(self) -> None:
     """Runs exit speed in a loop."""

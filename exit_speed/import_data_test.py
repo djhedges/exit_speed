@@ -53,10 +53,15 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(car, 'Bug')
     self.assertFalse(live_data)
     self.cursor.execute(
-        'SELECT number, (end_time - start_time) as lap_duration FROM laps '
-        'WHERE end_time IS NOT NULL')
-    res = self.cursor.fetchall()
-    # TODO(djhedges): Add a test and fix the bug with lap duration.'
+        'SELECT number, duration_ns FROM laps '
+        'WHERE duration_ns IS NOT NULL')
+    expected_durations = {
+      1: 71500000000,
+      2: 58898946624,
+      3: 58854358144,
+    }
+    for lap_number, duration_ns in self.cursor.fetchall():
+      self.assertEqual(duration_ns, expected_durations[lap_number])
 
 
 if __name__ == '__main__':
