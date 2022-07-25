@@ -37,24 +37,28 @@ SENSOR_PROTO = {
 }
 
 
-def new_prefix(old_data_path, track, sensor_name):
-  base_dir = old_data_path.strip('_1.data')
-  return os.path.join(
-      base_dir,
+def new_prefix(old_data_path, track, sensor_name, session_time):
+  base_dir = os.path.join(*old_data_path.split(os.path.sep)[:-1])
+  new_prefix = os.path.join(
+      os.path.join('/', base_dir),
       track.name,
+      session_time,
       sensor_name)
+  logging.info('New prefix: %s', new_prefix)
+  return new_prefix
 
 
 def main(unused_argv):
   flags.mark_flag_as_required('old_data_path')
   old_logger = data_logger.Logger(FLAGS.old_data_path)
   old_protos = list(old_logger.ReadProtos())
+  session_time = old_protos[0].time.ToJsonString()
   track = tracks.FindClosestTrack({'lat': old_protos[0].lat,
                                    'lon': old_protos[0].lon})
   new_loggers = {}
   for sensor_name, proto_class in SENSOR_PROTO.items():
     new_loggers[sensor_name] = data_logger.Logger(
-        new_prefix(FLAGS.old_data_path, track, sensor_name),
+        new_prefix(FLAGS.old_data_path, track, sensor_name, session_time),
         proto_class=proto_class)
   count = 0
   for old_point in old_protos:
