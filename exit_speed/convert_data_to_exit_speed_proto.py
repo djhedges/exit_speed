@@ -22,31 +22,37 @@ from absl import logging
 
 from exit_speed import data_logger
 from exit_speed import exit_speed_pb2
+from exit_speed import tracks
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('old_data_path', None, 'Path to an old data file.')
 
 
-def new_prefix(old_data_path, sensor_name):
+def new_prefix(old_data_path, track, sensor_name):
   base_dir = old_data_path.strip('_1.data')
   return os.path.join(
       base_dir,
+      track.name,
       sensor_name)
 
 
 def main(unused_argv):
   flags.mark_flag_as_required('old_data_path')
   old_logger = data_logger.Logger(FLAGS.old_data_path)
-  gps_logger = data_logger.Logger(new_prefix(FLAGS.old_data_path, 'GpsSensor'),
-																	proto_class=exit_speed_pb2.Gps)
+  old_protos = old_logger.ReadProtos()
+  track = tracks.FindClosestTrack({'lat': old_protos[0].lat,
+                                   'lon': old_protos[0].lon})
+  gps_logger = data_logger.Logger(
+    new_prefix(FLAGS.old_data_path, track, 'GpsSensor'),
+    proto_class=exit_speed_pb2.Gps)
   count = 0
-  for old_point in old_logger.ReadProtos():
+  for old_point in old_protos:
     count += 1
     gps_proto = exit_speed_pb2.Gps(time=old_point.time,
-																	 lat=old_point.lat,
-																	 lon=old_point.lon,
-																	 alt=old_point.alt,
-																	 speed_ms=old_point.speed_ms)
+                                   lat=old_point.lat,
+                                   lon=old_point.lon,
+                                   alt=old_point.alt,
+                                   speed_ms=old_point.speed_ms)
     gps_logger.WriteProto(gps_proto)
     logging.log_every_n_seconds(logging.INFO, 'Written %d protos', 10, count)
     logging.log_every_n_seconds(logging.INFO, gps_proto, 30)
