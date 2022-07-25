@@ -149,7 +149,6 @@ def GetTableData(table_name: Text,
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]),
       table=sql.SQL(table_name))
-  import pdb; pdb.set_trace()
   with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
       return pd.io.sql.read_sql(
@@ -162,11 +161,14 @@ def GetTableData(table_name: Text,
 def GetLapData(columns: List[Text],
 							 start_time: datetime.datetime,
 							 end_time: datetime.datetime) -> pd.DataFrame:
+  table_dfs = []
   for table_name, table_columns in GetTableColumns().items():
     # Only select columns that the table contains.
     columns_to_query = set(columns).intersection(set(table_columns))
     columns_to_query.add('time')
-    table_df = GetTableData(table_name, columns_to_query, start_time, end_time)
+    table_dfs.append(
+        GetTableData(table_name, columns_to_query, start_time, end_time))
+  return pd.concat(table_dfs)
 
 
 def GetLapStartEndTimes(
@@ -184,10 +186,12 @@ def GetLapStartEndTimes(
 
 def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   columns = GetColumnsToQuery(point_values)
+  lap_dfs = []
   for lap_id in lap_ids:
     start_time, end_time = GetLapStartEndTimes(lap_id)
-    lap_df = GetLapData(columns, start_time, end_time)
-  df.sort_values(by='elapsed_distance_m', inplace=True)
+    lap_dfs.append(GetLapData(columns, start_time, end_time))
+  df = pd.concat(lap_dfs)
+  #df.sort_values(by='elapsed_distance_m', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
     df['front_brake_pressure_voltage'].max())
@@ -195,7 +199,8 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
     df['rear_brake_pressure_voltage'] /
     df['rear_brake_pressure_voltage'].max())
   df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
-  df.rename(columns={'number': 'lap_number'}, inplace=True)
+  #df.rename(columns={'number': 'lap_number'}, inplace=True)
+  df['elapsed_duration_ms'] = df['time'] - min(df['time'])
   return df
 
 
