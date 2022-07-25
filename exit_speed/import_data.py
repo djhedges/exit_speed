@@ -31,6 +31,9 @@ from exit_speed import tracks
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir', None, 'Path to a directory with data files.')
+FLAGS.set_default('data_log_path', '/tmp')  # Dont clobber on import.
+FLAGS.set_default('led_brightness', 0.05)
+
 
 PREFIX_PROTO_MAP = {
   'GpsSensor': exit_speed_pb2.Gps,
