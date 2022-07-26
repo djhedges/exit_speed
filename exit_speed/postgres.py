@@ -256,7 +256,7 @@ class PostgresWithoutPrepare(object):
       self._postgres_conn.commit()
 
   def ExportData(self):
-    data = self._queue.get(timeout=1)
+    data = self._queue.get()
     if isinstance(data, common_lib.Session):
       self.ExportSession(data)
     elif isinstance(data, LapStart):
