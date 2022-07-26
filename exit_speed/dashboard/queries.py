@@ -143,9 +143,10 @@ def GetTableData(table_name: Text,
 								 start_time: datetime.datetime,
 								 end_time: datetime.datetime) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
-    SELECT {columns}
+    SELECT time, {columns}
     FROM {table}
     WHERE time >= %(start_time)s and time <= %(end_time)s
+    ORDER BY time
     """)
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
@@ -168,13 +169,15 @@ def GetLapData(columns: Set[Text],
     # Only select columns that the table contains.
     columns_to_query = set(columns).intersection(set(table_columns))
     if columns_to_query:
-      columns_to_query.add('time')
       table_df = GetTableData(table_name, columns_to_query,
 		  												start_time, end_time)
       if df is not None:
         df = pd.merge_asof(df, table_df, on='time')
       else:
         df = table_df
+  if df is not None:
+    df['elapsed_duration'] = (
+        df['time'] - df['time'].min())  #pytype: disable=attribute-error
   return df
 
 
@@ -210,8 +213,6 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   if 'gsum' in point_values:
     df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
   df['speed_mph'] = df['speed_ms'] * 2.23694
-  #df.rename(columns={'number': 'lap_number'}, inplace=True)
-  df['elapsed_duration_ms'] = df['time'] - min(df['time'])
   return df
 
 

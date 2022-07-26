@@ -142,7 +142,7 @@ def UpdateGraph(
           title=title,
           # TODO(djhedges): Move this back to elapsed_distance_m
           # once the dataframe contains that column again.
-          x='elapsed_duration_ms',
+          x='elapsed_duration',
           y=point_value,
           color='lap_id',
           # TODO(djhedges): Readd hover data for lap_number.'
@@ -192,7 +192,8 @@ def main(unused_argv):
       'rear_brake_pressure_percentage',
       'racing_line',
       'gsum',
-      'time_delta'
+      'time_delta',
+      'speed_mph',
       ]
   tracks = queries.GetTracks()
   app.layout = html.Div(
