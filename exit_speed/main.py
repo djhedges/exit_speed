@@ -18,9 +18,7 @@ import multiprocessing
 
 import pytz
 import sdnotify
-import u3
 from absl import app
-from absl import flags
 from absl import logging
 
 from exit_speed import accelerometer
@@ -37,15 +35,9 @@ from exit_speed import tire_temperature
 from exit_speed import tracks
 from exit_speed import wbo2
 
-FLAGS = flags.FLAGS
-flags.DEFINE_string('timezone', 'America/Los_Angeles',
-                    'Timezone to set in datetime objects.')
-
 
 class ExitSpeed(object):
   """Main object which loops and logs data."""
-  LABJACK_TIMER_CMD = u3.Timer0(UpdateReset=True, Value=0, Mode=None)
-  REPORT_REQ_FIELDS = ('lat', 'lon', 'time', 'speed')
 
   def __init__(
       self,
@@ -109,7 +101,8 @@ class ExitSpeed(object):
     if self.config.get('postgres'):
       self.postgres.AddToQueue(
           postgres.LapStart(number=self.lap_number,
-                            start_time=self.point.time.ToDatetime()))
+                            start_time=self.point.time.ToDatetime(
+                                tzinfo=pytz.UTC)))
 
   def ProcessPoint(self) -> None:
     """Updates LEDs, logs point and writes data to PostgresSQL."""
@@ -125,7 +118,7 @@ class ExitSpeed(object):
     logging.info('New Lap %d:%.03f', minutes, seconds)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(postgres.LapEnd(
-          end_time=self.point.time.ToDatetime(),
+          end_time=self.point.time.ToDatetime(tzinfo=pytz.UTC),
           duration_ns=int(duration_ns)))
 
   def CrossStartFinish(self) -> None:
@@ -158,7 +151,7 @@ class ExitSpeed(object):
     while not report:
       report = gps.GetReport()
     track = tracks.FindClosestTrack(report)
-    session_time = pytz.timezone(FLAGS.timezone).localize(
+    session_time = pytz.timezone('UTC').localize(
         datetime.datetime.today())
     self.session = common_lib.Session(
       time=session_time,
