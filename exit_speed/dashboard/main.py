@@ -140,9 +140,7 @@ def UpdateGraph(
         fig = px.line(
           figure_data,
           title=title,
-          # TODO(djhedges): Move this back to elapsed_distance_m
-          # once the dataframe contains that column again.
-          x='elapsed_duration',
+          x='elapsed_distance_m',
           y=point_value,
           color='lap_id',
           # TODO(djhedges): Readd hover data for lap_number.'

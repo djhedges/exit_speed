@@ -20,6 +20,7 @@ from typing import Set
 from typing import Text
 from typing import Tuple
 
+import gps
 import pandas as pd
 from psycopg2 import sql
 
@@ -139,9 +140,9 @@ def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
 
 
 def GetTableData(table_name: Text,
-								 columns: Set[Text],
-								 start_time: datetime.datetime,
-								 end_time: datetime.datetime) -> pd.DataFrame:
+                 columns: Set[Text],
+                 start_time: datetime.datetime,
+                 end_time: datetime.datetime) -> pd.DataFrame:
   select_statement = textwrap.dedent("""
     SELECT time, {columns}
     FROM {table}
@@ -158,25 +159,37 @@ def GetTableData(table_name: Text,
           query.as_string(cursor),
           conn,
           params={'start_time': start_time,
-									'end_time': end_time})
+                  'end_time': end_time})
 
 
 def GetLapData(columns: Set[Text],
-							 start_time: datetime.datetime,
-							 end_time: datetime.datetime) -> pd.DataFrame:
+               start_time: datetime.datetime,
+               end_time: datetime.datetime) -> pd.DataFrame:
   df = None
   for table_name, table_columns in GetTableColumns().items():
     # Only select columns that the table contains.
     columns_to_query = set(columns).intersection(set(table_columns))
     if columns_to_query:
       table_df = GetTableData(table_name, columns_to_query,
-		  												start_time, end_time)
+                              start_time, end_time)
+      if table_name == 'gps':
+        elapsed_distance_col = []
+        elapsed_distance = 0
+        prior_row = None
+        for row in table_df.itertuples():
+          if prior_row:
+            elapsed_distance += gps.EarthDistanceSmall(
+                (row.lat, row.lon),
+                (prior_row.lat, prior_row.lon))
+          elapsed_distance_col.append(elapsed_distance)
+          prior_row = row
+        table_df['elapsed_distance_m'] = elapsed_distance_col
       if df is not None:
         df = pd.merge_asof(df, table_df, on='time')
       else:
         df = table_df
   if df is not None:
-    df['elapsed_duration'] = (
+    df['elapsed_duration_ns'] = (
         df['time'] - df['time'].min())  #pytype: disable=attribute-error
   return df
 
