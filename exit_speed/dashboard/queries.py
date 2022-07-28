@@ -85,7 +85,7 @@ def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
   # Only select columns that map to point_values.
   columns = set(point_values).intersection(set(all_columns))
   # Columns used for graph labels and should always be included.
-  columns.update(['elapsed_distance_m', 'number', 'lap_id'])
+  columns.update(['elapsed_distance_m', 'number', 'lap_id', 'lat', 'lon'])
   if ('front_brake_pressure_percentage' in point_values or
       'rear_brake_pressure_percentage' in point_values):
     columns.update(['front_brake_pressure_voltage',
@@ -195,15 +195,18 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
       lap_df['time_delta'] = CalcTimeDeltas(lap_dfs[0], lap_df)
     lap_dfs.append(lap_df)
   df = pd.concat(lap_dfs)
-  df['front_brake_pressure_percentage'] = (
-    df['front_brake_pressure_voltage'] /
-    df['front_brake_pressure_voltage'].max())
-  df['rear_brake_pressure_percentage'] = (
-    df['rear_brake_pressure_voltage'] /
-    df['rear_brake_pressure_voltage'].max())
+  if 'front_brake_pressure_percentage' in point_values:
+    df['front_brake_pressure_percentage'] = (
+      df['front_brake_pressure_voltage'] /
+      df['front_brake_pressure_voltage'].max())
+  if 'rear_brake_pressure_percentage' in point_values:
+    df['rear_brake_pressure_percentage'] = (
+      df['rear_brake_pressure_voltage'] /
+      df['rear_brake_pressure_voltage'].max())
   if 'gsum' in point_values:
     df['gsum'] = df['accelerometer_x'].abs() + df['accelerometer_y'].abs()
-  df['speed_mph'] = df['speed_ms'] * 2.23694
+  if 'speed_mph' in point_values:
+    df['speed_mph'] = df['speed_ms'] * 2.23694
   return df
 
 
