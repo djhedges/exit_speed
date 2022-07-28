@@ -54,46 +54,6 @@ def GetSessions() -> pd.DataFrame:
     return pd.io.sql.read_sql(select_statement, conn)
 
 
-def GetTimeDelta(lap_ids: List[int]) -> pd.DataFrame:
-  select_statement = textwrap.dedent("""
-    SELECT
-      a.elapsed_distance_m,
-      b.elapsed_duration_ns - a.elapsed_duration_ns AS time_delta,
-      b.number AS lap_number
-    FROM (
-      SELECT
-        elapsed_duration_ns,
-        ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m
-      FROM points
-      JOIN laps ON laps.id=points.lap_id
-      WHERE id = %(lap_id_a)s
-    ) AS a INNER JOIN (
-      SELECT
-        elapsed_duration_ns,
-        ROUND(CAST(elapsed_distance_m AS numeric), 0) as elapsed_distance_m,
-        number
-      FROM points
-      JOIN laps ON laps.id=points.lap_id
-      WHERE id = %(lap_id_b)s
-      ) as b
-    ON a.elapsed_distance_m = b.elapsed_distance_m
-    """)
-  lap_id_a = lap_ids[0]
-  lap_dfs = []
-  with postgres.ConnectToDB() as conn:
-    for lap_id in lap_ids[1:]:
-      df = pd.io.sql.read_sql(
-          select_statement,
-          conn,
-          params={'lap_id_a': str(lap_id_a),
-                  'lap_id_b': str(lap_id)})
-      df['lap_id'] = lap_id
-      lap_dfs.append(df)
-  combined_df = pd.concat(lap_dfs)
-  combined_df.sort_values(by='elapsed_distance_m', inplace=True)
-  return combined_df
-
-
 def GetTableColumns() -> Dict[Text, List[Text]]:
   table_columns = {}
   for table in TABLES:
@@ -191,6 +151,7 @@ def GetLapData(columns: Set[Text],
   if df is not None:
     df['elapsed_duration_ns'] = (
         df['time'] - df['time'].min())  #pytype: disable=attribute-error
+    df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
 
 
@@ -207,6 +168,21 @@ def GetLapStartEndTimes(
       return cursor.fetchone()
 
 
+def CalcTimeDeltas(first_lap: pd.DataFrame,
+                   df: pd.DataFrame) -> List[float]:
+  time_deltas = []
+  first_lap_index = 0
+  for row in df.itertuples():
+    while (first_lap_index < len(first_lap) and
+           first_lap.iloc[first_lap_index].elapsed_distance_m <
+           row.elapsed_distance_m):
+      first_lap_index += 1
+    delta_ns = (row.elapsed_duration_ns -
+                first_lap.iloc[first_lap_index].elapsed_duration_ns)
+    time_deltas.append(delta_ns / 1e6)
+  return time_deltas
+
+
 def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   columns = GetColumnsToQuery(point_values)
   lap_dfs = []
@@ -214,9 +190,10 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
     start_time, end_time = GetLapStartEndTimes(lap_id)
     lap_df = GetLapData(columns, start_time, end_time)
     lap_df['lap_id'] = lap_id
+    if lap_dfs:
+      lap_df['time_delta'] = CalcTimeDeltas(lap_dfs[0], lap_df)
     lap_dfs.append(lap_df)
   df = pd.concat(lap_dfs)
-  df.sort_values(by='time', inplace=True)
   df['front_brake_pressure_percentage'] = (
     df['front_brake_pressure_voltage'] /
     df['front_brake_pressure_voltage'].max())
