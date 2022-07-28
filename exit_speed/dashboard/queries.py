@@ -191,7 +191,7 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
     start_time, end_time = GetLapStartEndTimes(lap_id)
     lap_df = GetLapData(columns, start_time, end_time)
     lap_df['lap_id'] = lap_id
-    if lap_dfs:
+    if lap_dfs and 'time_delta' in point_values:
       lap_df['time_delta'] = CalcTimeDeltas(lap_dfs[0], lap_df)
     lap_dfs.append(lap_df)
   df = pd.concat(lap_dfs)
