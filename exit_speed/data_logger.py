@@ -27,8 +27,6 @@ from absl import logging
 from google.protobuf import any_pb2
 from google.protobuf import message
 
-from exit_speed import gps_pb2
-
 BYTE_ORDER = 'big'
 
 class Error(Exception):
@@ -44,7 +42,7 @@ class Logger(object):
 
   def __init__(self,
                file_prefix_or_name: Text,
-               proto_class: any_pb2.Any=gps_pb2.Point):
+               proto_class: any_pb2.Any):
     """Initializer.
 
     Args:
