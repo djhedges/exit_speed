@@ -78,7 +78,8 @@ class TestAccelerometer(unittest.TestCase):
     sensor_instance = SensorTest(
         session, {}, queue, start_process=False)
     sensor_instance.LogMessage(point)
-    reader = data_logger.Logger(sensor_instance.data_logger.file_prefix)
+    reader = data_logger.Logger(sensor_instance.data_logger.file_prefix,
+																proto_class=exit_speed_pb2.Accelerometer)
     for read_point in reader.ReadProtos():
       self.assertEqual(point, read_point)
 
