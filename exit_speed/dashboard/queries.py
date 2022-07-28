@@ -151,6 +151,7 @@ def GetLapData(columns: Set[Text],
   if df is not None:
     df['elapsed_duration_ns'] = (
         df['time'] - df['time'].min())  #pytype: disable=attribute-error
+    df.interpolate(inplace=True)
     df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
 
