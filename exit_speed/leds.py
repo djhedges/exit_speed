@@ -86,12 +86,8 @@ class LEDs(object):
     """Returns the nearest point on the best lap to the given point."""
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
                                 return_distance=False)
-    for neighbor in neighbors[0]:
-      x = self.tree.data[:, 0][neighbor]
-      y = self.tree.data[:, 1][neighbor]
-      for point_b in self.best_lap:
-        if point_b.lat == x and point_b.lon == y:
-          return point_b
+    index = neighbors[0][0]
+    return self.best_lap[index]
 
   def GetLedColor(self) -> Tuple[int, int, int]:
     median_delta = self.GetMovingSpeedDelta()
