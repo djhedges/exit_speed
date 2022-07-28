@@ -173,7 +173,7 @@ def CalcTimeDeltas(first_lap: pd.DataFrame,
   time_deltas = []
   first_lap_index = 0
   for row in df.itertuples():
-    while (first_lap_index < len(first_lap) and
+    while (first_lap_index < len(first_lap) - 1 and
            first_lap.iloc[first_lap_index].elapsed_distance_m <
            row.elapsed_distance_m):
       first_lap_index += 1
