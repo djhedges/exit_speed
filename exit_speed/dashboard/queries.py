@@ -168,6 +168,7 @@ def GetLapData(columns: Set[Text],
 
 
 @funcy.log_durations(logging.debug)
+@funcy.cache(timeout=CACHE_TIMEOUT)
 def GetLapStartEndTimes(
     lap_id: int) -> Tuple[datetime.datetime, datetime.datetime]:
   select_statement = textwrap.dedent("""
