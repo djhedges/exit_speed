@@ -14,6 +14,7 @@ dash-html-components==2.0.0
 dash-table==5.0.0
 dash==2.0.0
 fake_rpi==0.7.1
+funcy==1.17
 google-cloud-storage==1.43.0
 gps==3.19
 grafanalib==0.6.1

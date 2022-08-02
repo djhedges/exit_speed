@@ -20,8 +20,10 @@ from typing import Set
 from typing import Text
 from typing import Tuple
 
+import funcy
 import gps
 import pandas as pd
+from absl import logging
 from psycopg2 import sql
 
 from exit_speed import postgres
@@ -35,6 +37,7 @@ def GetTracks() -> List[Text]:
   return [track.name for track in tracks.TRACK_LIST]
 
 
+@funcy.log_durations(logging.debug)
 def GetSessions() -> pd.DataFrame:
   select_statement = textwrap.dedent("""
   SELECT
@@ -54,6 +57,7 @@ def GetSessions() -> pd.DataFrame:
     return pd.io.sql.read_sql(select_statement, conn)
 
 
+@funcy.log_durations(logging.debug)
 def GetTableColumns() -> Dict[Text, List[Text]]:
   table_columns = {}
   for table in TABLES:
@@ -69,6 +73,7 @@ def GetTableColumns() -> Dict[Text, List[Text]]:
   return table_columns
 
 
+@funcy.log_durations(logging.debug)
 def GetPointsColumns() -> Set[Text]:
   columns = set()
   table_columns = GetTableColumns()
@@ -80,6 +85,7 @@ def GetPointsColumns() -> Set[Text]:
   return columns
 
 
+@funcy.log_durations(logging.debug)
 def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
@@ -99,6 +105,7 @@ def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
   return columns
 
 
+@funcy.log_durations(logging.debug)
 def GetTableData(table_name: Text,
                  columns: Set[Text],
                  start_time: datetime.datetime,
@@ -122,6 +129,7 @@ def GetTableData(table_name: Text,
                   'end_time': end_time})
 
 
+@funcy.log_durations(logging.debug)
 def GetLapData(columns: Set[Text],
                start_time: datetime.datetime,
                end_time: datetime.datetime) -> pd.DataFrame:
@@ -156,6 +164,7 @@ def GetLapData(columns: Set[Text],
   return df
 
 
+@funcy.log_durations(logging.debug)
 def GetLapStartEndTimes(
     lap_id: int) -> Tuple[datetime.datetime, datetime.datetime]:
   select_statement = textwrap.dedent("""
@@ -169,6 +178,7 @@ def GetLapStartEndTimes(
       return cursor.fetchone()
 
 
+@funcy.log_durations(logging.debug)
 def CalcTimeDeltas(first_lap: pd.DataFrame,
                    df: pd.DataFrame) -> List[float]:
   time_deltas = []
@@ -184,6 +194,7 @@ def CalcTimeDeltas(first_lap: pd.DataFrame,
   return time_deltas
 
 
+@funcy.log_durations(logging.debug)
 def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   columns = GetColumnsToQuery(point_values)
   lap_dfs = []
@@ -210,6 +221,7 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   return df
 
 
+@funcy.log_durations(logging.debug)
 def GetLiveData(start_time: datetime.datetime, point_values: List[Text]):
   all_columns = GetPointsColumns()
   # Only select columns that map to point_values.
