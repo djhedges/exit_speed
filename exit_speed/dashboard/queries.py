@@ -30,6 +30,7 @@ from exit_speed import postgres
 from exit_speed import tracks
 
 CACHE_TIMEOUT = 60 * 10  # 10 minutes.
+CACHE_DF = {}
 TABLES = ('accelerometer', 'gps', 'gyroscope', 'labjack', 'wbo2')
 
 
@@ -108,6 +109,24 @@ def GetColumnsToQuery(point_values: List[Text]) -> Set[Text]:
   return columns
 
 
+def DfCache(func):
+  """Decorator for caching functions which return panda dataframes.
+
+  Converts function arguments into a hashable format and creates a copy of
+  the dataframe.  Note this is unbounded and could possible OOM at some point.
+  """
+  def Wrapper(*args, **kwargs):
+    repr_args = ''.join(repr(arg) for arg in args)
+    cache_key = func.__name__ + repr_args
+    if cache_key in CACHE_DF:
+      return CACHE_DF[cache_key]
+    df = func(*args, **kwargs)
+    CACHE_DF[cache_key] = df.copy()
+    return df
+  return Wrapper
+
+
+@DfCache
 @funcy.log_durations(logging.debug)
 def GetTableData(table_name: Text,
                  columns: Set[Text],
@@ -132,6 +151,7 @@ def GetTableData(table_name: Text,
                   'end_time': end_time})
 
 
+@DfCache
 @funcy.log_durations(logging.debug)
 def GetLapData(columns: Set[Text],
                start_time: datetime.datetime,
@@ -182,6 +202,7 @@ def GetLapStartEndTimes(
       return cursor.fetchone()
 
 
+@DfCache
 @funcy.log_durations(logging.debug)
 def CalcTimeDeltas(first_lap: pd.DataFrame,
                    df: pd.DataFrame) -> List[float]:
@@ -198,6 +219,7 @@ def CalcTimeDeltas(first_lap: pd.DataFrame,
   return time_deltas
 
 
+@DfCache
 @funcy.log_durations(logging.debug)
 def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   columns = GetColumnsToQuery(point_values)
