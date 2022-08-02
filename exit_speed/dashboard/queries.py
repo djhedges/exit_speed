@@ -29,7 +29,7 @@ from psycopg2 import sql
 from exit_speed import postgres
 from exit_speed import tracks
 
-
+CACHE_TIMEOUT = 60 * 10  # 10 minutes.
 TABLES = ('accelerometer', 'gps', 'gyroscope', 'labjack', 'wbo2')
 
 
@@ -38,6 +38,7 @@ def GetTracks() -> List[Text]:
 
 
 @funcy.log_durations(logging.debug)
+@funcy.cache(timeout=CACHE_TIMEOUT)
 def GetSessions() -> pd.DataFrame:
   select_statement = textwrap.dedent("""
   SELECT
@@ -58,6 +59,7 @@ def GetSessions() -> pd.DataFrame:
 
 
 @funcy.log_durations(logging.debug)
+@funcy.cache(timeout=CACHE_TIMEOUT)
 def GetTableColumns() -> Dict[Text, List[Text]]:
   table_columns = {}
   for table in TABLES:
@@ -74,6 +76,7 @@ def GetTableColumns() -> Dict[Text, List[Text]]:
 
 
 @funcy.log_durations(logging.debug)
+@funcy.cache(timeout=CACHE_TIMEOUT)
 def GetPointsColumns() -> Set[Text]:
   columns = set()
   table_columns = GetTableColumns()
