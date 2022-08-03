@@ -139,8 +139,7 @@ def UpdateGraph(
           x='elapsed_distance_m',
           y=point_value,
           color='lap_id',
-          # TODO(djhedges): Readd hover data for lap_number.'
-          hover_data=['lap_id', point_value])
+          hover_data=['lap_id', 'lap_number', point_value])
         fig.update_xaxes(showspikes=True)
         fig.update_yaxes(fixedrange=True)
         fig.update_layout(hovermode='x unified')

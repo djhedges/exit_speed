@@ -189,10 +189,10 @@ def GetLapData(columns: Set[Text],
 
 @funcy.log_durations(logging.debug)
 @funcy.cache(timeout=CACHE_TIMEOUT)
-def GetLapStartEndTimes(
+def GetLapTableData(
     lap_id: int) -> Tuple[datetime.datetime, datetime.datetime]:
   select_statement = textwrap.dedent("""
-  SELECT start_time, end_time
+  SELECT start_time, end_time, number
   FROM laps
   WHERE id = %s
   """)
@@ -225,9 +225,10 @@ def GetLapsData(lap_ids: List[int], point_values: List[Text]) -> pd.DataFrame:
   columns = GetColumnsToQuery(point_values)
   lap_dfs = []
   for lap_id in lap_ids:
-    start_time, end_time = GetLapStartEndTimes(lap_id)
+    start_time, end_time, lap_number = GetLapTableData(lap_id)
     lap_df = GetLapData(columns, start_time, end_time)
     lap_df['lap_id'] = lap_id
+    lap_df['lap_number'] = lap_number
     if lap_dfs and 'time_delta' in point_values:
       lap_df['time_delta'] = CalcTimeDeltas(lap_dfs[0], lap_df)
     lap_dfs.append(lap_df)
