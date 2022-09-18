@@ -47,13 +47,14 @@ from exit_speed.tracks import base
 
 def GetPriorUniquePoint(lap: List[exit_speed_pb2.Gps],
                         point_c: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
-  """Avoids a division by zero if the two points have the same time.
+  """Avoids a division by zero if the two points have the same values.
 
   Older logged data had multiple points at the same time.
   """
   index = -1
   point = lap[-1]
-  while point.time.ToNanoseconds() == point_c.time.ToNanoseconds():
+  while (point.time.ToNanoseconds() == point_c.time.ToNanoseconds() or
+				 (point.lat == point_c.lat and point.lon == point_c.lon)):
     index -= 1
     point = lap[index]
   return point

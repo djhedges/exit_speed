@@ -46,7 +46,13 @@ FLAGS.set_default('config_path',
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        'testdata/Bug/Test Parking Lot/2020-06-11T22:00:00/')
+                        'testdata/Bug/Test Parking Lot/')
+EXPECTED_DURATIONS = {
+    '2020-06-11T22:00:00': {1: 71500000000,
+                            2: 76647099200,
+    },
+    '2022-09-14T20:01:31.072481': {1: 171006277000},
+}
 
 
 class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
@@ -58,34 +64,37 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self._AddMock(gps, 'gps')
 
   def testLoadProtos(self):
-    prefix_protos = import_data.LoadProtos(DATA_DIR)
+    data_dir = os.path.join(DATA_DIR, '2020-06-11T22:00:00')
+    prefix_protos = import_data.LoadProtos(data_dir)
     self.assertEqual(1962, len(prefix_protos['GpsSensor']))
 
   def testCopyProtosToPostgres(self):
-    prefix_protos = import_data.LoadProtos(DATA_DIR)
+    data_dir = os.path.join(DATA_DIR, '2020-06-11T22:00:00')
+    prefix_protos = import_data.LoadProtos(data_dir)
     import_data.CopyProtosToPostgres(prefix_protos)
     self.cursor.execute('SELECT count(*) FROM gps')
     self.assertEqual(1962, self.cursor.fetchone()[0])
 
   def testReRunMain(self):
-    prefix_protos = import_data.LoadProtos(DATA_DIR)
-    import_data.ReRunMain(DATA_DIR, prefix_protos['GpsSensor'])
-    self.cursor.execute('SELECT * from sessions')
-    db_id, _, track, car, live_data = self.cursor.fetchone()
-    self.assertEqual(db_id, 1)
-    self.assertEqual(track, tracks.test_track.TestTrack.name)
-    self.assertEqual(car, 'Bug')
-    self.assertFalse(live_data)
-    self.cursor.execute(
-        'SELECT number, duration_ns FROM laps '
-        'WHERE duration_ns IS NOT NULL')
-    expected_durations = {
-      1: 71500000000,
-      2: 58898946624,
-      3: 58854358144,
-    }
-    for lap_number, duration_ns in self.cursor.fetchall():
-      self.assertEqual(duration_ns, expected_durations[lap_number])
+    for test_dir, expected_durations in EXPECTED_DURATIONS.items():
+      data_dir = os.path.join(DATA_DIR, test_dir)
+      prefix_protos = import_data.LoadProtos(data_dir)
+      import_data.ReRunMain(data_dir, prefix_protos['GpsSensor'])
+      self.cursor.execute('SELECT * from sessions')
+      db_id, _, track, car, live_data = self.cursor.fetchone()
+      self.assertEqual(db_id, 1)
+      self.assertEqual(track, tracks.test_track.TestTrack.name)
+      self.assertEqual(car, 'Bug')
+      self.assertFalse(live_data)
+      self.cursor.execute(
+          'SELECT id FROM sessions WHERE time = %s', (test_dir,))
+      session_id = self.cursor.fetchall()[0]
+      self.cursor.execute(
+          'SELECT number, duration_ns FROM laps '
+          'WHERE session_id = %s '
+          'AND duration_ns IS NOT NULL', (session_id,))
+      for lap_number, duration_ns in self.cursor.fetchall():
+        self.assertEqual(duration_ns, expected_durations[lap_number])
 
 
 if __name__ == '__main__':
