@@ -29,16 +29,24 @@ class TestLapLib(unittest.TestCase):
   def testGetPriorUniquePoint(self):
     point_c = exit_speed_pb2.Gps()
     point_c.time.FromMilliseconds(10)
+    point_c.lat = 1.0
+    point_c.lon = 2.0
     lap = []
     point = exit_speed_pb2.Gps()
     lap.append(point)
     point.time.FromMilliseconds(9)
+    point.lat = 2.0
+    point.lon = 3.0
     point = exit_speed_pb2.Gps()
     lap.append(point)
     point.time.FromMilliseconds(9)
+    point.lat = 2.0
+    point.lon = 3.0
     point = exit_speed_pb2.Gps()
     lap.append(point)
     point.time.FromMilliseconds(8)
+    point.lat = 3.0
+    point.lon = 4.0
     returned = lap_lib.GetPriorUniquePoint(lap, point_c)
     self.assertEqual(8, returned.time.ToMilliseconds())
 
