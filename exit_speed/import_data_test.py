@@ -42,7 +42,7 @@ with mock.patch.object(adafruit_platformdetect, 'Detector') as mock_detector:
 FLAGS = flags.FLAGS
 FLAGS.set_default('config_path',
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
-        'testdata/test_config.yaml'))
+        'testdata/test_postgres.yaml'))
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
