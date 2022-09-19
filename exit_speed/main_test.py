@@ -103,7 +103,7 @@ class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     point_c.lon = -122.694638
     lap = []
     lap.extend([point_a, point_b])
-    es = main.ExitSpeed(min_points_per_session=0)
+    es = main.ExitSpeed(min_points_per_lap=0)
     es.current_lap = lap
     es.lap_number = 1
     es.laps = {1: lap}

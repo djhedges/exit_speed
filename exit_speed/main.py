@@ -43,7 +43,7 @@ class ExitSpeed(object):
       self,
       start_finish_range=20,  # Meters, ~4x the width of straightaways.
       live_data=True,
-      min_points_per_session=60 * 10):  # 1 min @ gps 10hz):
+      min_points_per_lap=60 * 10):  # 1 min @ gps 10hz):
     """Initializer.
 
     Args:
@@ -51,11 +51,11 @@ class ExitSpeed(object):
                           determining if the car crosses the start/finish.
       live_data: A boolean, if True indicates that this session's data should be
                  tagged as live.
-      min_points_per_session:  Used to prevent sessions from prematurely ending.
+      min_points_per_lap:  Used to prevent laps from prematurely ending.
     """
     self.start_finish_range = start_finish_range
     self.live_data = live_data
-    self.min_points_per_session = min_points_per_session
+    self.min_points_per_lap = min_points_per_lap
     self.point_queue = multiprocessing.Queue()
 
     self.config = config_lib.LoadConfig()
@@ -123,7 +123,12 @@ class ExitSpeed(object):
 
   def CrossStartFinish(self) -> None:
     """Checks and handles when the car crosses the start/finish."""
-    if len(self.current_lap) >= self.min_points_per_session:
+    logging.log_every_n_seconds(
+        logging.INFO,
+        'Current lap length: %s',
+        10,
+        len(self.current_lap))
+    if len(self.current_lap) >= self.min_points_per_lap:
       prior_point = lap_lib.GetPriorUniquePoint(self.current_lap, self.point)
       start_finish_distance = common_lib.PointDeltaFromTrack(
           self.session.track, self.point)
