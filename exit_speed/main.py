@@ -43,7 +43,7 @@ class ExitSpeed(object):
       self,
       start_finish_range=20,  # Meters, ~4x the width of straightaways.
       live_data=True,
-      min_points_per_lap=60 * 10):  # 1 min @ gps 10hz):
+      min_points_per_lap=30 * 10):  # 30 seconds @ gps 10hz):
     """Initializer.
 
     Args:

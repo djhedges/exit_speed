@@ -46,12 +46,31 @@ FLAGS.set_default('config_path',
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        'testdata/Bug/Test Parking Lot/')
+                        'testdata/')
 EXPECTED_DURATIONS = {
-    '2020-06-11T22:00:00': {1: 71500000000,
-                            2: 76647099200,
+    'Bug/Test Parking Lot/2020-06-11T22:00:00': {1: 31300000000,
+                                                 2: 40230395520,
+                                                 3: 41317467824,
+                                                 4: 35329631376,
+                                                 5: 40836133184,
     },
-    '2022-09-14T20:01:31.072481': {1: 171006277000},
+    'Bug/Test Parking Lot/2022-09-14T20:01:31.072481': {1: 171006277000,
+                                                        2: 0},
+    'Corrado/Portland International Raceway/2020-06-20': {1: 162400000000,
+                                                          2: 96508634400,
+                                                          3: 92020972432,
+                                                          4: 92144408672,
+                                                          5: 91838929920,
+                                                          6: 90884317040,
+                                                          7: 91417934496,
+                                                          8: 91510285456,
+                                                          9: 93499884352,
+                                                          10: 92428355488,
+                                                          11: 91658659808,
+                                                          12: 91076583760,
+                                                          13: 91270345664,
+                                                          14: 90930683824,
+                                                          15: 91508900336},
 }
 
 
@@ -64,12 +83,14 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self._AddMock(gps, 'gps')
 
   def testLoadProtos(self):
-    data_dir = os.path.join(DATA_DIR, '2020-06-11T22:00:00')
+    data_dir = os.path.join(DATA_DIR,
+                            'Bug/Test Parking Lot/2020-06-11T22:00:00')
     prefix_protos = import_data.LoadProtos(data_dir)
     self.assertEqual(1962, len(prefix_protos['GpsSensor']))
 
   def testCopyProtosToPostgres(self):
-    data_dir = os.path.join(DATA_DIR, '2020-06-11T22:00:00')
+    data_dir = os.path.join(DATA_DIR,
+                            'Bug/Test Parking Lot/2020-06-11T22:00:00')
     prefix_protos = import_data.LoadProtos(data_dir)
     import_data.CopyProtosToPostgres(prefix_protos)
     self.cursor.execute('SELECT count(*) FROM gps')
@@ -77,6 +98,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
 
   def testReRunMain(self):
     for test_dir, expected_durations in EXPECTED_DURATIONS.items():
+      session = os.path.basename(test_dir)
       data_dir = os.path.join(DATA_DIR, test_dir)
       prefix_protos = import_data.LoadProtos(data_dir)
       import_data.ReRunMain(data_dir, prefix_protos['GpsSensor'])
@@ -87,14 +109,16 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       self.assertEqual(car, 'Bug')
       self.assertFalse(live_data)
       self.cursor.execute(
-          'SELECT id FROM sessions WHERE time = %s', (test_dir,))
+          'SELECT id FROM sessions WHERE time = %s', (session,))
       session_id = self.cursor.fetchall()[0]
       self.cursor.execute(
           'SELECT number, duration_ns FROM laps '
           'WHERE session_id = %s '
           'AND duration_ns IS NOT NULL', (session_id,))
       for lap_number, duration_ns in self.cursor.fetchall():
-        self.assertEqual(duration_ns, expected_durations[lap_number])
+        with self.subTest(
+            name='Session %s Lap %d duration test' % (session, lap_number)):
+          self.assertEqual(duration_ns, expected_durations.get(lap_number))
 
 
 if __name__ == '__main__':
