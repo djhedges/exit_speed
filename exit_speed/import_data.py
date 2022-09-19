@@ -86,7 +86,7 @@ def ReRunMain(data_dir, protos):
 
 def main(unused_argv):
   prefix_protos = LoadProtos(FLAGS.data_dir)
-  ReRunMain(FLAGS.data_dir, prefix_protos['GpsSensor'])
+  ReRunMain(FLAGS.data_dir, prefix_protos['GPSProcess'])
   CopyProtosToPostgres(prefix_protos)
 
 
