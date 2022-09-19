@@ -36,11 +36,11 @@ FLAGS.set_default('led_brightness', 0.05)
 
 
 PREFIX_PROTO_MAP = {
-  'AccelerometerSensor': exit_speed_pb2.Accelerometer,
-  'GpsSensor': exit_speed_pb2.Gps,
-  'GyroscopeSensor': exit_speed_pb2.Gyroscope,
-  'LabjackSensor': exit_speed_pb2.Labjack,
-  'WBO2Sensor': exit_speed_pb2.WBO2,
+  'AccelerometerProcess': exit_speed_pb2.Accelerometer,
+  'GPSProcess': exit_speed_pb2.Gps,
+  'GyroscopeProcess': exit_speed_pb2.Gyroscope,
+  'LabjackProcess': exit_speed_pb2.Labjack,
+  'WBO2Process': exit_speed_pb2.WBO2,
 }
 
 def LoadProtos(data_dir):

@@ -86,7 +86,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     data_dir = os.path.join(DATA_DIR,
                             'Bug/Test Parking Lot/2020-06-11T22:00:00')
     prefix_protos = import_data.LoadProtos(data_dir)
-    self.assertEqual(1962, len(prefix_protos['GpsSensor']))
+    self.assertEqual(1962, len(prefix_protos['GPSProcess']))
 
   def testCopyProtosToPostgres(self):
     data_dir = os.path.join(DATA_DIR,
@@ -101,7 +101,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       session = os.path.basename(test_dir)
       data_dir = os.path.join(DATA_DIR, test_dir)
       prefix_protos = import_data.LoadProtos(data_dir)
-      import_data.ReRunMain(data_dir, prefix_protos['GpsSensor'])
+      import_data.ReRunMain(data_dir, prefix_protos['GPSProcess'])
       self.cursor.execute('SELECT * from sessions')
       db_id, _, track, car, live_data = self.cursor.fetchone()
       self.assertEqual(db_id, 1)
