@@ -22,6 +22,7 @@ from typing import Tuple
 import adafruit_dotstar
 import board
 import numpy as np
+from absl import app
 from absl import flags
 from absl import logging
 from gps import EarthDistanceSmall
@@ -140,3 +141,12 @@ class LEDs(object):
     self.Fill((0, 0, 255),  # Blue
               additional_delay=1,
               ignore_update_interval=True)
+
+def main(unused_argv):
+  leds = LEDs()
+  color = (255, 255, 0)
+  leds.Fill(color, ignore_update_interval=True)
+
+
+if __name__ == '__main__':
+  app.run(main)
