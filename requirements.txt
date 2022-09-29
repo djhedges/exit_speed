@@ -49,7 +49,7 @@ mock==4.0.2
 mypy-extensions==0.4.3
 networkx==2.6.3
 ninja==1.10.2.4
-numpy==1.22.0
+numpy==1.19.0
 parameterized==0.7.0
 pg8000==1.29.1
 pillow==9.0.1
