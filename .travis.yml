@@ -1,7 +1,6 @@
 os: linux
 arch:
   - amd64
-  - arm64
 dist: buster
 language:
   - python
