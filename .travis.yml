@@ -18,7 +18,7 @@ install:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
   - sudo add-apt-repository -y 'deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian buster main'
   - sudo apt-get update
-  - sudo apt-get install fonts-ubuntu
+  - sudo apt-get install fonts-liberation
   # Sktree Balltree
   - sudo apt-get install gfortran
   - sudo apt-get install libatlas3-base
