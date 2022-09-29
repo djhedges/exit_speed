@@ -16,7 +16,7 @@ adafruit-circuitpython-typing==1.8.1
 adafruit-platformdetect==3.26.0
 adafruit-pureio==1.1.9
 asn1crypto==1.5.1
-astroid==2.5
+astroid==2.12.10
 attrs==22.1.0
 brotli==1.0.9
 click==8.1.3
