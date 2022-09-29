@@ -59,7 +59,7 @@ psycopg2==2.9.3
 pydot==1.4.2
 pyftdi==0.54.0
 pygatt==4.0.5
-pylint==2.6.0
+pylint==2.15.3
 pyparsing==3.0.9
 pyserial==3.5
 python-dateutil==2.7.3
