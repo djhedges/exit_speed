@@ -18,7 +18,7 @@ funcy==1.17
 gps==3.19
 grafanalib==0.6.1
 grpcio==1.18.0
-libcst==0.3.23  # For pytype, new version relies on rust which doesn't compile.
+libcst
 mlx9064x-driver==1.3.0
 mock==4.0.2
 parameterized==0.7.0
@@ -34,7 +34,7 @@ pytz==2022.1
 sdnotify==0.3.2
 smbus2==0.4.1
 testing.postgresql==1.3.0
-werkzeug==2.0.0
+werkzeug
 
 # Finally scikit.
 scikit-learn==0.20.2
