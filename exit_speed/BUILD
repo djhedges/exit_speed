@@ -1,18 +1,4 @@
-load(
-    "@pypi//:requirements.bzl",
-    "data_requirement",
-    "dist_info_requirement",
-    "entry_point",
-)
 load("@rules_python//python:defs.bzl", "py_binary")
-load("@rules_python//python:pip.bzl", "compile_pip_requirements")
-
-compile_pip_requirements(
-    name = "requirements",
-    extra_args = ["--allow-unsafe"],
-    requirements_in = "requirements.txt",
-    requirements_txt = "requirements_lock.txt",
-)
 
 py_binary(
   name = "main",
@@ -29,10 +15,7 @@ py_binary(
 					":postgres",
 					":tire_temperature",
 					":wbo2",
-					"//exit_speed/tracks",
-					"@pypi_absl_py//:pkg",
-					"@pypi_sdnotify//:pkg",
-					"@pypi_pytz//:pkg",
+					"//exit_speed/tracks"
 					]
 )
 
@@ -46,7 +29,6 @@ py_library(
   srcs = ["accelerometer.py"],
   deps = [":exit_speed_proto",
 					":sensor",
-					#"@pypi_adafruit_circuitpython_fxos8700//:pkg",
 					]
 )
 
@@ -55,20 +37,17 @@ py_library(
   srcs = ["common_lib.py"],
   deps = [":exit_speed_proto",
 					"//exit_speed/tracks",
-					"@pypi_gps//:pkg",
 					]
 )
 
 py_library(
   name = "config_lib",
   srcs = ["config_lib.py"],
-  deps = ["@pypi_pyyaml//:pkg"],
 )
 
 py_library(
   name = "data_logger",
   srcs = ["data_logger.py"],
-  deps = ["@pypi_absl_py//:pkg"],
 )
 
 py_library(
@@ -76,8 +55,6 @@ py_library(
   srcs = ["gps_sensor.py"],
   deps = [":exit_speed_proto",
 					":sensor",
-					"@pypi_absl_py//:pkg",
-					"@pypi_gps//:pkg"
 					]
 )
 
@@ -86,8 +63,6 @@ py_library(
   srcs = ["gyroscope.py"],
   deps = [":exit_speed_proto",
 					":sensor",
-					"@pypi_absl_py//:pkg",
-					#"@pypi_adafruit_circuitpython_fxas21002c//:pkg",
 					]
 )
 
