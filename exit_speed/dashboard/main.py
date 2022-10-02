@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """App Engine dashboard using Dash, Plotly and Pandas."""
+import datetime
 import urllib
 from typing import Dict
 from typing import List
@@ -94,12 +95,18 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
 @app.callback(
   Output('sessions-table', 'data'),
   Input('track-dropdown', 'value'),
+  Input('date-picker-range', 'start_date'),
+  Input('date-picker-range', 'end_date'),
 )
-def UpdateSessions(track: pd.DataFrame) -> pd.DataFrame:
+def UpdateSessions(track: pd.DataFrame,
+									 start_date: datetime.date,
+									 end_date: datetime.date) -> pd.DataFrame:
   # TODO: Make this a more efficient query.
   sessions = queries.GetSessions()
-  filtered_df = sessions[sessions.track == track]
-  return filtered_df.to_dict('records')
+  df = sessions[sessions.track == track]
+  if start_date and end_date:
+    df = df[(df['session_time'] > start_date) & (df['session_time'] < end_date)]
+  return df.to_dict('records')
 
 
 @app.callback(
@@ -195,6 +202,7 @@ def main(unused_argv):
       dcc.Location(id='url', refresh=False),
       dcc.Link('Home', href='/'),
       dcc.Link('Clear', href='/track=None&points=None'),
+      dcc.DatePickerRange(id='date-picker-range'),
       dcc.Dropdown(
         id='track-dropdown',
         options=[{'label': i, 'value': i} for i in tracks],
