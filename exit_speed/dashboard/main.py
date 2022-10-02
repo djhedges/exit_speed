@@ -99,8 +99,8 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
   Input('date-picker-range', 'end_date'),
 )
 def UpdateSessions(track: pd.DataFrame,
-									 start_date: datetime.date,
-									 end_date: datetime.date) -> pd.DataFrame:
+                   start_date: datetime.date,
+                   end_date: datetime.date) -> pd.DataFrame:
   # TODO: Make this a more efficient query.
   sessions = queries.GetSessions()
   df = sessions[sessions.track == track]
@@ -138,7 +138,7 @@ def UpdateGraph(
           if len(lap_ids) < 2:
             continue  # Need at least two laps to make a comparison.
           title = ('time_delta (milliseconds) vs first selected lap '
-									 '(lap_id: %s)' % lap_ids[0])
+                   '(lap_id: %s)' % lap_ids[0])
         graph_type = 'graph'
         fig = px.line(
           laps_data,
@@ -202,7 +202,11 @@ def main(unused_argv):
       dcc.Location(id='url', refresh=False),
       dcc.Link('Home', href='/'),
       dcc.Link('Clear', href='/track=None&points=None'),
-      dcc.DatePickerRange(id='date-picker-range'),
+      dcc.DatePickerRange(
+        id='date-picker-range',
+        updatemode='bothdates',
+        clearable=True,
+      ),
       dcc.Dropdown(
         id='track-dropdown',
         options=[{'label': i, 'value': i} for i in tracks],
