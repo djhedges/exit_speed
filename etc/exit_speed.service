@@ -10,7 +10,7 @@ Description=ExitSpeed
 [Service]
 SyslogIdentifier=exit_speed
 Type=notify
-ExecStart=/bin/bash -c 'cd /home/pi/git/exit_speed && /usr/bin/python3 -m exit_speed.main --config_path /home/pi/git/exit_speed/etc/corrado.yaml'
+ExecStart=/bin/bash -c 'cd /home/$USER/git/exit_speed && /usr/bin/python3 -m exit_speed.main --config_path /home/$USER/git/exit_speed/etc/corrado.yaml'
 Restart=always
 RestartSec=3
 WatchdogSec=30

@@ -10,7 +10,7 @@ Description=ExitSpeedDashboard
 [Service]
 SyslogIdentifier=exit_speed_dash
 Type=simple
-ExecStart=/bin/bash -c 'cd /home/pi/git/exit_speed && /usr/bin/nice /usr/bin/python3 -m exit_speed.dashboard.main'
+ExecStart=/bin/bash -c 'cd /home/$USER/git/exit_speed && /usr/bin/nice /usr/bin/python3 -m exit_speed.dashboard.main'
 Restart=always
 RestartSec=3
 
