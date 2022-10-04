@@ -113,20 +113,25 @@ class Generator(object):
         )
     )
 
-  def AddPointPanel(
-      self, title: Text, point_values: Tuple[Text], y_axis_title: Text):
+  def AddPointPanel(self,
+										title: Text,
+										table_name: Text,
+										point_values: Tuple[Text],
+										y_axis_title: Text):
     select_statement = textwrap.dedent("""
         SELECT
           time,
           {columns},
           laps.number::text
-        FROM points
+        FROM {table_name}
         JOIN laps ON laps.id=points.lap_id
         WHERE  $__timeFilter(time)
         ORDER BY time
         """)
-    query = sql.SQL(select_statement).format(columns=sql.SQL(',').join(
-            [sql.Identifier(col) for col in point_values]))
+    query = sql.SQL(select_statement).format(
+            table_name=table_name,
+            columns=sql.SQL(',').join(
+                [sql.Identifier(col) for col in point_values]))
     with postgres.ConnectToDB() as conn:
       self.AddGraphPanel(title, query.as_string(conn), y_axis_title)
 
