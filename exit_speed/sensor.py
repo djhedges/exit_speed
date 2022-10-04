@@ -97,7 +97,8 @@ class SensorBase(object):
     self._process.join()
 
   def AddPointToQueue(self, point: exit_speed_pb2.Gps):
-    point.time.FromDatetime(datetime.datetime.utcnow())
+    if not point.time.seconds:
+      point.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(point)
     self._point_queue.put(point.SerializeToString())
 

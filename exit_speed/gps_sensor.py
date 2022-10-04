@@ -62,6 +62,7 @@ class GPSProcess(sensor.SensorBase):
           speed_ms=report.speed)
         if report.get('alt'):
           proto.alt = report.alt
+        proto.time.FromJsonString(report['time'])
         self.AddPointToQueue(proto)
         self.LogAndExportProto(proto)
 
