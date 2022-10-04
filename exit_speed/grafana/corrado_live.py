@@ -13,18 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Grafana dashboard for live Honda data."""
+from grafanalib import formatunits
+
 from exit_speed.grafana import dashboard_generator
 
 
 def CreateDashboard():
   generator = dashboard_generator.Generator('Corrado Live')
   generator.AddLapTimesTable()
-  generator.AddPointPanel('Speed', 'gps', ('speed_ms',), 'ms')
-  generator.AddPointPanel('TPS', 'wbo2', ('tps_voltage',), 'V')
   generator.AddPointPanel(
-      'Front Brake Pressure', 'labjack', ('front_brake_pressure_voltage',), 'V')
-  generator.AddPointPanel('RPM', 'wbo2', ('rpm',), 'rpm')
+      'Speed', 'gps', ('speed_ms',), formatunits.METERS_PER_SEC)
   generator.AddPointPanel(
-      'Battery Voltage', 'labjack', ('battery_voltage',), 'V')
+      'TPS', 'wbo2', ('tps_voltage',), formatunits.VOLT)
+  generator.AddPointPanel(
+      'Front Brake Pressure', 'labjack', ('front_brake_pressure_voltage',),
+      formatunits.VOLT)
+  generator.AddPointPanel('RPM', 'wbo2', ('rpm',), formatunits.RPM)
+  generator.AddPointPanel(
+      'Battery Voltage', 'labjack', ('battery_voltage',), formatunits.VOLT)
   generator.AddPointsExportedPanel()
   return generator.GenerateDashboard()

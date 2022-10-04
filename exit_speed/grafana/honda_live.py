@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Grafana dashboard for live Honda data."""
+from grafanalib import formatunits
+
 from exit_speed.grafana import dashboard_generator
 
 
@@ -20,9 +22,11 @@ def CreateDashboard():
   generator = dashboard_generator.Generator('Honda Live')
   generator.AddWorldMapPanel()
   generator.AddLapTimesTable()
-  generator.AddPointPanel('Speed', 'gps', ('speed_ms',), 'ms')
-  generator.AddPointPanel('TPS', 'wbo2', ('tps_voltage',), 'V')
   generator.AddPointPanel(
-      'Battery Voltage', 'labjack', ('battery_voltage',), 'V')
+      'Speed', 'gps', ('speed_ms',), formatunits.METERS_PER_SEC)
+  generator.AddPointPanel(
+      'TPS', 'wbo2', ('tps_voltage',), formatunits.VOLT)
+  generator.AddPointPanel(
+      'Battery Voltage', 'labjack', ('battery_voltage',), formatunits.VOLT)
   generator.AddPointsExportedPanel()
   return generator.GenerateDashboard()
