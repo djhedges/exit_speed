@@ -121,15 +121,13 @@ class Generator(object):
     select_statement = textwrap.dedent("""
         SELECT
           time,
-          {columns},
-          laps.number::text
+          {columns}
         FROM {table_name}
-        JOIN laps ON laps.id=points.lap_id
         WHERE  $__timeFilter(time)
         ORDER BY time
         """)
     query = sql.SQL(select_statement).format(
-            table_name=table_name,
+            table_name=sql.Identifier(table_name),
             columns=sql.SQL(',').join(
                 [sql.Identifier(col) for col in point_values]))
     with postgres.ConnectToDB() as conn:
@@ -140,7 +138,7 @@ class Generator(object):
         SELECT
           $__timeGroupAlias(time, 1s),
           count(*)
-        FROM points
+        FROM gps
         WHERE
           $__timeFilter(time)
         GROUP BY 1
