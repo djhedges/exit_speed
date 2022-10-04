@@ -78,12 +78,11 @@ class Generator(object):
           TO_CHAR(sessions.time AT TIME ZONE 'PDT', 'YYYY-MM-DD HH:MI:SS') AS session_time,
           sessions.id AS session_id,
           laps.number AS lap_number,
-          TO_CHAR((duration_ms || 'millisecond')::interval, 'MI:SS:MS') AS lap_time
+          TO_CHAR((end_time - start_time || 'millisecond')::interval, 'MI:SS:MS') AS lap_time
         FROM laps
-        JOIN points ON laps.id=points.lap_id
         JOIN sessions ON laps.session_id=sessions.id
         WHERE
-          $__timeFilter(points.time)
+          $__timeFilter(laps.start_time)
         GROUP BY sessions.id, session_time, track, laps.number, lap_time
         ORDER BY sessions.id, session_time, track, laps.number, lap_time
     """)
