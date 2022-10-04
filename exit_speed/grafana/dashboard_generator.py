@@ -144,7 +144,7 @@ class Generator(object):
         ORDER BY 1
         """)
     self.AddGraphPanel(
-        'Points Exported Per Second', select_statement, 'points/s')
+        'GPS Points Exported Per Second', select_statement, 'points/s')
 
 
   def GenerateDashboard(self):

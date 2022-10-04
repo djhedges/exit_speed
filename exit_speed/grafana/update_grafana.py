@@ -22,6 +22,7 @@ from absl import app
 from absl import flags
 from grafanalib._gen import DashboardEncoder
 
+from exit_speed.grafana import corrado_live
 from exit_speed.grafana import honda_live
 
 FLAGS = flags.FLAGS
@@ -33,18 +34,19 @@ flags.DEFINE_string('server', None, 'Grafana IP or hostname.')
 def main(unused_argv: List[Text]):
   flags.mark_flag_as_required('api_key')
   flags.mark_flag_as_required('server')
-  dash_json = json.dumps({
-      'dashboard': honda_live.CreateDashboard().to_json_data(),
-      'overwrite': True},
-      sort_keys=True, indent=2, cls=DashboardEncoder)
-  headers = {'Authorization': 'Bearer %s' % FLAGS.api_key,
-             'Content-Type': 'application/json'}
-  response = requests.post(
-      'http://%s/api/dashboards/db' % FLAGS.server,
-      data=dash_json,
-      headers=headers)
-  print(response)
-  print(response.text)
+  for generator in (corrado_live, honda_live):
+    dash_json = json.dumps({
+        'dashboard': generator.CreateDashboard().to_json_data(),
+        'overwrite': True},
+        sort_keys=True, indent=2, cls=DashboardEncoder)
+    headers = {'Authorization': 'Bearer %s' % FLAGS.api_key,
+               'Content-Type': 'application/json'}
+    response = requests.post(
+        'http://%s/api/dashboards/db' % FLAGS.server,
+        data=dash_json,
+        headers=headers)
+    print(response)
+    print(response.text)
 
 
 if __name__ == '__main__':
