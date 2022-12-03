@@ -8,7 +8,7 @@ This is not an officially supported Google product.
 
 ## Intro
 
-Race car telemetry with a Raspberry Pi.
+Race car telemetry with a Raspberry/Banana Pi .
 
 This project started with a set of LEDs and a USB GPS dongle.  The goal was to
 light the LEDs based on the current speed vs the fastest lap of the session.
@@ -21,8 +21,8 @@ slower based on the car's position compared to the fastest lap of the session.
 
 Later a DAQ device was added for measuring and logging voltage from sensors such
 as the throttle position and water temperature.  In turn the data was exported
-to a Timescale database which allows for real time analysis of the data in
-Grafana.
+to a Postgres database which allows for real time analysis of the data in
+Grafana and post analysis using Dash.
 
 [![4K Demo](https://img.youtube.com/vi/07UoDFVGBuI/0.jpg)](https://youtu.be/07UoDFVGBuI)
 
@@ -39,6 +39,12 @@ Lap comparison example written in [Dash](https://plotly.com/dash/).
 
 ## Hardware
 
+### Pi Hardware
+
+Initially developed using a Raspberry Pi 4 and later a Banana Pi M5.  Initial Pi 4 died on me possibly
+due to moisture from racing in the rain or the electrical environment in the car.  Due to logistical
+shortages I was unable to find a Pi 4 replacement and opted for the Banana Pi M5.
+
 ### Adafruit DotStar LEDs
 
 The Adafruit DotStar LEDs can be trimmed to a desired length and provide ample
@@ -47,8 +53,8 @@ https://www.adafruit.com/product/2241
 
 ### FXOS8700 & FXAS21002
 
-A FXOS8700 accelerometer is used to measure the g forces experienced by the car.
-Calibration was done following the Sparkfun guide to set the min/max values.  Historically a ADXL345 was used but the FXOS8700 was supposedly more accurate and also contained a FXAS21002 Gyroscope.  The Gyroscope data was nearly as interesting as I thought it would be.
+A FXOS8700 accelerometer is used to measure the G forces experienced by the car.
+Calibration was done following the Sparkfun guide to set the min/max values.  Historically a ADXL345 was used but the FXOS8700 was supposedly more accurate and also contained a FXAS21002 Gyroscope.  The Gyroscope data was not nearly as interesting as I thought it would be.
 https://learn.sparkfun.com/tutorials/adxl345-hookup-guide#calibration
 
 ### UBlox 8
@@ -90,16 +96,16 @@ http://wbo2.com/2a0/default.htm
 
 ## Software Design Choices
 
-Python has suprisingly been able to keep up with the GPS 10hz output.  In testing Exit Speed has been able to log to disk and write to Postgres with the sensors collecting data at 60hz (~1400 data values per second).  At 80z the point queue starts to fall behind.  Maybe one day I'll rewrite this in Rust but for now it has been more than sufficent for my needs.
+Python has suprisingly been able to keep up with the GPS 10hz output.  In testing Exit Speed has been able to log to disk and write to Postgres with the sensors collecting data at 60hz (~1400 data values per second).  At 80z the point queue starts to fall behind.
 
 I've always wanted to play with the multriprocessing module and it has proved
-useful.  For example the metrics which are uploaded to Timescale are done in a
-seperate process.  This isolates the main process from unexpected errors and
-delays on I/O operations.  The Accelermeter, Gyroscope, Labjack and WBO2 readings also take place in seperate processes as well.
+useful.  For example the metrics which are uploaded to Postgres are done in a
+separate process.  This isolates the main process from unexpected errors and
+delays on I/O operations.  The Accelerometer, Gyroscope, Labjack and WBO2 readings also take place in separate processes as well.
 
 ### Crossing Start/Finish
 
-Exit Speed has a map of tracks in the NW with GPS locations of arbitrary
+Exit Speed has a map of tracks in the North West with GPS locations of arbitrary
 start/finish points selected from Google maps.   The ExitSpeed class is
 initialized with a start_finish_range which determines how close the car needs
 to be to the finish line before we consider the lap complete.  Without the range
@@ -107,9 +113,8 @@ limit points on far ends of the track would have counted as crossing
 start/finish.
 
 Once the car is within range triangles are created consisting of two points
-along the straight away and the start/finish point from the prior mapping.
-When the older of the two points obtuse (greater than 90 degress) it is
-determined that the car has crossed start/finish.  The older point becomes the
+along the straight away and the start/finish point from the prior lap.
+When the older of the two points forms an obtuse angle (greater than 90 degress) in relation to start/finish it is determined that the car has crossed start/finish.  The older point becomes the
 first and last point of a lap.
 
 ### Lap Timing
@@ -120,13 +125,13 @@ to calculate a laptime with a resolution of thousands of a seconds despite the
 average being off by only 0.008 seconds compared to the transponder timing from
 a race.
 
-We start by calcuating the distance between B & C and from B to start/finish
+We start by calculating the distance between B & C and from B to start/finish
 and C to start/finish.  Knowing the 3 sides of the triangle we're able to
-deterimine the angle of B.
+determine the angle of B.
 
 The timing between points C & B is 0.1 seconds and we know the speed at
 points B & C.  This allows us to calcuate the acceleration between points B & C.
-Next we can calcuate the distance from point B to when the car actually crosses the start finish line.
+Next we can calculate the distance from point B to when the car actually crosses the start finish line.
 
 Finally we take the time between the first and last points of a lap and subtract
 the time it take for the car to travel from start/finish to point C.  Finally add the time it took on the prior lap for the car to travel from start/finish to
@@ -184,14 +189,14 @@ misleading results.  I find it's best to glance at the LEDs on the straights.
 Here is an example of the LEDs in action.
 https://youtu.be/sWjJ_7Hw02U
 
-### Grafana & Timescale
+### Grafana & Postgres
 
-Initially Prometheus and InfluxDB were tested before settling on Timescale.
-Grafana is designed for displaying time series data which is great for live or
-replayed data.  However that made graph lap comparisons difficult.  Since
-Timescale is backed by PostgresSQL I was able to come up with some clever
-Grafana queries to overlay laps.  It sounds like Grafana plans to add support
-for graphing none time series data in the future.
+Initially Prometheus, InfluxDB and Timescale were tested before settling on just Postgres.
+Grafana is designed for displaying time series data which is great for live data.
+However that made graph lap comparisons difficult.
+
+These are some old demos of using Grafana to compare lap data by using hacky queries to shift the
+lap data's start time to NOW() - 5m.  It's since been deprecated in favor using Dash.
 https://youtu.be/2FHSHHTeZAU
 https://youtu.be/joWSMB6zanM
 
