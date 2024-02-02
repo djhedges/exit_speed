@@ -12,7 +12,7 @@ adafruit-circuitpython-fxos8700==2.1.4
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
-dash==2.0.0
+dash==2.15.0
 fake_rpi==0.7.1
 funcy==1.17
 gps==3.19
