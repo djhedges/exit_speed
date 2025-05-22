@@ -186,7 +186,7 @@ class ExitSpeed(object):
 
 
 def main(unused_argv) -> None:
-  logging.get_absl_handler().use_absl_log_file()
+  logging.get_absl_handler().use_absl_log_file(log_dir='/home/pi/py_logs/')
   es = None
   try:
     while True:
