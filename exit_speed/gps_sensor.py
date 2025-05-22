@@ -14,6 +14,7 @@
 # limitations under the License.
 """GPS sensor."""
 import gps
+import functools
 from absl import app
 
 from exit_speed import exit_speed_pb2
@@ -22,12 +23,22 @@ from exit_speed import sensor
 REPORT_REQ_FIELDS = ('lat', 'lon', 'time', 'speed')
 
 
+@functools.cache
+def _CachedGpsd() -> gps.gps:
+    """To avoid instainting multiple gpsd instances.
+
+    At startup we need an intial GPS report to identify the nearest track to 
+    define the session.  This occurs before the GPS sensor process is started.
+    """
+    return gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
+
+
 class GPS(object):
   """Reads data from the GPS sensor."""
 
   def __init__(self, gpsd: gps.gps=None):
     self._last_gps_report_time = None  # Used to avoid duplicate GPS reports.
-    self.gpsd = gpsd or gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
+    self.gpsd = gpsd or _CachedGpsd()
 
   def CheckReportFields(self, report: gps.client.dictwrapper) -> bool:
     """Verifies required report fields are present."""
@@ -44,6 +55,9 @@ class GPS(object):
           self._last_gps_report_time != report.time):
         self._last_gps_report_time = report.time
         return report
+    # Recursive call to ensure we do not return None on the reports
+    # we don't care about.
+    return self.GetReport()  
 
 
 class GPSProcess(sensor.SensorBase):
