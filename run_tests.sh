@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 python3 -m exit_speed.accelerometer_test
 python3 -m exit_speed.common_lib_test
 python3 -m exit_speed.data_logger_test
