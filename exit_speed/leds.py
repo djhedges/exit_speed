@@ -50,7 +50,7 @@ class LEDs(object):
     self.last_led_update = time.time()
     self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=FLAGS.led_brightness)
-    self.Fill((0, 0, 255), ignore_update_interval=True)  # Blue
+    self.Fill((255, 0, 255), ignore_update_interval=True)  # Magenta
     self.tree = None
     self.speed_deltas = collections.deque(maxlen=FLAGS.speed_deltas)
     self.best_lap = None
@@ -144,8 +144,14 @@ class LEDs(object):
 
 def main(unused_argv):
   leds = LEDs()
-  color = (255, 255, 0)
-  leds.Fill(color, ignore_update_interval=True)
+  magenta = (255, 0, 255)
+  blue = (0, 0, 255)
+  red = (255, 0, 0)
+  green = (0, 255, 0)
+  while True:
+    for color in (magenta, blue, red, green):
+      leds.Fill(color, ignore_update_interval=True)
+      time.sleep(1)
 
 
 if __name__ == '__main__':
