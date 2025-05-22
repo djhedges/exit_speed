@@ -48,7 +48,7 @@ class LEDs(object):
   def __init__(self):
     self.led_update_interval = FLAGS.led_update_interval
     self.last_led_update = time.time()
-    self.dots = adafruit_dotstar.DotStar(board.SCLK, board.MOSI, 10,
+    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
                                          brightness=FLAGS.led_brightness)
     self.Fill((0, 0, 255), ignore_update_interval=True)  # Blue
     self.tree = None

@@ -17,5 +17,5 @@ from exit_speed.tracks import base
 
 TestTrack = base.Track(
     name='Test Parking Lot',
-    start_finish=(45.695079, -121.525848),
+    start_finish=(47.808765, -122.254380),
     turns=tuple())

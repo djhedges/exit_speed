@@ -10,19 +10,19 @@ postgres: True
 ##  lf:
 ##    ip_addr: 192.168.4.3
 ##    port: 27001
-labjack:
-  frequency_hz: 40
-  ain0: water_temp_voltage
-  ain1: oil_pressure_voltage
-  ain2: front_brake_pressure_voltage
-  ain3: rear_brake_pressure_voltage
-  fio4: battery_voltage
-  fio5: fuel_level_voltage
-  fio6: fuel_pressure_voltage
-  tick_divider_10: [ fio4, fio5, fio6, fio7 ]
-  dac0_5v_out: True
-wbo2:
-  frequency_hz: 40
-  lambda_16: afr
-  rpm_count: rpm
-  user_3: tps_voltage
+#labjack:
+#  frequency_hz: 40
+#  ain0: water_temp_voltage
+#  ain1: oil_pressure_voltage
+#  ain2: front_brake_pressure_voltage
+#  ain3: rear_brake_pressure_voltage
+#  fio4: battery_voltage
+#  fio5: fuel_level_voltage
+#  fio6: fuel_pressure_voltage
+#  tick_divider_10: [ fio4, fio5, fio6, fio7 ]
+#  dac0_5v_out: True
+#wbo2:
+#  frequency_hz: 40
+#  lambda_16: afr
+#  rpm_count: rpm
+#  user_3: tps_voltage
