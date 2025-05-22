@@ -151,6 +151,7 @@ class ExitSpeed(object):
 
   def ProcessSession(self) -> None:
     """Populates the session proto."""
+    logging.info('Waiting for first GPS report to locate track.')
     gps = gps_sensor.GPS()
     report = None
     while not report:
@@ -162,6 +163,7 @@ class ExitSpeed(object):
       track=track,
       car=self.config['car'],
       live_data=self.live_data)
+    logging.info('Session: \n%s', session)
     logging.info('Closest track: %s', track.name)
     if self.config.get('postgres'):
       self.postgres.AddToQueue(self.session)
