@@ -1,7 +1,5 @@
 # Exit Speed
 
-This is not an officially supported Google product.
-
 ## Status
 
 [![Build Status](https://travis-ci.com/djhedges/exit_speed.svg?branch=master)](https://travis-ci.com/github/djhedges/exit_speed)
