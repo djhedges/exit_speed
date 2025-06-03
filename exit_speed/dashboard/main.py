@@ -25,6 +25,7 @@ import pandas as pd
 import plotly.express as px
 from absl import app as absl_app
 from absl import flags
+from dash import callback
 from dash import dash_table
 from dash import dcc
 from dash import html
@@ -44,7 +45,7 @@ flags.DEFINE_bool(
 app = dash.Dash(__name__)
 server = app.server
 
-@app.callback(
+@callback(
   Output('url', 'href'),
   Input('url', 'href'),
   Input('track-dropdown', 'value'),
@@ -65,7 +66,7 @@ def UpdateURL(
   return urllib.parse.urljoin(href, urllib.parse.urlencode(args, doseq=True))
 
 
-@app.callback(
+@callback(
   Output('track-dropdown', 'value'),
   Output('points-dropdown', 'value'),
   Output('sessions-table', 'selected_row_ids'),
@@ -92,7 +93,7 @@ def ParseURL(pathname: Text) -> Tuple[Text, List[Text], List[int]]:
   return track, points, lap_ids
 
 
-@app.callback(
+@callback(
   Output('sessions-table', 'data'),
   Input('track-dropdown', 'value'),
   Input('date-picker-range', 'start_date'),
@@ -109,7 +110,7 @@ def UpdateSessions(track: pd.DataFrame,
   return df.to_dict('records')
 
 
-@app.callback(
+@callback(
   Output('graphs', 'children'),
   Input('sessions-table', 'selected_row_ids'),  # lap_ids
   Input('points-dropdown', 'value'),
@@ -160,7 +161,7 @@ def UpdateGraph(
   return [dcc.Graph(figure=px.line())]
 
 
-@app.callback(
+@callback(
   Output({'type': 'graph', 'index': ALL}, 'relayoutData'),
   Output({'type': 'graph', 'index': ALL}, 'figure'),
   Input({'type': 'graph', 'index': ALL}, 'relayoutData'),
