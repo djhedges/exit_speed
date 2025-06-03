@@ -25,6 +25,7 @@ from exit_speed.tracks import oregon_raceway_park
 from exit_speed.tracks import pacific_raceways
 from exit_speed.tracks import portland_internal_raceways
 from exit_speed.tracks import spokane_raceway
+from exit_speed.tracks import test_loop
 from exit_speed.tracks import test_track
 from exit_speed.tracks import the_ridge
 
@@ -34,6 +35,7 @@ TRACK_LIST = (
     pacific_raceways.PacificRaceways,
     portland_internal_raceways.PortlandInternationalRaceway,
     spokane_raceway.SpokaneRaceway,
+    test_loop.TestLoop,
     test_track.TestTrack,
     the_ridge.TheRidge,
     )
