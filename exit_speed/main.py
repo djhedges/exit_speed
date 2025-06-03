@@ -157,7 +157,7 @@ class ExitSpeed(object):
     while not report:
       report = gps.GetReport()
     track = tracks.FindClosestTrack(report)
-    session_time = datetime.datetime.today().astimezone(pytz.UTC)
+    session_time = datetime.datetime.fromisoformat(report['time'])
     self.session = common_lib.Session(
       time=session_time,
       track=track,
