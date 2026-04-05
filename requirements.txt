@@ -154,6 +154,7 @@ pyrsistent==0.18.1
 pyserial==3.5
 pysmbc==1.0.23
 python-apt==2.6.0
+python-can==4.6.1
 python-dateutil==2.9.0.post0
 python-dotenv==0.21.0
 python-geohash==0.8.5
