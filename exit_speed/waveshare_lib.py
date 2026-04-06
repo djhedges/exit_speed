@@ -73,7 +73,7 @@ class WaveshareSerial(object):
                 len2 = len + 5
 
             data2 = self.ser.read(len2)
-            hex_data = [hex(byte) for byte in data2]
+            hex_data = [byte for byte in data2]
             hex_data1 += hex_data
             if data2[len2 - 1] == 0x55:  # end code
                 if strFrameType == "Standard Frame":
@@ -99,19 +99,41 @@ class WaveshareSerial(object):
                         CanData = hex_data[4:4 + len]
                     else:
                         CanData = ["No Data"]
-                print("Receive CAN id: " + strId + " Data:", end='')
-                print(CanData)
-                print(strFrameType + ", " + strFrameFormat)
-                yield (strId, CanData)
+                yield (id, CanData)
             else:
                 logging.log_every_n_seconds(logging.DEBUG,
                                             "Receive Packet header Error")
 
 def main(unused_argv):
   waveshare = WaveshareSerial()
+  frames_seen = 0
   for can_id, data in waveshare.ReadFrames():
-    print(can_id, data)
-    break
+    if can_id in (1797, 1798):
+      print(f"\n--- ID: {can_id} ({hex(can_id)}) ---")
+      # Step through the 8 bytes of data in pairs (16-bit words)
+      for i in range(0, len(data), 2):
+        if i + 1 < len(data):
+          # Big Endian (MS First) as per your PCLink/CANchecked settings
+          raw_val = (data[i] << 8) + data[i+1]
+          
+          # Link ECU Divider of 4 -> Celsius -> Fahrenheit
+          celsius = raw_val / 4.0
+          fahrenheit = (celsius * 9/5) + 32
+          
+          # Determine sensor number based on the CAN ID
+          # 1797 holds EGT 1-4; 1798 holds EGT 5-8
+          base_sensor = 1 if can_id == 1797 else 5
+          sensor_num = base_sensor + (i // 2)
+          
+          print(f"EGT {sensor_num}: {fahrenheit:.1f}°F", end=' | ')
+      
+      print() # Newline for the next frame
+      frames_seen += 1
+      
+    # Exit after capturing 10 valid frames
+    if frames_seen >= 10:
+      break
+
 
 if __name__ == '__main__':
   app.run(main) 
