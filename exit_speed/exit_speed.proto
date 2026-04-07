@@ -42,11 +42,11 @@ message Ecu {
 
   // Frame 1
   double rpm = 2;
-  double map = 3;
-  double mgp = 4;
+  double map_psi = 3;
+  double mgp_psi = 4;
 
   // Frame 2
-  double barometric_pressure = 5;
+  double barometric_pressure_psi = 5;
   double tps = 6;
   double injector_dc = 7;
 
@@ -78,11 +78,11 @@ message Ecu {
   // Frame 8
   uint32 trig_1_error_counter = 23;
   uint32 fault_codes = 24;
-  double fuel_pressure = 25;
+  double fuel_pressure_psi = 25;
 
   // Frame 9
   double oil_temp_f = 26;
-  double oil_pressure = 27;
+  double oil_pressure_psi = 27;
   double lf_wheel_speed = 28;
 
   // Frame 10

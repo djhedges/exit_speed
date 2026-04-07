@@ -55,12 +55,12 @@ class TestEcu(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     for frame in frames:
       self.ecu.ParseLinkDashFrame(bytes(frame))
 
-    self.assertAlmostEqual(100.1, self.ecu.ecu_proto.barometric_pressure)
+    self.assertAlmostEqual(14.5182775, self.ecu.ecu_proto.barometric_pressure_psi)
     self.assertAlmostEqual(105.8, self.ecu.ecu_proto.ect_f)
     self.assertAlmostEqual(32.0, self.ecu.ecu_proto.iat_f)
     self.assertAlmostEqual(13.0, self.ecu.ecu_proto.ecu_volts)
     self.assertAlmostEqual(66.2, self.ecu.ecu_proto.oil_temp_f)
-    self.assertEqual(1, self.ecu.ecu_proto.oil_pressure)
+    self.assertAlmostEqual(0.1450377, self.ecu.ecu_proto.oil_pressure_psi)
 
 
 if __name__ == '__main__':

@@ -23,15 +23,15 @@ class Ecu(can_sensor.CanSensor):
   def ParseLinkDashFrame(self, data: bytes) -> None:
      index, _, raw1, raw2, raw3 = struct.unpack('<BBHHH', bytes(data))
      if index == 0:
-       if self.ecu_proto.map > 0:  # Export a full proto.
+       if self.ecu_proto.map_psi > 0:  # Export a full proto.
         self.LogAndExportProto(self.ecu_proto)
         self.ecu_proto = exit_speed_pb2.Ecu()
        self.ecu_proto.rpm = raw1
-       self.ecu_proto.map = raw2
-       self.ecu_proto.mgp = raw3 - 100
+       self.ecu_proto.map_psi = raw2 * 0.1450377377
+       self.ecu_proto.mgp_psi = (raw3 - 100) * 0.1450377377
 
      elif index == 1:
-       self.ecu_proto.barometric_pressure = raw1 * 0.1
+       self.ecu_proto.barometric_pressure_psi = raw1 * 0.1 * 0.1450377377
        self.ecu_proto.tps = raw2 * 0.1
        self.ecu_proto.injector_dc = raw3 * 0.1
 
@@ -63,11 +63,11 @@ class Ecu(can_sensor.CanSensor):
      elif index == 7:
        self.ecu_proto.trig_1_error_counter = raw1
        self.ecu_proto.fault_codes = raw2
-       self.ecu_proto.fuel_pressure = raw3
+       self.ecu_proto.fuel_pressure_psi = raw3 * 0.1450377377
 
      elif index == 8:
        self.ecu_proto.oil_temp_f = (raw1 - 50) * 9 / 5 + 32
-       self.ecu_proto.oil_pressure = raw2
+       self.ecu_proto.oil_pressure_psi = raw2 * 0.1450377377
        self.ecu_proto.lf_wheel_speed = raw3 * 0.1
 
      elif index == 9:
