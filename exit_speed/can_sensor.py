@@ -11,6 +11,6 @@ class CanSensor(sensor.SensorBase):
              start_time: datetime.datetime,
              config: Dict,
              point_queue: multiprocessing.Queue,
-             can_data_queue: multiprocessing.Queue):
+             can_data_queue: multiprocessing.Queue) -> None:
     self.can_data_queue = can_data_queue
     super().__init__(start_time, config, point_queue)

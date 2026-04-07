@@ -15,6 +15,8 @@
 """The main script for starting exit speed."""
 import datetime
 import multiprocessing
+from typing import Any
+from typing import List
 
 import pytz
 import sdnotify
@@ -43,9 +45,9 @@ class ExitSpeed(object):
 
   def __init__(
       self,
-      start_finish_range=20,  # Meters, ~4x the width of straightaways.
-      live_data=True,
-      min_points_per_lap=30 * 10):  # 30 seconds @ gps 10hz):
+      start_finish_range: int = 20,  # Meters, ~4x the width of straightaways.
+      live_data: bool = True,
+      min_points_per_lap: int = 30 * 10) -> None:  # 30 seconds @ gps 10hz):
     """Initializer.
 
     Args:
@@ -71,7 +73,7 @@ class ExitSpeed(object):
     self.sdnotify = sdnotify.SystemdNotifier()
     self.sdnotify.notify('READY=1')
 
-  def InitializeSubProcesses(self):
+  def InitializeSubProcesses(self) -> None:
     """Initialize subprocess modules based on config.yaml."""
     if self.config.get('postgres'):
       self.postgres = postgres.PostgresWithoutPrepare()
@@ -193,7 +195,7 @@ class ExitSpeed(object):
       self.sdnotify.notify('WATCHDOG=1')
 
 
-def main(unused_argv) -> None:
+def main(unused_argv: List[Any]) -> None:
   logging.get_absl_handler().use_absl_log_file(log_dir='/home/pi/py_logs/')
   es = None
   try:

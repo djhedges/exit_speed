@@ -21,7 +21,7 @@ class Ecu(can_sensor.CanSensor):
     super().__init__(start_time, config, point_queue, can_data_queue)
 
 
-  def ParseLinkDashFrame(self, data):
+  def ParseLinkDashFrame(self, data: bytes) -> None:
      index, _, raw1, raw2, raw3 = struct.unpack('<BBHHH', bytes(data))
      if index == 0:
        if self.ecu_proto.map > 0:  # Export a full proto.
@@ -96,7 +96,7 @@ class Ecu(can_sensor.CanSensor):
        self.ecu_proto.percent_ethanol = raw2
        self.ecu_proto.status_bit_field = raw3
 
-  def Loop(self):
+  def Loop(self) -> None:
     while not self.stop_process_signal.value:
       data = self.can_data_queue.get()
       logging.log_every_n_seconds(logging.DEBUG,

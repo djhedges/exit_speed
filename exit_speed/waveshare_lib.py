@@ -1,5 +1,8 @@
 """Library for interacting with the Waveshare USB dongle."""
 import multiprocessing
+from typing import Generator
+from typing import List
+from typing import Tuple
 import serial
 import string
 import binascii
@@ -9,14 +12,14 @@ from exit_speed import exit_speed_pb2
 from exit_speed import sensor
 
 
-def calculate_checksum(data):
+def calculate_checksum(data: List[int]) -> int:
     checksum = sum(data[2:])
     return checksum & 0xff
 
 
 class WaveshareSerial(object):
   
-  def __init__(self, start_process: bool=True):
+  def __init__(self, start_process: bool=True) -> None:
     super().__init__()
     self.ser = serial.Serial("/dev/ttyUSB0", 2000000)
     self.SetBaudRate()
@@ -27,10 +30,10 @@ class WaveshareSerial(object):
           daemon=True)
       self._process.start()
 
-  def __del__(self):
+  def __del__(self) -> None:
     self.ser.close()
 
-  def SetBaudRate(self):
+  def SetBaudRate(self) -> None:
     set_can_baudrate = [
         0xaa,     #  0  Packet header
         0x55,     #  1  Packet header
@@ -58,7 +61,7 @@ class WaveshareSerial(object):
     self.ser.write(set_can_baudrate)
     logging.info("CAN baud rate setting command sent.")
 
-  def ReadFrames(self):
+  def ReadFrames(self) -> Generator[Tuple[int, List[int]], None, None]:
     strFrameType = ""
     strFrameFormat = ""
     len2 = 0
@@ -112,12 +115,12 @@ class WaveshareSerial(object):
                 logging.log_every_n_seconds(logging.DEBUG,
                                             "Receive Packet header Error")
 
-  def Loop(self):
+  def Loop(self) -> None:
     for can_id, data in self.ReadFrames():
       if can_id == 56:
         self.ecu_queue.put(data)
 
-def main(unused_argv):
+def main(unused_argv: List[str]) -> None:
   waveshare = WaveshareSerial()
   frames_seen = 0
   for can_id, data in waveshare.ReadFrames():
