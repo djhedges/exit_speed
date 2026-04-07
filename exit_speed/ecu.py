@@ -38,10 +38,10 @@ class Ecu(can_sensor.CanSensor):
      elif index == 2:
        self.ecu_proto.injector_dc_sec = raw1 * 0.1
        self.ecu_proto.injector_pulse_width = raw2 * 0.001
-       self.ecu_proto.ect = raw3 - 50
+       self.ecu_proto.ect_f = (raw3 - 50) * 9 / 5 + 32
 
      elif index == 3:
-       self.ecu_proto.iat = raw1 - 50
+       self.ecu_proto.iat_f = (raw1 - 50) * 9 / 5 + 32
        self.ecu_proto.ecu_volts = raw2 * 0.01
        self.ecu_proto.maf = raw3 * 0.1
 
@@ -66,7 +66,7 @@ class Ecu(can_sensor.CanSensor):
        self.ecu_proto.fuel_pressure = raw3
 
      elif index == 8:
-       self.ecu_proto.oil_temp = raw1 - 50
+       self.ecu_proto.oil_temp_f = (raw1 - 50) * 9 / 5 + 32
        self.ecu_proto.oil_pressure = raw2
        self.ecu_proto.lf_wheel_speed = raw3 * 0.1
 

@@ -53,10 +53,10 @@ message Ecu {
   // Frame 3
   double injector_dc_sec = 8;
   double injector_pulse_width = 9;
-  double ect = 10;
+  double ect_f = 10;
 
   // Frame 4
-  double iat = 11;
+  double iat_f = 11;
   double ecu_volts = 12;
   double maf = 13;
 
@@ -81,7 +81,7 @@ message Ecu {
   double fuel_pressure = 25;
 
   // Frame 9
-  double oil_temp = 26;
+  double oil_temp_f = 26;
   double oil_pressure = 27;
   double lf_wheel_speed = 28;
 
