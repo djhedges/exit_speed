@@ -20,7 +20,6 @@ class Ecu(can_sensor.CanSensor):
     self.ecu_proto = exit_speed_pb2.Ecu()
     super().__init__(start_time, config, point_queue, can_data_queue)
 
-
   def ParseLinkDashFrame(self, data: bytes) -> None:
      index, _, raw1, raw2, raw3 = struct.unpack('<BBHHH', bytes(data))
      if index == 0:
