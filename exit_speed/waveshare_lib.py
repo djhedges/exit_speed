@@ -110,6 +110,7 @@ def main(unused_argv):
   for can_id, data in waveshare.ReadFrames():
     if can_id in (1797, 1798):
       print(f"\n--- ID: {can_id} ({hex(can_id)}) ---")
+      print(f"Data {data}")
       # Step through the 8 bytes of data in pairs (16-bit words)
       for i in range(0, len(data), 2):
         if i + 1 < len(data):
