@@ -112,8 +112,9 @@ class WaveshareSerial(object):
                         CanData = ["No Data"]
                 yield (id, CanData)
             else:
-                logging.log_every_n_seconds(logging.DEBUG,
-                                            "Receive Packet header Error")
+                logging.log_every_n_seconds(logging.DEBUG, 
+                                            "Receive Packet header Error",
+                                            10)
 
   def Loop(self) -> None:
     for can_id, data in self.ReadFrames():
@@ -146,10 +147,11 @@ def main(unused_argv: List[str]) -> None:
           print(f"EGT {sensor_num}: {fahrenheit:.1f}°F", end=' | ')
       
       print() # Newline for the next frame
-    frames_seen += 1
+    if can_id == 56:
+      frames_seen += 1
       
     # Exit after capturing 10 valid frames
-    if frames_seen >= 10:
+    if frames_seen >= 30:
       break
 
 
