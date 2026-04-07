@@ -1,3 +1,17 @@
+#!/usr/bin/python3
+# Copyright 2022 Douglas Hedges
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """Unitests for ecu.py"""
 import datetime
 import multiprocessing
@@ -6,7 +20,9 @@ from unittest import mock
 from absl.testing import absltest
 from exit_speed import ecu
 from exit_speed import exit_speed_pb2
+from exit_speed import postgres
 from exit_speed import postgres_test_lib
+
 
 class TestEcu(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   """Ecu unittests."""
@@ -14,7 +30,7 @@ class TestEcu(postgres_test_lib.PostgresTestBase, unittest.TestCase):
   def setUp(self):
     super().setUp()
     self.start_time = datetime.datetime.now()
-    self.config = {'car': 'corrado'}
+    self.config = {'car': 'corrado', 'can': {'frequency_hz': 10}}
     self.point_queue = multiprocessing.Queue()
     self.can_data_queue = multiprocessing.Queue()
     self.ecu = ecu.Ecu(self.start_time, self.config,
@@ -37,7 +53,14 @@ class TestEcu(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       [13, 0, 0, 0, 0, 0, 0, 0],
     ]
     for frame in frames:
-      self.ecu.ParseLinkDashFrame(frame)
+      self.ecu.ParseLinkDashFrame(bytes(frame))
+
+    self.assertAlmostEqual(100.1, self.ecu.ecu_proto.barometric_pressure)
+    self.assertEqual(41, self.ecu.ecu_proto.ect)
+    self.assertEqual(0, self.ecu.ecu_proto.iat)
+    self.assertAlmostEqual(13.0, self.ecu.ecu_proto.ecu_volts)
+    self.assertEqual(19, self.ecu.ecu_proto.oil_temp)
+    self.assertEqual(1, self.ecu.ecu_proto.oil_pressure)
 
 
 if __name__ == '__main__':
