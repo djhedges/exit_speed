@@ -66,14 +66,14 @@ message Ecu {
   double ignition_timing = 16;
 
   // Frame 6
-  double cam_inlet_bank_1 = 17;
-  double cam_inlet_bank_2 = 18;
-  double cam_exhaust_bank_1 = 19;
+  // double cam_inlet_bank_1 = 17;
+  // double cam_inlet_bank_2 = 18;
+  // double cam_exhaust_bank_1 = 19;
 
   // Frame 7
-  double cam_exhaust_bank_2 = 20;
+  // double cam_exhaust_bank_2 = 20;
   double lambda_1 = 21;
-  double lambda_2 = 22;
+  // double lambda_2 = 22;
 
   // Frame 8
   uint32 trig_1_error_counter = 23;
@@ -83,32 +83,32 @@ message Ecu {
   // Frame 9
   double oil_temp_f = 26;
   double oil_pressure_psi = 27;
-  double lf_wheel_speed = 28;
+  // double lf_wheel_speed = 28;
 
   // Frame 10
-  double lr_wheel_speed = 29;
-  double rf_wheel_speed = 30;
-  double rr_wheel_speed = 31;
+  // double lr_wheel_speed = 29;
+  // double rf_wheel_speed = 30;
+  // double rr_wheel_speed = 31;
 
   // Frame 11
   double knock_level_1 = 32;
   double knock_level_2 = 33;
-  double knock_level_3 = 34;
+  // double knock_level_3 = 34;
 
   // Frame 12
-  double knock_level_4 = 35;
-  double knock_level_5 = 36;
-  double knock_level_6 = 37;
+  // double knock_level_4 = 35;
+  // double knock_level_5 = 36;
+  // double knock_level_6 = 37;
 
   // Frame 13
-  double knock_level_7 = 38;
-  double knock_level_8 = 39;
-  uint32 limits_flags = 40; // Bit field
+  // double knock_level_7 = 38;
+  // double knock_level_8 = 39;
+  // uint32 limits_flags = 40; // Bit field
 
   // Frame 14
-  double aps_main = 41;
-  double percent_ethanol = 42;
-  uint32 status_bit_field = 43; // Bit field
+  // double aps_main = 41;
+  // double percent_ethanol = 42;
+  // uint32 status_bit_field = 43; // Bit field
 }
 
 message Gyroscope {

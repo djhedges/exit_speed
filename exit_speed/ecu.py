@@ -50,15 +50,8 @@ class Ecu(can_sensor.CanSensor):
        self.ecu_proto.injector_timing = raw2
        self.ecu_proto.ignition_timing = (raw3 * 0.1) - 100
 
-     elif index == 5:
-       self.ecu_proto.cam_inlet_bank_1 = raw1 * 0.1
-       self.ecu_proto.cam_inlet_bank_2 = raw2 * 0.1
-       self.ecu_proto.cam_exhaust_bank_1 = raw3 * -0.1
-
      elif index == 6:
-       self.ecu_proto.cam_exhaust_bank_2 = raw1 * -0.1
        self.ecu_proto.lambda_1 = raw2 * 0.001
-       self.ecu_proto.lambda_2 = raw3 * 0.001
 
      elif index == 7:
        self.ecu_proto.trig_1_error_counter = raw1
@@ -68,32 +61,10 @@ class Ecu(can_sensor.CanSensor):
      elif index == 8:
        self.ecu_proto.oil_temp_f = (raw1 - 50) * 9 / 5 + 32
        self.ecu_proto.oil_pressure_psi = raw2 * 0.1450377377
-       self.ecu_proto.lf_wheel_speed = raw3 * 0.1
-
-     elif index == 9:
-       self.ecu_proto.lr_wheel_speed = raw1 * 0.1
-       self.ecu_proto.rf_wheel_speed = raw2 * 0.1
-       self.ecu_proto.rr_wheel_speed = raw3 * 0.1
 
      elif index == 10:
        self.ecu_proto.knock_level_1 = raw1 * 5
        self.ecu_proto.knock_level_2 = raw2 * 5
-       self.ecu_proto.knock_level_3 = raw3 * 5
-
-     elif index == 11:
-       self.ecu_proto.knock_level_4 = raw1 * 5
-       self.ecu_proto.knock_level_5 = raw2 * 5
-       self.ecu_proto.knock_level_6 = raw3 * 5
-
-     elif index == 12:
-       self.ecu_proto.knock_level_7 = raw1 * 5
-       self.ecu_proto.knock_level_8 = raw2 * 5
-       self.ecu_proto.limits_flags = raw3
-
-     elif index == 13:
-       self.ecu_proto.aps_main = raw1 * 0.1
-       self.ecu_proto.percent_ethanol = raw2
-       self.ecu_proto.status_bit_field = raw3
 
   def Loop(self) -> None:
     while not self.stop_process_signal.value:

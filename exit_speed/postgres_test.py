@@ -187,33 +187,14 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       gear_position=3,
       injector_timing=320,
       ignition_timing=25,
-      cam_inlet_bank_1=15.5,
-      cam_inlet_bank_2=16.5,
-      cam_exhaust_bank_1=10.5,
-      cam_exhaust_bank_2=11.5,
       lambda_1=0.98,
-      lambda_2=0.99,
       trig_1_error_counter=0,
       fault_codes=0,
       fuel_pressure_psi=400,
       oil_temp_f=100,
       oil_pressure_psi=50,
-      lf_wheel_speed=60.1,
-      lr_wheel_speed=60.2,
-      rf_wheel_speed=60.3,
-      rr_wheel_speed=60.4,
       knock_level_1=5,
       knock_level_2=6,
-      knock_level_3=7,
-      knock_level_4=8,
-      knock_level_5=9,
-      knock_level_6=10,
-      knock_level_7=11,
-      knock_level_8=12,
-      limits_flags=0,
-      aps_main=20.5,
-      percent_ethanol=10,
-      status_bit_field=1,
     )
     proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     interface = postgres.Postgres(exit_speed_pb2.Ecu, start_process=False)
@@ -239,33 +220,14 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(3, result[13])
     self.assertAlmostEqual(320, result[14])
     self.assertAlmostEqual(25, result[15])
-    self.assertAlmostEqual(15.5, result[16])
-    self.assertAlmostEqual(16.5, result[17])
-    self.assertAlmostEqual(10.5, result[18])
-    self.assertAlmostEqual(11.5, result[19])
-    self.assertAlmostEqual(0.98, result[20])
-    self.assertAlmostEqual(0.99, result[21])
-    self.assertEqual(0, result[22])
-    self.assertEqual(0, result[23])
-    self.assertAlmostEqual(400, result[24])
-    self.assertEqual(100, result[25])
-    self.assertEqual(50, result[26])
-    self.assertAlmostEqual(60.1, result[27])
-    self.assertAlmostEqual(60.2, result[28])
-    self.assertAlmostEqual(60.3, result[29])
-    self.assertAlmostEqual(60.4, result[30])
-    self.assertAlmostEqual(5, result[31])
-    self.assertAlmostEqual(6, result[32])
-    self.assertAlmostEqual(7, result[33])
-    self.assertAlmostEqual(8, result[34])
-    self.assertAlmostEqual(9, result[35])
-    self.assertAlmostEqual(10, result[36])
-    self.assertAlmostEqual(11, result[37])
-    self.assertAlmostEqual(12, result[38])
-    self.assertEqual(0, result[39])
-    self.assertAlmostEqual(20.5, result[40])
-    self.assertAlmostEqual(10, result[41])
-    self.assertEqual(1, result[42])
+    self.assertAlmostEqual(0.98, result[16])
+    self.assertEqual(0, result[17])
+    self.assertEqual(0, result[18])
+    self.assertAlmostEqual(400, result[19])
+    self.assertEqual(100, result[20])
+    self.assertEqual(50, result[21])
+    self.assertAlmostEqual(5, result[22])
+    self.assertAlmostEqual(6, result[23])
 
   def testExportData(self):
     interface = postgres.PostgresWithoutPrepare(start_process=False)

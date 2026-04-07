@@ -126,33 +126,14 @@ ARGS_ECU = (
   'gear_position',
   'injector_timing',
   'ignition_timing',
-  'cam_inlet_bank_1',
-  'cam_inlet_bank_2',
-  'cam_exhaust_bank_1',
-  'cam_exhaust_bank_2',
   'lambda_1',
-  'lambda_2',
   'trig_1_error_counter',
   'fault_codes',
   'fuel_pressure_psi',
   'oil_temp_f',
   'oil_pressure_psi',
-  'lf_wheel_speed',
-  'lr_wheel_speed',
-  'rf_wheel_speed',
-  'rr_wheel_speed',
   'knock_level_1',
   'knock_level_2',
-  'knock_level_3',
-  'knock_level_4',
-  'knock_level_5',
-  'knock_level_6',
-  'knock_level_7',
-  'knock_level_8',
-  'limits_flags',
-  'aps_main',
-  'percent_ethanol',
-  'status_bit_field',
 )
 PREPARE_ECU = textwrap.dedent("""
   PREPARE ecu_insert AS
@@ -173,37 +154,18 @@ PREPARE_ECU = textwrap.dedent("""
     gear_position,
     injector_timing,
     ignition_timing,
-    cam_inlet_bank_1,
-    cam_inlet_bank_2,
-    cam_exhaust_bank_1,
-    cam_exhaust_bank_2,
     lambda_1,
-    lambda_2,
     trig_1_error_counter,
     fault_codes,
     fuel_pressure_psi,
     oil_temp_f,
     oil_pressure_psi,
-    lf_wheel_speed,
-    lr_wheel_speed,
-    rf_wheel_speed,
-    rr_wheel_speed,
     knock_level_1,
-    knock_level_2,
-    knock_level_3,
-    knock_level_4,
-    knock_level_5,
-    knock_level_6,
-    knock_level_7,
-    knock_level_8,
-    limits_flags,
-    aps_main,
-    percent_ethanol,
-    status_bit_field)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43)
+    knock_level_2)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
 """)
 INSERT_ECU = textwrap.dedent("""
-  EXECUTE ecu_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+  EXECUTE ecu_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """)
 
 ARGS_MAP = {
