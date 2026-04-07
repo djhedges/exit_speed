@@ -42,7 +42,7 @@ message CAN {
 
   // Frame 1
   double rpm = 2;
-  double map 3;
+  double map = 3;
   double mgp = 4;
 
   // Frame 2
