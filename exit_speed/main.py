@@ -24,6 +24,7 @@ from absl import logging
 from exit_speed import accelerometer
 from exit_speed import common_lib
 from exit_speed import config_lib
+from exit_speed import ecu
 from exit_speed import exit_speed_pb2
 from exit_speed import gps_sensor
 from exit_speed import gyroscope
@@ -33,6 +34,7 @@ from exit_speed import leds
 from exit_speed import postgres
 from exit_speed import tire_temperature
 from exit_speed import tracks
+from exit_speed import waveshare_lib
 from exit_speed import wbo2
 
 
@@ -92,6 +94,10 @@ class ExitSpeed(object):
     if self.config.get('wbo2'):
       self.wbo2 = wbo2.WBO2(
           self.session, self.config, self.point_queue)
+    if self.config.get('can'):
+      self.waveshare = waveshare_lib.WaveshareSerial()
+      self.ecu = ecu.Ecu(
+          self.session, self.config, self.point_queue, self.waveshare.ecu_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""

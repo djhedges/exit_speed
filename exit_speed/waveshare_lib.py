@@ -1,3 +1,5 @@
+"""Library for interacting with the Waveshare USB dongle."""
+import multiprocessing
 import serial
 import string
 import binascii
@@ -14,10 +16,16 @@ def calculate_checksum(data):
 
 class WaveshareSerial(object):
   
-  def __init__(self):
+  def __init__(self, start_process: bool=True):
     super().__init__()
     self.ser = serial.Serial("/dev/ttyUSB0", 2000000)
     self.SetBaudRate()
+    self.ecu_queue = multiprocessing.Queue()
+    if start_process:
+      self._process = multiprocessing.Process(
+          target=self.Loop,
+          daemon=True)
+      self._process.start()
 
   def __del__(self):
     self.ser.close()
@@ -104,10 +112,16 @@ class WaveshareSerial(object):
                 logging.log_every_n_seconds(logging.DEBUG,
                                             "Receive Packet header Error")
 
+  def Loop(self):
+    for can_id, data in self.ReadFrames():
+      if can_id == 56:
+        self.ecu_queue.put(data)
+
 def main(unused_argv):
   waveshare = WaveshareSerial()
   frames_seen = 0
   for can_id, data in waveshare.ReadFrames():
+    print(can_id, data)
     if can_id in (1797, 1798):
       print(f"\n--- ID: {can_id} ({hex(can_id)}) ---")
       print(f"Data {data}")
@@ -129,7 +143,7 @@ def main(unused_argv):
           print(f"EGT {sensor_num}: {fahrenheit:.1f}°F", end=' | ')
       
       print() # Newline for the next frame
-      frames_seen += 1
+    frames_seen += 1
       
     # Exit after capturing 10 valid frames
     if frames_seen >= 10:

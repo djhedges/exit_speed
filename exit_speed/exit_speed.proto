@@ -37,7 +37,7 @@ message Accelerometer {
   double accelerometer_z = 4; // G forces.
 }
 
-message CAN {
+message Ecu {
   google.protobuf.Timestamp time = 1;
 
   // Frame 1
