@@ -163,3 +163,62 @@ message Egts {
   // double egt_7_f = 8;
   // double egt_8_f = 9;
 }
+
+message Pdm {
+  google.protobuf.Timestamp time = 1;
+  // HP Outputs 1-4
+  uint32 hp_output_1_status = 2;
+  uint32 hp_output_1_freq = 3;
+  float hp_output_1_duty_cycle = 4;
+  float hp_output_1_current = 5;
+  uint32 hp_output_2_status = 6;
+  uint32 hp_output_2_freq = 7;
+  float hp_output_2_duty_cycle = 8;
+  float hp_output_2_current = 9;
+  uint32 hp_output_3_status = 10;
+  uint32 hp_output_3_freq = 11;
+  float hp_output_3_duty_cycle = 12;
+  float hp_output_3_current = 13;
+  uint32 hp_output_4_status = 14;
+  uint32 hp_output_4_freq = 15;
+  float hp_output_4_duty_cycle = 16;
+  float hp_output_4_current = 17;
+
+  // ADIO 1-8
+  uint32 adio_1_status = 18;
+  uint32 adio_1_freq = 19;
+  float adio_1_duty_cycle = 20;
+  float adio_1_voltage = 21;
+  uint32 adio_2_status = 22;
+  uint32 adio_2_freq = 23;
+  float adio_2_duty_cycle = 24;
+  float adio_2_voltage = 25;
+  uint32 adio_3_status = 26;
+  uint32 adio_3_freq = 27;
+  float adio_3_duty_cycle = 28;
+  float adio_3_voltage = 29;
+  uint32 adio_4_status = 30;
+  uint32 adio_4_freq = 31;
+  float adio_4_duty_cycle = 32;
+  float adio_4_voltage = 33;
+  uint32 adio_5_status = 34;
+  uint32 adio_5_freq = 35;
+  float adio_5_duty_cycle = 36;
+  float adio_5_voltage = 37;
+  uint32 adio_6_status = 38;
+  uint32 adio_6_freq = 39;
+  float adio_6_duty_cycle = 40;
+  float adio_6_voltage = 41;
+  uint32 adio_7_status = 42;
+  uint32 adio_7_freq = 43;
+  float adio_7_duty_cycle = 44;
+  float adio_7_voltage = 45;
+  uint32 adio_8_status = 46;
+  uint32 adio_8_freq = 47;
+  float adio_8_duty_cycle = 48;
+  float adio_8_voltage = 49;
+
+  // Health
+  float pdm_temp_f = 50;
+  float pdm_voltage = 51;
+}

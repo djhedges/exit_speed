@@ -25,6 +25,7 @@ class WaveshareSerial(object):
     self.SetBaudRate()
     self.ecu_queue = multiprocessing.Queue()
     self.egts_queue = multiprocessing.Queue()
+    self.pdm_queue = multiprocessing.Queue()
     if start_process:
       self._process = multiprocessing.Process(
           target=self.Loop,
@@ -123,6 +124,8 @@ class WaveshareSerial(object):
         self.ecu_queue.put((can_id, data))
       if can_id in (1797, 1798):
         self.egts_queue.put((can_id, data))
+      if can_id == 501:
+        self.pdm_queue.put((can_id, data))
 
 def main(unused_argv: List[str]) -> None:
   waveshare = WaveshareSerial()
