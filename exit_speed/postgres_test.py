@@ -36,6 +36,9 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertTupleEqual(
             postgres.ARGS_ECU,
             postgres.ARGS_MAP[exit_speed_pb2.Ecu])
+    self.assertTupleEqual(
+            postgres.ARGS_EGTS,
+            postgres.ARGS_MAP[exit_speed_pb2.Egts])
 
   def testPrepareMapLookup(self):
     self.assertEqual(
@@ -44,6 +47,9 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(
             postgres.PREPARE_ECU,
             postgres.PREPARE_MAP[exit_speed_pb2.Ecu])
+    self.assertEqual(
+            postgres.PREPARE_EGTS,
+            postgres.PREPARE_MAP[exit_speed_pb2.Egts])
 
   def testInsertMapLookup(self):
     self.assertEqual(
@@ -52,6 +58,9 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(
             postgres.INSERT_ECU,
             postgres.INSERT_MAP[exit_speed_pb2.Ecu])
+    self.assertEqual(
+            postgres.INSERT_EGTS,
+            postgres.INSERT_MAP[exit_speed_pb2.Egts])
 
   def testExportGps(self):
     proto = exit_speed_pb2.Gps(
@@ -228,6 +237,31 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertEqual(50, result[21])
     self.assertAlmostEqual(5, result[22])
     self.assertAlmostEqual(6, result[23])
+
+  def testExportEgts(self):
+    proto = exit_speed_pb2.Egts(
+      egt_1_f=1.0,
+      egt_2_f=2.0,
+      egt_3_f=3.0,
+      egt_4_f=4.0,
+      egt_5_f=5.0,
+      egt_6_f=6.0,
+    )
+    proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
+    interface = postgres.Postgres(exit_speed_pb2.Egts, start_process=False)
+    interface.AddProtoToQueue(proto)
+    interface.ExportProto()
+    self.cursor.execute('SELECT * FROM egts')
+    result = self.cursor.fetchone()
+    self.assertEqual(
+            datetime.datetime(2020, 5, 23, 17, 47, 44, 100000, tzinfo=pytz.UTC),
+            result[0])
+    self.assertEqual(1.0, result[1])
+    self.assertEqual(2.0, result[2])
+    self.assertEqual(3.0, result[3])
+    self.assertEqual(4.0, result[4])
+    self.assertEqual(5.0, result[5])
+    self.assertEqual(6.0, result[6])
 
   def testExportData(self):
     interface = postgres.PostgresWithoutPrepare(start_process=False)

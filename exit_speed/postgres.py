@@ -168,6 +168,31 @@ INSERT_ECU = textwrap.dedent("""
   EXECUTE ecu_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """)
 
+ARGS_EGTS = (
+  'time',
+  'egt_1_f',
+  'egt_2_f',
+  'egt_3_f',
+  'egt_4_f',
+  'egt_5_f',
+  'egt_6_f',
+)
+PREPARE_EGTS = textwrap.dedent("""
+  PREPARE egts_insert AS
+  INSERT INTO egts (
+    time,
+    egt_1_f,
+    egt_2_f,
+    egt_3_f,
+    egt_4_f,
+    egt_5_f,
+    egt_6_f)
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
+""")
+INSERT_EGTS = textwrap.dedent("""
+  EXECUTE egts_insert (%s, %s, %s, %s, %s, %s, %s)
+""")
+
 ARGS_MAP = {
   exit_speed_pb2.Gps: ARGS_GPS,
   exit_speed_pb2.Accelerometer: ARGS_ACCELEROMETER,
@@ -175,6 +200,7 @@ ARGS_MAP = {
   exit_speed_pb2.Labjack: ARGS_LABJACK,
   exit_speed_pb2.WBO2: ARGS_WBO2,
   exit_speed_pb2.Ecu: ARGS_ECU,
+  exit_speed_pb2.Egts: ARGS_EGTS,
 }
 PREPARE_MAP = {
   exit_speed_pb2.Gps: PREPARE_GPS,
@@ -183,6 +209,7 @@ PREPARE_MAP = {
   exit_speed_pb2.Labjack: PREPARE_LABJACK,
   exit_speed_pb2.WBO2: PREPARE_WBO2,
   exit_speed_pb2.Ecu: PREPARE_ECU,
+  exit_speed_pb2.Egts: PREPARE_EGTS,
 }
 INSERT_MAP = {
   exit_speed_pb2.Gps: INSERT_GPS,
@@ -191,6 +218,7 @@ INSERT_MAP = {
   exit_speed_pb2.Labjack: INSERT_LABJACK,
   exit_speed_pb2.WBO2: INSERT_WBO2,
   exit_speed_pb2.Ecu: INSERT_ECU,
+  exit_speed_pb2.Egts: INSERT_EGTS,
 }
 
 def ConnectToDB() -> psycopg2.extensions.connection:

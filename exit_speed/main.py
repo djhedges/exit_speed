@@ -27,6 +27,7 @@ from exit_speed import accelerometer
 from exit_speed import common_lib
 from exit_speed import config_lib
 from exit_speed import ecu
+from exit_speed import egts
 from exit_speed import exit_speed_pb2
 from exit_speed import gps_sensor
 from exit_speed import gyroscope
@@ -100,6 +101,8 @@ class ExitSpeed(object):
       self.waveshare = waveshare_lib.WaveshareSerial()
       self.ecu = ecu.Ecu(
           self.session, self.config, self.point_queue, self.waveshare.ecu_queue)
+      self.egts = egts.Egts(
+          self.session, self.config, self.point_queue, self.waveshare.egts_queue)
 
   def AddNewLap(self) -> None:
     """Adds a new lap to the current session."""

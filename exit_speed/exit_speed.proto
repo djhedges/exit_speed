@@ -151,3 +151,15 @@ message TireIrSensor {
   double middle = 2;
   double outer = 3;
 }
+
+message Egts {
+  google.protobuf.Timestamp time = 1;
+  double egt_1_f = 2;
+  double egt_2_f = 3;
+  double egt_3_f = 4;
+  double egt_4_f = 5;
+  double egt_5_f = 6;
+  double egt_6_f = 7;
+  // double egt_7_f = 8;
+  // double egt_8_f = 9;
+}

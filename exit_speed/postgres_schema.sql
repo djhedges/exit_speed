@@ -65,6 +65,15 @@ CREATE TABLE ecu (
   knock_level_1                FLOAT             NOT NULL,
   knock_level_2                FLOAT             NOT NULL
 );
+CREATE TABLE egts (
+  time                         TIMESTAMPTZ       NOT NULL,
+  egt_1_f                      FLOAT             NOT NULL,
+  egt_2_f                      FLOAT             NOT NULL,
+  egt_3_f                      FLOAT             NOT NULL,
+  egt_4_f                      FLOAT             NOT NULL,
+  egt_5_f                      FLOAT             NOT NULL,
+  egt_6_f                      FLOAT             NOT NULL
+);
 CREATE TABLE sessions(
   id               SERIAL            PRIMARY KEY,
   time                         TIMESTAMPTZ       NOT NULL,

@@ -68,7 +68,7 @@ class Ecu(can_sensor.CanSensor):
 
   def Loop(self) -> None:
     while not self.stop_process_signal.value:
-      data = self.can_data_queue.get()
+      _, data = self.can_data_queue.get()
       logging.log_every_n_seconds(logging.DEBUG,
                                   'Ecu Data: %s',
                                   10, data)
