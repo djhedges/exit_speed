@@ -31,7 +31,7 @@ from exit_speed import tracks
 
 CACHE_TIMEOUT = 60 * 10  # 10 minutes.
 CACHE_DF = {}
-TABLES = ('accelerometer', 'gps', 'gyroscope', 'labjack', 'wbo2')
+TABLES = ('accelerometer', 'ecu', 'egts', 'gps', 'gyroscope', 'labjack', 'pdm')
 
 
 def GetTracks() -> List[Text]:
