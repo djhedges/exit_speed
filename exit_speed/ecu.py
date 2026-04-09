@@ -29,7 +29,6 @@ class Ecu(can_sensor.CanSensor):
         self.ecu_proto = exit_speed_pb2.Ecu()
        self.ecu_proto.rpm = raw1
        self.ecu_proto.map_psi = raw2 * 0.1450377377
-       print(self.ecu_proto.map_psi, data, raw2)
        self.ecu_proto.mgp_psi = (raw3 - 100) * 0.1450377377
 
      elif index == 1:

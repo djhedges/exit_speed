@@ -34,10 +34,6 @@ class Pdm(can_sensor.CanSensor):
       value_raw = struct.unpack('>h', data[6:8])[0]
 
       if frame_number == 0:
-        logging.log_every_n_seconds(logging.DEBUG, 'PDM HP1 status: %s', 10, status)
-        if self.pdm_proto.hp_output_1_status:
-           self.LogAndExportProto(self.pdm_proto)
-           self.pdm_proto = exit_speed_pb2.Pdm()
         self.pdm_proto.hp_output_1_status = status
         self.pdm_proto.hp_output_1_freq = freq
         self.pdm_proto.hp_output_1_duty_cycle = duty_cycle_raw * 0.01
@@ -100,8 +96,12 @@ class Pdm(can_sensor.CanSensor):
     elif frame_number == 50:  # Health
       # Temperature is +50 offset. 
       # Celsius to Fahrenheit: (C * 9/5) + 32
-      pdm_temp_c = data[1] - 50
-      self.pdm_proto.pdm_temp_f = (pdm_temp_c * 9/5) + 32
+      temp_f = ((data[1] - 50) * 9/5) + 32
+      logging.log_every_n_seconds(logging.DEBUG, 'PDM Temp: %s', 10, temp_f)
+      if self.pdm_proto.hp_output_1_freq:
+         self.LogAndExportProto(self.pdm_proto)
+         self.pdm_proto = exit_speed_pb2.Pdm()
+      self.pdm_proto.pdm_temp_f = temp_f
       self.pdm_proto.pdm_voltage = data[2] * 0.1
 
   def Loop(self) -> None:
