@@ -21,13 +21,15 @@ class Ecu(can_sensor.CanSensor):
     super().__init__(start_time, config, point_queue, can_data_queue)
 
   def ParseLinkDashFrame(self, data: bytes) -> None:
-     index, _, raw1, raw2, raw3 = struct.unpack('<BBHHH', bytes(data))
+     index, _, raw1, raw2, raw3 = struct.unpack('<BBHHH', data)
+     logging.log_every_n_seconds(logging.DEBUG, 'ECU Frame Index: %s', 10, index)
      if index == 0:
        if self.ecu_proto.map_psi > 0:  # Export a full proto.
         self.LogAndExportProto(self.ecu_proto)
         self.ecu_proto = exit_speed_pb2.Ecu()
        self.ecu_proto.rpm = raw1
        self.ecu_proto.map_psi = raw2 * 0.1450377377
+       print(self.ecu_proto.map_psi, data, raw2)
        self.ecu_proto.mgp_psi = (raw3 - 100) * 0.1450377377
 
      elif index == 1:
@@ -70,6 +72,6 @@ class Ecu(can_sensor.CanSensor):
     while not self.stop_process_signal.value:
       _, data = self.can_data_queue.get()
       logging.log_every_n_seconds(logging.DEBUG,
-                                  'Ecu Data: %s',
+                                  'ECU Data: %s',
                                   10, data)
       self.ParseLinkDashFrame(data)

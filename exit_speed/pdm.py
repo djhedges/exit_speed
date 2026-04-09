@@ -34,6 +34,7 @@ class Pdm(can_sensor.CanSensor):
       value_raw = struct.unpack('>h', data[6:8])[0]
 
       if frame_number == 0:
+        logging.log_every_n_seconds(logging.DEBUG, 'PDM HP1 status: %s', 10, status)
         if self.pdm_proto.hp_output_1_status:
            self.LogAndExportProto(self.pdm_proto)
            self.pdm_proto = exit_speed_pb2.Pdm()
@@ -106,4 +107,5 @@ class Pdm(can_sensor.CanSensor):
   def Loop(self) -> None:
     while not self.stop_process_signal.value:
       _, data = self.can_data_queue.get()
+      logging.log_every_n_seconds(logging.DEBUG, 'PDM Data: %s', 10, data)
       self.ParsePdmFrame(data)

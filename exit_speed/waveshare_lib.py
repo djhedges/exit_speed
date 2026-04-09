@@ -63,42 +63,32 @@ class WaveshareSerial(object):
     self.ser.write(set_can_baudrate)
     logging.info("CAN baud rate setting command sent.")
 
-  def ReadFrames(self) -> Generator[Tuple[int, List[int]], None, None]:
+  def ReadFrames(self) -> Generator[Tuple[int, bytes], None, None]:
     strFrameType = ""
-    strFrameFormat = ""
     len2 = 0
     id = 0
     while True:
         data = self.ser.read(2)
-        hex_data1 = [hex(byte) for byte in data]
         if (data[0] == 0xaa) and (data[1] & 0xc0 == 0xc0):  # frame header
-            len = data[1] & 0x0f
-            if data[1] & 0x10 == 0x00:
-                strFrameFormat = "Data Frame"
-            else:
-                strFrameFormat = "Remote Frame"
-
+            data_len = data[1] & 0x0f
             if data[1] & 0x20 == 0x00:
                 strFrameType = "Standard Frame"
-                len2 = len + 3
+                len2 = data_len + 3
             else:
                 strFrameType = "Extended Frame"
-                len2 = len + 5
+                len2 = data_len + 5
 
             data2 = self.ser.read(len2)
-            hex_data = [byte for byte in data2]
-            hex_data1 += hex_data
             if data2[len2 - 1] == 0x55:  # end code
                 if strFrameType == "Standard Frame":
                     id = data2[1]
                     id <<= 8
                     id += data2[0]
-                    strId = hex(id)
 
-                    if len > 0:
-                        CanData = hex_data[2:2 + len]
+                    if data_len > 0:
+                        can_data = data2[2:2 + data_len]
                     else:
-                        CanData = ["No Data"]
+                        can_data = b""
                 else:
                     id = data2[3]
                     id <<= 8
@@ -107,12 +97,11 @@ class WaveshareSerial(object):
                     id += data2[1]
                     id <<= 8
                     id += data2[0]
-                    strId = hex(id)
-                    if len > 0:
-                        CanData = hex_data[4:4 + len]
+                    if data_len > 0:
+                        can_data = data2[4:4 + data_len]
                     else:
-                        CanData = ["No Data"]
-                yield (id, CanData)
+                        can_data = b""
+                yield (id, can_data)
             else:
                 logging.log_every_n_seconds(logging.DEBUG, 
                                             "Receive Packet header Error",
@@ -120,6 +109,7 @@ class WaveshareSerial(object):
 
   def Loop(self) -> None:
     for can_id, data in self.ReadFrames():
+      logging.log_every_n_seconds(logging.INFO, 'CAN ID: %s', 10, can_id)
       if can_id == 56:
         self.ecu_queue.put((can_id, data))
       if can_id in (1797, 1798):
