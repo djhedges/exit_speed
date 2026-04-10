@@ -128,17 +128,17 @@ CREATE TABLE pdm (
   pdm_voltage                  FLOAT             NOT NULL
 );
 CREATE TABLE sessions(
-  id               SERIAL            NOT NULL,
+  id               SERIAL            PRIMARY KEY,
   time             TIMESTAMPTZ       NOT NULL,
   track            TEXT              NOT NULL,
   car              TEXT              NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
-  id               SERIAL            NOT NULL,
   session_id       INT               REFERENCES sessions (id),
   number           INT               NOT NULL,
   start_time       TIMESTAMPTZ       NOT NULL,
   end_time         TIMESTAMPTZ,
-  duration_ns      BIGINT
+  duration_ns      BIGINT,
+  PRIMARY KEY (session_id, number)
 );

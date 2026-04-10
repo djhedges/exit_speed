@@ -400,12 +400,11 @@ RETURNING id
 LAP_INSERT = textwrap.dedent("""
 INSERT INTO laps (session_id, number, start_time)
 VALUES (%s, %s, %s)
-RETURNING id
 """)
 LAP_END_TIME_UPDATE = textwrap.dedent("""
 UPDATE laps
 SET end_time = %s, duration_ns = %s
-WHERE id = %s
+WHERE session_id = %s AND number = %s
 """)
 
 
@@ -430,7 +429,7 @@ class PostgresWithoutPrepare(object):
   def __init__(self, start_process: bool = True):
     """Initializer."""
     self.session_id = None
-    self.current_lap_id = None
+    self.current_lap_number = None
     self._postgres_conn = ConnectToDB()
     self._queue = multiprocessing.Queue()
     self.stop_process_signal = multiprocessing.Value('b', False)
@@ -452,12 +451,12 @@ class PostgresWithoutPrepare(object):
     with self._postgres_conn.cursor() as cursor:
       args = (self.session_id, lap.number, lap.start_time)
       cursor.execute(LAP_INSERT, args)
-      self.current_lap_id = cursor.fetchone()[0]
+      self.current_lap_number = lap.number
       self._postgres_conn.commit()
 
   def ExportLapEnd(self, lap: LapEnd):
     with self._postgres_conn.cursor() as cursor:
-      args = (lap.end_time, lap.duration_ns, self.current_lap_id)
+      args = (lap.end_time, lap.duration_ns, self.session_id, self.current_lap_number)
       cursor.execute(LAP_END_TIME_UPDATE, args)
       self._postgres_conn.commit()
 

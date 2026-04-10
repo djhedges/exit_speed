@@ -17,19 +17,28 @@
 import panel as pn
 from absl import app
 from exit_speed.holoviz import queries
-
+from exit_speed.tracks import portland_internal_raceways
 
 def main(unused_argv):
   pn.extension()
   
+  sessions = queries.GetSessions()
   tracks = queries.GetTracks()
+
   track_dropdown = pn.widgets.Select(
       name='Track', 
       options=tracks, 
-      value='Portland International Raceway')
+      value=portland_internal_raceways.PortlandInternationalRaceway.name)
+
+  @pn.depends(track_dropdown.param.value)
+  def get_sessions_df(track):
+    df = sessions[sessions.track == track]
+    return df
+
+  sessions_table = pn.widgets.DataFrame(get_sessions_df, width=800)
   
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
-  dashboard = pn.Column(title, track_dropdown)
+  dashboard = pn.Column(title, track_dropdown, sessions_table)
   
   # Serve the dashboard
   pn.serve(dashboard, port=5006, show=False)
