@@ -1,5 +1,5 @@
 CREATE TABLE gps (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   lat                          FLOAT             NOT NULL,
   lon                          FLOAT             NOT NULL,
   alt                          FLOAT             NOT NULL,
@@ -7,21 +7,21 @@ CREATE TABLE gps (
 );
 
 CREATE TABLE accelerometer (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   accelerometer_x              FLOAT             NOT NULL,
   accelerometer_y              FLOAT             NOT NULL,
   accelerometer_z              FLOAT             NOT NULL
 );
 
 CREATE TABLE gyroscope (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   gyro_x                       FLOAT             NOT NULL,
   gyro_y                       FLOAT             NOT NULL,
   gyro_z                       FLOAT             NOT NULL
 );
 
 CREATE TABLE labjack (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   labjack_temp_f               FLOAT             NOT NULL,
   battery_voltage              FLOAT,
   front_brake_pressure_voltage FLOAT,
@@ -34,13 +34,13 @@ CREATE TABLE labjack (
 );
 
 CREATE TABLE wbo2 (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   afr                          FLOAT             NOT NULL,
   rpm                          INT               NOT NULL,
   tps_voltage                  FLOAT
 );
 CREATE TABLE ecu (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   rpm                          FLOAT             NOT NULL,
   map_psi                      FLOAT             NOT NULL,
   mgp_psi                      FLOAT             NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE ecu (
   knock_level_2                FLOAT             NOT NULL
 );
 CREATE TABLE egts (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   egt_1_f                      FLOAT             NOT NULL,
   egt_2_f                      FLOAT             NOT NULL,
   egt_3_f                      FLOAT             NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE egts (
   egt_6_f                      FLOAT             NOT NULL
 );
 CREATE TABLE pdm (
-  time                         TIMESTAMPTZ       PRIMARY KEY,
+  time                         TIMESTAMPTZ       NOT NULL,
   hp_output_1_status           INT               NOT NULL,
   hp_output_1_freq             INT               NOT NULL,
   hp_output_1_duty_cycle       FLOAT             NOT NULL,
@@ -128,14 +128,14 @@ CREATE TABLE pdm (
   pdm_voltage                  FLOAT             NOT NULL
 );
 CREATE TABLE sessions(
-  id               SERIAL            PRIMARY KEY,
+  id               SERIAL            NOT NULL,
   time             TIMESTAMPTZ       NOT NULL,
   track            TEXT              NOT NULL,
   car              TEXT              NOT NULL,
   live_data        BOOLEAN           DEFAULT TRUE
 );
 CREATE TABLE laps(
-  id               SERIAL            PRIMARY KEY,
+  id               SERIAL            NOT NULL,
   session_id       INT               REFERENCES sessions (id),
   number           INT               NOT NULL,
   start_time       TIMESTAMPTZ       NOT NULL,

@@ -37,9 +37,12 @@ FLAGS.set_default('led_brightness', 0.05)
 
 PREFIX_PROTO_MAP = {
   'AccelerometerProcess': exit_speed_pb2.Accelerometer,
+  'ECUProcess': exit_speed_pb2.Ecu,
+  'EGTsProcess': exit_speed_pb2.Egts,
   'GPSProcess': exit_speed_pb2.Gps,
   'GyroscopeProcess': exit_speed_pb2.Gyroscope,
   'LabjackProcess': exit_speed_pb2.Labjack,
+  'PDMProcess': exit_speed_pb2.Pdm,
   'WBO2Process': exit_speed_pb2.WBO2,
 }
 
@@ -56,6 +59,8 @@ def LoadProtos(data_dir):
 
 def CopyProtosToPostgres(prefix_protos):
   for prefix, protos in prefix_protos.items():
+    if not protos:
+      continue
     logging.info('Prefix: %s, proto count: %d', prefix, len(protos))
     db_writer = postgres.Postgres(protos[0].__class__, start_process=False)
     for proto in protos:
@@ -64,6 +69,9 @@ def CopyProtosToPostgres(prefix_protos):
 
 
 def ReRunMain(data_dir, protos):
+  if not protos:
+    logging.warning('No GPS protos found, skipping ReRunMain')
+    return
   path = pathlib.Path(data_dir)
   es = exit_speed.ExitSpeed(live_data=False)
   es.postgres = postgres.PostgresWithoutPrepare()
@@ -86,7 +94,7 @@ def ReRunMain(data_dir, protos):
 
 def main(unused_argv):
   prefix_protos = LoadProtos(FLAGS.data_dir)
-  ReRunMain(FLAGS.data_dir, prefix_protos['GPSProcess'])
+  ReRunMain(FLAGS.data_dir, prefix_protos.get('GPSProcess'))
   CopyProtosToPostgres(prefix_protos)
 
 
