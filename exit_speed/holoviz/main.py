@@ -20,7 +20,7 @@ from exit_speed.holoviz import queries
 from exit_speed.tracks import portland_internal_raceways
 
 def main(unused_argv):
-  pn.extension()
+  pn.extension('tabulator')
   
   sessions = queries.GetSessions()
   tracks = queries.GetTracks()
@@ -30,15 +30,30 @@ def main(unused_argv):
       options=tracks, 
       value=portland_internal_raceways.PortlandInternationalRaceway.name)
 
-  @pn.depends(track_dropdown.param.value)
-  def get_sessions_df(track):
-    df = sessions[sessions.track == track]
-    return df
+  sessions_table = pn.widgets.Tabulator(
+      sessions[sessions.track == track_dropdown.value], 
+      width=800, 
+      selectable='checkbox',
+      pagination='remote',
+      page_size=10)
 
-  sessions_table = pn.widgets.DataFrame(get_sessions_df, width=800)
-  
+  @pn.depends(track_dropdown, watch=True)
+  def _update_table(track):
+    sessions_table.value = sessions[sessions.track == track]
+
+  @pn.depends(sessions_table.param.selection)
+  def selected_laps_display(selection):
+    if not selection:
+      return "### Selected Laps: None"
+    selected_df = sessions_table.value.iloc[selection]
+    return f"### Selected Laps: {selected_df['lap_number'].tolist()}"
+
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
-  dashboard = pn.Column(title, track_dropdown, sessions_table)
+  dashboard = pn.Column(
+      title, 
+      track_dropdown, 
+      sessions_table, 
+      selected_laps_display)
   
   # Serve the dashboard
   pn.serve(dashboard, port=5006, show=False)
