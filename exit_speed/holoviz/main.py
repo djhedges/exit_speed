@@ -24,6 +24,7 @@ def main(unused_argv):
   
   sessions = queries.GetSessions()
   tracks = queries.GetTracks()
+  metrics = sorted(list(queries.GetPointsColumns()))
 
   track_dropdown = pn.widgets.Select(
       name='Track', 
@@ -37,22 +38,30 @@ def main(unused_argv):
       pagination='remote',
       page_size=10)
 
+  metrics_selection = pn.widgets.MultiChoice(
+      name='Metrics', 
+      options=metrics, 
+      value=['speed_ms'])
+
   @pn.depends(track_dropdown, watch=True)
   def _update_table(track):
     sessions_table.value = sessions[sessions.track == track]
 
-  @pn.depends(sessions_table.param.selection)
-  def selected_laps_display(selection):
+  @pn.depends(sessions_table.param.selection, metrics_selection)
+  def selected_laps_display(selection, selected_metrics):
     if not selection:
       return "### Selected Laps: None"
     selected_df = sessions_table.value.iloc[selection]
-    return f"### Selected Laps: {selected_df['lap_number'].tolist()}"
+    laps_str = f"### Selected Laps: {selected_df['lap_number'].tolist()}"
+    metrics_str = f"### Selected Metrics: {selected_metrics}"
+    return pn.Column(laps_str, metrics_str)
 
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
   dashboard = pn.Column(
       title, 
       track_dropdown, 
       sessions_table, 
+      metrics_selection,
       selected_laps_display)
   
   # Serve the dashboard
