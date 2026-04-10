@@ -15,6 +15,8 @@
 """HoloViz dashboard for Exit Speed."""
 
 import panel as pn
+import hvplot.pandas
+import pandas as pd
 from absl import app
 from exit_speed.holoviz import queries
 from exit_speed.tracks import portland_internal_raceways
@@ -48,13 +50,40 @@ def main(unused_argv):
     sessions_table.value = sessions[sessions.track == track]
 
   @pn.depends(sessions_table.param.selection, metrics_selection)
-  def selected_laps_display(selection, selected_metrics):
-    if not selection:
-      return "### Selected Laps: None"
+  def make_plots(selection, selected_metrics):
+    if not selection or not selected_metrics:
+      return pn.pane.Markdown("### Select laps and metrics to display plots")
+    
     selected_df = sessions_table.value.iloc[selection]
-    laps_str = f"### Selected Laps: {selected_df['lap_number'].tolist()}"
-    metrics_str = f"### Selected Metrics: {selected_metrics}"
-    return pn.Column(laps_str, metrics_str)
+    all_laps_data = []
+    
+    for _, row in selected_df.iterrows():
+      start_time, end_time = queries.GetLapTableData(row['session_id'], row['lap_number'])
+      lap_data = queries.GetLapData(set(selected_metrics + ['elapsed_distance_m']), start_time, end_time)
+      if lap_data is not None:
+        lap_data['lap_number'] = row['lap_number']
+        lap_data['session_id'] = row['session_id']
+        lap_data['legend_label'] = f"Lap {row['lap_number']} (Session {row['session_id']})"
+        all_laps_data.append(lap_data)
+    
+    if not all_laps_data:
+      return pn.pane.Markdown("### No data found for selected laps")
+    
+    df = pd.concat(all_laps_data)
+    
+    plots = []
+    for metric in selected_metrics:
+      if metric in df.columns:
+        plot = df.hvplot.line(
+            x='elapsed_distance_m', 
+            y=metric, 
+            by='legend_label', 
+            title=f"{metric} vs Distance",
+            height=300,
+            width=800)
+        plots.append(plot)
+    
+    return pn.Column(*plots)
 
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
   dashboard = pn.Column(
@@ -62,7 +91,7 @@ def main(unused_argv):
       track_dropdown, 
       sessions_table, 
       metrics_selection,
-      selected_laps_display)
+      make_plots)
   
   # Serve the dashboard
   pn.serve(dashboard, port=5006, show=False)
