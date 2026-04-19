@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SCHEMA_FILE="$SCRIPT_DIR/../exit_speed/postgres_schema.sql"
 DB_NAME="exit_speed"
@@ -11,15 +12,13 @@ if [ ! -f "$SCHEMA_FILE" ]; then
 fi
 
 sudo -u postgres psql postgres <<EOF
-SELECT pg_terminate_backend(pg_stat_activity.pid)
-FROM pg_stat_activity
-WHERE pg_stat_activity.datname = '$DB_NAME'
-  AND pid <> pg_backend_pid();
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();
+SELECT pg_drop_replication_slot(slot_name) FROM pg_replication_slots WHERE database = '$DB_NAME';
 DROP DATABASE IF EXISTS $DB_NAME;
 CREATE DATABASE $DB_NAME;
 EOF
 
-sudo -u postgres psql -d $DB_NAME -f "$SCHEMA_FILE"
+sudo -u postgres psql -d $DB_NAME < "$SCHEMA_FILE"
 
 sudo -u postgres psql -d $DB_NAME <<EOF
 DO \$\$
@@ -48,6 +47,7 @@ ALTER TABLE sessions REPLICA IDENTITY FULL;
 ALTER TABLE laps REPLICA IDENTITY FULL;
 EOF
 
+cd /home/pi/git/exit_speed
 for car in "$LAP_LOG_PATH"/*; do
   [ -d "$car" ] || continue
   for track in "$car"/*; do
