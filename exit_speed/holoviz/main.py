@@ -21,9 +21,7 @@ from absl import app
 from exit_speed.holoviz import queries
 from exit_speed.tracks import portland_internal_raceways
 
-def main(unused_argv):
-  pn.extension('tabulator')
-  
+def make_dashboard():
   sessions = queries.GetSessions()
   tracks = queries.GetTracks()
   metrics = sorted(list(queries.GetPointsColumns()))
@@ -98,15 +96,17 @@ def main(unused_argv):
     return pn.Column(*plots)
 
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
-  dashboard = pn.Column(
+  return pn.Column(
       title, 
       track_dropdown, 
       sessions_table, 
       metrics_selection,
       make_plots)
-  
-  # Serve the dashboard
-  pn.serve(dashboard, port=5006, show=False)
+
+
+def main(unused_argv):
+  pn.extension('tabulator')
+  pn.serve(make_dashboard, port=5006, show=False)
 
 
 if __name__ == '__main__':
