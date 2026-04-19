@@ -27,6 +27,10 @@ def main(unused_argv):
   sessions = queries.GetSessions()
   tracks = queries.GetTracks()
   metrics = sorted(list(queries.GetPointsColumns()))
+  if 'speed_ms' in metrics:
+    metrics.remove('speed_ms')
+    metrics.append('speed_mph')
+  metrics = sorted(metrics)
 
   track_dropdown = pn.widgets.Select(
       name='Track', 
@@ -43,7 +47,7 @@ def main(unused_argv):
   metrics_selection = pn.widgets.MultiChoice(
       name='Metrics', 
       options=metrics, 
-      value=['speed_ms'])
+      value=['speed_mph'])
 
   @pn.depends(track_dropdown, watch=True)
   def _update_table(track):
@@ -57,10 +61,18 @@ def main(unused_argv):
     selected_df = sessions_table.value.iloc[selection]
     all_laps_data = []
     
+    columns_to_fetch = set(selected_metrics)
+    if 'speed_mph' in columns_to_fetch:
+      columns_to_fetch.remove('speed_mph')
+      columns_to_fetch.add('speed_ms')
+    columns_to_fetch.add('elapsed_distance_m')
+
     for _, row in selected_df.iterrows():
       start_time, end_time = queries.GetLapTableData(row['session_id'], row['lap_number'])
-      lap_data = queries.GetLapData(set(selected_metrics + ['elapsed_distance_m']), start_time, end_time)
+      lap_data = queries.GetLapData(columns_to_fetch, start_time, end_time)
       if lap_data is not None:
+        if 'speed_ms' in lap_data.columns:
+          lap_data['speed_mph'] = lap_data['speed_ms'] * 2.236936
         lap_data['lap_number'] = row['lap_number']
         lap_data['session_id'] = row['session_id']
         lap_data['legend_label'] = f"Lap {row['lap_number']} (Session {row['session_id']})"
