@@ -106,7 +106,9 @@ class SensorBase(object):
     self.data_logger.WriteProto(proto)
 
   def LogAndExportProto(self, proto: any_pb2.Any):
-    proto.time.FromDatetime(datetime.datetime.utcnow())
+    # Ensures we don't clobber the GPS time with system time.
+    if not proto.time.seconds and not proto.time.nanos:
+      proto.time.FromDatetime(datetime.datetime.utcnow())
     self.LogMessage(proto)
     self.postgres.AddProtoToQueue(proto)
 
