@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SCHEMA_FILE="$SCRIPT_DIR/../exit_speed/postgres_schema.sql"
 DB_NAME="exit_speed"
@@ -11,6 +12,14 @@ if [ ! -f "$SCHEMA_FILE" ]; then
   exit 1
 fi
 
+if sudo -u postgres psql -lqt | grep -qw "$DB_NAME"; then
+  sudo -u postgres psql -d $DB_NAME <<EOF
+ALTER SUBSCRIPTION $SUBSCRIPTION_NAME DISABLE;
+ALTER SUBSCRIPTION $SUBSCRIPTION_NAME SET (slot_name = NONE);
+DROP SUBSCRIPTION IF EXISTS $SUBSCRIPTION_NAME;
+EOF
+fi
+
 sudo -u postgres psql postgres <<EOF
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity
@@ -20,7 +29,7 @@ DROP DATABASE IF EXISTS $DB_NAME;
 CREATE DATABASE $DB_NAME;
 EOF
 
-sudo -u postgres psql -d $DB_NAME -f "$SCHEMA_FILE"
+sudo -u postgres psql -d $DB_NAME < "$SCHEMA_FILE"
 
 sudo -u postgres psql -d $DB_NAME <<EOF
 DO \$\$
