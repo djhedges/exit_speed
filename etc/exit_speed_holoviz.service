@@ -1,0 +1,18 @@
+# Enable by running:
+# cd ~/.config/systemd/user
+# ln -s /home/pi/git/exit_speed/etc/exit_speed_holoviz.service
+# systemctl --user enable exit_speed_holoviz.service
+# systemctl --user start exit_speed_holoviz.service
+# systemctl --user status exit_speed_holoviz.service
+[Unit]
+Description=ExitSpeedHoloVizDashboard
+
+[Service]
+SyslogIdentifier=exit_speed_holoviz
+Type=simple
+ExecStart=/bin/bash -c 'cd /home/$USER/git/exit_speed && /home/$USER/venv/exitspeed/bin/python3 -m exit_speed.holoviz.main'
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
