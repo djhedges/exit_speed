@@ -107,6 +107,8 @@ def AlignSensorTimestamps(prefix_protos):
     prefix_protos: A dictionary of prefix to list of protos.
   """
   gps_protos = prefix_protos.get('GPSProcess')
+  if not gps_protos:
+    return
   gps_start_time = gps_protos[0].time.ToDatetime(tzinfo=pytz.UTC)
   if gps_start_time.date() >= CHRONY_SETUP_DATE:
     return
