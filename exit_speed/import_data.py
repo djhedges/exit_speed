@@ -76,7 +76,7 @@ def ReRunMain(data_dir, protos):
   es = exit_speed.ExitSpeed(live_data=False)
   es.postgres = postgres.PostgresWithoutPrepare()
   es.session = common_lib.Session(
-    time=dateutil.parser.parse(path.name),
+    time=dateutil.parser.parse(path.name).replace(tzinfo=pytz.UTC),
     track=tracks.FindClosestTrack({'lat': protos[0].lat,
 																	 'lon': protos[0].lon}),
     car=path.parts[-3],
