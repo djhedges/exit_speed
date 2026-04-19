@@ -92,6 +92,16 @@ class TestLapLib(unittest.TestCase):
                                                     perp_dist_b,
                                                     acceleration))
 
+  def testSolveTimeToCrossFinishZeroAcceleration(self):
+    point_b = exit_speed_pb2.Gps()
+    point_b.speed_ms = 70
+    acceleration = 0
+    perp_dist_b = 1
+    self.assertEqual(1/70,
+                     lap_lib.SolveTimeToCrossFinish(point_b,
+                                                    perp_dist_b,
+                                                    acceleration))
+
   def testGetTimeDelta(self):
     point_b = exit_speed_pb2.Gps()
     point_b.time.FromMilliseconds(1)
@@ -117,8 +127,8 @@ class TestLapLib(unittest.TestCase):
     point_c.lon = -122.694638
     point_b.speed_ms = 70
     point_c.speed_ms = 70.2
-    self.assertEqual(1000000.0548742702,
-										 lap_lib.CalcTimeAfterFinish(track, lap))
+    self.assertAlmostEqual(55874270.18,
+										   lap_lib.CalcTimeAfterFinish(track, lap), places=1)
 
   def testCalcLastLapDuration(self):
     track = tracks.portland_internal_raceways.PortlandInternationalRaceway

@@ -39,10 +39,14 @@ point_a |
 import math
 from typing import Dict
 from typing import List
+from typing import NewType
 
 from exit_speed import common_lib
 from exit_speed import exit_speed_pb2
 from exit_speed.tracks import base
+
+Seconds = NewType('Seconds', float)
+Nanoseconds = NewType('Nanoseconds', float)
 
 
 def GetPriorUniquePoint(lap: List[exit_speed_pb2.Gps],
@@ -93,21 +97,26 @@ def PerpendicularDistanceToFinish(track: base.Track,
 
 def SolveTimeToCrossFinish(point_b: exit_speed_pb2.Gps,
                            perp_dist_b: float,
-                           accelration: float):
+                           accelration: float) -> Seconds:
   """
   https://physics.stackexchange.com/questions/134771/deriving-time-from-acceleration-displacement-and-initial-velocity
   """
+  if accelration == 0:
+    # If acceleration is zero, we can just use time = distance / velocity.
+    return Seconds(perp_dist_b / point_b.speed_ms)
   sqrt = math.sqrt(point_b.speed_ms ** 2 + 2 * accelration * perp_dist_b)
-  return (point_b.speed_ms * -1 + sqrt) / accelration
+  return Seconds((point_b.speed_ms * -1 + sqrt) / accelration)
 
 
-def GetTimeDelta(first_point, last_point) -> float:
-  return last_point.time.ToNanoseconds() - first_point.time.ToNanoseconds()
+def GetTimeDelta(first_point: exit_speed_pb2.Gps,
+                 last_point: exit_speed_pb2.Gps) -> Nanoseconds:
+  return Nanoseconds(last_point.time.ToNanoseconds() -
+                     first_point.time.ToNanoseconds())
 
 
 def CalcTimeAfterFinish(track: base.Track,
-												lap: List[exit_speed_pb2.Gps]) -> float:
-  """Returns how many seconds between crossing start/finish and the last point.
+												lap: List[exit_speed_pb2.Gps]) -> Nanoseconds:
+  """Returns how many nanoseconds between crossing start/finish and the last point.
 
   This assumes the first/last points of a lap are just past start/finish.
   """
@@ -118,11 +127,11 @@ def CalcTimeAfterFinish(track: base.Track,
   perp_dist_b = PerpendicularDistanceToFinish(track, point_b_angle, point_b)
   time_to_fin = SolveTimeToCrossFinish(point_b, perp_dist_b, accelration)
   delta = GetTimeDelta(point_b, point_c)
-  return delta - time_to_fin
+  return Nanoseconds(delta - time_to_fin * 1e9)
 
 
 def CalcLastLapDuration(track: base.Track,
-												laps: Dict[int, List[exit_speed_pb2.Gps]]) -> float:
+												laps: Dict[int, List[exit_speed_pb2.Gps]]) -> Nanoseconds:
   """Calculates the last lap duration (nanoseconds) for the given session."""
   if len(laps) == 1:
     first_point = laps[1][0]
@@ -135,4 +144,4 @@ def CalcLastLapDuration(track: base.Track,
   delta = GetTimeDelta(first_point, last_point)
   prior_after = CalcTimeAfterFinish(track, prior_lap)
   current_after = CalcTimeAfterFinish(track, current_lap)
-  return int(delta - current_after * 1e9 + prior_after * 1e9)
+  return Nanoseconds(delta - current_after + prior_after)
