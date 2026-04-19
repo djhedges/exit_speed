@@ -23,6 +23,7 @@ import pandas as pd
 import gps
 from exit_speed import postgres
 from exit_speed import tracks
+from psycopg2 import sql
 
 TABLES = ('accelerometer', 'ecu', 'egts', 'gps', 'gyroscope', 'labjack', 'pdm')
 
@@ -85,18 +86,21 @@ def GetTableData(table_name: Text,
     WHERE time >= %(start_time)s and time <= %(end_time)s
     ORDER BY time
     """)
-  from psycopg2 import sql
   query = sql.SQL(select_statement).format(
       columns=sql.SQL(',').join(
           [sql.Identifier(col) for col in columns]),
       table=sql.SQL(table_name))
   with postgres.ConnectToDB() as conn:
     with conn.cursor() as cursor:
-      return pd.io.sql.read_sql(
+      print(cursor.mogrify(query.as_string(cursor),
+                           {'start_time': start_time,
+                            'end_time': end_time}).decode('utf-8'))
+      df = pd.io.sql.read_sql(
           query.as_string(cursor),
           conn,
           params={'start_time': start_time,
                   'end_time': end_time})
+      return df 
 
 
 def GetLapData(columns: Set[Text],
@@ -111,6 +115,8 @@ def GetLapData(columns: Set[Text],
     if columns_to_query:
       table_df = GetTableData(table_name, columns_to_query,
                               start_time, end_time)
+      if table_df.empty:
+        continue
       if table_name == 'gps':
         elapsed_distance_col = []
         elapsed_distance = 0
@@ -124,13 +130,20 @@ def GetLapData(columns: Set[Text],
           prior_row = row
         table_df['elapsed_distance_m'] = elapsed_distance_col
       if df is not None:
+        print('~' * 80)
+        print(df.dtypes)
+        print(df.head())
+        print('~' * 80)
+        print(table_df.dtypes)
+        print(table_df.head())
+        print('~' * 80)
         df = pd.merge_asof(df, table_df, on='time')
       else:
         df = table_df
   if df is not None:
     df['elapsed_duration_ns'] = (
         df['time'] - df['time'].min())
-    df.interpolate(method='bfill', inplace=True)
+    df.bfill(inplace=True)
     if 'elapsed_distance_m' in df.columns:
       df.sort_values(by='elapsed_distance_m', inplace=True)
   return df
