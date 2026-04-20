@@ -20,6 +20,7 @@ from typing import Set
 from typing import Text
 from typing import Tuple
 import pandas as pd
+import numpy as np
 import gps
 from exit_speed import postgres
 from exit_speed import tracks
@@ -63,17 +64,14 @@ def GetPointsColumns() -> Set[Text]:
 def CalcTimeDeltas(first_lap: pd.DataFrame,
                    df: pd.DataFrame) -> List[float]:
   """Calculates the time delta between the first lap and the current lap."""
-  time_deltas = []
-  first_lap_index = 0
-  for row in df.itertuples():
-    while (first_lap_index < len(first_lap) - 1 and
-           first_lap.iloc[first_lap_index].elapsed_distance_m <
-           row.elapsed_distance_m):
-      first_lap_index += 1
-    delta = (row.elapsed_duration_ns -
-             first_lap.iloc[first_lap_index].elapsed_duration_ns)
-    time_deltas.append(delta.total_seconds() * 1000)  # Convert to milliseconds
-  return time_deltas
+  # Interpolate the first lap's elapsed duration over the current lap's distances
+  interp_first_lap_duration = np.interp(
+      df.elapsed_distance_m,
+      first_lap.elapsed_distance_m,
+      first_lap.elapsed_duration_ns)
+
+  # Calculate delta in seconds
+  return (df.elapsed_duration_ns - interp_first_lap_duration) / 1e9
 
 
 def GetSessions() -> pd.DataFrame:
@@ -148,19 +146,12 @@ def GetLapData(columns: Set[Text],
           prior_row = row
         table_df['elapsed_distance_m'] = elapsed_distance_col
       if df is not None:
-        print('~' * 80)
-        print(df.dtypes)
-        print(df.head())
-        print('~' * 80)
-        print(table_df.dtypes)
-        print(table_df.head())
-        print('~' * 80)
         df = pd.merge_asof(df, table_df, on='time')
       else:
         df = table_df
   if df is not None:
     df['elapsed_duration_ns'] = (
-        df['time'] - df['time'].min())
+        df['time'] - df['time'].min()).dt.total_seconds() * 1e9
     df.bfill(inplace=True)
     if 'elapsed_distance_m' in df.columns:
       df.sort_values(by='elapsed_distance_m', inplace=True)
