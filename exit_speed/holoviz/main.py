@@ -87,9 +87,6 @@ def make_dashboard():
     
     df = pd.concat(all_laps_data)
 
-    # Creates a linked vertical line across plots. 
-    df = pd.concat(all_laps_data)
-
     pointer = hv.streams.PointerX(x=0)
     vline = hv.DynamicMap(lambda x: hv.VLine(x or 0), streams=[pointer]).opts(
         line_width=0.5, line_color='lightgrey')
