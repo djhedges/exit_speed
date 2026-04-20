@@ -96,12 +96,20 @@ def make_dashboard():
     def get_hover_text(x, metric_name):
       if x is None:
         return hv.Text(0, 0, "")
-      # Find the closest value in the data
-      subset = df[df.elapsed_distance_m >= x].head(1)
-      if subset.empty:
-        subset = df.tail(1)
-      val = subset[metric_name].values[0]
-      return hv.Text(x, val, f"{val:.2f}", halign='left', valign='bottom')
+      # Find the closest value in the data for each lap
+      laps_at_x = []
+      for label in df.legend_label.unique():
+        lap_df = df[df.legend_label == label]
+        subset = lap_df[lap_df.elapsed_distance_m >= x].head(1)
+        if subset.empty:
+          subset = lap_df.tail(1)
+        val = subset[metric_name].values[0]
+        laps_at_x.append(f"{label}: {val:.2f}")
+      
+      text = "\n".join(laps_at_x)
+      # Position text at the top of the plot to avoid overlapping lines
+      y_max = df[metric_name].max()
+      return hv.Text(x, y_max, text, halign='left', valign='top', fontsize=8)
 
     plots = []
     for metric in selected_metrics:
