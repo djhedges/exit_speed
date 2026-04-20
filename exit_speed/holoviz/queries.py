@@ -56,7 +56,24 @@ def GetPointsColumns() -> Set[Text]:
   if 'lon' in columns: columns.remove('lon')
   if 'time' in columns: columns.remove('time')
   columns.add('gsum')
+  columns.add('time_delta')
   return columns
+
+
+def CalcTimeDeltas(first_lap: pd.DataFrame,
+                   df: pd.DataFrame) -> List[float]:
+  """Calculates the time delta between the first lap and the current lap."""
+  time_deltas = []
+  first_lap_index = 0
+  for row in df.itertuples():
+    while (first_lap_index < len(first_lap) - 1 and
+           first_lap.iloc[first_lap_index].elapsed_distance_m <
+           row.elapsed_distance_m):
+      first_lap_index += 1
+    delta = (row.elapsed_duration_ns -
+             first_lap.iloc[first_lap_index].elapsed_duration_ns)
+    time_deltas.append(delta.total_seconds() * 1000)  # Convert to milliseconds
+  return time_deltas
 
 
 def GetSessions() -> pd.DataFrame:

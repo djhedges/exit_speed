@@ -67,6 +67,8 @@ def make_dashboard():
     if 'gsum' in columns_to_fetch:
       columns_to_fetch.remove('gsum')
       columns_to_fetch.update(['accelerometer_x', 'accelerometer_y'])
+    if 'time_delta' in columns_to_fetch:
+      columns_to_fetch.remove('time_delta')
     columns_to_fetch.add('elapsed_distance_m')
 
     for _, row in selected_df.iterrows():
@@ -77,6 +79,13 @@ def make_dashboard():
           lap_data['speed_mph'] = lap_data['speed_ms'] * 2.236936
         if 'accelerometer_x' in lap_data.columns and 'accelerometer_y' in lap_data.columns:
           lap_data['gsum'] = lap_data['accelerometer_x'].abs() + lap_data['accelerometer_y'].abs()
+        
+        if 'time_delta' in selected_metrics:
+          if all_laps_data:
+            lap_data['time_delta'] = queries.CalcTimeDeltas(all_laps_data[0], lap_data)
+          else:
+            lap_data['time_delta'] = 0.0
+            
         lap_data['lap_number'] = row['lap_number']
         lap_data['session_id'] = row['session_id']
         lap_data['legend_label'] = f"Lap {row['lap_number']} (Session {row['session_id']})"
