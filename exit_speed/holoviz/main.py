@@ -85,7 +85,6 @@ def make_dashboard():
       return pn.pane.Markdown("### No data found for selected laps")
     
     df = pd.concat(all_laps_data)
-    
     plots = []
     for metric in selected_metrics:
       if metric in df.columns:
@@ -95,18 +94,20 @@ def make_dashboard():
             by='legend_label', 
             title=f"{metric} vs Distance",
             height=300,
-            width=800)
+            responsive=True)
         plots.append(plot)
-    
-    return pn.Column(*plots)
 
-  title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard")
+    return pn.GridBox(*plots, ncols=2, sizing_mode='stretch_width')
+
+
+  title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard", sizing_mode='stretch_width')
   return pn.Column(
       title, 
       track_dropdown, 
       sessions_table, 
       metrics_selection,
-      make_plots)
+      make_plots,
+      sizing_mode='stretch_width')
 
 
 def main(unused_argv):
