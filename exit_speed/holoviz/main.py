@@ -17,6 +17,7 @@
 import panel as pn
 import hvplot.pandas
 import pandas as pd
+import holoviews as hv
 from absl import app
 from exit_speed.holoviz import queries
 from exit_speed.tracks import portland_internal_raceways
@@ -85,6 +86,11 @@ def make_dashboard():
       return pn.pane.Markdown("### No data found for selected laps")
     
     df = pd.concat(all_laps_data)
+
+    # Creates a linked vertical line across plots. 
+    pointer = hv.streams.PointerX(x=0)
+    vline = hv.DynamicMap(lambda x: hv.VLine(x or 0), streams=[pointer])
+
     plots = []
     for metric in selected_metrics:
       if metric in df.columns:
@@ -95,7 +101,7 @@ def make_dashboard():
             title=f"{metric} vs Distance",
             height=300,
             responsive=True)
-        plots.append(plot)
+        plots.append(plot * vline)
 
     return pn.GridBox(*plots, ncols=2, sizing_mode='stretch_width')
 
