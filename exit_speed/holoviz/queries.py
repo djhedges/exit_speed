@@ -55,6 +55,7 @@ def GetPointsColumns() -> Set[Text]:
   if 'lat' in columns: columns.remove('lat')
   if 'lon' in columns: columns.remove('lon')
   if 'time' in columns: columns.remove('time')
+  columns.add('gsum')
   return columns
 
 
