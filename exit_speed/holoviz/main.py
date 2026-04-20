@@ -88,8 +88,20 @@ def make_dashboard():
     df = pd.concat(all_laps_data)
 
     # Creates a linked vertical line across plots. 
+    df = pd.concat(all_laps_data)
+
     pointer = hv.streams.PointerX(x=0)
     vline = hv.DynamicMap(lambda x: hv.VLine(x or 0), streams=[pointer])
+
+    def get_hover_text(x, metric_name):
+      if x is None:
+        return hv.Text(0, 0, "")
+      # Find the closest value in the data
+      subset = df[df.elapsed_distance_m >= x].head(1)
+      if subset.empty:
+        subset = df.tail(1)
+      val = subset[metric_name].values[0]
+      return hv.Text(x, val, f"{val:.2f}", halign='left', valign='bottom')
 
     plots = []
     for metric in selected_metrics:
@@ -101,10 +113,11 @@ def make_dashboard():
             title=f"{metric} vs Distance",
             height=300,
             responsive=True)
-        plots.append(plot * vline)
+        # Add shared_axes=True to ensure syncing
+        text_annotation = hv.DynamicMap(lambda x, m=metric: get_hover_text(x, m), streams=[pointer])
+        plots.append((plot * vline * text_annotation).opts(shared_axes=True))
 
     return pn.GridBox(*plots, ncols=2, sizing_mode='stretch_width')
-
 
   title = pn.pane.Markdown("# Exit Speed HoloViz Dashboard", sizing_mode='stretch_width')
   return pn.Column(
