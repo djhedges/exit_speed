@@ -14,6 +14,7 @@
 # limitations under the License.
 """HoloViz dashboard for Exit Speed."""
 
+import os
 import panel as pn
 import hvplot.pandas
 import pandas as pd
@@ -145,6 +146,7 @@ def make_dashboard():
 
 
 def main(unused_argv):
+  os.environ['BOKEH_ALLOW_WS_ORIGIN'] = 'alien.tail0ae7d.ts.net:5006'
   pn.extension('tabulator')
   pn.serve(make_dashboard, port=5006, show=False)
 
