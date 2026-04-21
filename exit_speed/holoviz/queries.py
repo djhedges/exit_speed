@@ -85,7 +85,8 @@ def GetSessions() -> pd.DataFrame:
   FROM laps
   JOIN sessions ON laps.session_id = sessions.id
   WHERE
-    duration_ns IS NOT NULL
+    duration_ns IS NOT NULL AND
+    duration_ns >= 60000
   ORDER BY lap_time ASC
   """)
   with postgres.ConnectToDB() as conn:
