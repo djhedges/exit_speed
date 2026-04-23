@@ -109,6 +109,8 @@ message Ecu {
   // double aps_main = 41;
   // double percent_ethanol = 42;
   // uint32 status_bit_field = 43; // Bit field
+  double front_brake_pressure_psi = 44;
+  double rear_brake_pressure_psi = 45;
 }
 
 message Gyroscope {

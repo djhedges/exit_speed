@@ -67,10 +67,21 @@ class Ecu(can_sensor.CanSensor):
        self.ecu_proto.knock_level_1 = raw1 * 5
        self.ecu_proto.knock_level_2 = raw2 * 5
 
+  def ParseBrakePressure(self, data: bytes) -> None:
+    front_mv = int.from_bytes(data[0:2], 'big')
+    rear_mv = int.from_bytes(data[2:4], 'big')
+    # (mV / 1000 - 0.5) * 500 = PSI
+    # Link ECU Useer stream is multipling by 1000 to move the decimal.
+    self.ecu_proto.front_brake_pressure_psi = (front_mv / 1000.0 - 0.5) * 500.0
+    self.ecu_proto.rear_brake_pressure_psi = (rear_mv / 1000.0 - 0.5) * 500.0
+
   def Loop(self) -> None:
     while not self.stop_process_signal.value:
-      _, data = self.can_data_queue.get()
+      can_id, data = self.can_data_queue.get()
       logging.log_every_n_seconds(logging.DEBUG,
                                   'ECU Data: %s',
                                   10, data)
-      self.ParseLinkDashFrame(data)
+      if can_id == 56:
+        self.ParseLinkDashFrame(data)
+      elif can_id == 182:
+        self.ParseBrakePressure(data)

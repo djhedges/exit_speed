@@ -110,7 +110,7 @@ class WaveshareSerial(object):
   def Loop(self) -> None:
     for can_id, data in self.ReadFrames():
       logging.log_every_n_seconds(logging.INFO, 'CAN ID: %s', 10, can_id)
-      if can_id == 56:
+      if can_id in (56, 182):
         self.ecu_queue.put((can_id, data))
       if can_id in (1797, 1798):
         self.egts_queue.put((can_id, data))
@@ -118,7 +118,7 @@ class WaveshareSerial(object):
         self.pdm_queue.put((can_id, data))
 
 def main(unused_argv: List[str]) -> None:
-  waveshare = WaveshareSerial()
+  waveshare = WaveshareSerial(start_process=False)
   frames_seen = 0
   for can_id, data in waveshare.ReadFrames():
     print(can_id, data)

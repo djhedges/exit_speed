@@ -63,7 +63,9 @@ CREATE TABLE ecu (
   oil_temp_f                   FLOAT             NOT NULL,
   oil_pressure_psi             FLOAT             NOT NULL,
   knock_level_1                FLOAT             NOT NULL,
-  knock_level_2                FLOAT             NOT NULL
+  knock_level_2                FLOAT             NOT NULL,
+  front_brake_pressure_psi     FLOAT             NOT NULL,
+  rear_brake_pressure_psi      FLOAT             NOT NULL
 );
 CREATE TABLE egts (
   time                         TIMESTAMPTZ       NOT NULL,

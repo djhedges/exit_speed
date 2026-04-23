@@ -134,6 +134,8 @@ ARGS_ECU = (
   'oil_pressure_psi',
   'knock_level_1',
   'knock_level_2',
+  'front_brake_pressure_psi',
+  'rear_brake_pressure_psi',
 )
 PREPARE_ECU = textwrap.dedent("""
   PREPARE ecu_insert AS
@@ -161,11 +163,13 @@ PREPARE_ECU = textwrap.dedent("""
     oil_temp_f,
     oil_pressure_psi,
     knock_level_1,
-    knock_level_2)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+    knock_level_2,
+    front_brake_pressure_psi,
+    rear_brake_pressure_psi)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
 """)
 INSERT_ECU = textwrap.dedent("""
-  EXECUTE ecu_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+  EXECUTE ecu_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """)
 
 ARGS_EGTS = (

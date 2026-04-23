@@ -213,6 +213,8 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       oil_pressure_psi=50,
       knock_level_1=5,
       knock_level_2=6,
+      front_brake_pressure_psi=1000,
+      rear_brake_pressure_psi=500,
     )
     proto.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
     interface = postgres.Postgres(exit_speed_pb2.Ecu, start_process=False)
@@ -244,8 +246,10 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     self.assertAlmostEqual(400, result[19])
     self.assertEqual(100, result[20])
     self.assertEqual(50, result[21])
-    self.assertAlmostEqual(5, result[22])
-    self.assertAlmostEqual(6, result[23])
+    self.assertEqual(5, result[22])
+    self.assertEqual(6, result[23])
+    self.assertEqual(1000, result[24])
+    self.assertEqual(500, result[25])
 
   def testExportEgts(self):
     proto = exit_speed_pb2.Egts(
@@ -320,7 +324,7 @@ class TestPostgres(postgres_test_lib.PostgresTestBase, unittest.TestCase):
     interface.AddToQueue(lap_start)
     interface.ExportData()
     self.cursor.execute('SELECT * FROM laps')
-    (_, db_session_id, db_number, db_start_time,
+    (db_session_id, db_number, db_start_time,
      db_end_time, db_duration_ns) = self.cursor.fetchone()
     self.assertEqual(db_session_id, interface.session_id)
     self.assertEqual(db_number, 1)
