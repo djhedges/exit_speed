@@ -48,16 +48,14 @@ class GPS(object):
     return True
 
   def GetReport(self) -> gps.client.dictwrapper:
-    report = self.gpsd.next()
-    # TPV(time-position-velocity report)
-    if (report.get('class') == 'TPV' and self.CheckReportFields(report)):
-      if (not self._last_gps_report_time or
-          self._last_gps_report_time != report.time):
-        self._last_gps_report_time = report.time
-        return report
-    # Recursive call to ensure we do not return None on the reports
-    # we don't care about.
-    return self.GetReport()  
+    while True:
+      report = self.gpsd.next()
+      # TPV(time-position-velocity report)
+      if (report.get('class') == 'TPV' and self.CheckReportFields(report)):
+        if (not self._last_gps_report_time or
+            self._last_gps_report_time != report.time):
+          self._last_gps_report_time = report.time
+          return report
 
 
 class GPSProcess(sensor.SensorBase):
