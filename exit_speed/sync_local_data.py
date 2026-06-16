@@ -62,7 +62,7 @@ def IsFileAlreadySynced(postgres_conn: psycopg2.extensions.connection,
   if cursor.execute(SELECT_SESSION, (session_time,)):
     return True
   if first_point:
-    _, track, _ = tracks.FindClosestTrack(first_point)
+    track = tracks.FindClosestTrack({'lat': first_point.lat, 'lon': first_point.lon})
     if track.name == 'Test Parking Lot':
       return True  # Skip the test parking lot.  Mostly development files.
   return False

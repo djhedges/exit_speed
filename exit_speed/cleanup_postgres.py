@@ -30,12 +30,23 @@ def NukeNonLiveData(conn):
   """Delete non live data which usually generated during testing."""
   with conn.cursor() as cursor:
     nuke_statement = """
-    DELETE FROM points
-    WHERE session_id IN (SELECT id FROM sessions WHERE live_data = False);
-    DELETE FROM laps
-    WHERE session_id IN (SELECT id FROM sessions WHERE live_data = False);
-    DELETE FROM sessions
-    WHERE id IN (SELECT id FROM sessions WHERE live_data = False);
+    WITH non_live_sessions AS (
+      SELECT id, time AS start_time,
+             COALESCE((SELECT MAX(end_time) FROM laps WHERE session_id = sessions.id), time + INTERVAL '24 hours') AS end_time
+      FROM sessions
+      WHERE live_data = False
+    )
+    DELETE FROM gps WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE gps.time >= non_live_sessions.start_time AND gps.time <= non_live_sessions.end_time);
+    DELETE FROM accelerometer WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE accelerometer.time >= non_live_sessions.start_time AND accelerometer.time <= non_live_sessions.end_time);
+    DELETE FROM gyroscope WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE gyroscope.time >= non_live_sessions.start_time AND gyroscope.time <= non_live_sessions.end_time);
+    DELETE FROM labjack WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE labjack.time >= non_live_sessions.start_time AND labjack.time <= non_live_sessions.end_time);
+    DELETE FROM wbo2 WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE wbo2.time >= non_live_sessions.start_time AND wbo2.time <= non_live_sessions.end_time);
+    DELETE FROM ecu WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE ecu.time >= non_live_sessions.start_time AND ecu.time <= non_live_sessions.end_time);
+    DELETE FROM egts WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE egts.time >= non_live_sessions.start_time AND egts.time <= non_live_sessions.end_time);
+    DELETE FROM pdm WHERE EXISTS (SELECT 1 FROM non_live_sessions WHERE pdm.time >= non_live_sessions.start_time AND pdm.time <= non_live_sessions.end_time);
+    
+    DELETE FROM laps WHERE session_id IN (SELECT id FROM sessions WHERE live_data = False);
+    DELETE FROM sessions WHERE live_data = False;
     """
     logging.info(nuke_statement)
     cursor.execute(nuke_statement)
@@ -51,14 +62,21 @@ def NukeLapsWithNoDuration(conn):
   """
   with conn.cursor() as cursor:
     nuke_statement = """
-    DELETE FROM points
-    WHERE lap_id IN (SELECT id FROM laps WHERE duration_ms is NULL);
-    """
-    logging.info(nuke_statement)
-    cursor.execute(nuke_statement)
-    nuke_statement = """
-    DELETE FROM laps
-    WHERE duration_ms is NULL;
+    WITH laps_no_duration AS (
+      SELECT start_time, COALESCE(end_time, start_time + INTERVAL '24 hours') AS end_time
+      FROM laps
+      WHERE duration_ns is NULL
+    )
+    DELETE FROM gps WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE gps.time >= laps_no_duration.start_time AND gps.time <= laps_no_duration.end_time);
+    DELETE FROM accelerometer WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE accelerometer.time >= laps_no_duration.start_time AND accelerometer.time <= laps_no_duration.end_time);
+    DELETE FROM gyroscope WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE gyroscope.time >= laps_no_duration.start_time AND gyroscope.time <= laps_no_duration.end_time);
+    DELETE FROM labjack WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE labjack.time >= laps_no_duration.start_time AND labjack.time <= laps_no_duration.end_time);
+    DELETE FROM wbo2 WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE wbo2.time >= laps_no_duration.start_time AND wbo2.time <= laps_no_duration.end_time);
+    DELETE FROM ecu WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE ecu.time >= laps_no_duration.start_time AND ecu.time <= laps_no_duration.end_time);
+    DELETE FROM egts WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE egts.time >= laps_no_duration.start_time AND egts.time <= laps_no_duration.end_time);
+    DELETE FROM pdm WHERE EXISTS (SELECT 1 FROM laps_no_duration WHERE pdm.time >= laps_no_duration.start_time AND pdm.time <= laps_no_duration.end_time);
+
+    DELETE FROM laps WHERE duration_ns is NULL;
     """
     logging.info(nuke_statement)
     cursor.execute(nuke_statement)
@@ -68,64 +86,54 @@ def NukeLapsByDuration(conn):
   """Delete laps based on time.  These are usually traffic or the out lap."""
   with conn.cursor() as cursor:
     nuke_statement = """
-    DELETE FROM points
-    WHERE lap_id IN (SELECT id FROM laps
-                     WHERE duration_ms < %s or duration_ms > %s);
-    DELETE FROM laps
-    WHERE duration_ms < %s OR duration_ms > %s;
+    WITH laps_out_of_bounds AS (
+      SELECT start_time, COALESCE(end_time, start_time + INTERVAL '24 hours') AS end_time
+      FROM laps
+      WHERE duration_ns < %s OR duration_ns > %s
+    )
+    DELETE FROM gps WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE gps.time >= laps_out_of_bounds.start_time AND gps.time <= laps_out_of_bounds.end_time);
+    DELETE FROM accelerometer WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE accelerometer.time >= laps_out_of_bounds.start_time AND accelerometer.time <= laps_out_of_bounds.end_time);
+    DELETE FROM gyroscope WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE gyroscope.time >= laps_out_of_bounds.start_time AND gyroscope.time <= laps_out_of_bounds.end_time);
+    DELETE FROM labjack WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE labjack.time >= laps_out_of_bounds.start_time AND labjack.time <= laps_out_of_bounds.end_time);
+    DELETE FROM wbo2 WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE wbo2.time >= laps_out_of_bounds.start_time AND wbo2.time <= laps_out_of_bounds.end_time);
+    DELETE FROM ecu WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE ecu.time >= laps_out_of_bounds.start_time AND ecu.time <= laps_out_of_bounds.end_time);
+    DELETE FROM egts WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE egts.time >= laps_out_of_bounds.start_time AND egts.time <= laps_out_of_bounds.end_time);
+    DELETE FROM pdm WHERE EXISTS (SELECT 1 FROM laps_out_of_bounds WHERE pdm.time >= laps_out_of_bounds.start_time AND pdm.time <= laps_out_of_bounds.end_time);
+
+    DELETE FROM laps WHERE duration_ns < %s OR duration_ns > %s;
     """
     logging.info(nuke_statement)
-    args = (FLAGS.min_lap_duration_ms, FLAGS.max_lap_duration_ms,
-            FLAGS.min_lap_duration_ms, FLAGS.max_lap_duration_ms)
+    args = (FLAGS.min_lap_duration_ms * 1000000, FLAGS.max_lap_duration_ms * 1000000,
+            FLAGS.min_lap_duration_ms * 1000000, FLAGS.max_lap_duration_ms * 1000000)
     cursor.execute(nuke_statement, args)
 
 
 def NukeHangingLaps(conn):
   """Based on prior deletes these cleans up any laps without points."""
   with conn.cursor() as cursor:
-    select_statement = """
-    SELECT DISTINCT(lap_id) FROM points
-    """
-    cursor.execute(select_statement)
-    laps_to_keep = set(cursor.fetchall())
-    select_statement = """
-    SELECT id FROM laps
-    """
-    cursor.execute(select_statement)
-    all_lap_ids = set(cursor.fetchall())
-    hanging_lap_ids = all_lap_ids.difference(laps_to_keep)
     nuke_statement = """
     DELETE FROM laps
-    WHERE id IN %s
+    WHERE NOT EXISTS (
+      SELECT 1 FROM gps
+      WHERE gps.time >= laps.start_time
+        AND gps.time <= COALESCE(laps.end_time, laps.start_time + INTERVAL '24 hours')
+    )
     """
     logging.info(nuke_statement)
-    if hanging_lap_ids:
-      args = (tuple(hanging_lap_ids),)
-      cursor.execute(nuke_statement, args)
+    cursor.execute(nuke_statement)
 
 
 def NukeHangingSessions(conn):
   """Based on prior deletes this cleans up any sessions without laps."""
   with conn.cursor() as cursor:
-    select_statement = """
-    SELECT DISTINCT(session_id) FROM laps
-    """
-    cursor.execute(select_statement)
-    sessions_to_keep = set(cursor.fetchall())
-    select_statement = """
-    SELECT id FROM sessions
-    """
-    cursor.execute(select_statement)
-    all_session_ids = set(cursor.fetchall())
-    hanging_session_ids = all_session_ids.difference(sessions_to_keep)
     nuke_statement = """
     DELETE FROM sessions
-    WHERE id IN %s
+    WHERE NOT EXISTS (
+      SELECT 1 FROM laps WHERE laps.session_id = sessions.id
+    )
     """
     logging.info(nuke_statement)
-    if hanging_session_ids:
-      args = (tuple(hanging_session_ids),)
-      cursor.execute(nuke_statement, args)
+    cursor.execute(nuke_statement)
 
 
 def CleanupPostgres():
