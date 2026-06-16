@@ -72,7 +72,12 @@ def SolvePointBAngle(track: base.Track,
   a = common_lib.PointDeltaFromTrack(track, point_b)
   b = common_lib.PointDeltaFromTrack(track, point_c)
   c = common_lib.PointDelta(point_b, point_c)
-  return math.degrees(math.acos((c**2 + a**2 - b**2)/(2*c*a)))
+  denominator = 2 * c * a
+  if not denominator:
+    return 0.0
+  cos_b = (c**2 + a**2 - b**2) / denominator
+  cos_b = max(-1.0, min(1.0, cos_b))
+  return math.degrees(math.acos(cos_b))
 
 
 def CalcAcceleration(point_b: exit_speed_pb2.Gps,
