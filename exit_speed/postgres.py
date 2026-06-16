@@ -361,8 +361,7 @@ class Postgres(object):
   def __init__(self, proto_class: any_pb2.Any, start_process: bool = True):
     """Initializer."""
     self.proto_class = proto_class
-    self._postgres_conn = GetConnWithPointPrepare(
-            PREPARE_MAP[proto_class])
+    self._postgres_conn = None
     self._proto_queue = multiprocessing.Queue()
     self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
@@ -386,6 +385,8 @@ class Postgres(object):
 
   def Loop(self):
     """Tries to export data to the postgres backend."""
+    self._postgres_conn = GetConnWithPointPrepare(
+            PREPARE_MAP[self.proto_class])
     while not self.stop_process_signal.value:
       self.ExportProto()
       logging.log_every_n_seconds(
@@ -434,7 +435,7 @@ class PostgresWithoutPrepare(object):
     """Initializer."""
     self.session_id = None
     self.current_lap_number = None
-    self._postgres_conn = ConnectToDB()
+    self._postgres_conn = None
     self._queue = multiprocessing.Queue()
     self.stop_process_signal = multiprocessing.Value('b', False)
     if start_process:
@@ -478,6 +479,7 @@ class PostgresWithoutPrepare(object):
 
   def Loop(self):
     """Tries to export data to the postgres backend."""
+    self._postgres_conn = ConnectToDB()
     while not self.stop_process_signal.value:
       self.ExportData()
       logging.log_every_n_seconds(
