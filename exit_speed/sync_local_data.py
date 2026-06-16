@@ -24,6 +24,7 @@ from absl import logging
 
 from exit_speed import cleanup_postgres
 from exit_speed import data_logger
+from exit_speed import exit_speed_pb2
 from exit_speed import postgres
 from exit_speed import replay_data
 from exit_speed import tracks
@@ -48,7 +49,7 @@ def GetLocalFiles() -> List:
 
 def IsFileAlreadySynced(postgres_conn: psycopg2.extensions.connection,
                         filepath: Text) -> bool:
-  logger = data_logger.Logger(filepath)
+  logger = data_logger.Logger(filepath, proto_class=exit_speed_pb2.Gps)
   first_point = None
   for point in logger.ReadProtos():
     first_point = point
