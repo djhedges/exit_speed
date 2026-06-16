@@ -77,7 +77,7 @@ class GPSProcess(sensor.SensorBase):
         if report.get('alt'):
           proto.alt = report.alt
         proto.time.FromJsonString(report['time'])
-        self.LogAndExportProto(proto)
+        self.AddPointToQueue(proto)
 
 
 def main(unused_argv):

@@ -97,7 +97,7 @@ class SensorBase(object):
     self._process.join()
 
   def AddPointToQueue(self, point: exit_speed_pb2.Gps):
-    self.LogMessage(point)
+    self.LogAndExportProto(point)
     self._point_queue.put(point.SerializeToString())
 
   def LogMessage(self, proto: any_pb2.Any):
