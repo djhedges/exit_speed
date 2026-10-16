@@ -81,8 +81,10 @@ class LEDs(object):
                         to blue for a full second.
       ignore_update_interval: If True skips the update interval check.
     """
-    update = self.LedInterval(additional_delay)
-    if ignore_update_interval or update:
+    if ignore_update_interval:
+      self.last_led_update = time.time() + additional_delay
+      self.dots.fill(color)
+    elif self.LedInterval(additional_delay):
       self.dots.fill(color)
 
   def FindNearestBestLapPoint(self,

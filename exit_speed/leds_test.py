@@ -58,7 +58,7 @@ class TestLEDs(unittest.TestCase):
     self.assertFalse(self.leds.LedInterval())
     time.sleep(self.leds.led_update_interval)
     self.leds.LedInterval(additional_delay=10)
-    self.assertGreater(time.time() + 5, self.leds.led_update_interval)
+    self.assertGreater(self.leds.last_led_update, time.time() + 5)
 
   def testFill(self):
     color = (255, 255, 255)
@@ -71,8 +71,12 @@ class TestLEDs(unittest.TestCase):
     self.mock_dots.fill.reset_mock()
 
     self.leds.Fill(color, additional_delay=10, ignore_update_interval=True)
-    self.assertGreater(time.time() + 5, self.leds.led_update_interval)
+    self.assertGreater(self.leds.last_led_update, time.time() + 5)
     self.mock_dots.fill.assert_called_once_with(color)
+    self.mock_dots.fill.reset_mock()
+
+    self.leds.Fill(color)
+    self.mock_dots.fill.assert_not_called()
 
   def testFindNearestBestLapPoint(self):
     lap = []
