@@ -131,6 +131,10 @@ class TestLEDs(unittest.TestCase):
     self.leds.SetBestLap(lap, 100 * 1e9)
     first_tree = self.leds.tree
 
+    self.leds.SetBestLap(lap, 52.5 * 1e9)
+    self.assertEqual(first_tree, self.leds.tree)
+    self.assertEqual(100 * 1e9, self.leds.best_lap_duration_ns)
+
     lap = []
     lap.append(exit_speed_pb2.Gps(speed_ms=88))
     self.leds.SetBestLap(lap, 99 * 1e9)

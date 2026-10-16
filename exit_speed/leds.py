@@ -40,6 +40,9 @@ flags.DEFINE_integer('speed_deltas', 10,
                      'Used to smooth out GPS data.  This controls how many '
                      'recent speed deltas are stored.  50 at 10hz means a '
                      'median of the last 5 seconds is used.')
+flags.DEFINE_integer('min_lap_duration_sec', 60,
+                     'Minimum lap duration in seconds required to be '
+                     'considered a valid best lap.')
 
 
 class LEDs(object):
@@ -122,9 +125,11 @@ class LEDs(object):
       self.Fill(led_color)
 
   def SetBestLap(self,
-								 lap: List[exit_speed_pb2.Gps],
-								 duration_ns: float) -> None:
+                 lap: List[exit_speed_pb2.Gps],
+                 duration_ns: float) -> None:
     """Sets best lap and builds a KDTree for finding closest points."""
+    if duration_ns < FLAGS.min_lap_duration_sec * 1e9:
+      return
     if not self.best_lap or duration_ns < self.best_lap_duration_ns:
       minutes = duration_ns / 1e9 // 60
       seconds = (duration_ns / 1e6 % 60000) / 1000.0

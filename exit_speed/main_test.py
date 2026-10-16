@@ -70,9 +70,11 @@ class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
 
   def testSetLapTime(self):
     es = main.ExitSpeed()
-    first_point = exit_speed_pb2.Gps()
+    first_point = exit_speed_pb2.Gps(
+        lat=45.594961, lon=-122.694508, speed_ms=40)
     first_point.time.FromJsonString(u'2020-05-23T17:47:44.100Z')
-    last_point = exit_speed_pb2.Gps()
+    last_point = exit_speed_pb2.Gps(
+        lat=45.595000, lon=-122.694638, speed_ms=40)
     last_point.time.FromJsonString(u'2020-05-23T17:49:00.100Z')
     lap = []
     lap.append(first_point)
@@ -84,6 +86,11 @@ class TestExitSpeed(postgres_test_lib.PostgresTestBase, unittest.TestCase):
       track=tracks.portland_internal_raceways.PortlandInternationalRaceway,
       car='RC Car',
       live_data=False)
+    es.SetLapTime()
+    self.assertIsNone(es.leds.best_lap_duration_ns)
+    self.assertIsNone(es.leds.best_lap)
+
+    es.laps = {1: lap, 2: lap}
     es.SetLapTime()
     self.assertEqual(76 * 1e9, es.leds.best_lap_duration_ns)
     self.assertEqual(es.leds.best_lap, lap)
