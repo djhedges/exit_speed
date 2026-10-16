@@ -43,6 +43,15 @@ flags.DEFINE_integer('speed_deltas', 10,
 flags.DEFINE_integer('min_lap_duration_sec', 60,
                      'Minimum lap duration in seconds required to be '
                      'considered a valid best lap.')
+flags.DEFINE_integer('led_count', 10,
+                     'Number of LEDs in the strip.')
+flags.DEFINE_enum('led_direction', 'right_to_left',
+                  ['left_to_right', 'right_to_left'],
+                  'Physical direction of LED strip indexing from pixel 0 '
+                  '(right_to_left when wires are on the right).')
+flags.DEFINE_float('led_speed_step_ms', 0.5,
+                   'Speed delta in m/s (~1.1 mph) per LED step from the '
+                   'center of the LED strip.')
 
 
 class LEDs(object):
@@ -51,7 +60,8 @@ class LEDs(object):
   def __init__(self):
     self.led_update_interval = FLAGS.led_update_interval
     self.last_led_update = time.time()
-    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI, 10,
+    self.dots = adafruit_dotstar.DotStar(board.SCK, board.MOSI,
+                                         FLAGS.led_count,
                                          brightness=FLAGS.led_brightness)
     self.Fill((255, 0, 255), ignore_update_interval=True)  # Magenta
     self.tree = None
@@ -87,19 +97,34 @@ class LEDs(object):
     elif self.LedInterval(additional_delay):
       self.dots.fill(color)
 
+  def SetLeds(self, colors: List[Tuple[int, int, int]]) -> None:
+    """Sets individual LED colors if the update interval has elapsed."""
+    if self.LedInterval():
+      self.dots[:] = colors
+
   def FindNearestBestLapPoint(self,
-															point: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
+                              point: exit_speed_pb2.Gps) -> exit_speed_pb2.Gps:
     """Returns the nearest point on the best lap to the given point."""
     neighbors = self.tree.query([[point.lat, point.lon]], k=1,
                                 return_distance=False)
     index = neighbors[0][0]
     return self.best_lap[index]
 
-  def GetLedColor(self) -> Tuple[int, int, int]:
+  def GetLedColors(self) -> List[Tuple[int, int, int]]:
+    """Returns a list of LED colors growing outward from the center split."""
     median_delta = self.GetMovingSpeedDelta()
+    half_count = FLAGS.led_count // 2
+    num_lit = min(half_count, int(abs(median_delta) // FLAGS.led_speed_step_ms))
+    colors = [(0, 0, 0)] * FLAGS.led_count
     if median_delta > 0:
-      return (255, 0, 0)  # Red
-    return (0, 255, 0)  # Green
+      for i in range(num_lit):
+        colors[half_count - 1 - i] = (255, 0, 0)  # Red: center-left
+    elif median_delta < 0:
+      for i in range(num_lit):
+        colors[half_count + i] = (0, 255, 0)  # Green: center-right
+    if FLAGS.led_direction == 'right_to_left':
+      colors.reverse()
+    return colors
 
   def GetMovingSpeedDelta(self) -> float:
     """Returns the median speed delta over a time period based on the ring size.
@@ -123,8 +148,8 @@ class LEDs(object):
     if self.tree:
       best_point = self.FindNearestBestLapPoint(point)
       self.UpdateSpeedDeltas(point, best_point)
-      led_color = self.GetLedColor()
-      self.Fill(led_color)
+      led_colors = self.GetLedColors()
+      self.SetLeds(led_colors)
 
   def SetBestLap(self,
                  lap: List[exit_speed_pb2.Gps],

@@ -78,6 +78,15 @@ class TestLEDs(unittest.TestCase):
     self.leds.Fill(color)
     self.mock_dots.fill.assert_not_called()
 
+  def testSetLeds(self):
+    colors = [(0, 255, 0)] * 10
+    self.leds.SetLeds(colors)
+    self.mock_dots.__setitem__.assert_called_once_with(slice(None), colors)
+    self.mock_dots.reset_mock()
+
+    self.leds.SetLeds(colors)
+    self.mock_dots.__setitem__.assert_not_called()
+
   def testFindNearestBestLapPoint(self):
     lap = []
     lap.append(exit_speed_pb2.Gps(lat=1, lon=1))
@@ -90,13 +99,48 @@ class TestLEDs(unittest.TestCase):
     self.assertEqual(nearest.lat, 5)
     self.assertEqual(nearest.lon, 5)
 
-  def testGetLedColor(self):
+  def testGetLedColors(self):
+    off = (0, 0, 0)
+    red = (255, 0, 0)
+    green = (0, 255, 0)
+
+    # Deadband (|median_delta| < 0.5): all off.
+    self.leds.speed_deltas.extend([0.2] * 10)
+    self.assertListEqual(self.leds.GetLedColors(), [off] * 10)
+
+    # Slower by 1.2 m/s (2 steps -> indices 5, 6 Red).
+    self.leds.speed_deltas.extend([1.2] * 10)
+    self.assertListEqual(
+        self.leds.GetLedColors(),
+        [off, off, off, off, off, red, red, off, off, off])
+
+    # Slower by >= 2.5 m/s (capped at 5 steps -> indices 5..9 Red).
     self.leds.speed_deltas.extend([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    self.assertTupleEqual(self.leds.GetLedColor(), (255, 0, 0))
+    self.assertListEqual(
+        self.leds.GetLedColors(),
+        [off, off, off, off, off, red, red, red, red, red])
+
+    # Faster by 1.2 m/s (2 steps -> indices 4, 3 Green).
+    self.leds.speed_deltas.extend([-1.2] * 10)
+    self.assertListEqual(
+        self.leds.GetLedColors(),
+        [off, off, off, green, green, off, off, off, off, off])
+
+    # Faster by >= 2.5 m/s (capped at 5 steps -> indices 4..0 Green).
     self.leds.speed_deltas.extend([0, -1, -2, -3, -4, -5, -6, -7, -8, -9])
-    self.assertTupleEqual(self.leds.GetLedColor(), (0, 255, 0))
-    self.leds.speed_deltas.extend([0, 1, 2, 3, 4, -5, -6, -7, -8, -9])
-    self.assertTupleEqual(self.leds.GetLedColor(), (0, 255, 0))
+    self.assertListEqual(
+        self.leds.GetLedColors(),
+        [green, green, green, green, green, off, off, off, off, off])
+
+    # Verify left_to_right direction and custom led_count.
+    FLAGS.led_direction = 'left_to_right'
+    FLAGS.led_count = 6
+    self.addCleanup(setattr, FLAGS, 'led_direction', 'right_to_left')
+    self.addCleanup(setattr, FLAGS, 'led_count', 10)
+    self.leds.speed_deltas.extend([0.6] * 10)
+    self.assertListEqual(
+        self.leds.GetLedColors(),
+        [off, off, red, off, off, off])
 
   def testGetMovingSpeedDelta(self):
     self.leds.speed_deltas = [-100, 5, 100]
@@ -112,18 +156,18 @@ class TestLEDs(unittest.TestCase):
     deltas.append(-1.0)
     self.assertSequenceEqual(deltas, self.leds.speed_deltas)
 
-  @mock.patch.object(leds.LEDs, 'Fill')
-  def testUpdateLeds(self, mock_fill):
+  @mock.patch.object(leds.LEDs, 'SetLeds')
+  def testUpdateLeds(self, mock_set_leds):
     lap = []
     point = exit_speed_pb2.Gps(speed_ms=88)
     lap.append(point)
     self.leds.UpdateLeds(point)
-    self.assertFalse(mock_fill.mock_calls)  # No BallTree yet.
+    self.assertFalse(mock_set_leds.mock_calls)  # No BallTree yet.
 
     self.leds.SetBestLap(lap, 90 * 1e9)  # Used to build the BallTree.
     self.leds.UpdateLeds(point)
-    color = (0, 255, 0)  # Green
-    mock_fill.assert_called_once_with(color)
+    colors = [(0, 0, 0)] * 10
+    mock_set_leds.assert_called_once_with(colors)
     deltas = collections.deque(maxlen=FLAGS.speed_deltas)
     deltas.append(0.0)
     self.assertSequenceEqual(deltas, self.leds.speed_deltas)
