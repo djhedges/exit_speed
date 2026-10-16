@@ -146,7 +146,7 @@ def make_dashboard():
 
 
 def main(unused_argv):
-  os.environ['BOKEH_ALLOW_WS_ORIGIN'] = 'alien.tail0ae7d.ts.net:5006'
+  os.environ['BOKEH_ALLOW_WS_ORIGIN'] = '*'
   pn.extension('tabulator')
   pn.serve(make_dashboard, port=5006, show=False)
 
